@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ok, err } from 'neverthrow';
-import { FetchSignalsUseCase } from '../fetch-signals.js';
-import { SignalRepositoryError } from '../../ports/signal-repository.js';
-import { IdempotencyStoreError } from '../../ports/idempotency-store.js';
-import type { ISignalRepository } from '../../ports/signal-repository.js';
-import type { IEventBus } from '../../ports/event-bus.js';
-import type { IIdempotencyStore } from '../../ports/idempotency-store.js';
-import type { Signal } from '../../domain/signal.js';
+import { FetchSignalsUseCase } from '../fetch-signals';
+import { SignalRepositoryError } from '../../ports/signal-repository';
+import { IdempotencyStoreError } from '../../ports/idempotency-store';
+import type { ISignalRepository } from '../../ports/signal-repository';
+import type { IEventBus } from '../../ports/event-bus';
+import type { IIdempotencyStore } from '../../ports/idempotency-store';
+import type { Signal } from '../../domain/signal';
 
 const makeSignal = (ideaId: string): Signal => ({
   id: crypto.randomUUID(),

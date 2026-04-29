@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FeedbackSchema, FeedbackVoteSchema } from '../feedback.js';
+import { FeedbackSchema, FeedbackVoteSchema } from '../feedback';
 
 describe('FeedbackVoteSchema', () => {
   it('accepts thumbs_up and thumbs_down', () => {

@@ -1,20 +1,20 @@
 // Domain entities
-export * from './domain/idea.js';
-export * from './domain/signal.js';
-export * from './domain/decision.js';
-export * from './domain/feedback.js';
+export * from './domain/idea';
+export * from './domain/signal';
+export * from './domain/decision';
+export * from './domain/feedback';
 
 // Ports
-export * from './ports/idea-repository.js';
-export * from './ports/signal-repository.js';
-export * from './ports/decision-repository.js';
-export * from './ports/feedback-repository.js';
-export * from './ports/event-bus.js';
-export * from './ports/idempotency-store.js';
-export * from './ports/llm-client.js';
+export * from './ports/idea-repository';
+export * from './ports/signal-repository';
+export * from './ports/decision-repository';
+export * from './ports/feedback-repository';
+export * from './ports/event-bus';
+export * from './ports/idempotency-store';
+export * from './ports/llm-client';
 
 // Use cases
-export * from './use-cases/create-idea.js';
-export * from './use-cases/fetch-signals.js';
-export * from './use-cases/decide.js';
-export * from './use-cases/record-feedback.js';
+export * from './use-cases/create-idea';
+export * from './use-cases/fetch-signals';
+export * from './use-cases/decide';
+export * from './use-cases/record-feedback';

@@ -1,5 +1,5 @@
 import { Result } from 'neverthrow';
-import type { Feedback } from '../domain/feedback.js';
+import type { Feedback } from '../domain/feedback';
 
 export class FeedbackRepositoryError extends Error {
   readonly code = 'FEEDBACK_REPOSITORY_ERROR' as const;

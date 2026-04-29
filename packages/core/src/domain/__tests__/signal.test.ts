@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { SignalSchema } from '../signal.js';
+import { SignalSchema } from '../signal';
 
 describe('SignalSchema', () => {
   const validSignal = {

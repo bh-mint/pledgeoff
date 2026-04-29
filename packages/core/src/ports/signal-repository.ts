@@ -1,5 +1,5 @@
 import { Result } from 'neverthrow';
-import type { Signal } from '../domain/signal.js';
+import type { Signal } from '../domain/signal';
 
 export class SignalRepositoryError extends Error {
   readonly code = 'SIGNAL_REPOSITORY_ERROR' as const;

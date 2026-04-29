@@ -1,5 +1,5 @@
 import { Result } from 'neverthrow';
-import type { Idea } from '../domain/idea.js';
+import type { Idea } from '../domain/idea';
 
 export class IdeaRepositoryError extends Error {
   readonly code = 'IDEA_REPOSITORY_ERROR' as const;
