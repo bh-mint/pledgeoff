@@ -1,10 +1,10 @@
 import { Result, err, ok } from 'neverthrow';
-import type { Decision } from '../domain/decision.js';
-import type { IDecisionRepository, DecisionRepositoryError } from '../ports/decision-repository.js';
-import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository.js';
-import type { ILLMClient, LLMClientError } from '../ports/llm-client.js';
-import type { IEventBus, EventBusError } from '../ports/event-bus.js';
-import type { IIdempotencyStore, IdempotencyStoreError } from '../ports/idempotency-store.js';
+import type { Decision } from '../domain/decision';
+import type { IDecisionRepository, DecisionRepositoryError } from '../ports/decision-repository';
+import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository';
+import type { ILLMClient, LLMClientError } from '../ports/llm-client';
+import type { IEventBus, EventBusError } from '../ports/event-bus';
+import type { IIdempotencyStore, IdempotencyStoreError } from '../ports/idempotency-store';
 
 export interface DecideInput {
   readonly ideaId: string;

@@ -7,7 +7,7 @@ import {
   InMemoryEventBus,
 } from '@pledgeoff/adapters';
 import { CreateIdeaUseCase } from '@pledgeoff/core';
-import { createServiceRoleClient } from './supabase-server.js';
+import { createServiceRoleClient } from './supabase-server';
 
 function buildContainer() {
   const supabase = createServiceRoleClient();

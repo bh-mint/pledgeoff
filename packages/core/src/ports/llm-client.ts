@@ -1,6 +1,6 @@
 import { Result } from 'neverthrow';
-import type { Signal } from '../domain/signal.js';
-import type { Verdict } from '../domain/decision.js';
+import type { Signal } from '../domain/signal';
+import type { Verdict } from '../domain/decision';
 
 export interface LLMDecisionRequest {
   readonly ideaText: string;

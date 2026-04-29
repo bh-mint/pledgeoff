@@ -1,7 +1,7 @@
 import { Result, err, ok } from 'neverthrow';
-import { createIdea, type Idea, type CreateIdeaError } from '../domain/idea.js';
-import type { IIdeaRepository, IdeaRepositoryError } from '../ports/idea-repository.js';
-import type { IEventBus, EventBusError } from '../ports/event-bus.js';
+import { createIdea, type Idea, type CreateIdeaError } from '../domain/idea';
+import type { IIdeaRepository, IdeaRepositoryError } from '../ports/idea-repository';
+import type { IEventBus, EventBusError } from '../ports/event-bus';
 
 export interface CreateIdeaInput {
   readonly userId: string;

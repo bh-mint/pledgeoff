@@ -1,5 +1,5 @@
 import { Result } from 'neverthrow';
-import type { Decision } from '../domain/decision.js';
+import type { Decision } from '../domain/decision';
 
 export class DecisionRepositoryError extends Error {
   readonly code = 'DECISION_REPOSITORY_ERROR' as const;

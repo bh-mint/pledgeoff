@@ -1,6 +1,6 @@
 import { Result, err, ok } from 'neverthrow';
-import type { Feedback, FeedbackVote } from '../domain/feedback.js';
-import type { IFeedbackRepository, FeedbackRepositoryError } from '../ports/feedback-repository.js';
+import type { Feedback, FeedbackVote } from '../domain/feedback';
+import type { IFeedbackRepository, FeedbackRepositoryError } from '../ports/feedback-repository';
 
 export interface RecordFeedbackInput {
   readonly ideaId: string;

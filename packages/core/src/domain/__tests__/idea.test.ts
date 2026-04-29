@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createIdea, IdeaTooShortError, IdeaTooLongError } from '../idea.js';
+import { createIdea, IdeaTooShortError, IdeaTooLongError } from '../idea';
 
 describe('createIdea', () => {
   it('creates a valid idea', () => {

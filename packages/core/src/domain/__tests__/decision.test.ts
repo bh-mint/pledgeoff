@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DecisionSchema, VerdictSchema } from '../decision.js';
+import { DecisionSchema, VerdictSchema } from '../decision';
 
 describe('VerdictSchema', () => {
   it('accepts GO, KILL, PIVOT', () => {

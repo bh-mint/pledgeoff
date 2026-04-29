@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ok, err } from 'neverthrow';
-import { RecordFeedbackUseCase } from '../record-feedback.js';
-import { FeedbackRepositoryError } from '../../ports/feedback-repository.js';
-import type { IFeedbackRepository } from '../../ports/feedback-repository.js';
-import type { Feedback } from '../../domain/feedback.js';
+import { RecordFeedbackUseCase } from '../record-feedback';
+import { FeedbackRepositoryError } from '../../ports/feedback-repository';
+import type { IFeedbackRepository } from '../../ports/feedback-repository';
+import type { Feedback } from '../../domain/feedback';
 
 function makeRepo(overrides: Partial<IFeedbackRepository> = {}): IFeedbackRepository {
   return {

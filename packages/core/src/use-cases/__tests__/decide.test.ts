@@ -1,14 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ok, err } from 'neverthrow';
-import { DecideUseCase } from '../decide.js';
-import { LLMClientError } from '../../ports/llm-client.js';
-import { SignalRepositoryError } from '../../ports/signal-repository.js';
-import type { ISignalRepository } from '../../ports/signal-repository.js';
-import type { IDecisionRepository } from '../../ports/decision-repository.js';
-import type { ILLMClient, LLMDecisionResponse } from '../../ports/llm-client.js';
-import type { IEventBus } from '../../ports/event-bus.js';
-import type { IIdempotencyStore } from '../../ports/idempotency-store.js';
-import type { Signal } from '../../domain/signal.js';
+import { DecideUseCase } from '../decide';
+import { LLMClientError } from '../../ports/llm-client';
+import { SignalRepositoryError } from '../../ports/signal-repository';
+import type { ISignalRepository } from '../../ports/signal-repository';
+import type { IDecisionRepository } from '../../ports/decision-repository';
+import type { ILLMClient, LLMDecisionResponse } from '../../ports/llm-client';
+import type { IEventBus } from '../../ports/event-bus';
+import type { IIdempotencyStore } from '../../ports/idempotency-store';
+import type { Signal } from '../../domain/signal';
 
 const ideaId = crypto.randomUUID();
 

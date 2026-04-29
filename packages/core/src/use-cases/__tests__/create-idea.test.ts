@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ok, err } from 'neverthrow';
-import { CreateIdeaUseCase } from '../create-idea.js';
-import { IdeaRepositoryError } from '../../ports/idea-repository.js';
-import { EventBusError } from '../../ports/event-bus.js';
-import { IdeaTooShortError } from '../../domain/idea.js';
-import type { IIdeaRepository } from '../../ports/idea-repository.js';
-import type { IEventBus } from '../../ports/event-bus.js';
+import { CreateIdeaUseCase } from '../create-idea';
+import { IdeaRepositoryError } from '../../ports/idea-repository';
+import { EventBusError } from '../../ports/event-bus';
+import { IdeaTooShortError } from '../../domain/idea';
+import type { IIdeaRepository } from '../../ports/idea-repository';
+import type { IEventBus } from '../../ports/event-bus';
 
 function makeRepo(overrides: Partial<IIdeaRepository> = {}): IIdeaRepository {
   return {

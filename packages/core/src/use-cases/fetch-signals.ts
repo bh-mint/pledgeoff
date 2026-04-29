@@ -1,8 +1,8 @@
 import { Result, err, ok } from 'neverthrow';
-import type { Signal } from '../domain/signal.js';
-import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository.js';
-import type { IEventBus, EventBusError } from '../ports/event-bus.js';
-import type { IIdempotencyStore, IdempotencyStoreError } from '../ports/idempotency-store.js';
+import type { Signal } from '../domain/signal';
+import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository';
+import type { IEventBus, EventBusError } from '../ports/event-bus';
+import type { IIdempotencyStore, IdempotencyStoreError } from '../ports/idempotency-store';
 
 export interface FetchSignalsInput {
   readonly ideaId: string;
