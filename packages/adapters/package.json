@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@pledgeoff/core": "workspace:*",
+    "@supabase/supabase-js": "^2.49.4",
     "neverthrow": "^8.2.0"
   },
   "devDependencies": {
