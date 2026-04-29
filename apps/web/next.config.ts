@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: [
+    '@pledgeoff/core',
+    '@pledgeoff/adapters',
+    '@pledgeoff/contracts',
+    '@pledgeoff/observability',
+    '@pledgeoff/eventbus',
+  ],
 };
 
 export default nextConfig;
