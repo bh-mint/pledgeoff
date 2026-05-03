@@ -6,3 +6,4 @@ export { SupabaseIdempotencyStore } from './storage/supabase-idempotency-store';
 export { InMemoryEventBus } from './in-memory-event-bus';
 export { RedditSourceAdapter } from './sources/reddit-source-adapter';
 export { GitHubSourceAdapter } from './sources/github-source-adapter';
+export { GroqLLMAdapter } from './llm/groq-llm-adapter';
