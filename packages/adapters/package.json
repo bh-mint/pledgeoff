@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@pledgeoff/core": "workspace:*",
+    "@pledgeoff/observability": "workspace:*",
     "@supabase/supabase-js": "^2.49.4",
     "groq-sdk": "^0.9.1",
     "neverthrow": "^8.2.0",

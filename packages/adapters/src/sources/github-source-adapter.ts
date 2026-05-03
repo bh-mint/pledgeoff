@@ -2,6 +2,9 @@ import { Result, ok, err } from 'neverthrow';
 import type { Signal } from '@pledgeoff/core';
 import type { ISourceAdapter } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
+import { createLogger } from '@pledgeoff/observability';
+
+const log = createLogger({ adapter: 'github' });
 
 interface GitHubIssue {
   html_url: string;
@@ -31,11 +34,12 @@ export class GitHubSourceAdapter implements ISourceAdapter {
     private readonly maxRetries = 3,
   ) {}
 
-  async fetch(ideaText: string, ideaId: string, _traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
+  async fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
     const query = encodeURIComponent(ideaText.slice(0, 100));
     const url = `https://api.github.com/search/issues?q=${query}&sort=reactions&per_page=10`;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      const start = Date.now();
       try {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -51,6 +55,10 @@ export class GitHubSourceAdapter implements ISourceAdapter {
 
         if (!response.ok) {
           if (attempt < this.maxRetries) continue;
+          log.warn(
+            { traceId, target: 'github', operation: 'search', latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${response.status}` },
+            'GitHub search failed',
+          );
           return err(new SourceAdapterError(`HTTP ${response.status}`, this.sourceName));
         }
 
@@ -66,10 +74,18 @@ export class GitHubSourceAdapter implements ISourceAdapter {
           fetchedAt: new Date().toISOString(),
         }));
 
+        log.info(
+          { traceId, target: 'github', operation: 'search', latencyMs: Date.now() - start, outcome: 'success', signalCount: signals.length },
+          'GitHub signals fetched',
+        );
         return ok(signals);
       } catch (error) {
         if (attempt === this.maxRetries) {
           const message = error instanceof Error ? error.message : 'unknown error';
+          log.error(
+            { traceId, target: 'github', operation: 'search', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'MAX_RETRIES' },
+            `GitHub fetch failed: ${message}`,
+          );
           return err(new SourceAdapterError(message, this.sourceName));
         }
         await new Promise((resolve) => setTimeout(resolve, 500 * attempt));

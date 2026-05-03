@@ -2,6 +2,9 @@ import { Result, ok, err } from 'neverthrow';
 import type { Signal } from '@pledgeoff/core';
 import type { ISourceAdapter } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
+import { createLogger } from '@pledgeoff/observability';
+
+const log = createLogger({ adapter: 'reddit' });
 
 interface RedditPost {
   data: {
@@ -32,11 +35,12 @@ export class RedditSourceAdapter implements ISourceAdapter {
     private readonly maxRetries = 3,
   ) {}
 
-  async fetch(ideaText: string, ideaId: string, _traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
+  async fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
     const query = encodeURIComponent(ideaText.slice(0, 100));
     const url = `https://www.reddit.com/search.json?q=${query}&sort=relevance&limit=10&type=link,self`;
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      const start = Date.now();
       try {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), this.timeoutMs);
@@ -48,6 +52,10 @@ export class RedditSourceAdapter implements ISourceAdapter {
 
         if (!response.ok) {
           if (attempt < this.maxRetries) continue;
+          log.warn(
+            { traceId, target: 'reddit', operation: 'search', latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${response.status}` },
+            'Reddit search failed',
+          );
           return err(new SourceAdapterError(`HTTP ${response.status}`, this.sourceName));
         }
 
@@ -63,13 +71,20 @@ export class RedditSourceAdapter implements ISourceAdapter {
           fetchedAt: new Date().toISOString(),
         }));
 
+        log.info(
+          { traceId, target: 'reddit', operation: 'search', latencyMs: Date.now() - start, outcome: 'success', signalCount: signals.length },
+          'Reddit signals fetched',
+        );
         return ok(signals);
       } catch (error) {
         if (attempt === this.maxRetries) {
           const message = error instanceof Error ? error.message : 'unknown error';
+          log.error(
+            { traceId, target: 'reddit', operation: 'search', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'MAX_RETRIES' },
+            `Reddit fetch failed: ${message}`,
+          );
           return err(new SourceAdapterError(message, this.sourceName));
         }
-        // Brief pause before retry
         await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
       }
     }
