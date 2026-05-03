@@ -50,11 +50,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     );
   }
 
-  const decisionResult = await container._repos.decisionRepo.findByIdeaId(id);
+  const [decisionResult, signalsResult] = await Promise.all([
+    container._repos.decisionRepo.findByIdeaId(id),
+    container._repos.signalRepo.findByIdeaId(id),
+  ]);
+
   const decision = decisionResult.isOk() ? decisionResult.value : null;
+  const signals = signalsResult.isOk() ? signalsResult.value : [];
 
   return Response.json(
-    { data: { idea, decision } },
+    { data: { idea, decision, signals } },
     { status: 200, headers: { 'X-Trace-Id': traceId } },
   );
 }

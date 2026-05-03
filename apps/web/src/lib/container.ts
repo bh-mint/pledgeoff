@@ -6,7 +6,7 @@ import {
   SupabaseIdempotencyStore,
   InMemoryEventBus,
 } from '@pledgeoff/adapters';
-import { CreateIdeaUseCase } from '@pledgeoff/core';
+import { CreateIdeaUseCase, RecordFeedbackUseCase } from '@pledgeoff/core';
 import { createServiceRoleClient } from './supabase-server';
 
 function buildContainer() {
@@ -20,10 +20,11 @@ function buildContainer() {
   const eventBus = new InMemoryEventBus();
 
   const createIdeaUseCase = new CreateIdeaUseCase(ideaRepo, eventBus);
+  const recordFeedbackUseCase = new RecordFeedbackUseCase(feedbackRepo);
 
   return {
     createIdeaUseCase,
-    // Remaining use cases wired in P3/P4 when their adapters are ready
+    recordFeedbackUseCase,
     _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore },
     _eventBus: eventBus,
   };

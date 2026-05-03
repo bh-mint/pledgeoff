@@ -21,6 +21,33 @@ async function resolveUserId(authHeader: string | null): Promise<string | null> 
   return data.user?.id ?? null;
 }
 
+export async function GET(req: Request) {
+  const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
+
+  const userId = await resolveUserId(req.headers.get('authorization'));
+  if (!userId) return unauthorizedResponse(traceId);
+
+  const result = await container._repos.ideaRepo.findByUserId(userId);
+  if (result.isErr()) {
+    return Response.json(
+      { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
+      { status: 500, headers: { 'X-Trace-Id': traceId } },
+    );
+  }
+
+  const ideas = result.value;
+  const decisions = await Promise.all(
+    ideas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))
+  );
+
+  const data = ideas.map((idea, i) => ({
+    ...idea,
+    decision: decisions[i].isOk() ? decisions[i].value : null,
+  }));
+
+  return Response.json({ data }, { status: 200, headers: { 'X-Trace-Id': traceId } });
+}
+
 export async function POST(req: Request) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 
