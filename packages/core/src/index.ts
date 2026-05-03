@@ -12,6 +12,7 @@ export * from './ports/feedback-repository';
 export * from './ports/event-bus';
 export * from './ports/idempotency-store';
 export * from './ports/llm-client';
+export * from './ports/source-adapter';
 
 // Use cases
 export * from './use-cases/create-idea';
