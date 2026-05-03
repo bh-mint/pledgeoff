@@ -1,0 +1,85 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
+export function TableOfContents() {
+  const [items, setItems] = useState<TocItem[]>([]);
+  const [active, setActive] = useState("");
+
+  useEffect(() => {
+    const headings = document.querySelectorAll<HTMLHeadingElement>(
+      ".prose-pledgeoff h2, .prose-pledgeoff h3"
+    );
+
+    const parsed: TocItem[] = Array.from(headings).map((h) => {
+      if (!h.id) {
+        h.id = h.textContent
+          ?.toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "") ?? "";
+      }
+      return {
+        id: h.id,
+        text: h.textContent ?? "",
+        level: parseInt(h.tagName[1]),
+      };
+    });
+
+    setItems(parsed);
+  }, []);
+
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: "-20% 0% -70% 0%" }
+    );
+
+    items.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [items]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <nav aria-label="Table of contents">
+      <p className="mono text-[10px] uppercase tracking-[0.12em] text-[var(--t3)] mb-3">
+        On this page
+      </p>
+      <ul className="space-y-1">
+        {items.map((item) => (
+          <li key={item.id} style={{ paddingLeft: item.level === 3 ? "0.75rem" : 0 }}>
+            <a
+              href={`#${item.id}`}
+              className={`block text-[12px] leading-relaxed transition-colors py-0.5 ${
+                active === item.id
+                  ? "text-[var(--accent)]"
+                  : "text-[var(--t3)] hover:text-[var(--t2)]"
+              }`}
+            >
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
