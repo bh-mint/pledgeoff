@@ -12,7 +12,10 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@pledgeoff/contracts": "workspace:*"
+    "@pledgeoff/contracts": "workspace:*",
+    "@pledgeoff/core": "workspace:*",
+    "@supabase/supabase-js": "^2.49.4",
+    "neverthrow": "^8.2.0"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
