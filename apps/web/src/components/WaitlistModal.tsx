@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { trackEvent } from "@/components/GoogleAnalytics";
 
 interface WaitlistModalProps {
@@ -79,12 +80,12 @@ export function WaitlistModal({
               <br />
               You&apos;ll hear from us within 2 weeks.
             </p>
-            <a
+            <Link
               href="/blog"
               className="text-[13px] text-[var(--accent)] hover:opacity-80 transition-opacity"
             >
               In the meantime, read the blog →
-            </a>
+            </Link>
           </div>
         ) : (
           <>

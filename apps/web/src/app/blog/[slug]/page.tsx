@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllArticles, getArticleBySlug, getRelatedArticles } from "@/lib/mdx";
@@ -167,12 +168,12 @@ export default async function ArticlePage({ params }: Props) {
                   PledgeOFF scans 847 live signals from Reddit and GitHub and
                   returns a weighted verdict with verbatim evidence. Free to try.
                 </p>
-                <a
+                <Link
                   href="/"
                   className="display inline-block h-11 px-6 rounded-md bg-[var(--accent)] text-black text-[14px] font-semibold hover:opacity-90 transition-opacity leading-[44px]"
                 >
                   Validate my idea →
-                </a>
+                </Link>
               </div>
             </article>
 

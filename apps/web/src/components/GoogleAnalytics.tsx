@@ -27,5 +27,5 @@ export function trackEvent(
   params?: Record<string, string | number>
 ) {
   if (typeof window === "undefined" || !("gtag" in window)) return;
-  (window as unknown as { gtag: Function }).gtag("event", name, params);
+  (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("event", name, params);
 }
