@@ -38,3 +38,18 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          NEXT_PUBLIC_APP_URL: https://pledgeoff.com
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          NEXT_PUBLIC_SENTRY_DSN: ""
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          SUPABASE_DB_URL: postgresql://placeholder:placeholder@placeholder:5432/postgres
+          GROQ_API_KEY: placeholder-groq-key
+          GITHUB_PAT: placeholder-github-pat
+          RESEND_API_KEY: placeholder-resend-key
+          SENTRY_AUTH_TOKEN: placeholder-sentry-token
+          CRON_SECRET: placeholder-cron-secret
+          FEATURE_FETCH_REDDIT: "true"
+          FEATURE_FETCH_GITHUB: "true"
+          FEATURE_LLM_DECIDE: "true"
