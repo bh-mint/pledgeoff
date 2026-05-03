@@ -1,1 +1,1 @@
-// @pledgeoff/eventbus — Postgres LISTEN/NOTIFY + outbox pattern
+export { PostgresEventBus } from './postgres-event-bus';
