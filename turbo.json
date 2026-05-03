@@ -3,7 +3,35 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_APP_URL",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "NEXT_PUBLIC_SENTRY_DSN",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_DB_URL",
+        "GROQ_API_KEY",
+        "GROQ_MODEL",
+        "ANTHROPIC_API_KEY",
+        "ANTHROPIC_MODEL",
+        "GITHUB_PAT",
+        "RESEND_API_KEY",
+        "SENTRY_AUTH_TOKEN",
+        "AXIOM_TOKEN",
+        "AXIOM_DATASET",
+        "LOG_LEVEL",
+        "LLM_PROVIDER",
+        "CACHE_PROVIDER",
+        "RATE_LIMIT_PROVIDER",
+        "EVENT_BUS_PROVIDER",
+        "OUTBOX_POLL_INTERVAL_MS",
+        "FEATURE_FETCH_REDDIT",
+        "FEATURE_FETCH_GITHUB",
+        "FEATURE_LLM_DECIDE",
+        "CRON_SECRET"
+      ]
     },
     "dev": {
       "cache": false,
