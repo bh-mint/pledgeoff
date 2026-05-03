@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
 interface TocItem {
   id: string;
@@ -12,7 +12,7 @@ export function TableOfContents() {
   const [items, setItems] = useState<TocItem[]>([]);
   const [active, setActive] = useState("");
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const headings = document.querySelectorAll<HTMLHeadingElement>(
       ".prose-pledgeoff h2, .prose-pledgeoff h3"
     );
@@ -31,6 +31,7 @@ export function TableOfContents() {
       };
     });
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(parsed);
   }, []);
 
