@@ -1,26 +1,179 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --canvas:    #0A0A0B;
+  --surface:   #111114;
+  --border:    #1F1F23;
+
+  --t1:        #F5F5F4;
+  --t2:        #A1A1A6;
+  --t3:        #52525B;
+
+  --accent:    #D6FF3D;
+  --validated: #7DD66B;
+  --caution:   #E8B341;
+  --kill:      #E55B3C;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+::selection {
+  background: var(--accent);
+  color: #000;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--t1);
+  font-family: var(--font-geist-sans), "Geist", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.display {
+  font-family: "Inter Tight", system-ui, sans-serif;
+  letter-spacing: -0.04em;
+}
+
+.mono {
+  font-family: "JetBrains Mono", "Courier New", monospace;
+  font-feature-settings: "tnum";
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.15); }
+}
+
+.pulse-dot {
+  animation: pulseDot 1100ms cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Reading progress bar */
+#reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 9999;
+  transition: width 100ms linear;
+}
+
+/* MDX content styles */
+.prose-pledgeoff h2 {
+  font-family: "Inter Tight", sans-serif;
+  letter-spacing: -0.04em;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--t1);
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.prose-pledgeoff h3 {
+  font-family: "Inter Tight", sans-serif;
+  letter-spacing: -0.04em;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--t1);
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-pledgeoff p {
+  color: var(--t2);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  margin-bottom: 1.25rem;
+}
+
+.prose-pledgeoff strong {
+  color: var(--t1);
+  font-weight: 600;
+}
+
+.prose-pledgeoff a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose-pledgeoff a:hover {
+  opacity: 0.8;
+}
+
+.prose-pledgeoff ul,
+.prose-pledgeoff ol {
+  color: var(--t2);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+
+.prose-pledgeoff li {
+  margin-bottom: 0.375rem;
+}
+
+.prose-pledgeoff blockquote {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: var(--t2);
+  font-style: italic;
+}
+
+.prose-pledgeoff code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.8125rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.125rem 0.375rem;
+  color: var(--t1);
+}
+
+.prose-pledgeoff pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+}
+
+.prose-pledgeoff pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.8125rem;
+}
+
+.prose-pledgeoff hr {
+  border-color: var(--border);
+  margin: 2rem 0;
 }

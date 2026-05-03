@@ -14,11 +14,18 @@
     "@pledgeoff/adapters": "workspace:*",
     "@pledgeoff/contracts": "workspace:*",
     "@pledgeoff/core": "workspace:*",
+    "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.49.4",
+    "@vercel/og": "^0.11.1",
+    "gray-matter": "^4.0.3",
     "neverthrow": "^8.2.0",
     "next": "16.2.4",
+    "next-mdx-remote": "^6.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "reading-time": "^1.5.0",
+    "rehype-highlight": "^7.0.2",
+    "resend": "^6.12.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
