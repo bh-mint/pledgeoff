@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { CreateIdeaRequestSchema } from '@pledgeoff/contracts';
 import { container } from '@/lib/container';
+import { checkRateLimit } from '@/lib/rate-limiter';
+import { logger } from '@pledgeoff/observability';
 
 function unauthorizedResponse(traceId: string) {
   return Response.json(
@@ -54,6 +56,37 @@ export async function POST(req: Request) {
   const userId = await resolveUserId(req.headers.get('authorization'));
   if (!userId) return unauthorizedResponse(traceId);
 
+  // Rate limiting
+  const rateLimit = checkRateLimit(userId);
+  if (!rateLimit.allowed) {
+    logger.warn(
+      { traceId, userId, action: 'create_idea', outcome: 'error', errorCode: 'RATE_LIMITED' },
+      'Rate limit exceeded',
+    );
+    return Response.json(
+      { error: { code: 'RATE_LIMITED', message: 'Too many requests. Try again later.' } },
+      {
+        status: 429,
+        headers: {
+          'X-Trace-Id': traceId,
+          'Retry-After': String(Math.ceil(rateLimit.retryAfterMs / 1000)),
+        },
+      },
+    );
+  }
+
+  // Idempotency-Key
+  const idempotencyKey = req.headers.get('idempotency-key');
+  if (idempotencyKey) {
+    const alreadyProcessed = await container._repos.idempotencyStore.hasBeenProcessed(idempotencyKey);
+    if (alreadyProcessed.isOk() && alreadyProcessed.value) {
+      return Response.json(
+        { error: { code: 'ALREADY_PROCESSED', message: 'This request was already processed.' } },
+        { status: 409, headers: { 'X-Trace-Id': traceId } },
+      );
+    }
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -92,8 +125,19 @@ export async function POST(req: Request) {
     );
   }
 
+  // Mark idempotency key as processed
+  if (idempotencyKey) {
+    await container._repos.idempotencyStore.markAsProcessed(idempotencyKey);
+  }
+
+  const idea = result.value;
+  logger.info(
+    { traceId, userId, action: 'create_idea', resourceId: idea.id, outcome: 'success' },
+    'Idea created',
+  );
+
   return Response.json(
-    { data: result.value },
+    { data: idea },
     { status: 201, headers: { 'X-Trace-Id': traceId } },
   );
 }

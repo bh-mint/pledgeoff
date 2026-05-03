@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { container } from "@/lib/container";
+import { logger } from "@pledgeoff/observability";
 
 const FeedbackSchema = z.object({
   ideaId: z.string().uuid(),
@@ -63,6 +64,11 @@ export async function POST(req: NextRequest) {
       { status: 500, headers: { "X-Trace-Id": traceId } }
     );
   }
+
+  logger.info(
+    { traceId, userId, action: 'submit_feedback', resourceId: parsed.data.ideaId, vote: parsed.data.vote, outcome: 'success' },
+    'Feedback recorded',
+  );
 
   return NextResponse.json(
     { data: result.value },

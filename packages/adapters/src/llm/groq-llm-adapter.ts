@@ -14,6 +14,8 @@ const LLMResponseSchema = z.object({
   reasoning: z.string().min(1).max(5000),
 });
 
+const TIMEOUT_MS = 30_000;
+
 export class GroqLLMAdapter implements ILLMClient {
   private readonly client: Groq;
 
@@ -21,7 +23,7 @@ export class GroqLLMAdapter implements ILLMClient {
     apiKey: string,
     private readonly model = 'llama-3.3-70b-versatile',
   ) {
-    this.client = new Groq({ apiKey });
+    this.client = new Groq({ apiKey, timeout: TIMEOUT_MS });
   }
 
   async generateDecision(request: LLMDecisionRequest): Promise<Result<LLMDecisionResponse, LLMClientError>> {
