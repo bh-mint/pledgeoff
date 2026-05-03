@@ -6,14 +6,16 @@ import {
   SupabaseIdempotencyStore,
   RedditSourceAdapter,
   GitHubSourceAdapter,
+  GroqLLMAdapter,
 } from '@pledgeoff/adapters';
 import { PostgresEventBus } from '@pledgeoff/eventbus';
 import {
   CreateIdeaUseCase,
   FetchSignalsUseCase,
+  DecideUseCase,
   RecordFeedbackUseCase,
 } from '@pledgeoff/core';
-import type { IdeaCreatedV1 } from '@pledgeoff/contracts';
+import type { IdeaCreatedV1, SignalsFetchedV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
 import { createServiceRoleClient } from './supabase-server';
 
@@ -38,6 +40,7 @@ function buildContainer() {
     new RedditSourceAdapter(),
     new GitHubSourceAdapter(requireEnv('GITHUB_PAT')),
   ];
+  const llmClient = new GroqLLMAdapter(requireEnv('GROQ_API_KEY'));
 
   const createIdeaUseCase = new CreateIdeaUseCase(ideaRepo, eventBus);
   const fetchSignalsUseCase = new FetchSignalsUseCase(
@@ -45,6 +48,13 @@ function buildContainer() {
     eventBus,
     idempotencyStore,
     sourceAdapters,
+  );
+  const decideUseCase = new DecideUseCase(
+    signalRepo,
+    decisionRepo,
+    llmClient,
+    eventBus,
+    idempotencyStore,
   );
   const recordFeedbackUseCase = new RecordFeedbackUseCase(feedbackRepo);
 
@@ -58,9 +68,24 @@ function buildContainer() {
     });
   });
 
+  // Wire: signals.fetched.v1 → DecideUseCase
+  // Fetches idea text from DB since payload only has ideaId
+  eventBus.subscribe<SignalsFetchedV1['payload']>('signals.fetched.v1', async (event: DomainEvent<SignalsFetchedV1['payload']>) => {
+    const ideaResult = await ideaRepo.findById(event.payload.ideaId);
+    if (ideaResult.isErr() || !ideaResult.value) return;
+
+    await decideUseCase.execute({
+      ideaId: event.payload.ideaId,
+      ideaText: ideaResult.value.text,
+      traceId: event.traceId,
+      eventId: event.eventId,
+    });
+  });
+
   return {
     createIdeaUseCase,
     fetchSignalsUseCase,
+    decideUseCase,
     recordFeedbackUseCase,
     eventBus,
     _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore },
