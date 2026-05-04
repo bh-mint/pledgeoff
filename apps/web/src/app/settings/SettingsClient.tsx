@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 
 interface SettingsClientProps {
   email: string;
@@ -47,8 +46,7 @@ export function SettingsClient({
 
   const handleDeleteAccount = async () => {
     if (deleteInput !== email) return;
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    await fetch("/api/v1/profile", { method: "DELETE" });
     router.push("/");
   };
 

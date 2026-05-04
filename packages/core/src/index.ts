@@ -13,6 +13,7 @@ export * from './ports/event-bus';
 export * from './ports/idempotency-store';
 export * from './ports/llm-client';
 export * from './ports/source-adapter';
+export * from './ports/audit-log';
 
 // Use cases
 export * from './use-cases/create-idea';

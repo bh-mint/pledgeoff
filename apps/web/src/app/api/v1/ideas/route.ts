@@ -136,6 +136,14 @@ export async function POST(req: Request) {
     'Idea created',
   );
 
+  void container.auditLog.log({
+    userId,
+    action: 'idea_created',
+    resourceType: 'idea',
+    resourceId: idea.id,
+    traceId,
+  });
+
   return Response.json(
     { data: idea },
     { status: 201, headers: { 'X-Trace-Id': traceId } },

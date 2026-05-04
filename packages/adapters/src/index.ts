@@ -3,6 +3,7 @@ export { SupabaseSignalRepository } from './storage/supabase-signal-repository';
 export { SupabaseDecisionRepository } from './storage/supabase-decision-repository';
 export { SupabaseFeedbackRepository } from './storage/supabase-feedback-repository';
 export { SupabaseIdempotencyStore } from './storage/supabase-idempotency-store';
+export { SupabaseAuditLogAdapter, InMemoryAuditLog } from './storage/supabase-audit-log-adapter';
 export { InMemoryEventBus } from './in-memory-event-bus';
 export { RedditSourceAdapter } from './sources/reddit-source-adapter';
 export { GitHubSourceAdapter } from './sources/github-source-adapter';
