@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LegalTOC } from "@/components/LegalTOC";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — PledgeOFF",
@@ -79,23 +80,14 @@ export default function PrivacyPage() {
             <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
               CONTENTS
             </div>
-            <nav
-              className="toc flex flex-col gap-2 mono text-[11px]"
-              style={{ borderLeft: "1px solid var(--border)", paddingLeft: "12px" }}
-            >
-              {PRIVACY_TOC.map(({ id, label }, i) => (
-                <a key={id} href={`#${id}`} className={i === 0 ? "active" : ""}>
-                  {label}
-                </a>
-              ))}
-            </nav>
+            <LegalTOC items={PRIVACY_TOC} />
           </div>
         </aside>
 
         {/* Content */}
         <main className="col-span-12 md:col-span-9">
           <div className="prose-legal">
-          <Section title="1. Who we are">
+          <Section id="s1" title="1. Who we are">
             <p>
               PledgeOFF (&quot;PledgeOFF&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is a Decision Intelligence
               Platform that helps founders validate product ideas using live market signals.
@@ -110,7 +102,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="2. What personal data we collect">
+          <Section id="s2" title="2. What personal data we collect">
             <Subsection title="2.1 Account data">
               <p>When you create an account we collect:</p>
               <ul>
@@ -190,7 +182,7 @@ export default function PrivacyPage() {
             </Subsection>
           </Section>
 
-          <Section title="3. Legal basis for processing (GDPR)">
+          <Section id="s3" title="3. Legal basis for processing (GDPR)">
             <p>
               We process personal data under the following legal bases as defined in
               Article 6 of the GDPR:
@@ -235,7 +227,7 @@ export default function PrivacyPage() {
             </table>
           </Section>
 
-          <Section title="4. How we use your data">
+          <Section id="s4" title="4. How we use your data">
             <ul>
               <li>To create and maintain your account.</li>
               <li>
@@ -264,7 +256,7 @@ export default function PrivacyPage() {
             </ul>
           </Section>
 
-          <Section title="5. Third-party processors">
+          <Section id="s5" title="5. Third-party processors">
             <p>
               We engage the following sub-processors to deliver the service. Each
               processor is bound by a Data Processing Agreement and, where applicable,
@@ -367,7 +359,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="6. International data transfers">
+          <Section id="s6" title="6. International data transfers">
             <p>
               Several of our processors are based in the United States. Where personal
               data is transferred from the European Economic Area (EEA) or the United
@@ -391,7 +383,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="7. Data retention">
+          <Section id="s7" title="7. Data retention">
             <table>
               <thead>
                 <tr>
@@ -438,7 +430,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="8. Cookies and tracking technologies">
+          <Section id="s8" title="8. Cookies and tracking technologies">
             <Subsection title="8.1 What cookies we use">
               <table>
                 <thead>
@@ -505,7 +497,7 @@ export default function PrivacyPage() {
             </Subsection>
           </Section>
 
-          <Section title="9. Your rights under GDPR">
+          <Section id="s9" title="9. Your rights under GDPR">
             <p>
               If you are located in the European Economic Area (EEA) or the United
               Kingdom, you have the following rights regarding your personal data:
@@ -574,7 +566,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="10. Children">
+          <Section id="s10" title="10. Children">
             <p>
               PledgeOFF is not directed at children under the age of 16. We do not
               knowingly collect personal data from anyone under 16. If you believe we
@@ -584,7 +576,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="11. Security">
+          <Section id="s11" title="11. Security">
             <p>
               We implement appropriate technical and organisational measures to protect
               your data against unauthorised access, alteration, disclosure, or
@@ -612,7 +604,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="12. Links to third-party sites">
+          <Section id="s12" title="12. Links to third-party sites">
             <p>
               Our blog and application may contain links to third-party websites. This
               Privacy Policy does not apply to those sites. We encourage you to review
@@ -620,7 +612,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="13. Changes to this policy">
+          <Section id="s13" title="13. Changes to this policy">
             <p>
               We may update this Privacy Policy from time to time. When we do, we will
               update the &quot;Last updated&quot; date at the top of this page. For material
@@ -633,7 +625,7 @@ export default function PrivacyPage() {
             </p>
           </Section>
 
-          <Section title="14. Contact">
+          <Section id="s14" title="14. Contact">
             <p>
               If you have any questions, concerns, or requests regarding this Privacy
               Policy or how we handle your data, please contact us:
@@ -675,14 +667,16 @@ export default function PrivacyPage() {
 }
 
 function Section({
+  id,
   title,
   children,
 }: {
+  id?: string;
   title: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-10">
+    <section id={id} className="mb-10" style={{ scrollMarginTop: "80px" }}>
       <h2 className="text-[18px] font-bold text-[var(--t1)] mb-4 mt-8">{title}</h2>
       <div className="space-y-3">{children}</div>
     </section>
