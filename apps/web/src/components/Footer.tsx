@@ -13,7 +13,7 @@ export function Footer() {
           </span>
         </div>
 
-        <div className="flex items-center gap-6 text-[13px] text-[var(--t3)]">
+        <div className="flex items-center gap-6 text-[11px] text-[var(--t3)]">
           <Link href="/privacy" className="hover:text-[var(--t2)] transition-colors">
             Privacy
           </Link>

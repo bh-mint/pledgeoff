@@ -39,7 +39,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
           >
             Pledge<span className="text-[var(--accent)]">OFF</span>
           </Link>
-          <div className="hidden md:flex items-center gap-1 mono text-[11px]">
+          <div className="hidden md:flex items-center gap-1 mono text-[10px]">
             <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-[var(--accent)] inline-block" />
             <span className="text-[var(--t2)]">3,418 ideas validated this week</span>
           </div>
@@ -49,13 +49,13 @@ export function Nav({ onWaitlistOpen }: NavProps) {
         <div className="flex items-center gap-6">
           <Link
             href="/pricing"
-            className="text-[13px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+            className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
           >
             Pricing
           </Link>
           <Link
             href="/blog"
-            className="text-[13px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+            className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
           >
             Blog
           </Link>
@@ -64,9 +64,9 @@ export function Nav({ onWaitlistOpen }: NavProps) {
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 text-[13px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+                className="flex items-center gap-2 text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
               >
-                <span className="w-7 h-7 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[11px] font-semibold text-[var(--t1)] uppercase">
+                <span className="w-6 h-6 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[10px] font-semibold text-[var(--t1)] uppercase">
                   {user.email?.[0] ?? "U"}
                 </span>
               </button>
@@ -74,14 +74,14 @@ export function Nav({ onWaitlistOpen }: NavProps) {
                 <div className="absolute right-0 top-full mt-2 w-44 bg-[var(--surface)] border border-[var(--border)] rounded-md shadow-xl overflow-hidden">
                   <Link
                     href="/dashboard"
-                    className="block px-4 py-2.5 text-[13px] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--border)] transition-colors"
+                    className="block px-4 py-2.5 text-[11px] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--border)] transition-colors"
                     onClick={() => setDropdownOpen(false)}
                   >
                     Dashboard
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="w-full text-left px-4 py-2.5 text-[13px] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--border)] transition-colors border-t border-[var(--border)]"
+                    className="w-full text-left px-4 py-2.5 text-[11px] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--border)] transition-colors border-t border-[var(--border)]"
                   >
                     Sign out
                   </button>
@@ -92,13 +92,13 @@ export function Nav({ onWaitlistOpen }: NavProps) {
             <>
               <Link
                 href="/login"
-                className="text-[13px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+                className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
               >
                 Log in
               </Link>
               <button
                 onClick={onWaitlistOpen}
-                className="display h-9 px-4 rounded-md bg-[var(--accent)] text-black text-[13px] font-semibold hover:opacity-90 transition-opacity"
+                className="display h-7 px-3 rounded-md bg-[var(--accent)] text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
               >
                 Start free →
               </button>
