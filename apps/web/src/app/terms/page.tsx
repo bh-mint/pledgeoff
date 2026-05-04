@@ -36,17 +36,17 @@ export default function TermsPage() {
         className="border-b sticky top-12 z-40"
         style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
       >
-        <div className="max-w-[1100px] mx-auto px-8 py-12">
-          <div className="mono text-[10px] uppercase tracking-wider mb-3" style={{ color: "var(--t3)" }}>
+        <div className="max-w-[1100px] mx-auto px-8 py-4">
+          <div className="mono text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>
             LEGAL · DOC_02
           </div>
           <h1
             className="display font-semibold leading-tight"
-            style={{ fontSize: "32px", letterSpacing: "-0.04em", color: "var(--t1)" }}
+            style={{ fontSize: "22px", letterSpacing: "-0.04em", color: "var(--t1)" }}
           >
             Terms of Service
           </h1>
-          <div className="mt-4 flex items-center gap-3 mono text-[11px]" style={{ color: "var(--t3)" }}>
+          <div className="mt-1.5 flex items-center gap-3 mono text-[10px]" style={{ color: "var(--t3)" }}>
             <span>UPDATED · APR 12 2026</span>
             <span>·</span>
             <span>EFFECTIVE · MAY 1 2026</span>
@@ -61,7 +61,7 @@ export default function TermsPage() {
 
         {/* TOC sidebar */}
         <aside className="w-[220px] hidden md:block flex-shrink-0">
-          <div className="sticky top-[244px]">
+          <div className="sticky top-[144px]">
             <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
               CONTENTS
             </div>
@@ -573,7 +573,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="mb-10" style={{ scrollMarginTop: "260px" }}>
+    <section id={id} className="mb-10" style={{ scrollMarginTop: "156px" }}>
       <h2 className="text-[18px] font-bold text-[var(--t1)] mb-4 mt-8">{title}</h2>
       <div className="space-y-3">{children}</div>
     </section>
