@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { PreLoginNav } from "@/components/PreLoginNav";
+import { Footer } from "@/components/Footer";
 
 const FEATURES = [
   {
@@ -137,24 +139,7 @@ export function PricingClient() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
-      {/* Top bar */}
-      <div className="border-b sticky top-0 z-50 " style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
-        <div className="max-w-[1200px] mx-auto px-8 h-12 flex items-center justify-between">
-          <span
-            className="display text-[15px] font-semibold tracking-tight"
-            style={{ color: "var(--t1)" }}
-          >
-            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-          </span>
-          <Link
-            href="/dashboard"
-            className="mono text-[11px] transition-colors"
-            style={{ color: "var(--t3)" }}
-          >
-            ← back to dashboard
-          </Link>
-        </div>
-      </div>
+      <PreLoginNav />
 
       {/* Hero */}
       <div className="border-b" style={{ borderColor: "var(--border)" }}>
@@ -564,6 +549,7 @@ export function PricingClient() {
           </Link>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

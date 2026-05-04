@@ -5,6 +5,8 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllArticles, getArticleBySlug, getRelatedArticles } from "@/lib/mdx";
 import { formatDate } from "@/lib/mdx-utils";
 import { ReadingProgress } from "@/components/blog/ReadingProgress";
+import { PreLoginNav } from "@/components/PreLoginNav";
+import { Footer } from "@/components/Footer";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -90,17 +92,7 @@ export default async function ArticlePage({ params }: Props) {
       <ReadingProgress />
 
       <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-        {/* Header */}
-        <header className="border-b" style={{ borderColor: "var(--border)" }}>
-          <div className="max-w-[1100px] mx-auto px-8 h-14 flex items-center justify-between">
-            <Link href="/" className="display text-[13px] font-semibold">
-              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-            </Link>
-            <Link href="/blog" className="mono text-[11px]" style={{ color: "var(--t3)" }}>
-              ← All articles
-            </Link>
-          </div>
-        </header>
+        <PreLoginNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
         {/* Article */}
         <article className="max-w-2xl mx-auto px-6 pt-16 pb-24">
@@ -262,15 +254,7 @@ export default async function ArticlePage({ params }: Props) {
           )}
         </article>
 
-        {/* Footer */}
-        <footer className="border-t" style={{ borderColor: "var(--border)" }}>
-          <div className="max-w-[1100px] mx-auto px-8 py-8 flex items-center justify-between">
-            <span className="display text-[12px] font-semibold">
-              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-            </span>
-            <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>© 2026</span>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   );

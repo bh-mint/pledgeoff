@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { PreLoginNav } from "@/components/PreLoginNav";
+import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Changelog — PledgeOFF",
@@ -88,30 +89,7 @@ const TAG_COLORS: Record<string, string> = {
 export default function ChangelogPage() {
   return (
     <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-      {/* Nav */}
-      <header className="border-b sticky top-0 z-50" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
-        <div className="max-w-[1100px] mx-auto px-8 h-12 flex items-center justify-between">
-          <Link href="/" className="display text-[15px] font-semibold">
-            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-          </Link>
-          <nav className="flex items-center gap-2 mono text-[11px]">
-            {[
-              { href: "/pricing", label: "Pricing" },
-              { href: "/blog",    label: "Blog" },
-              { href: "/login",   label: "Log in" },
-            ].map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className="h-7 px-3 rounded-md font-semibold flex items-center hover:opacity-90 transition-opacity"
-                style={{ background: "var(--accent)", color: "#000" }}
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </header>
+      <PreLoginNav />
 
       {/* Heading */}
       <section className="border-b" style={{ borderColor: "var(--border)" }}>
@@ -171,6 +149,7 @@ export default function ChangelogPage() {
           </div>
         ))}
       </div>
+      <Footer />
     </div>
   );
 }
