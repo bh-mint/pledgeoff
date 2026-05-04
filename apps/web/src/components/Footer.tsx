@@ -2,15 +2,15 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--border)] mt-auto">
+    <footer className="border-t border-[var(--border)] mt-auto bg-[var(--canvas)]">
       <div className="max-w-[1320px] mx-auto px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
+        <div className="flex items-center gap-3">
           <p className="display text-[15px] font-semibold text-[var(--t1)]">
             Pledge<span className="text-[var(--accent)]">OFF</span>
           </p>
-          <p className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em] mt-1">
+          <span className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em]">
             every number is sourced
-          </p>
+          </span>
         </div>
 
         <div className="flex items-center gap-6 text-[13px] text-[var(--t3)]">
@@ -37,7 +37,7 @@ export function Footer() {
       <div className="border-t border-[var(--border)]">
         <div className="max-w-[1320px] mx-auto px-8 py-3">
           <p className="text-[11px] mono text-[var(--t3)]">
-            © 2025 Pledge<span className="text-[var(--accent)]">OFF</span>. Built to kill bad ideas early.
+            © 2026 Pledge<span className="text-[var(--accent)]">OFF</span> · Built to kill bad ideas early.
           </p>
         </div>
       </div>
