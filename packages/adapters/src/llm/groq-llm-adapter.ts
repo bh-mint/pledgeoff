@@ -8,10 +8,17 @@ import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
 
+const DimensionResponseSchema = z.object({
+  name: z.string(),
+  weight: z.number().min(0).max(1),
+  score: z.number().min(0).max(100),
+});
+
 const LLMResponseSchema = z.object({
   verdict: z.enum(['GO', 'KILL', 'PIVOT']),
   confidence: z.number().min(0).max(1),
   reasoning: z.string().min(1).max(5000),
+  dimensions: z.array(DimensionResponseSchema).optional(),
 });
 
 const TIMEOUT_MS = 30_000;
@@ -42,7 +49,7 @@ export class GroqLLMAdapter implements ILLMClient {
           { role: 'user', content: prompt },
         ],
         temperature: 0.3,
-        max_tokens: 512,
+        max_tokens: 1024,
         response_format: { type: 'json_object' },
       });
 

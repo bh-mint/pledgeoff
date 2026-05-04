@@ -56,6 +56,7 @@ export class DecideUseCase {
       reasoning: llmResult.value.reasoning,
       confidence: llmResult.value.confidence,
       signalIds: signalsResult.value.map((s) => s.id),
+      dimensions: llmResult.value.dimensions,
       createdAt: new Date().toISOString(),
     };
 

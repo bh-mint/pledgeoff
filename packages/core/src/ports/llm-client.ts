@@ -1,6 +1,6 @@
 import { Result } from 'neverthrow';
 import type { Signal } from '../domain/signal';
-import type { Verdict } from '../domain/decision';
+import type { Verdict, Dimension } from '../domain/decision';
 
 export interface LLMDecisionRequest {
   readonly ideaText: string;
@@ -12,6 +12,7 @@ export interface LLMDecisionResponse {
   readonly verdict: Verdict;
   readonly reasoning: string;
   readonly confidence: number;
+  readonly dimensions?: Dimension[];
 }
 
 export class LLMClientError extends Error {
