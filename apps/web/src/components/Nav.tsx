@@ -31,18 +31,18 @@ export function Nav({ onWaitlistOpen }: NavProps) {
   return (
     <nav className="border-b border-[var(--border)] bg-[var(--canvas)]/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-[1320px] mx-auto px-8 h-14 flex items-center justify-between">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="display text-[15px] font-semibold text-[var(--t1)] tracking-tight"
-        >
-          Pledge<span className="text-[var(--accent)]">OFF</span>
-        </Link>
-
-        {/* Live indicator */}
-        <div className="hidden md:flex items-center gap-2 text-[11px] mono text-[var(--t3)] uppercase tracking-[0.08em]">
-          <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-[var(--validated)] inline-block" />
-          3,418 decisions made this week
+        {/* Logo + live indicator (left group) */}
+        <div className="flex items-center gap-8">
+          <Link
+            href="/"
+            className="display text-[16px] font-semibold text-[var(--t1)] tracking-tight"
+          >
+            Pledge<span className="text-[var(--accent)]">OFF</span>
+          </Link>
+          <div className="hidden md:flex items-center gap-1 mono text-[11px]">
+            <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-[var(--accent)] inline-block" />
+            <span className="text-[var(--t2)]">3,418 ideas validated this week</span>
+          </div>
         </div>
 
         {/* Right links */}
