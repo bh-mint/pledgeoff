@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { formatDate } from "@/lib/mdx-utils";
 
 export type TableRow = {
   id: string;
@@ -13,29 +12,33 @@ export type TableRow = {
   status: "pending" | "validated" | "killed" | "pivoting";
 };
 
-const STATUS_CONFIG = {
-  pending:   { label: "Pending",   color: "var(--accent)",    pulse: true  },
-  validated: { label: "Validated", color: "var(--validated)", pulse: false },
-  killed:    { label: "Killed",    color: "var(--kill)",      pulse: false },
-  pivoting:  { label: "Pivoting",  color: "var(--caution)",   pulse: false },
-} as const;
-
-const VERDICT_COLORS: Record<string, string> = {
+const VERDICT_COLOR: Record<string, string> = {
   GO:    "var(--validated)",
   KILL:  "var(--kill)",
   PIVOT: "var(--caution)",
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  pending:   "pending",
+  validated: "validated",
+  killed:    "archived",
+  pivoting:  "pivoting",
+};
+
 type SortKey = "date" | "score";
 
-export function DashboardClient({ rows }: { rows: TableRow[] }) {
+function shortDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalCount: number }) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date");
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return rows
-      .filter((r) => !q || r.text.toLowerCase().includes(q) || r.status.includes(q))
+      .filter((r) => !q || r.text.toLowerCase().includes(q))
       .sort((a, b) =>
         sort === "score"
           ? (b.score ?? -1) - (a.score ?? -1)
@@ -44,16 +47,27 @@ export function DashboardClient({ rows }: { rows: TableRow[] }) {
   }, [rows, search, sort]);
 
   return (
-    <div>
-      {/* Controls */}
-      <div className="flex items-center gap-3 mb-4">
+    <div
+      className="rounded-md border"
+      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+    >
+      {/* Table header */}
+      <div
+        className="px-6 py-4 border-b flex items-center gap-3"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <h2 className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]">
+          All validations
+        </h2>
+        <span className="mono text-[10px] text-[var(--t3)]">
+          {totalCount} · sortable
+        </span>
         <input
-          type="text"
-          placeholder="Search ideas…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 h-8 px-3 rounded border text-[13px] text-[var(--t1)] placeholder:text-[var(--t3)] focus:outline-none focus:border-[var(--t3)] transition-colors"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          placeholder="search ideas…"
+          className="ml-auto bg-transparent outline-none px-3 h-7 text-[12px] rounded-md border w-52"
+          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
         />
         <div
           className="flex rounded border overflow-hidden"
@@ -63,7 +77,7 @@ export function DashboardClient({ rows }: { rows: TableRow[] }) {
             <button
               key={key}
               onClick={() => setSort(key)}
-              className="mono text-[10px] px-3 h-8 uppercase tracking-[0.08em] transition-colors"
+              className="mono text-[9px] px-2.5 h-7 uppercase tracking-[0.08em] transition-colors"
               style={{
                 background: sort === key ? "var(--border)" : "transparent",
                 color: sort === key ? "var(--t1)" : "var(--t3)",
@@ -75,69 +89,106 @@ export function DashboardClient({ rows }: { rows: TableRow[] }) {
         </div>
       </div>
 
+      {/* Column headers */}
+      <div
+        className="px-6 py-2.5 grid grid-cols-12 gap-3 border-b mono text-[10px] uppercase tracking-[0.14em]"
+        style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+      >
+        <div className="col-span-6">Idea</div>
+        <div className="col-span-2">Score</div>
+        <div className="col-span-1">Verdict</div>
+        <div className="col-span-2">Status</div>
+        <div className="col-span-1 text-right">Date</div>
+      </div>
+
       {/* Rows */}
-      {filtered.length === 0 ? (
-        <p className="text-[13px] text-[var(--t3)] py-8 text-center">No results.</p>
-      ) : (
-        <div className="space-y-2">
-          {filtered.map((row) => {
-            const st = STATUS_CONFIG[row.status];
-            return (
-              <Link
-                key={row.id}
-                href={`/ideas/${row.id}`}
-                className="group flex items-center gap-4 rounded-md border px-5 py-3.5 hover:border-[var(--t3)] transition-colors"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] text-[var(--t1)] leading-snug truncate group-hover:text-[var(--accent)] transition-colors">
-                    {row.text}
-                  </p>
-                  <p className="mono text-[10px] text-[var(--t3)] mt-0.5">
-                    {formatDate(row.createdAt)}
-                  </p>
-                </div>
+      {filtered.map((row) => {
+        const color = row.verdict ? (VERDICT_COLOR[row.verdict] ?? "var(--t3)") : "var(--t3)";
+        return (
+          <Link
+            key={row.id}
+            href={`/ideas/${row.id}`}
+            className="px-6 py-3 grid grid-cols-12 gap-3 border-b items-center cursor-pointer transition-colors"
+            style={{ borderColor: "var(--border)" }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(255,255,255,0.015)")
+            }
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          >
+            {/* Idea */}
+            <div className="col-span-6 min-w-0">
+              <div className="text-[13px] text-[var(--t1)] truncate">{row.text}</div>
+              <div className="mono text-[10px] mt-0.5 text-[var(--t3)]">
+                val_{row.id.slice(0, 8)}
+              </div>
+            </div>
 
-                <div className="flex items-center gap-4 flex-shrink-0">
-                  {/* Score */}
-                  <div className="w-10 text-right">
-                    {row.score !== null ? (
-                      <span
-                        className="display tnum text-[16px] font-semibold"
-                        style={{
-                          color: row.verdict
-                            ? (VERDICT_COLORS[row.verdict] ?? "var(--t3)")
-                            : "var(--t3)",
-                        }}
-                      >
-                        {row.score}
-                      </span>
-                    ) : (
-                      <span className="mono text-[11px] text-[var(--t3)]">—</span>
-                    )}
-                  </div>
-
-                  {/* Status badge */}
-                  <div className="flex items-center gap-1.5 w-[72px]">
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${st.pulse ? "pulse-dot" : ""}`}
-                      style={{ background: st.color }}
-                    />
-                    <span
-                      className="mono text-[10px] uppercase tracking-[0.08em]"
-                      style={{ color: st.color }}
-                    >
-                      {st.label}
-                    </span>
-                  </div>
-
-                  <span className="text-[var(--t3)] group-hover:text-[var(--accent)] transition-colors text-[13px]">
-                    →
+            {/* Score + mini bar */}
+            <div className="col-span-2 flex items-center gap-2">
+              {row.score !== null ? (
+                <>
+                  <span
+                    className="display tnum text-[16px] font-semibold w-7 flex-shrink-0"
+                    style={{ color }}
+                  >
+                    {row.score}
                   </span>
-                </div>
+                  <div
+                    className="flex-1 h-[3px] rounded-full"
+                    style={{ background: "var(--border)" }}
+                  >
+                    <div
+                      className="h-[3px] rounded-full"
+                      style={{ width: `${row.score}%`, background: color }}
+                    />
+                  </div>
+                </>
+              ) : (
+                <span className="mono text-[10px] text-[var(--t3)]">—</span>
+              )}
+            </div>
+
+            {/* Verdict */}
+            <div
+              className="col-span-1 mono text-[10px]"
+              style={{ color }}
+            >
+              {row.verdict ?? "—"}
+            </div>
+
+            {/* Status */}
+            <div className="col-span-2 mono text-[10px] text-[var(--t2)]">
+              {STATUS_LABEL[row.status]}
+            </div>
+
+            {/* Date */}
+            <div className="col-span-1 text-right mono text-[10px] text-[var(--t3)]">
+              {shortDate(row.createdAt)}
+            </div>
+          </Link>
+        );
+      })}
+
+      {/* Empty */}
+      {filtered.length === 0 && (
+        <div className="px-6 py-16 text-center">
+          <div className="display text-[18px] font-semibold tracking-tight text-[var(--t1)] mb-2">
+            {search ? "No results." : "No validations yet."}
+          </div>
+          {!search && (
+            <>
+              <p className="text-[13px] text-[var(--t2)] max-w-[420px] mx-auto">
+                Type a one-sentence idea. Get a score in 15 seconds.
+              </p>
+              <Link
+                href="/ideas/new"
+                className="inline-block mt-5 display text-[13px] font-semibold px-5 h-10 leading-[40px] rounded-md"
+                style={{ background: "var(--accent)", color: "#000" }}
+              >
+                Validate your first idea →
               </Link>
-            );
-          })}
+            </>
+          )}
         </div>
       )}
     </div>
