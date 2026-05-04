@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { formatDate } from "@/lib/mdx-utils";
 import type { ArticleFrontmatter } from "@/lib/mdx";
+import { PreLoginNav } from "@/components/PreLoginNav";
+import { Footer } from "@/components/Footer";
 
 const ARTICLES_PER_PAGE = 9;
 
@@ -52,26 +54,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
   return (
     <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-      {/* Nav */}
-      <header className="border-b sticky top-0 z-50 " style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
-        <div className="max-w-[1100px] mx-auto px-8 h-14 flex items-center justify-between">
-          <Link href="/" className="display text-[13px] font-semibold">
-            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-          </Link>
-          <nav className="flex items-center gap-6 mono text-[11px]" style={{ color: "var(--t3)" }}>
-            <Link href="/pricing" style={{ color: "var(--t2)" }}>Pricing</Link>
-            <Link href="/dashboard" style={{ color: "var(--t2)" }}>Dashboard</Link>
-            <span style={{ color: "var(--t1)" }}>Blog</span>
-            <Link
-              href="/login"
-              className="rounded-md px-3 h-8 inline-flex items-center"
-              style={{ background: "var(--accent)", color: "#000" }}
-            >
-              Sign in
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <PreLoginNav />
 
       {/* Hero */}
       <section className="border-b" style={{ borderColor: "var(--border)" }}>
@@ -252,15 +235,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
         </>
       )}
 
-      {/* Footer */}
-      <footer className="border-t" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-[1100px] mx-auto px-8 py-8 flex items-center justify-between">
-          <span className="display text-[12px] font-semibold">
-            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-          </span>
-          <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>© 2026 · all rights reserved</span>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
