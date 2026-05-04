@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
+import { createServiceClient } from "@/lib/supabase/server";
 import { container } from "@/lib/container";
 import { DashboardClient, type TableRow } from "./DashboardClient";
 import { ProfileButton } from "@/components/ProfileButton";
@@ -66,6 +67,9 @@ const PIPELINE_STEPS = [
 
 export default async function DashboardPage() {
   const user = await requireUser();
+  const supabase = createServiceClient();
+  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
+  const displayName = profile?.full_name || user.email?.split("@")[0] || "—";
 
   const ideasResult = await container._repos.ideaRepo.findByUserId(user.id);
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
@@ -423,7 +427,7 @@ export default async function DashboardPage() {
         style={{ borderColor: "var(--border)" }}
       >
         <span className="mono text-[10px] text-[var(--t3)]">
-          {user.email ?? "—"} · free plan · {rows.length} idea{rows.length !== 1 ? "s" : ""} · {daysSinceJoin}d streak
+          {displayName} · free plan · {rows.length} idea{rows.length !== 1 ? "s" : ""} · {daysSinceJoin}d streak
         </span>
         <Link
           href="/pricing"
