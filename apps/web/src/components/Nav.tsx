@@ -28,8 +28,6 @@ export function Nav({ onWaitlistOpen }: NavProps) {
     setDropdownOpen(false);
   };
 
-  const btnCls = "h-7 px-3 rounded-md bg-[var(--accent)] text-black text-[11px] font-semibold hover:opacity-90 transition-opacity";
-
   return (
     <nav className="border-b border-[var(--border)] bg-[var(--canvas)] sticky top-0 z-50">
       <div className="max-w-[1320px] mx-auto px-8 h-12 flex items-center justify-between">
@@ -48,15 +46,34 @@ export function Nav({ onWaitlistOpen }: NavProps) {
         </div>
 
         {/* Right */}
-        <div className="flex items-center gap-2">
-          <Link href="/pricing" className={btnCls}>Pricing</Link>
-          <Link href="/blog" className={btnCls}>Blog</Link>
+        <div className="flex items-center gap-5">
+          <Link
+            href="/pricing"
+            className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+          >
+            Pricing
+          </Link>
+          <Link
+            href="/blog"
+            className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+          >
+            Blog
+          </Link>
+
+          {!user && (
+            <button
+              onClick={onWaitlistOpen}
+              className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+            >
+              Get access
+            </button>
+          )}
 
           {user ? (
-            <div className="relative ml-1">
+            <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2"
+                className="flex items-center"
               >
                 <span className="w-6 h-6 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[10px] font-semibold text-[var(--t1)] uppercase">
                   {user.email?.[0] ?? "U"}
@@ -81,7 +98,12 @@ export function Nav({ onWaitlistOpen }: NavProps) {
               )}
             </div>
           ) : (
-            <Link href="/login" className={btnCls}>Log in</Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center h-7 px-3 rounded-md bg-[var(--accent)] text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
+            >
+              Log in
+            </Link>
           )}
         </div>
       </div>
