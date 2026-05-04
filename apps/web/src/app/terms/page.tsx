@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Terms of Service — PledgeOFF",
@@ -9,24 +7,93 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+const TERMS_TOC = [
+  { id: "s1", label: "01 · Agreement" },
+  { id: "s2", label: "02 · Description" },
+  { id: "s3", label: "03 · Registration" },
+  { id: "s4", label: "04 · Plans & billing" },
+  { id: "s5", label: "05 · Free trial" },
+  { id: "s6", label: "06 · Cancellation" },
+  { id: "s7", label: "07 · Refunds" },
+  { id: "s8", label: "08 · Acceptable use" },
+  { id: "s9", label: "09 · AI disclaimer" },
+  { id: "s10", label: "10 · User content" },
+  { id: "s11", label: "11 · IP" },
+  { id: "s12", label: "12 · Liability" },
+  { id: "s13", label: "13 · Governing law" },
+];
+
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[var(--canvas)]">
-      <Nav />
-      <main className="max-w-[800px] mx-auto px-8 pt-16 pb-24">
-        <div className="mb-12">
-          <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em] mb-3">
-            Legal
-          </p>
-          <h1 className="display text-[40px] font-black text-[var(--t1)] leading-tight mb-3">
+    <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
+      {/* Nav */}
+      <header className="border-b" style={{ borderColor: "var(--border)" }}>
+        <div className="max-w-[1100px] mx-auto px-8 h-14 flex items-center justify-between">
+          <Link href="/" className="display text-[13px] font-semibold">
+            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+          </Link>
+          <nav className="flex items-center gap-6 mono text-[11px]" style={{ color: "var(--t3)" }}>
+            <Link href="/pricing" style={{ color: "var(--t2)" }}>Pricing</Link>
+            <Link href="/blog" style={{ color: "var(--t2)" }}>Blog</Link>
+            <span style={{ color: "var(--t1)" }}>Legal</span>
+            <Link
+              href="/login"
+              className="rounded-md px-3 h-8 inline-flex items-center"
+              style={{ background: "var(--accent)", color: "#000" }}
+            >
+              Sign in
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      {/* Heading band */}
+      <section className="border-b" style={{ borderColor: "var(--border)" }}>
+        <div className="max-w-[1100px] mx-auto px-8 py-12">
+          <div className="mono text-[10px] uppercase tracking-wider mb-3" style={{ color: "var(--t3)" }}>
+            LEGAL · DOC_02
+          </div>
+          <h1
+            className="display font-semibold leading-tight"
+            style={{ fontSize: "32px", letterSpacing: "-0.04em", color: "var(--t1)" }}
+          >
             Terms of Service
           </h1>
-          <p className="text-[13px] text-[var(--t3)]">
-            Last updated: <span className="text-[var(--t2)]">May 4, 2026</span>
-          </p>
+          <div className="mt-4 flex items-center gap-3 mono text-[11px]" style={{ color: "var(--t3)" }}>
+            <span>UPDATED · APR 12 2026</span>
+            <span>·</span>
+            <span>EFFECTIVE · MAY 1 2026</span>
+            <span>·</span>
+            <span>VERSION 3.1</span>
+          </div>
         </div>
+      </section>
 
-        <div className="prose-legal">
+      {/* 2-col layout */}
+      <div className="max-w-[1100px] mx-auto px-8 py-12 grid grid-cols-12 gap-12">
+
+        {/* TOC sidebar */}
+        <aside className="col-span-3 hidden md:block">
+          <div className="sticky top-8">
+            <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
+              CONTENTS
+            </div>
+            <nav
+              className="toc flex flex-col gap-2 mono text-[11px]"
+              style={{ borderLeft: "1px solid var(--border)", paddingLeft: "12px" }}
+            >
+              {TERMS_TOC.map(({ id, label }, i) => (
+                <a key={id} href={`#${id}`} className={i === 0 ? "active" : ""}>
+                  {label}
+                </a>
+              ))}
+            </nav>
+          </div>
+        </aside>
+
+        {/* Content */}
+        <main className="col-span-12 md:col-span-9">
+          <div className="prose-legal">
           <Section title="1. Acceptance of terms">
             <p>
               By accessing or using PledgeOFF at{" "}
@@ -509,9 +576,19 @@ export default function TermsPage() {
               </Link>
             </p>
           </div>
+          </div>{/* end prose-legal */}
+        </main>
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t" style={{ borderColor: "var(--border)" }}>
+        <div className="max-w-[1100px] mx-auto px-8 py-8 flex items-center justify-between">
+          <span className="display text-[12px] font-semibold">
+            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+          </span>
+          <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>© 2026 · all rights reserved</span>
         </div>
-      </main>
-      <Footer />
+      </footer>
     </div>
   );
 }

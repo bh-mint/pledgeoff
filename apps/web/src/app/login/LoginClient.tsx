@@ -11,24 +11,23 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 type Mode = "signin" | "signup";
+type State = "idle" | "loading" | "error" | "check_email";
 
 export function LoginClient() {
   const searchParams = useSearchParams();
   const errorKey = searchParams.get("error") ?? "";
-  const errorMsg = ERROR_MESSAGES[errorKey] ?? "";
+  const urlError = ERROR_MESSAGES[errorKey] ?? "";
 
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [uiState, setUiState] = useState<State>(urlError ? "error" : "idle");
+  const [errorMsg, setErrorMsg] = useState(urlError);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError("");
-    setSuccess("");
-    setLoading(true);
+    setErrorMsg("");
+    setUiState("loading");
 
     const supabase = createClient();
 
@@ -39,142 +38,249 @@ export function LoginClient() {
         options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
       if (error) {
-        setFormError(error.message);
+        setErrorMsg(error.message);
+        setUiState("error");
       } else {
-        setSuccess("Check your email to confirm your account.");
+        setUiState("check_email");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        setFormError(error.message);
+        setErrorMsg(error.message);
+        setUiState("error");
       } else {
         window.location.href = "/dashboard";
       }
     }
-
-    setLoading(false);
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    setUiState("loading");
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
     if (error) {
-      setFormError(error.message);
-      setLoading(false);
+      setErrorMsg(error.message);
+      setUiState("error");
     }
   };
 
-  return (
-    <div className="w-full max-w-sm bg-[var(--surface)] border border-[var(--border)] rounded-lg p-8">
-      <h1 className="display text-[22px] font-bold text-[var(--t1)] mb-2">
-        {mode === "signin" ? "Sign in" : "Create account"}
-      </h1>
-      <p className="text-[13px] text-[var(--t2)] mb-6 leading-relaxed">
-        {mode === "signin"
-          ? "Access your dashboard and validate your ideas."
-          : "Start free. No credit card required."}
-      </p>
+  const switchMode = (m: Mode) => {
+    setMode(m);
+    setErrorMsg("");
+    setUiState("idle");
+  };
 
-      {/* Mode toggle */}
-      <div className="flex border border-[var(--border)] rounded-md mb-6 p-0.5">
+  if (uiState === "check_email") {
+    return (
+      <div
+        className="rounded-md border p-8 w-full max-w-sm reveal"
+        style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
+      >
+        <div className="display text-[14px] font-semibold mb-4">
+          Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+        </div>
+
+        <div
+          className="rounded-md border p-4 mb-5"
+          style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--validated)" }} />
+            <span className="mono text-[10px]" style={{ color: "var(--validated)" }}>SENT</span>
+            <span className="mono text-[10px] ml-auto" style={{ color: "var(--t3)" }}>
+              {new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} UTC
+            </span>
+          </div>
+          <div className="mono text-[11px]" style={{ color: "var(--t2)" }}>to: {email}</div>
+          <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>subj: Confirm your PledgeOFF account</div>
+        </div>
+
+        <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
+          Check your email.
+        </h1>
+        <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
+          We sent a confirmation link to{" "}
+          <span style={{ color: "var(--t1)" }}>{email}</span>. Click it to activate your account, then sign in.
+        </p>
+
+        <div className="grid grid-cols-2 gap-2 mt-6">
+          <button
+            onClick={() => setUiState("idle")}
+            className="h-10 rounded-md border display text-[13px] transition-colors hover:bg-white/5"
+            style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+          >
+            Back to sign in
+          </button>
+          <a
+            href="https://mail.google.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-10 rounded-md display text-[13px] font-semibold flex items-center justify-center transition-opacity hover:opacity-90"
+            style={{ background: "var(--accent)", color: "#000" }}
+          >
+            Open inbox →
+          </a>
+        </div>
+
+        <p className="mono text-[10px] mt-5" style={{ color: "var(--t3)" }}>
+          Didn&apos;t get it? Check spam, or{" "}
+          <button onClick={() => switchMode("signup")} className="underline" style={{ color: "var(--t2)" }}>
+            use a different email
+          </button>.
+        </p>
+      </div>
+    );
+  }
+
+  const isLoading = uiState === "loading";
+
+  return (
+    <div
+      className="rounded-md border p-8 w-full max-w-sm reveal"
+      style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
+    >
+      {/* Tab switcher */}
+      <div
+        className="grid grid-cols-2 rounded-md border p-1 mb-6"
+        style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+      >
         {(["signin", "signup"] as Mode[]).map((m) => (
           <button
             key={m}
-            onClick={() => { setMode(m); setFormError(""); setSuccess(""); }}
-            className={`flex-1 h-8 rounded text-[12px] font-medium transition-colors ${
+            onClick={() => switchMode(m)}
+            disabled={isLoading}
+            className="rounded-[4px] py-1.5 text-[12px] font-semibold display transition-colors"
+            style={
               mode === m
-                ? "bg-[var(--accent)] text-black"
-                : "text-[var(--t3)] hover:text-[var(--t2)]"
-            }`}
+                ? { background: "var(--accent)", color: "#000" }
+                : { color: "var(--t2)" }
+            }
           >
             {m === "signin" ? "Sign in" : "Sign up"}
           </button>
         ))}
       </div>
 
-      {(errorMsg || formError) && (
-        <div className="mb-4 px-4 py-3 bg-[var(--kill)]/10 border border-[var(--kill)]/30 rounded-md">
-          <p className="text-[12px] text-[var(--kill)]">{errorMsg || formError}</p>
+      <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
+        {mode === "signin" ? "Welcome back." : "Start validating."}
+      </h1>
+      <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
+        {mode === "signin"
+          ? "Validate your next idea in 15 seconds."
+          : "3 free validations every month. No card."}
+      </p>
+
+      {/* Error banner */}
+      {uiState === "error" && errorMsg && (
+        <div
+          className="rounded-md border p-3 flex gap-3 mt-5"
+          style={{ borderColor: "rgba(229,91,60,0.4)", background: "rgba(229,91,60,0.06)" }}
+        >
+          <span className="mono text-[10px] mt-0.5" style={{ color: "var(--kill)" }}>err_auth</span>
+          <div className="flex-1">
+            <div className="text-[12px]" style={{ color: "var(--t1)" }}>{errorMsg}</div>
+          </div>
         </div>
       )}
 
-      {success && (
-        <div className="mb-4 px-4 py-3 bg-[var(--validated)]/10 border border-[var(--validated)]/30 rounded-md">
-          <p className="text-[12px] text-[var(--validated)]">{success}</p>
-        </div>
-      )}
+      <form onSubmit={handleEmailAuth} className="mt-6 space-y-3">
+        <label className="block">
+          <span className="mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>Email</span>
+          <div
+            className="mt-1.5 rounded-md border px-3 h-10 flex items-center"
+            style={
+              uiState === "error"
+                ? { borderColor: "rgba(229,91,60,0.5)", background: "var(--canvas)" }
+                : { borderColor: "var(--border)", background: "var(--canvas)" }
+            }
+          >
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              disabled={isLoading}
+              className="w-full text-[13px] bg-transparent outline-none placeholder:text-[var(--t3)]"
+              style={{ color: "var(--t1)" }}
+            />
+          </div>
+        </label>
 
-      {/* Email form */}
-      <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full h-10 px-3 rounded-md bg-[var(--canvas)] border border-[var(--border)] text-[13px] text-[var(--t1)] placeholder:text-[var(--t3)] focus:outline-none focus:border-[var(--t3)] transition-colors"
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={6}
-          className="w-full h-10 px-3 rounded-md bg-[var(--canvas)] border border-[var(--border)] text-[13px] text-[var(--t1)] placeholder:text-[var(--t3)] focus:outline-none focus:border-[var(--t3)] transition-colors"
-        />
+        <label className="block">
+          <div className="flex items-center justify-between">
+            <span className="mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>Password</span>
+            {mode === "signin" && (
+              <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>Forgot</span>
+            )}
+          </div>
+          <div
+            className="mt-1.5 rounded-md border px-3 h-10 flex items-center"
+            style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+          >
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={mode === "signup" ? "At least 8 characters" : "••••••••••"}
+              required
+              minLength={mode === "signup" ? 8 : 6}
+              disabled={isLoading}
+              className="w-full text-[13px] bg-transparent outline-none placeholder:text-[var(--t3)]"
+              style={{ color: "var(--t1)" }}
+            />
+          </div>
+          {mode === "signup" && (
+            <span className="mono text-[10px] mt-1.5 block" style={{ color: "var(--t3)" }}>
+              8+ chars · 1 number · 1 symbol
+            </span>
+          )}
+        </label>
+
         <button
           type="submit"
-          disabled={loading}
-          className="display w-full h-10 rounded-md bg-[var(--accent)] text-black text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+          disabled={isLoading}
+          className="display w-full h-10 rounded-md text-[13px] font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ background: "var(--accent)", color: "#000" }}
         >
-          {loading ? "Loading…" : mode === "signin" ? "Sign in" : "Create account"}
+          {isLoading ? (
+            <>
+              <span className="inline-block w-3 h-3 rounded-full border-2 border-black/30 border-t-black/90 animate-spin" />
+              {mode === "signin" ? "Signing in…" : "Creating account…"}
+            </>
+          ) : (
+            mode === "signin" ? "Sign in" : "Create account"
+          )}
         </button>
       </form>
 
       {/* Divider */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="flex-1 h-px bg-[var(--border)]" />
-        <span className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.08em]">or</span>
-        <div className="flex-1 h-px bg-[var(--border)]" />
+      <div className="flex items-center gap-3 my-5">
+        <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+        <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>OR</span>
+        <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
       </div>
 
-      {/* Google */}
+      {/* Google OAuth */}
       <button
         onClick={handleGoogleLogin}
-        disabled={loading}
-        className="w-full h-10 flex items-center justify-center gap-3 rounded-md border border-[var(--border)] text-[var(--t2)] text-[13px] hover:border-[var(--t3)] hover:text-[var(--t1)] transition-colors disabled:opacity-50"
+        disabled={isLoading}
+        className="w-full h-10 rounded-md border flex items-center justify-center gap-2 text-[13px] transition-colors hover:bg-white/5 disabled:opacity-50"
+        style={{ borderColor: "var(--border)", color: "var(--t1)" }}
       >
-        <GoogleIcon />
+        <span className="w-4 h-4 rounded-full border" style={{ borderColor: "var(--t2)" }} />
         Continue with Google
       </button>
 
-      <p className="text-[11px] mono text-[var(--t3)] text-center mt-6 leading-relaxed">
+      <p className="mono text-[10px] mt-6 leading-relaxed" style={{ color: "var(--t3)" }}>
         By continuing, you agree to our{" "}
-        <Link href="/terms" className="hover:text-[var(--t2)] transition-colors">
-          Terms
-        </Link>{" "}
-        and{" "}
-        <Link href="/privacy" className="hover:text-[var(--t2)] transition-colors">
-          Privacy Policy
-        </Link>
-        .
+        <Link href="/terms" className="underline" style={{ color: "var(--t2)" }}>Terms</Link>
+        {" "}and{" "}
+        <Link href="/privacy" className="underline" style={{ color: "var(--t2)" }}>Privacy Policy</Link>.
       </p>
     </div>
-  );
-}
-
-function GoogleIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-      <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4" />
-      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853" />
-      <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05" />
-      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335" />
-    </svg>
   );
 }
