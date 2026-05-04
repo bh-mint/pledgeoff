@@ -61,16 +61,6 @@ export function DecisionCard({ decision }: DecisionCardProps) {
 
   const displayScore = useCountUp(score);
 
-  const formula = hasDimensions
-    ? (() => {
-        const parts = decision.dimensions!.map(
-          (d) => `${d.weight.toFixed(2)}·${d.score}`
-        ).join(" + ");
-        const raw = decision.dimensions!.reduce((sum, d) => sum + d.weight * d.score, 0);
-        return `weighted_avg = ${parts} = ${raw.toFixed(2)} → ${Math.round(raw)}`;
-      })()
-    : null;
-
   useEffect(() => {
     const t1 = setTimeout(() => setRevealed(true), 100);
     const t2 = setTimeout(() => setGlowVisible(true), 1300);
@@ -201,8 +191,8 @@ export function DecisionCard({ decision }: DecisionCardProps) {
           </div>
         )}
 
-        {/* Formula */}
-        {formula && (
+        {/* Score contribution breakdown */}
+        {hasDimensions && (
           <div
             className="mb-6 transition-all duration-500"
             style={{
@@ -211,15 +201,50 @@ export function DecisionCard({ decision }: DecisionCardProps) {
               transitionDelay: "200ms",
             }}
           >
-            <p
-              className="mono text-[10px] text-[var(--t3)] px-3 py-2 rounded border overflow-x-auto"
-              style={{
-                borderColor: "var(--border)",
-                background: "var(--canvas)",
-              }}
-            >
-              {formula}
+            <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.1em] mb-3">
+              How this score was calculated
             </p>
+            <div
+              className="rounded border divide-y"
+              style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+            >
+              {decision.dimensions!.map((d) => {
+                const contribution = Math.round(d.weight * d.score);
+                const dimColor =
+                  d.score >= 75 ? "var(--validated)" : d.score >= 50 ? "var(--caution)" : "var(--kill)";
+                return (
+                  <div
+                    key={d.name}
+                    className="flex items-center justify-between px-3 py-2"
+                    style={{ borderColor: "var(--border)" }}
+                  >
+                    <span className="text-[12px] text-[var(--t2)]">{d.name}</span>
+                    <div className="flex items-center gap-3 mono text-[11px]">
+                      <span className="text-[var(--t3)]">
+                        scored <span style={{ color: dimColor }}>{d.score}/100</span>
+                      </span>
+                      <span className="text-[var(--t3)]">×</span>
+                      <span className="text-[var(--t3)]">{Math.round(d.weight * 100)}% weight</span>
+                      <span className="text-[var(--t3)]">=</span>
+                      <span className="font-semibold" style={{ color: dimColor, minWidth: "2.5rem", textAlign: "right" }}>
+                        {contribution} pts
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+              <div
+                className="flex items-center justify-between px-3 py-2"
+                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              >
+                <span className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em]">
+                  Final score
+                </span>
+                <span className="mono text-[13px] font-semibold text-[var(--t1)]">
+                  {score} / 100
+                </span>
+              </div>
+            </div>
           </div>
         )}
 
