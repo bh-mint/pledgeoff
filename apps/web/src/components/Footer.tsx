@@ -27,49 +27,51 @@ function IconInstagram() {
 export function Footer() {
   return (
     <footer className="border-t border-[var(--border)] mt-auto bg-[var(--canvas)]">
-      {/* Main row */}
-      <div className="max-w-[1320px] mx-auto px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        {/* Left: logo + tagline + social icons */}
-        <div className="flex items-center gap-4">
+      {/* Main row — 3 coloane */}
+      <div className="max-w-[1320px] mx-auto px-8 py-5 grid grid-cols-3 items-center">
+        {/* Left: logo + tagline */}
+        <div className="flex items-baseline gap-3">
           <p className="display text-[15px] font-semibold text-[var(--t1)]">
             Pledge<span className="text-[var(--accent)]">OFF</span>
           </p>
           <span className="mono text-[11px] text-[var(--t3)] tracking-[0.04em]">
             Every number is sourced
           </span>
-          <div className="flex items-center gap-3 ml-1">
-            <a
-              href="https://x.com/pledgeoff"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
-              aria-label="X (Twitter)"
-            >
-              <IconX />
-            </a>
-            <a
-              href="https://tiktok.com/@pledgeoff"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
-              aria-label="TikTok"
-            >
-              <IconTikTok />
-            </a>
-            <a
-              href="https://instagram.com/pledgeoff"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
-              aria-label="Instagram"
-            >
-              <IconInstagram />
-            </a>
-          </div>
+        </div>
+
+        {/* Center: social icons */}
+        <div className="flex items-center justify-center gap-4">
+          <a
+            href="https://x.com/pledgeoff"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
+            aria-label="X (Twitter)"
+          >
+            <IconX />
+          </a>
+          <a
+            href="https://tiktok.com/@pledgeoff"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
+            aria-label="TikTok"
+          >
+            <IconTikTok />
+          </a>
+          <a
+            href="https://instagram.com/pledgeoff"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
+            aria-label="Instagram"
+          >
+            <IconInstagram />
+          </a>
         </div>
 
         {/* Right: nav links */}
-        <div className="flex items-center gap-6 text-[11px] text-[var(--t3)]">
+        <div className="flex items-center justify-end gap-6 text-[11px] text-[var(--t3)]">
           <Link href="/privacy" className="hover:text-[var(--t2)] transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-[var(--t2)] transition-colors">Terms</Link>
           <Link href="/changelog" className="hover:text-[var(--t2)] transition-colors">Changelog</Link>
