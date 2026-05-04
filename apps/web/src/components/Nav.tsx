@@ -34,7 +34,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
         {/* Logo + live indicator */}
         <div className="flex items-center gap-8">
           <Link
-            href="/"
+            href={user ? "/dashboard" : "/"}
             className="display text-[15px] font-semibold text-[var(--t1)] tracking-tight"
           >
             Pledge<span className="text-[var(--accent)]">OFF</span>
