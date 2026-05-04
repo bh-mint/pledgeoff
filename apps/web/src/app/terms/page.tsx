@@ -31,8 +31,11 @@ export default function TermsPage() {
     <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
       <PreLoginNav extraLink={{ href: "/privacy", label: "Privacy" }} />
 
-      {/* Heading band */}
-      <section className="border-b" style={{ borderColor: "var(--border)" }}>
+      {/* Heading band — sticky below PreLoginNav */}
+      <section
+        className="border-b sticky top-12 z-40"
+        style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+      >
         <div className="max-w-[1100px] mx-auto px-8 py-12">
           <div className="mono text-[10px] uppercase tracking-wider mb-3" style={{ color: "var(--t3)" }}>
             LEGAL · DOC_02
@@ -54,19 +57,11 @@ export default function TermsPage() {
       </section>
 
       {/* 2-col layout */}
-      <div className="max-w-[1100px] mx-auto px-8 py-12 grid grid-cols-12 gap-12">
+      <div className="max-w-[1100px] mx-auto px-8 py-12 flex gap-12">
 
         {/* TOC sidebar */}
-        <aside className="col-span-3 hidden md:block">
-          <div className="sticky top-[56px]">
-            <div className="pb-4 mb-4 border-b" style={{ borderColor: "var(--border)" }}>
-              <div className="display text-[13px] font-semibold" style={{ color: "var(--t1)" }}>
-                Terms of Service
-              </div>
-              <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
-                Updated Apr 12 2026
-              </div>
-            </div>
+        <aside className="w-[220px] hidden md:block flex-shrink-0">
+          <div className="sticky top-[244px]">
             <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
               CONTENTS
             </div>
@@ -75,7 +70,7 @@ export default function TermsPage() {
         </aside>
 
         {/* Content */}
-        <main className="col-span-12 md:col-span-9">
+        <main className="flex-1 min-w-0">
           <div className="prose-legal">
           <Section id="s1" title="1. Acceptance of terms">
             <p>
@@ -578,7 +573,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section id={id} className="mb-10" style={{ scrollMarginTop: "80px" }}>
+    <section id={id} className="mb-10" style={{ scrollMarginTop: "260px" }}>
       <h2 className="text-[18px] font-bold text-[var(--t1)] mb-4 mt-8">{title}</h2>
       <div className="space-y-3">{children}</div>
     </section>
