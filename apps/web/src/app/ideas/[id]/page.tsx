@@ -69,7 +69,7 @@ export default async function IdeaPage({ params }: Props) {
           href="/dashboard"
           className="mono text-[11px] text-[var(--t3)] hover:text-[var(--t2)] transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
         >
-          ← Dashboard
+          ← Back to Dashboard
         </Link>
 
         {/* Idea */}
