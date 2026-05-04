@@ -87,6 +87,91 @@ const TESTIMONIALS = [
   },
 ];
 
+const PREVIEW_DIMENSIONS = [
+  { k: "Market Demand", w: 40, v: 87, c: "var(--validated)" },
+  { k: "Competition",   w: 25, v: 71, c: "var(--caution)"   },
+  { k: "Feasibility",   w: 20, v: 84, c: "var(--validated)" },
+  { k: "Timing",        w: 15, v: 79, c: "var(--validated)" },
+];
+
+const PREVIEW_POSTS = [
+  { sub: "r/Fitness",      u: "u/throwaway_2847",   txt: "4 hours sunday meal prepping and my training split changed wednesday" },
+  { sub: "r/loseit",       u: "u/quietlifter88",    txt: "anyone use an app that adjusts when you skip a workout?" },
+  { sub: "r/Entrepreneur", u: "u/bootstrapped_jan", txt: "none of the meal apps know your training calendar exists" },
+];
+
+function PreviewCard() {
+  return (
+    <div
+      className="rounded-md border overflow-hidden float origin-center w-full max-w-[560px]"
+      style={{
+        borderColor: "var(--border)",
+        background: "var(--surface)",
+        boxShadow: "0 60px 120px -40px rgba(214,255,61,0.12), 0 30px 60px -20px rgba(0,0,0,0.6)",
+      }}
+    >
+      {/* Header */}
+      <div className="border-b px-4 h-9 flex items-center justify-between" style={{ borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-2">
+          <span className="display text-[12px] font-semibold text-[var(--t1)]">
+            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+          </span>
+          <span className="mono text-[10px] text-[var(--t3)]">val_2k9p3xLm0aQs</span>
+        </div>
+        <span className="mono text-[10px]" style={{ color: "var(--validated)" }}>● VALIDATED</span>
+      </div>
+
+      {/* Score + dimensions */}
+      <div className="grid grid-cols-12 gap-4 p-6">
+        <div className="col-span-6">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
+            <span className="mono text-[9px] text-[var(--t3)]">847 LIVE SIGNALS</span>
+          </div>
+          <div className="display tnum font-semibold text-[var(--t1)]" style={{ fontSize: 110, lineHeight: 0.85 }}>
+            82
+          </div>
+          <div className="display text-[12px] mt-2" style={{ color: "var(--validated)" }}>VALIDATED</div>
+          <div className="text-[10px] mt-1 text-[var(--t3)]">4 of 4 dimensions clear</div>
+        </div>
+
+        <div className="col-span-6 pt-2 space-y-0">
+          {PREVIEW_DIMENSIONS.map((d) => (
+            <div
+              key={d.k}
+              className="grid grid-cols-12 items-center gap-2 py-1.5 border-b"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <div className="col-span-5 text-[10px] text-[var(--t1)]">{d.k}</div>
+              <div className="col-span-1 mono text-[8px] text-[var(--t3)]">{d.w}</div>
+              <div className="col-span-5">
+                <div className="h-[3px] rounded-full" style={{ background: "var(--border)" }}>
+                  <div className="h-[3px] rounded-full" style={{ width: `${d.v}%`, background: d.c }} />
+                </div>
+              </div>
+              <div className="col-span-1 mono tnum text-[10px] text-right text-[var(--t2)]">{d.v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Evidence posts */}
+      <div className="border-t px-4 py-3 grid grid-cols-3 gap-2" style={{ borderColor: "var(--border)" }}>
+        {PREVIEW_POSTS.map((p) => (
+          <div
+            key={p.u}
+            className="border rounded p-2"
+            style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+          >
+            <div className="mono text-[8px] text-[var(--t3)]">{p.sub} · {p.u}</div>
+            <div className="text-[9px] mt-1 leading-snug text-[var(--t1)]">&ldquo;{p.txt}&rdquo;</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -100,93 +185,67 @@ export default function LandingPage() {
       />
 
       {/* ── HERO ── */}
-      <section className="max-w-[1320px] mx-auto px-8 pt-20 pb-24">
-        <p className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.12em] mb-6">
-          Decision Intelligence · GO / KILL / PIVOT
-        </p>
+      <section className="relative overflow-hidden border-b border-[var(--border)]">
+        {/* Background glow */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-end">
+          <div style={{
+            width: 1100, height: 1100, borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(214,255,61,0.10) 0%, transparent 60%)",
+            filter: "blur(40px)", transform: "translateX(20%)"
+          }} />
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          <div>
-            <h1 className="display text-[64px] md:text-[80px] font-black leading-[0.95] text-[var(--t1)] mb-6">
-              Kill bad ideas
-              <br />
-              before they
-              <br />
-              <span className="text-[var(--accent)]">kill you.</span>
+        <div className="relative max-w-[1320px] mx-auto px-8 pt-24 pb-20 grid grid-cols-12 gap-8">
+          {/* Left — copy */}
+          <div className="col-span-12 lg:col-span-7 pt-8">
+            <div className="mono text-[11px] mb-6 flex items-center gap-2" style={{ color: "var(--t2)" }}>
+              <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
+              idea-to-verdict OS · live data, not GPT guesses
+            </div>
+
+            <h1 className="display font-semibold tracking-tight text-[var(--t1)]"
+              style={{ fontSize: "clamp(56px, 7vw, 96px)", lineHeight: 0.92 }}>
+              Stop building<br />
+              things <span className="text-[var(--t3)]">nobody</span><br />
+              <span className="text-[var(--t1)]">asked for.</span>
             </h1>
 
-            <p className="text-[17px] text-[var(--t2)] leading-relaxed max-w-[480px] mb-8">
-              847 live signals from Reddit and GitHub decide in 15 seconds what
-              would take you 4 months to discover.
+            <p className="mt-8 max-w-[540px] text-[16px] leading-[1.55] text-[var(--t2)]">
+              In 15 seconds, PledgeOFF scrapes Reddit, Google Trends, and your
+              competitors live — then tells you whether your idea is a 0 or an 89,
+              with the receipts.{" "}
+              <span className="text-[var(--t3)]">Every number has a permalink.</span>
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="mt-10 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setModalOpen(true)}
-                className="display h-11 px-6 rounded-md bg-[var(--accent)] text-black text-[14px] font-semibold hover:opacity-90 transition-opacity"
+                className="display text-[14px] font-semibold px-5 h-11 rounded-md bg-[var(--accent)] text-black flex items-center gap-2 hover:opacity-90 transition-opacity"
               >
-                Get early access
+                Validate your idea →
               </button>
               <Link
                 href="/blog"
-                className="display h-11 px-6 rounded-md border border-[var(--border)] text-[var(--t1)] text-[14px] font-medium hover:border-[var(--t3)] transition-colors flex items-center justify-center"
+                className="text-[13px] px-5 h-11 rounded-md border border-[var(--border)] text-[var(--t1)] flex items-center gap-2 hover:border-[var(--t3)] transition-colors"
               >
-                Read the blog
+                See a live validation
               </Link>
+              <span className="mono text-[11px] text-[var(--t3)] ml-1">free · 3 ideas / mo</span>
             </div>
 
-            <p className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em]">
-              No credit card · 15 seconds · Every claim is sourced
-            </p>
-
-            <div className="grid grid-cols-3 gap-4 mt-10 pt-8 border-t border-[var(--border)]">
-              {[
-                { value: "14,209", label: "ideas validated" },
-                { value: "3.1s", label: "avg decision time" },
-                { value: "94%", label: "agree with verdict" },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <p className="display text-[28px] font-black text-[var(--t1)] tnum">
-                    {stat.value}
-                  </p>
-                  <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.08em] mt-1">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
+            <div className="mt-12 flex flex-wrap items-center gap-6 mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
+              <span>scraped today</span>
+              <span className="text-[var(--t2)]">2.4M reddit posts</span>
+              <span>·</span>
+              <span className="text-[var(--t2)]">14k trend curves</span>
+              <span>·</span>
+              <span className="text-[var(--t2)]">847 niches</span>
             </div>
           </div>
 
-          {/* Floating verdict cards */}
-          <div className="hidden lg:flex flex-col gap-3 pt-8">
-            {[
-              { verdict: "GO", symbol: "●", color: "var(--validated)", idea: "AI meal planner for gym schedules", score: 82 },
-              { verdict: "KILL", symbol: "✕", color: "var(--kill)", idea: "Another todo app for teams", score: 31 },
-              { verdict: "PIVOT", symbol: "↻", color: "var(--caution)", idea: "B2B invoicing for freelancers", score: 57 },
-            ].map((card) => (
-              <div
-                key={card.verdict}
-                className="bg-[var(--surface)] border border-[var(--border)] rounded-md p-4 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className="mono text-[11px] font-semibold uppercase"
-                    style={{ color: card.color }}
-                  >
-                    {card.symbol} {card.verdict}
-                  </span>
-                  <span className="text-[13px] text-[var(--t2)]">
-                    {card.idea}
-                  </span>
-                </div>
-                <span
-                  className="display text-[22px] font-black tnum"
-                  style={{ color: card.color }}
-                >
-                  {card.score}
-                </span>
-              </div>
-            ))}
+          {/* Right — PreviewCard */}
+          <div className="hidden lg:flex col-span-5 items-center justify-center" style={{ perspective: 1200 }}>
+            <PreviewCard />
           </div>
         </div>
       </section>

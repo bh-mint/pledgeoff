@@ -61,6 +61,15 @@ body {
   animation: marquee 30s linear infinite;
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotateX(8deg) rotateY(-6deg); }
+  50%       { transform: translateY(-8px) rotateX(8deg) rotateY(-6deg); }
+}
+
+.float {
+  animation: float 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
