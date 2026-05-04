@@ -114,7 +114,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
       {/* Sticky filter bar */}
       <section
-        className="border-b sticky top-14 z-40 backdrop-blur"
+        className="border-b sticky top-12 z-40 backdrop-blur"
         style={{ borderColor: "var(--border)", background: "rgba(10,10,11,0.85)" }}
       >
         <div className="max-w-[1100px] mx-auto px-8 h-12 flex items-center justify-between">
