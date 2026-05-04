@@ -29,7 +29,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
   };
 
   return (
-    <nav className="border-b border-[var(--border)] bg-[var(--canvas)]/80 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b border-[var(--border)] bg-[var(--canvas)] sticky top-0 z-50">
       <div className="max-w-[1320px] mx-auto px-8 h-12 flex items-center justify-between">
         {/* Logo + live indicator (left group) */}
         <div className="flex items-center gap-8">
