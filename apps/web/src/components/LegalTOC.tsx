@@ -65,8 +65,8 @@ export function LegalTOC({ items }: LegalTOCProps) {
     >
       {items.map(({ id, label }) => {
         const sepIdx = label.indexOf(" · ");
-        const prefix = sepIdx !== -1 ? label.slice(0, sepIdx + 2) : "";
-        const text = sepIdx !== -1 ? label.slice(sepIdx + 3) : label;
+        const num = sepIdx !== -1 ? label.slice(0, sepIdx) : label;
+        const text = sepIdx !== -1 ? label.slice(sepIdx + 3) : "";
         return (
           <a
             key={id}
@@ -75,8 +75,9 @@ export function LegalTOC({ items }: LegalTOCProps) {
             onClick={(e) => handleClick(e, id)}
             style={{ display: "block" }}
           >
-            {prefix && (
-              <span style={{ color: "var(--accent)" }}>{prefix}</span>
+            {num}{" "}
+            {sepIdx !== -1 && (
+              <span style={{ color: "var(--accent)" }}>·</span>
             )}{" "}
             {text}
           </a>
