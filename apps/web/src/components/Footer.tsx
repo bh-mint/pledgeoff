@@ -2,7 +2,7 @@ import Link from "next/link";
 
 function IconX() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
     </svg>
   );
@@ -10,7 +10,7 @@ function IconX() {
 
 function IconTikTok() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.23 8.23 0 0 0 4.82 1.54V6.78a4.85 4.85 0 0 1-1.05-.09z" />
     </svg>
   );
@@ -18,7 +18,7 @@ function IconTikTok() {
 
 function IconInstagram() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
     </svg>
   );
@@ -28,31 +28,16 @@ export function Footer() {
   return (
     <footer className="border-t border-[var(--border)] mt-auto bg-[var(--canvas)]">
       {/* Main row */}
-      <div className="max-w-[1320px] mx-auto px-8 py-5 flex flex-col md:flex-row items-start md:items-baseline justify-between gap-4">
-        <div className="flex items-baseline gap-3">
+      <div className="max-w-[1320px] mx-auto px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        {/* Left: logo + tagline + social icons */}
+        <div className="flex items-center gap-4">
           <p className="display text-[15px] font-semibold text-[var(--t1)]">
             Pledge<span className="text-[var(--accent)]">OFF</span>
           </p>
-          <span className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em]">
-            every number is sourced
+          <span className="mono text-[11px] text-[var(--t3)] tracking-[0.04em]">
+            Every number is sourced
           </span>
-        </div>
-
-        <div className="flex items-center gap-6 text-[11px] text-[var(--t3)]">
-          <Link href="/privacy" className="hover:text-[var(--t2)] transition-colors">Privacy</Link>
-          <Link href="/terms" className="hover:text-[var(--t2)] transition-colors">Terms</Link>
-          <Link href="/changelog" className="hover:text-[var(--t2)] transition-colors">Changelog</Link>
-        </div>
-      </div>
-
-      {/* Copyright + social */}
-      <div className="border-t border-[var(--border)]">
-        <div className="max-w-[1320px] mx-auto px-8 py-3 grid grid-cols-3 items-center">
-          <p className="text-[11px] mono text-[var(--t3)]">
-            © 2026 <span className="text-[var(--t1)]">Pledge</span><span className="text-[var(--accent)]">OFF</span> · Built to kill bad ideas early.
-          </p>
-
-          <div className="flex items-center justify-center gap-5">
+          <div className="flex items-center gap-3 ml-1">
             <a
               href="https://x.com/pledgeoff"
               target="_blank"
@@ -81,8 +66,22 @@ export function Footer() {
               <IconInstagram />
             </a>
           </div>
+        </div>
 
-          <div />
+        {/* Right: nav links */}
+        <div className="flex items-center gap-6 text-[11px] text-[var(--t3)]">
+          <Link href="/privacy" className="hover:text-[var(--t2)] transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-[var(--t2)] transition-colors">Terms</Link>
+          <Link href="/changelog" className="hover:text-[var(--t2)] transition-colors">Changelog</Link>
+        </div>
+      </div>
+
+      {/* Copyright */}
+      <div className="border-t border-[var(--border)]">
+        <div className="max-w-[1320px] mx-auto px-8 py-3">
+          <p className="text-[11px] mono text-[var(--t3)]">
+            © 2026 <span className="text-[var(--t1)]">Pledge</span><span className="text-[var(--accent)]">OFF</span> · Built to kill bad ideas early.
+          </p>
         </div>
       </div>
     </footer>
