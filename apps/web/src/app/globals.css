@@ -177,3 +177,86 @@ body {
   border-color: var(--border);
   margin: 2rem 0;
 }
+
+/* Legal pages (Privacy Policy, Terms of Service) */
+.prose-legal p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--t2);
+}
+
+.prose-legal h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--t1);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-legal h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--t1);
+  margin-bottom: 0.5rem;
+}
+
+.prose-legal ul,
+.prose-legal ol {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.prose-legal li {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--t2);
+  margin-bottom: 0.25rem;
+}
+
+.prose-legal a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.prose-legal a:hover {
+  opacity: 0.8;
+}
+
+.prose-legal strong {
+  color: var(--t1);
+  font-weight: 600;
+}
+
+.prose-legal code {
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 4px;
+  color: var(--t2);
+}
+
+.prose-legal table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin: 0.75rem 0;
+}
+
+.prose-legal th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--t1);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.prose-legal td {
+  padding: 8px 12px;
+  color: var(--t2);
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
