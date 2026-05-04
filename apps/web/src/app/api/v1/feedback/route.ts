@@ -70,6 +70,15 @@ export async function POST(req: NextRequest) {
     'Feedback recorded',
   );
 
+  void container.auditLog.log({
+    userId,
+    action: 'feedback_recorded',
+    resourceType: 'decision',
+    resourceId: parsed.data.decisionId,
+    metadata: { vote: parsed.data.vote, ideaId: parsed.data.ideaId },
+    traceId,
+  });
+
   return NextResponse.json(
     { data: result.value },
     { status: 201, headers: { "X-Trace-Id": traceId } }

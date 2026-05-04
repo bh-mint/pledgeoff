@@ -4,6 +4,7 @@ import {
   SupabaseDecisionRepository,
   SupabaseFeedbackRepository,
   SupabaseIdempotencyStore,
+  SupabaseAuditLogAdapter,
   RedditSourceAdapter,
   GitHubSourceAdapter,
   GroqLLMAdapter,
@@ -28,6 +29,7 @@ function requireEnv(name: string): string {
 function buildContainer() {
   const supabase = createServiceRoleClient();
 
+  const auditLog = new SupabaseAuditLogAdapter(supabase);
   const ideaRepo = new SupabaseIdeaRepository(supabase);
   const signalRepo = new SupabaseSignalRepository(supabase);
   const decisionRepo = new SupabaseDecisionRepository(supabase);
@@ -88,6 +90,7 @@ function buildContainer() {
     decideUseCase,
     recordFeedbackUseCase,
     eventBus,
+    auditLog,
     _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore },
   };
 }

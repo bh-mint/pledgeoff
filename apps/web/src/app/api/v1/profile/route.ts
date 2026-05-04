@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { container } from "@/lib/container";
 
 export async function PATCH(req: NextRequest) {
   const supabase = await createClient();
@@ -19,6 +20,26 @@ export async function PATCH(req: NextRequest) {
     .eq("id", user.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  return NextResponse.json({ ok: true });
+}
+
+export async function DELETE(req: NextRequest) {
+  const traceId = req.headers.get("x-trace-id") ?? crypto.randomUUID();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  void container.auditLog.log({
+    userId: user.id,
+    action: 'account_delete_requested',
+    resourceType: 'account',
+    resourceId: user.id,
+    metadata: { email: user.email },
+    traceId,
+  });
+
+  await supabase.auth.signOut();
 
   return NextResponse.json({ ok: true });
 }
