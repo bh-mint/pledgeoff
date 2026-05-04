@@ -311,6 +311,10 @@ body {
   margin-bottom: 0.25rem;
 }
 
+.prose-legal li::marker {
+  color: var(--accent);
+}
+
 .prose-legal a {
   color: var(--accent);
   text-decoration: none;
