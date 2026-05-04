@@ -3,7 +3,7 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="border-t border-[var(--border)] mt-auto">
-      <div className="max-w-[1320px] mx-auto px-8 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="max-w-[1320px] mx-auto px-8 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <p className="display text-[15px] font-semibold text-[var(--t1)]">
             Pledge<span className="text-[var(--accent)]">OFF</span>
@@ -35,7 +35,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-[var(--border)]">
-        <div className="max-w-[1320px] mx-auto px-8 py-4">
+        <div className="max-w-[1320px] mx-auto px-8 py-3">
           <p className="text-[11px] mono text-[var(--t3)]">
             © 2025 Pledge<span className="text-[var(--accent)]">OFF</span>. Built to kill bad ideas early.
           </p>
