@@ -59,7 +59,15 @@ export default function PrivacyPage() {
 
         {/* TOC sidebar */}
         <aside className="col-span-3 hidden md:block">
-          <div className="sticky top-[88px]">
+          <div className="sticky top-[56px]">
+            <div className="pb-4 mb-4 border-b" style={{ borderColor: "var(--border)" }}>
+              <div className="display text-[13px] font-semibold" style={{ color: "var(--t1)" }}>
+                Privacy Policy
+              </div>
+              <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+                Updated Apr 12 2026
+              </div>
+            </div>
             <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
               CONTENTS
             </div>

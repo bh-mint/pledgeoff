@@ -63,17 +63,25 @@ export function LegalTOC({ items }: LegalTOCProps) {
       className="toc flex flex-col gap-2 mono text-[11px]"
       style={{ borderLeft: "1px solid var(--border)", paddingLeft: "12px" }}
     >
-      {items.map(({ id, label }) => (
-        <a
-          key={id}
-          href={`#${id}`}
-          className={activeId === id ? "active" : ""}
-          onClick={(e) => handleClick(e, id)}
-          style={{ display: "block" }}
-        >
-          {label}
-        </a>
-      ))}
+      {items.map(({ id, label }) => {
+        const sepIdx = label.indexOf(" · ");
+        const prefix = sepIdx !== -1 ? label.slice(0, sepIdx + 2) : "";
+        const text = sepIdx !== -1 ? label.slice(sepIdx + 3) : label;
+        return (
+          <a
+            key={id}
+            href={`#${id}`}
+            className={activeId === id ? "active" : ""}
+            onClick={(e) => handleClick(e, id)}
+            style={{ display: "block" }}
+          >
+            {prefix && (
+              <span style={{ color: "var(--accent)" }}>{prefix}</span>
+            )}{" "}
+            {text}
+          </a>
+        );
+      })}
     </nav>
   );
 }
