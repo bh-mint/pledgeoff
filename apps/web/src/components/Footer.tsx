@@ -6,7 +6,7 @@ export function Footer() {
       <div className="max-w-[1320px] mx-auto px-8 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
           <p className="display text-[15px] font-semibold text-[var(--t1)]">
-            PledgeOFF
+            Pledge<span className="text-[var(--accent)]">OFF</span>
           </p>
           <p className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em] mt-1">
             every number is sourced
@@ -37,7 +37,7 @@ export function Footer() {
       <div className="border-t border-[var(--border)]">
         <div className="max-w-[1320px] mx-auto px-8 py-4">
           <p className="text-[11px] mono text-[var(--t3)]">
-            © 2025 PledgeOFF. Built to kill bad ideas early.
+            © 2025 Pledge<span className="text-[var(--accent)]">OFF</span>. Built to kill bad ideas early.
           </p>
         </div>
       </div>
