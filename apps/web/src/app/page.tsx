@@ -251,16 +251,35 @@ export default function LandingPage() {
       </section>
 
       {/* ── LIVE SIGNALS TICKER ── */}
-      <section className="border-y border-[var(--border)] py-3 overflow-hidden bg-[var(--surface)]">
-        <div className="flex gap-8 animate-marquee whitespace-nowrap">
-          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
-            <span
-              key={i}
-              className="mono text-[11px] text-[var(--t3)] shrink-0"
-            >
-              {item}
+      <section className="border-b border-[var(--border)] py-8 overflow-hidden bg-[var(--surface)]">
+        {/* Header */}
+        <div className="max-w-[1320px] mx-auto px-8 mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
+            <span className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t2)]">
+              live signals scraped today · auto-refresh every 60s
             </span>
-          ))}
+          </div>
+          <span className="mono text-[10px] text-[var(--t3)]">
+            last update 47s ago · 2.4M posts indexed
+          </span>
+        </div>
+
+        {/* Scrolling row */}
+        <div
+          className="relative"
+          style={{ maskImage: "linear-gradient(to right, transparent, black 80px, black calc(100% - 80px), transparent)" }}
+        >
+          <div className="flex animate-marquee" style={{ width: "max-content" }}>
+            {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+              <div
+                key={i}
+                className="mono text-[12px] px-6 border-r whitespace-nowrap text-[var(--t2)] border-[var(--border)]"
+              >
+                <span style={{ color: "var(--accent)" }}>●</span> {item}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
