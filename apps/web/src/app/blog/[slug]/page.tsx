@@ -4,10 +4,6 @@ import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { getAllArticles, getArticleBySlug, getRelatedArticles } from "@/lib/mdx";
 import { formatDate } from "@/lib/mdx-utils";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
-import { ArticleCard } from "@/components/blog/ArticleCard";
-import { TableOfContents } from "@/components/blog/TableOfContents";
 import { ReadingProgress } from "@/components/blog/ReadingProgress";
 
 interface Props {
@@ -26,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImage = `/api/og?title=${encodeURIComponent(article.title)}&tag=${encodeURIComponent(article.tag)}`;
 
   return {
-    title: article.title,
+    title: `${article.title} — PledgeOFF`,
     description: article.excerpt,
     openGraph: {
       title: article.title,
@@ -49,9 +45,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const TAG_LABELS: Record<string, string> = {
-  "idea-validation": "IDEA VALIDATION",
-  "product-decisions": "PRODUCT DECISIONS",
-  "founder": "FOUNDER MINDSET",
+  "idea-validation": "VALIDATION",
+  "product-decisions": "STRATEGY",
+  "founder": "FIELD NOTES",
+};
+
+const TAG_COLORS: Record<string, string> = {
+  "idea-validation": "var(--validated)",
+  "product-decisions": "var(--accent)",
+  "founder": "var(--caution)",
 };
 
 export default async function ArticlePage({ params }: Props) {
@@ -59,7 +61,7 @@ export default async function ArticlePage({ params }: Props) {
   const article = getArticleBySlug(slug);
   if (!article) notFound();
 
-  const related = getRelatedArticles(slug, article.tag, 3);
+  const related = getRelatedArticles(slug, article.tag, 2);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -87,120 +89,188 @@ export default async function ArticlePage({ params }: Props) {
       />
       <ReadingProgress />
 
-      <div className="min-h-screen bg-[var(--canvas)]">
-        <Nav />
+      <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
+        {/* Header */}
+        <header className="border-b" style={{ borderColor: "var(--border)" }}>
+          <div className="max-w-[1100px] mx-auto px-8 h-14 flex items-center justify-between">
+            <Link href="/" className="display text-[13px] font-semibold">
+              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+            </Link>
+            <Link href="/blog" className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+              ← All articles
+            </Link>
+          </div>
+        </header>
 
-        <div className="max-w-[1320px] mx-auto px-8 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-12">
-            {/* Article */}
-            <article>
-              {/* Header */}
-              <header className="mb-10 pb-10 border-b border-[var(--border)]">
-                <span className="mono text-[10px] uppercase tracking-[0.12em] text-[var(--t3)]">
-                  {TAG_LABELS[article.tag] ?? article.tag}
-                </span>
-                <h1 className="display text-[40px] font-black leading-[1.1] text-[var(--t1)] mt-3 mb-4">
-                  {article.title}
-                </h1>
-                <p className="text-[16px] text-[var(--t2)] leading-relaxed mb-6 max-w-[640px]">
-                  {article.excerpt}
-                </p>
-                <div className="flex items-center gap-4 mono text-[11px] text-[var(--t3)] uppercase tracking-[0.06em]">
-                  <span>{formatDate(article.publishedAt)}</span>
-                  <span>·</span>
-                  <span>{article.readingTimeText}</span>
-                  {article.affiliateDisclosure && (
-                    <>
-                      <span>·</span>
-                      <span className="text-[var(--t3)]">contains affiliate links</span>
-                    </>
-                  )}
-                </div>
-              </header>
+        {/* Article */}
+        <article className="max-w-2xl mx-auto px-6 pt-16 pb-24">
 
-              {/* Body */}
-              <div className="prose-pledgeoff">
-                <MDXRemote source={article.content} />
-              </div>
-
-              {/* Affiliate disclosure */}
-              {article.affiliateDisclosure && (
-                <div className="mt-12 pt-6 border-t border-[var(--border)]">
-                  <p className="mono text-[11px] text-[var(--t3)] leading-relaxed">
-                    <strong className="text-[var(--t2)]">Affiliate disclosure:</strong>{" "}
-                    This article contains affiliate links. If you purchase through them, we
-                    may earn a commission at no extra cost to you. We only recommend tools
-                    we&apos;ve evaluated and believe in.
-                  </p>
-                </div>
-              )}
-
-              {/* Share */}
-              <div className="mt-10 pt-6 border-t border-[var(--border)] flex items-center gap-4">
-                <span className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em]">Share:</span>
-                <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(`https://pledgeoff.com/blog/${slug}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mono text-[11px] text-[var(--t3)] hover:text-[var(--accent)] transition-colors uppercase tracking-[0.06em]"
-                >
-                  Twitter/X
-                </a>
-                <a
-                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://pledgeoff.com/blog/${slug}`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mono text-[11px] text-[var(--t3)] hover:text-[var(--accent)] transition-colors uppercase tracking-[0.06em]"
-                >
-                  LinkedIn
-                </a>
-              </div>
-
-              {/* CTA box */}
-              <div className="mt-12 p-8 bg-[var(--surface)] border border-[var(--border)] rounded-md">
-                <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em] mb-2">
-                  Stop guessing. Start deciding.
-                </p>
-                <h2 className="display text-[24px] font-bold text-[var(--t1)] mb-3">
-                  See a GO / KILL / PIVOT verdict on your idea in 15 seconds.
-                </h2>
-                <p className="text-[14px] text-[var(--t2)] mb-6 max-w-md leading-relaxed">
-                  PledgeOFF scans 847 live signals from Reddit and GitHub and
-                  returns a weighted verdict with verbatim evidence. Free to try.
-                </p>
-                <Link
-                  href="/"
-                  className="display inline-block h-11 px-6 rounded-md bg-[var(--accent)] text-black text-[14px] font-semibold hover:opacity-90 transition-opacity leading-[44px]"
-                >
-                  Validate my idea →
-                </Link>
-              </div>
-            </article>
-
-            {/* Sidebar */}
-            <aside className="hidden lg:block">
-              <div className="sticky top-20">
-                <TableOfContents />
-              </div>
-            </aside>
+          {/* Category */}
+          <div className="mono text-[10px] uppercase tracking-wider" style={{ color: "var(--t3)" }}>
+            {TAG_LABELS[article.tag] ?? article.tag}
           </div>
 
-          {/* Related articles */}
-          {related.length > 0 && (
-            <section className="mt-20 pt-12 border-t border-[var(--border)]">
-              <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em] mb-6">
-                Related articles
+          {/* Title */}
+          <h1
+            className="display font-bold mt-3 leading-[1.05]"
+            style={{ fontSize: "40px", letterSpacing: "-0.04em", color: "var(--t1)" }}
+          >
+            {article.title}
+          </h1>
+
+          {/* Meta row */}
+          <div
+            className="mt-6 pb-6 flex items-center gap-3 mono text-[11px] flex-wrap"
+            style={{ color: "var(--t3)", borderBottom: "1px solid var(--border)" }}
+          >
+            <span>{formatDate(article.publishedAt).toUpperCase()}</span>
+            <span>·</span>
+            <span style={{ color: "var(--t2)" }}>PledgeOFF</span>
+            <span>·</span>
+            <span>{article.readingTime} min read</span>
+            {article.affiliateDisclosure && (
+              <>
+                <span>·</span>
+                <span style={{ color: "var(--caution)" }}>affiliate links</span>
+              </>
+            )}
+            <span className="ml-auto inline-flex items-center gap-1.5">
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: TAG_COLORS[article.tag] ?? "var(--t3)" }}
+              />
+              <span style={{ color: TAG_COLORS[article.tag] ?? "var(--t3)" }}>
+                {TAG_LABELS[article.tag] ?? article.tag}
+              </span>
+            </span>
+          </div>
+
+          {/* Body */}
+          <div className="prose-pledgeoff mt-8">
+            <MDXRemote source={article.content} />
+          </div>
+
+          {/* Affiliate disclosure */}
+          {article.affiliateDisclosure && (
+            <div className="mt-12 pt-6" style={{ borderTop: "1px solid var(--border)" }}>
+              <p className="mono text-[11px] leading-relaxed" style={{ color: "var(--t3)" }}>
+                <strong style={{ color: "var(--t2)" }}>Affiliate disclosure:</strong>{" "}
+                This article contains affiliate links marked with rel=&quot;nofollow sponsored&quot;. If you
+                purchase through them, we may earn a commission at no extra cost to you. We only recommend
+                tools we&apos;ve evaluated and believe in.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            </div>
+          )}
+
+          {/* End-of-article CTA */}
+          <div
+            className="mt-16 rounded-md border p-6"
+            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          >
+            <div className="mono text-[10px] mb-3" style={{ color: "var(--t3)" }}>END_OF_ARTICLE · CTA</div>
+            <div
+              className="display font-semibold leading-tight"
+              style={{ fontSize: "22px", color: "var(--t1)" }}
+            >
+              Validate your idea now.
+            </div>
+            <p className="text-[14px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
+              Get a verdict in 15 seconds. Four dimensions, one composite, full per-axis breakdown.
+            </p>
+            <Link
+              href="/ideas/new"
+              className="mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
+              style={{ background: "var(--accent)", color: "#000" }}
+            >
+              Run a validation →
+            </Link>
+          </div>
+
+          {/* Author */}
+          <div
+            className="mt-10 pt-8 flex items-start gap-4"
+            style={{ borderTop: "1px solid var(--border)" }}
+          >
+            <div
+              className="w-10 h-10 rounded-full border flex-shrink-0"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            />
+            <div className="flex-1">
+              <div className="text-[14px]" style={{ color: "var(--t1)" }}>PledgeOFF Team</div>
+              <div className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
+                Writes on validation &amp; founder strategy
+              </div>
+            </div>
+            <Link href="/blog" className="mono text-[11px] underline" style={{ color: "var(--t3)" }}>
+              More posts →
+            </Link>
+          </div>
+
+          {/* Share */}
+          <div
+            className="mt-8 pt-6 flex items-center gap-4"
+            style={{ borderTop: "1px solid var(--border)" }}
+          >
+            <span className="mono text-[11px] uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+              Share:
+            </span>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(`https://pledgeoff.com/blog/${slug}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mono text-[11px] uppercase tracking-[0.06em] transition-colors hover:opacity-70"
+              style={{ color: "var(--t3)" }}
+            >
+              Twitter/X
+            </a>
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://pledgeoff.com/blog/${slug}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mono text-[11px] uppercase tracking-[0.06em] transition-colors hover:opacity-70"
+              style={{ color: "var(--t3)" }}
+            >
+              LinkedIn
+            </a>
+          </div>
+
+          {/* Related */}
+          {related.length > 0 && (
+            <div className="mt-16">
+              <div className="mono text-[10px] mb-4" style={{ color: "var(--t3)" }}>CONTINUE READING</div>
+              <div
+                className="rounded-md border divide-y"
+                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              >
                 {related.map((a) => (
-                  <ArticleCard key={a.slug} article={a} />
+                  <Link
+                    key={a.slug}
+                    href={`/blog/${a.slug}`}
+                    className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/5"
+                  >
+                    <div>
+                      <div className="display text-[15px]" style={{ color: "var(--t1)" }}>{a.title}</div>
+                      <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+                        {TAG_LABELS[a.tag] ?? a.tag} · {a.readingTime} MIN
+                      </div>
+                    </div>
+                    <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>→</span>
+                  </Link>
                 ))}
               </div>
-            </section>
+            </div>
           )}
-        </div>
+        </article>
 
-        <Footer />
+        {/* Footer */}
+        <footer className="border-t" style={{ borderColor: "var(--border)" }}>
+          <div className="max-w-[1100px] mx-auto px-8 py-8 flex items-center justify-between">
+            <span className="display text-[12px] font-semibold">
+              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+            </span>
+            <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>© 2026</span>
+          </div>
+        </footer>
       </div>
     </>
   );
