@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
 import { DashboardClient, type TableRow } from "./DashboardClient";
+import { ProfileButton } from "@/components/ProfileButton";
 import type { Decision } from "@pledgeoff/core";
 
 export const metadata: Metadata = {
@@ -186,12 +187,7 @@ export default async function DashboardPage() {
               <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
               <span>live</span>
             </div>
-            <div
-              className="w-7 h-7 rounded-full border display text-[11px] font-semibold flex items-center justify-center text-[var(--t1)]"
-              style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
-            >
-              {userInitials}
-            </div>
+            <ProfileButton email={user.email ?? ""} initials={userInitials} />
           </div>
         </div>
       </div>
