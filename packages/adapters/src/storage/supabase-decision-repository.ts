@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Decision } from '@pledgeoff/core';
+import type { Decision, Dimension } from '@pledgeoff/core';
 import { DecisionRepositoryError, type IDecisionRepository } from '@pledgeoff/core';
 
 type DecisionRow = {
@@ -10,6 +10,7 @@ type DecisionRow = {
   reasoning: string;
   confidence: number;
   signal_ids: string[];
+  dimensions: Dimension[] | null;
   created_at: string;
 };
 
@@ -21,6 +22,7 @@ function rowToDecision(row: DecisionRow): Decision {
     reasoning: row.reasoning,
     confidence: Number(row.confidence),
     signalIds: row.signal_ids ?? [],
+    dimensions: row.dimensions ?? undefined,
     createdAt: row.created_at,
   };
 }
@@ -38,6 +40,7 @@ export class SupabaseDecisionRepository implements IDecisionRepository {
         reasoning: decision.reasoning,
         confidence: decision.confidence,
         signal_ids: decision.signalIds,
+        dimensions: decision.dimensions ?? null,
         created_at: decision.createdAt,
       })
       .select()
