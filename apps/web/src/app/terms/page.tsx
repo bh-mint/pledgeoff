@@ -28,7 +28,7 @@ export default function TermsPage() {
   return (
     <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
       {/* Nav */}
-      <header className="border-b" style={{ borderColor: "var(--border)" }}>
+      <header className="border-b sticky top-0 z-50 backdrop-blur-sm" style={{ borderColor: "var(--border)", background: "rgba(10,10,11,0.85)" }}>
         <div className="max-w-[1100px] mx-auto px-8 h-14 flex items-center justify-between">
           <Link href="/" className="display text-[13px] font-semibold">
             Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
@@ -75,7 +75,7 @@ export default function TermsPage() {
 
         {/* TOC sidebar */}
         <aside className="col-span-3 hidden md:block">
-          <div className="sticky top-8">
+          <div className="sticky top-[88px]">
             <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
               CONTENTS
             </div>
