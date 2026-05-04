@@ -31,15 +31,9 @@ export async function GET(req: NextRequest) {
       >
         {/* Top bar */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span
-            style={{
-              fontSize: "18px",
-              fontWeight: 700,
-              color: "#f5f5f5",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            PledgeOFF
+          <span style={{ fontSize: "18px", fontWeight: 700, letterSpacing: "-0.02em", display: "flex" }}>
+            <span style={{ color: "#f5f5f5" }}>Pledge</span>
+            <span style={{ color: "#D6FF3D" }}>OFF</span>
           </span>
           <span style={{ color: "#404040", fontSize: "14px" }}>·</span>
           <span style={{ color: "#caff47", fontSize: "12px", fontWeight: 600, letterSpacing: "0.1em" }}>

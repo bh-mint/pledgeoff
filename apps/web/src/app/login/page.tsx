@@ -15,7 +15,7 @@ export default function LoginPage() {
         href="/"
         className="display text-[15px] font-semibold text-[var(--t1)] tracking-tight mb-12"
       >
-        PledgeOFF
+        Pledge<span className="text-[var(--accent)]">OFF</span>
       </Link>
 
       <Suspense fallback={<div className="w-full max-w-sm h-48 bg-[var(--surface)] border border-[var(--border)] rounded-lg animate-pulse" />}>

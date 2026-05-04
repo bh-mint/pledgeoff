@@ -36,7 +36,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
           href="/"
           className="display text-[15px] font-semibold text-[var(--t1)] tracking-tight"
         >
-          PledgeOFF
+          Pledge<span className="text-[var(--accent)]">OFF</span>
         </Link>
 
         {/* Live indicator */}
