@@ -186,7 +186,6 @@ export default function LandingPage() {
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden border-b border-[var(--border)]">
-        {/* Background glow */}
         <div className="absolute inset-0 pointer-events-none flex items-center justify-end">
           <div style={{
             width: 1100, height: 1100, borderRadius: "50%",
@@ -198,7 +197,7 @@ export default function LandingPage() {
         <div className="relative max-w-[1320px] mx-auto px-8 pt-24 pb-20 grid grid-cols-12 gap-8">
           {/* Left — copy */}
           <div className="col-span-12 lg:col-span-7 pt-8">
-            <div className="mono text-[11px] mb-6 flex items-center gap-2" style={{ color: "var(--t2)" }}>
+            <div className="mono text-[10px] mb-6 flex items-center gap-2" style={{ color: "var(--t2)" }}>
               <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
               idea-to-verdict OS · live data, not GPT guesses
             </div>
@@ -210,7 +209,7 @@ export default function LandingPage() {
               <span className="text-[var(--t1)]">asked for.</span>
             </h1>
 
-            <p className="mt-8 max-w-[540px] text-[16px] leading-[1.55] text-[var(--t2)]">
+            <p className="mt-8 max-w-[540px] text-[14px] leading-[1.6] text-[var(--t2)]">
               In 15 seconds, PledgeOFF scrapes Reddit, Google Trends, and your
               competitors live — then tells you whether your idea is a 0 or an 89,
               with the receipts.{" "}
@@ -220,17 +219,17 @@ export default function LandingPage() {
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setModalOpen(true)}
-                className="display text-[14px] font-semibold px-5 h-11 rounded-md bg-[var(--accent)] text-black flex items-center gap-2 hover:opacity-90 transition-opacity"
+                className="display text-[13px] font-semibold px-5 h-10 rounded-md bg-[var(--accent)] text-black flex items-center gap-2 hover:opacity-90 transition-opacity"
               >
                 Validate your idea →
               </button>
               <Link
                 href="/blog"
-                className="text-[13px] px-5 h-11 rounded-md border border-[var(--border)] text-[var(--t1)] flex items-center gap-2 hover:border-[var(--t3)] transition-colors"
+                className="text-[12px] px-5 h-10 rounded-md border border-[var(--border)] text-[var(--t1)] flex items-center gap-2 hover:border-[var(--t3)] transition-colors"
               >
                 See a live validation
               </Link>
-              <span className="mono text-[11px] text-[var(--t3)] ml-1">free · 3 ideas / mo</span>
+              <span className="mono text-[10px] text-[var(--t3)] ml-1">free · 3 ideas / mo</span>
             </div>
 
             <div className="mt-12 flex flex-wrap items-center gap-6 mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
@@ -252,7 +251,6 @@ export default function LandingPage() {
 
       {/* ── LIVE SIGNALS TICKER ── */}
       <section className="border-b border-[var(--border)] py-8 overflow-hidden bg-[var(--surface)]">
-        {/* Header */}
         <div className="max-w-[1320px] mx-auto px-8 mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
@@ -265,7 +263,6 @@ export default function LandingPage() {
           </span>
         </div>
 
-        {/* Scrolling row */}
         <div
           className="relative"
           style={{ maskImage: "linear-gradient(to right, transparent, black 80px, black calc(100% - 80px), transparent)" }}
@@ -274,7 +271,7 @@ export default function LandingPage() {
             {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
               <div
                 key={i}
-                className="mono text-[12px] px-6 border-r whitespace-nowrap text-[var(--t2)] border-[var(--border)]"
+                className="mono text-[11px] px-6 border-r whitespace-nowrap text-[var(--t2)] border-[var(--border)]"
               >
                 <span style={{ color: "var(--accent)" }}>●</span> {item}
               </div>
@@ -294,7 +291,7 @@ export default function LandingPage() {
             <br />
             In 15s.
           </h2>
-          <p className="text-[15px] text-[var(--t2)] leading-relaxed self-end">
+          <p className="text-[14px] text-[var(--t2)] leading-relaxed self-end">
             No surveys. No landing pages. No spending €5k on ads to validate
             demand. Just type, and the market speaks.
           </p>
@@ -328,13 +325,13 @@ export default function LandingPage() {
               <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em] mb-3">
                 {step.label}
               </p>
-              <h3 className="display text-[18px] font-semibold text-[var(--t1)] mb-3">
+              <h3 className="display text-[16px] font-semibold text-[var(--t1)] mb-3">
                 {step.title}
               </h3>
-              <p className="text-[13px] text-[var(--t2)] leading-relaxed mb-4">
+              <p className="text-[12px] text-[var(--t2)] leading-relaxed mb-4">
                 {step.body}
               </p>
-              <p className="mono text-[12px] text-[var(--t3)] bg-[var(--canvas)] border border-[var(--border)] rounded px-3 py-2">
+              <p className="mono text-[11px] text-[var(--t3)] bg-[var(--canvas)] border border-[var(--border)] rounded px-3 py-2">
                 {step.detail}
               </p>
             </div>
@@ -355,7 +352,7 @@ export default function LandingPage() {
               Verbatim posts.
             </h2>
           </div>
-          <p className="text-[12px] text-[var(--t3)] text-right mt-2">
+          <p className="text-[11px] text-[var(--t3)] text-right mt-2">
             6 of 847 posts shown
             <br />
             click any to verify on Reddit
@@ -370,14 +367,14 @@ export default function LandingPage() {
             >
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="mono text-[11px] font-semibold text-[var(--t2)]">
+                  <span className="mono text-[10px] font-semibold text-[var(--t2)]">
                     {card.source}
                   </span>
                   <span className="mono text-[10px] text-[var(--validated)]">
                     {card.upvotes}
                   </span>
                 </div>
-                <p className="text-[13px] text-[var(--t1)] leading-relaxed italic">
+                <p className="text-[12px] text-[var(--t1)] leading-relaxed italic">
                   &ldquo;{card.quote}&rdquo;
                 </p>
               </div>
@@ -393,10 +390,10 @@ export default function LandingPage() {
           <p className="display text-[64px] font-black text-[var(--accent)] tnum">
             $2.4M
           </p>
-          <p className="display text-[18px] font-semibold text-[var(--t1)] mt-1">
+          <p className="display text-[16px] font-semibold text-[var(--t1)] mt-1">
             saved in bad product bets
           </p>
-          <p className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em] mt-2">
+          <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.08em] mt-2">
             estimated across 14,209 validated ideas
           </p>
         </div>
@@ -407,14 +404,14 @@ export default function LandingPage() {
               key={i}
               className="bg-[var(--surface)] border border-[var(--border)] rounded-md p-6"
             >
-              <p className="text-[14px] text-[var(--t1)] leading-relaxed mb-4">
+              <p className="text-[13px] text-[var(--t1)] leading-relaxed mb-4">
                 &ldquo;{t.quote}&rdquo;
               </p>
               <div>
-                <p className="text-[13px] font-semibold text-[var(--t1)]">
+                <p className="text-[12px] font-semibold text-[var(--t1)]">
                   {t.name}
                 </p>
-                <p className="mono text-[11px] text-[var(--t3)] mt-0.5">
+                <p className="mono text-[10px] text-[var(--t3)] mt-0.5">
                   {t.handle}
                 </p>
               </div>
@@ -423,115 +420,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── PRICING PREVIEW ── */}
-      <section className="max-w-[1320px] mx-auto px-8 py-20 border-b border-[var(--border)]">
-        <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em] mb-4">
-          Pricing
-        </p>
-        <h2 className="display text-[40px] font-black leading-[1] text-[var(--t1)] mb-12">
-          Free until you&apos;re sure.
-          <br />
-          Then €19.99.
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-md p-6">
-            <p className="text-[13px] font-semibold text-[var(--t1)] mb-1">Free</p>
-            <p className="mono text-[11px] text-[var(--t3)] mb-4">Kick the tires</p>
-            <p className="display text-[36px] font-black text-[var(--t1)] mb-1">€0</p>
-            <p className="mono text-[11px] text-[var(--t3)] mb-6">forever</p>
-            <button
-              onClick={() => setModalOpen(true)}
-              className="w-full h-9 rounded-md border border-[var(--border)] text-[13px] text-[var(--t1)] hover:border-[var(--t3)] transition-colors mb-5"
-            >
-              Start free
-            </button>
-            <ul className="space-y-2 text-[13px]">
-              {["3 validations / month", "Reddit + Trends signals"].map((f) => (
-                <li key={f} className="flex items-center gap-2 text-[var(--t2)]">
-                  <span className="text-[var(--validated)]">✓</span> {f}
-                </li>
-              ))}
-              {["Competitor matrix", "Revenue simulator", "AI co-founder"].map((f) => (
-                <li key={f} className="flex items-center gap-2 text-[var(--t3)]">
-                  <span>—</span> {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-[var(--surface)] border border-[var(--accent)]/40 rounded-md p-6 relative">
-            <span className="absolute top-4 right-4 mono text-[9px] text-[var(--accent)] uppercase tracking-[0.12em] bg-[var(--accent)]/10 px-2 py-0.5 rounded">
-              ● RECOMMENDED
-            </span>
-            <p className="text-[13px] font-semibold text-[var(--t1)] mb-1">Pro</p>
-            <p className="mono text-[11px] text-[var(--t3)] mb-4">For serious founders</p>
-            <p className="display text-[36px] font-black text-[var(--t1)] mb-1">€19.99</p>
-            <p className="mono text-[11px] text-[var(--t3)] mb-6">/mo · cancel anytime</p>
-            <button
-              onClick={() => setModalOpen(true)}
-              className="display w-full h-9 rounded-md bg-[var(--accent)] text-black text-[13px] font-semibold hover:opacity-90 transition-opacity mb-5"
-            >
-              Start Pro trial
-            </button>
-            <ul className="space-y-2 text-[13px]">
-              {[
-                "Unlimited validations",
-                "All 5 signal sources",
-                "Competitor matrix + trends",
-                "Revenue simulator",
-                "Niche goldmine feed",
-                "AI co-founder mode",
-              ].map((f) => (
-                <li key={f} className="flex items-center gap-2 text-[var(--t2)]">
-                  <span className="text-[var(--validated)]">✓</span> {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-md p-6">
-            <p className="text-[13px] font-semibold text-[var(--t1)] mb-1">Agency</p>
-            <p className="mono text-[11px] text-[var(--t3)] mb-4">Vet client briefs</p>
-            <p className="display text-[36px] font-black text-[var(--t1)] mb-1">€99</p>
-            <p className="mono text-[11px] text-[var(--t3)] mb-6">/mo · 5 seats</p>
-            <button className="w-full h-9 rounded-md border border-[var(--border)] text-[13px] text-[var(--t1)] hover:border-[var(--t3)] transition-colors mb-5">
-              Talk to us
-            </button>
-            <ul className="space-y-2 text-[13px]">
-              {[
-                "Everything in Pro",
-                "5 seats included",
-                "White-label PDF reports",
-                "API access",
-                "Priority scraping queue",
-              ].map((f) => (
-                <li key={f} className="flex items-center gap-2 text-[var(--t2)]">
-                  <span className="text-[var(--validated)]">✓</span> {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
       {/* ── FINAL CTA ── */}
       <section className="max-w-[1320px] mx-auto px-8 py-24 text-center">
-        <h2 className="display text-[48px] md:text-[64px] font-black leading-[1] text-[var(--t1)] mb-4">
+        <h2 className="display text-[40px] md:text-[56px] font-black leading-[1] text-[var(--t1)] mb-4">
           What&apos;s the idea
           <br />
           you keep putting off?
         </h2>
-        <p className="text-[17px] text-[var(--t2)] mb-8">
+        <p className="text-[14px] text-[var(--t2)] mb-8">
           Type it. Get the verdict. 15 seconds.
         </p>
         <button
           onClick={() => setModalOpen(true)}
-          className="display h-12 px-8 rounded-md bg-[var(--accent)] text-black text-[15px] font-semibold hover:opacity-90 transition-opacity"
+          className="display h-10 px-8 rounded-md bg-[var(--accent)] text-black text-[13px] font-semibold hover:opacity-90 transition-opacity"
         >
           Validate it →
         </button>
-        <p className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em] mt-4">
+        <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.08em] mt-4">
           No credit card · every number is sourced
         </p>
       </section>

@@ -28,10 +28,12 @@ export function Nav({ onWaitlistOpen }: NavProps) {
     setDropdownOpen(false);
   };
 
+  const btnCls = "h-7 px-3 rounded-md bg-[var(--accent)] text-black text-[11px] font-semibold hover:opacity-90 transition-opacity";
+
   return (
     <nav className="border-b border-[var(--border)] bg-[var(--canvas)] sticky top-0 z-50">
       <div className="max-w-[1320px] mx-auto px-8 h-12 flex items-center justify-between">
-        {/* Logo + live indicator (left group) */}
+        {/* Logo + live indicator */}
         <div className="flex items-center gap-8">
           <Link
             href="/"
@@ -45,26 +47,16 @@ export function Nav({ onWaitlistOpen }: NavProps) {
           </div>
         </div>
 
-        {/* Right links */}
-        <div className="flex items-center gap-6">
-          <Link
-            href="/pricing"
-            className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/blog"
-            className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
-          >
-            Blog
-          </Link>
+        {/* Right */}
+        <div className="flex items-center gap-2">
+          <Link href="/pricing" className={btnCls}>Pricing</Link>
+          <Link href="/blog" className={btnCls}>Blog</Link>
 
           {user ? (
-            <div className="relative">
+            <div className="relative ml-1">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+                className="flex items-center gap-2"
               >
                 <span className="w-6 h-6 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[10px] font-semibold text-[var(--t1)] uppercase">
                   {user.email?.[0] ?? "U"}
@@ -89,20 +81,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
               )}
             </div>
           ) : (
-            <>
-              <Link
-                href="/login"
-                className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
-              >
-                Log in
-              </Link>
-              <button
-                onClick={onWaitlistOpen}
-                className="display h-7 px-3 rounded-md bg-[var(--accent)] text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
-              >
-                Start free →
-              </button>
-            </>
+            <Link href="/login" className={btnCls}>Log in</Link>
           )}
         </div>
       </div>
