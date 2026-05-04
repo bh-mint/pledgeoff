@@ -86,12 +86,23 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
 
       {/* Minimal top bar */}
       <div className="relative px-10 py-6 flex items-center justify-between">
-        <Link
-          href="/dashboard"
-          className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]"
-        >
-          Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-        </Link>
+        <div className="flex items-center gap-6">
+          <Link
+            href="/dashboard"
+            className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]"
+          >
+            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+          </Link>
+          <Link
+            href="/dashboard"
+            className="mono text-[11px] transition-colors"
+            style={{ color: "var(--t3)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
+          >
+            ← back to dashboard
+          </Link>
+        </div>
         <span className="mono text-[11px] text-[var(--t3)]">
           new validation · {validationsLeft} left this month
         </span>
