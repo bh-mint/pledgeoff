@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 interface ProfileButtonProps {
@@ -51,6 +52,15 @@ export function ProfileButton({ email, initials }: ProfileButtonProps) {
           >
             {email}
           </div>
+          <Link
+            href="/settings"
+            onClick={() => setOpen(false)}
+            className="block w-full text-left px-3 py-2 text-[12px] hover:bg-[var(--border)] transition-colors"
+            style={{ color: "var(--t2)" }}
+          >
+            Settings
+          </Link>
+          <div style={{ borderTop: "1px solid var(--border)" }} />
           <button
             onClick={handleSignOut}
             className="w-full text-left px-3 py-2 text-[12px] hover:bg-[var(--border)] transition-colors"
