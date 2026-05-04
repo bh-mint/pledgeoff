@@ -17,24 +17,20 @@ export function LegalTOC({ items }: LegalTOCProps) {
 
   useEffect(() => {
     const ids = items.map((item) => item.id);
+    const lastId = items[items.length - 1]?.id;
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        // Find the topmost visible section
         const visible = entries
           .filter((e) => e.isIntersecting)
-          .sort((a, b) => {
-            const aTop = a.boundingClientRect.top;
-            const bTop = b.boundingClientRect.top;
-            return aTop - bTop;
-          });
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
 
         if (visible.length > 0) {
           setActiveId(visible[0].target.id);
         }
       },
       {
-        rootMargin: "-10% 0px -80% 0px",
+        rootMargin: "-10% 0px -40% 0px",
         threshold: 0,
       }
     );
@@ -44,7 +40,19 @@ export function LegalTOC({ items }: LegalTOCProps) {
       if (el) observerRef.current?.observe(el);
     });
 
-    return () => observerRef.current?.disconnect();
+    // Activate last item when scrolled to page bottom
+    const handleScroll = () => {
+      if (!lastId) return;
+      const nearBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 80;
+      if (nearBottom) setActiveId(lastId);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      observerRef.current?.disconnect();
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, [items]);
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
