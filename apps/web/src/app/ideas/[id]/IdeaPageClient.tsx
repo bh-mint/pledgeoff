@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { DecisionCard, DecisionPending } from "@/components/DecisionCard";
+import { DecisionCard } from "@/components/DecisionCard";
+import { ValidatingLoader } from "@/components/ValidatingLoader";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import type { Idea, Decision, Signal } from "@pledgeoff/core";
 
@@ -109,7 +110,7 @@ export function IdeaPageClient({
             </div>
           </>
         ) : (
-          <DecisionPending />
+          <ValidatingLoader />
         )}
       </section>
 
