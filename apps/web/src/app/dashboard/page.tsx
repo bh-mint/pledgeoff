@@ -165,7 +165,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
       {/* Dashboard nav */}
-      <div className="border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="border-b sticky top-0 z-50 backdrop-blur-sm" style={{ borderColor: "var(--border)", background: "rgba(10,10,11,0.85)" }}>
         <div className="max-w-[1440px] mx-auto px-10 h-12 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link

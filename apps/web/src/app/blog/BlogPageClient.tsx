@@ -53,7 +53,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
   return (
     <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
       {/* Nav */}
-      <header className="border-b" style={{ borderColor: "var(--border)" }}>
+      <header className="border-b sticky top-0 z-50 backdrop-blur-sm" style={{ borderColor: "var(--border)", background: "rgba(10,10,11,0.85)" }}>
         <div className="max-w-[1100px] mx-auto px-8 h-14 flex items-center justify-between">
           <Link href="/" className="display text-[13px] font-semibold">
             Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
@@ -114,7 +114,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
       {/* Sticky filter bar */}
       <section
-        className="border-b sticky top-0 z-20 backdrop-blur"
+        className="border-b sticky top-14 z-40 backdrop-blur"
         style={{ borderColor: "var(--border)", background: "rgba(10,10,11,0.85)" }}
       >
         <div className="max-w-[1100px] mx-auto px-8 h-12 flex items-center justify-between">
