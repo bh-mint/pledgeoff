@@ -100,7 +100,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
             onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t1)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
           >
-            ← back to dashboard
+            ← back to Dashboard
           </Link>
         </div>
         <span className="mono text-[11px] text-[var(--t3)]">

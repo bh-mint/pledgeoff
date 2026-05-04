@@ -102,7 +102,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
               href="/login"
               className="inline-flex items-center h-7 px-3 rounded-md bg-[var(--accent)] text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
             >
-              Log in
+              Sign in
             </Link>
           )}
         </div>
