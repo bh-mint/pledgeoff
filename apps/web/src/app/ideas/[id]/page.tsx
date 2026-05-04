@@ -23,6 +23,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function parseIdeaText(text: string): { title: string; description: string; category: string | null } {
+  const parts = text.split("\n\n");
+  const title = parts[0]?.trim() ?? text;
+  let description = parts[1]?.trim() ?? "";
+  let category: string | null = null;
+
+  // Last part may be "Category: X"
+  const last = parts[parts.length - 1]?.trim() ?? "";
+  if (last.startsWith("Category:")) {
+    category = last.replace("Category:", "").trim();
+    description = parts.slice(1, parts.length - 1).join("\n\n").trim();
+  }
+
+  return { title, description, category };
+}
+
 export default async function IdeaPage({ params }: Props) {
   const { id } = await params;
   const user = await requireUser();
@@ -41,6 +57,8 @@ export default async function IdeaPage({ params }: Props) {
   const decision = decisionResult.isOk() ? decisionResult.value : null;
   const signals = signalsResult.isOk() ? signalsResult.value : [];
 
+  const { title, description, category } = parseIdeaText(idea.text);
+
   return (
     <div className="min-h-screen bg-[var(--canvas)]">
       <Nav />
@@ -56,12 +74,31 @@ export default async function IdeaPage({ params }: Props) {
 
         {/* Idea */}
         <div className="mb-10 pb-10 border-b border-[var(--border)]">
-          <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em] mb-3">
-            Idea · {formatDate(idea.createdAt)}
-          </p>
-          <p className="text-[18px] text-[var(--t1)] leading-relaxed">
-            {idea.text}
-          </p>
+          <div className="flex items-center gap-3 mb-3">
+            <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em]">
+              Idea · {formatDate(idea.createdAt)}
+            </p>
+            {category && (
+              <span
+                className="mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
+                style={{
+                  color: "var(--accent)",
+                  background: "rgba(214,255,61,0.08)",
+                  border: "1px solid rgba(214,255,61,0.2)",
+                }}
+              >
+                {category}
+              </span>
+            )}
+          </div>
+          <h1 className="display text-[22px] font-semibold tracking-tight text-[var(--t1)] leading-snug mb-3">
+            {title}
+          </h1>
+          {description && (
+            <p className="text-[14px] text-[var(--t2)] leading-relaxed">
+              {description}
+            </p>
+          )}
         </div>
 
         {/* Decision + Signals (client, polls if pending) */}
