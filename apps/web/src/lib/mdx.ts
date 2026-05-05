@@ -64,3 +64,31 @@ export function getRelatedArticles(
     .slice(0, limit);
 }
 
+export function getSeeAlsoArticles(
+  currentSlug: string,
+  currentTag: string,
+  limit = 2
+): ArticleFrontmatter[] {
+  return getAllArticles()
+    .filter((a) => a.slug !== currentSlug && a.tag !== currentTag)
+    .slice(0, limit);
+}
+
+export const CLUSTER_META: Record<ArticleFrontmatter["tag"], { label: string; description: string; slug: string }> = {
+  "idea-validation": {
+    label: "Idea Validation",
+    slug: "idea-validation",
+    description: "How to test startup ideas before building — using Reddit, GitHub, and real market signals.",
+  },
+  "product-decisions": {
+    label: "Product Decisions",
+    slug: "product-decisions",
+    description: "Frameworks for prioritizing features, reading data, and shipping the right thing.",
+  },
+  founder: {
+    label: "Founder Mindset",
+    slug: "founder",
+    description: "Evidence-based thinking for founders — from second-guessing to shipping with confidence.",
+  },
+};
+

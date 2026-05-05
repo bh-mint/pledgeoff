@@ -92,6 +92,27 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
               </div>
             ))}
           </div>
+
+          {/* Browse by topic */}
+          <div className="mt-10 max-w-xl">
+            <div className="mono text-[10px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>Browse by topic</div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { href: "/blog/idea-validation", label: "Idea Validation", color: "var(--validated)" },
+                { href: "/blog/product-decisions", label: "Product Decisions", color: "var(--accent)" },
+                { href: "/blog/founder", label: "Founder Mindset", color: "var(--caution)" },
+              ].map((t) => (
+                <Link
+                  key={t.href}
+                  href={t.href}
+                  className="mono text-[11px] rounded-full border h-7 px-3 inline-flex items-center transition-colors hover:border-[var(--t3)]"
+                  style={{ borderColor: "var(--border)", color: t.color }}
+                >
+                  {t.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
