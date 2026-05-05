@@ -67,16 +67,17 @@ describe('PostgresEventBus', () => {
     }
   });
 
-  it('dispatches to subscriber in-process after publish', async () => {
+  it('does not dispatch to subscribers in-process — outbox-only, webhooks handle dispatch', async () => {
     const supabase = makeSupabase();
     const bus = new PostgresEventBus(supabase as never);
     const event = makeEvent('idea.created.v1');
     const handler = vi.fn().mockResolvedValue(undefined);
 
     bus.subscribe('idea.created.v1', handler);
-    await bus.publish('idea.created.v1', event);
+    const result = await bus.publish('idea.created.v1', event);
 
-    expect(handler).toHaveBeenCalledWith(event);
+    expect(result.isOk()).toBe(true);
+    expect(handler).not.toHaveBeenCalled();
   });
 
   it('processOutbox marks rows as processed on success', async () => {

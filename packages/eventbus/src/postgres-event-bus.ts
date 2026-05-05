@@ -32,9 +32,6 @@ export class PostgresEventBus implements IEventBus {
       return err(new EventBusErrorClass(`Failed to insert into outbox: ${error.message}`));
     }
 
-    // Best-effort in-process dispatch — if this fails the cron will retry
-    await this.dispatchOne(event as DomainEvent<unknown>).catch(() => undefined);
-
     return ok(undefined);
   }
 

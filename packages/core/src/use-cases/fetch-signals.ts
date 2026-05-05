@@ -27,12 +27,12 @@ export class FetchSignalsUseCase {
     if (alreadyProcessed.isErr()) return err(alreadyProcessed.error);
     if (alreadyProcessed.value) return ok([]);
 
+    const results = await Promise.allSettled(
+      this.sourceAdapters.map((a) => a.fetch(input.ideaText, input.ideaId, input.traceId)),
+    );
     const signals: Signal[] = [];
-    for (const adapter of this.sourceAdapters) {
-      const result = await adapter.fetch(input.ideaText, input.ideaId, input.traceId);
-      if (result.isOk()) {
-        signals.push(...result.value);
-      }
+    for (const r of results) {
+      if (r.status === 'fulfilled' && r.value.isOk()) signals.push(...r.value.value);
       // Partial failure: one source down doesn't abort — log and continue
     }
 
