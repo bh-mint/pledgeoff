@@ -179,7 +179,7 @@ export default async function DashboardPage() {
             >
               Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
             </Link>
-            <nav className="hidden sm:flex items-center gap-5 text-[13px] text-[var(--t2)]">
+            <nav className="flex items-center gap-4 text-[13px] text-[var(--t2)]">
               <span className="text-[var(--t1)]">Dashboard</span>
               <Link href="/ideas/new" className="hover:text-[var(--t1)] transition-colors">
                 Validator
