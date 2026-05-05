@@ -8,6 +8,7 @@ import {
   RedditSourceAdapter,
   GitHubSourceAdapter,
   GroqLLMAdapter,
+  AnthropicLLMAdapter,
 } from '@pledgeoff/adapters';
 import { PostgresEventBus } from '@pledgeoff/eventbus';
 import {
@@ -42,7 +43,11 @@ function buildContainer() {
     new RedditSourceAdapter(),
     new GitHubSourceAdapter(requireEnv('GITHUB_PAT')),
   ];
-  const llmClient = new GroqLLMAdapter(requireEnv('GROQ_API_KEY'));
+  const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
+  const llmClient =
+    llmProvider === 'anthropic'
+      ? new AnthropicLLMAdapter(requireEnv('ANTHROPIC_API_KEY'), process.env.ANTHROPIC_MODEL)
+      : new GroqLLMAdapter(requireEnv('GROQ_API_KEY'));
 
   const createIdeaUseCase = new CreateIdeaUseCase(ideaRepo, eventBus);
   const fetchSignalsUseCase = new FetchSignalsUseCase(
