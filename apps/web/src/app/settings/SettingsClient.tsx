@@ -70,7 +70,7 @@ export function SettingsClient({
             <label className="mono text-[10px] uppercase tracking-[0.12em] text-[var(--t3)] block mb-2">
               Full name
             </label>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <input
                 value={name}
                 onChange={(e) => { setName(e.target.value); setSaveStatus("idle"); }}
@@ -81,7 +81,7 @@ export function SettingsClient({
               <button
                 onClick={handleSave}
                 disabled={saveStatus === "saving" || !name.trim()}
-                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors"
+                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors sm:flex-shrink-0"
                 style={{
                   borderColor: saveStatus === "saved" ? "var(--validated)" : "var(--border)",
                   color: saveStatus === "saved" ? "var(--validated)" : "var(--t2)",
@@ -198,14 +198,14 @@ export function SettingsClient({
         </div>
         <div className="px-6 py-5">
           {plan === "free" ? (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
               <div>
                 <div className="text-[13px] text-[var(--t1)]">Free plan · <span className="text-[var(--validated)]">$0 / month</span></div>
                 <div className="mono text-[10px] text-[var(--t3)] mt-1">No credit card required.</div>
               </div>
               <Link
                 href="/pricing"
-                className="mono text-[11px] h-8 px-4 rounded-md border hover:border-[var(--t2)] transition-colors flex items-center"
+                className="mono text-[11px] h-8 px-4 rounded-md border hover:border-[var(--t2)] transition-colors inline-flex items-center self-start sm:self-auto"
                 style={{ borderColor: "var(--border)", color: "var(--t2)" }}
               >
                 View plans →
@@ -213,14 +213,14 @@ export function SettingsClient({
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
                 <div>
                   <div className="text-[13px] text-[var(--t1)]">{PLAN_LABELS[plan]} plan</div>
                   <div className="mono text-[10px] text-[var(--t3)] mt-1">Renews automatically · cancel anytime</div>
                 </div>
                 <button
                   disabled
-                  className="mono text-[11px] h-8 px-4 rounded-md border opacity-40 cursor-not-allowed"
+                  className="mono text-[11px] h-8 px-4 rounded-md border opacity-40 cursor-not-allowed self-start sm:self-auto"
                   style={{ borderColor: "var(--border)", color: "var(--t2)" }}
                 >
                   Manage subscription
@@ -242,14 +242,14 @@ export function SettingsClient({
         </div>
         <div className="px-6 py-5">
           {!deleteConfirm ? (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
               <div>
                 <div className="text-[13px] text-[var(--t1)]">Delete account</div>
                 <div className="mono text-[10px] text-[var(--t3)] mt-1">Permanently delete your account and all your data. Irreversible.</div>
               </div>
               <button
                 onClick={() => setDeleteConfirm(true)}
-                className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--kill)] hover:text-[var(--kill)]"
+                className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--kill)] hover:text-[var(--kill)] self-start sm:self-auto"
                 style={{ borderColor: "var(--border)", color: "var(--t3)" }}
               >
                 Delete account
@@ -260,7 +260,7 @@ export function SettingsClient({
               <p className="text-[13px] text-[var(--t2)]">
                 Type your email <span className="font-semibold text-[var(--t1)]">{email}</span> to confirm deletion:
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <input
                   value={deleteInput}
                   onChange={(e) => setDeleteInput(e.target.value)}
