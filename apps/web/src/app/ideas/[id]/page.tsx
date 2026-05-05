@@ -63,7 +63,7 @@ export default async function IdeaPage({ params }: Props) {
     <div className="min-h-screen bg-[var(--canvas)]">
       <Nav />
 
-      <div className="max-w-[720px] mx-auto px-8 py-12">
+      <div className="max-w-[720px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Back */}
         <Link
           href="/dashboard"
