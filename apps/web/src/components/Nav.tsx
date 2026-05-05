@@ -49,7 +49,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
         <div className="flex items-center gap-3 sm:gap-5">
           <Link
             href="/pricing"
-            className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+            className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
           >
             Pricing
           </Link>
@@ -63,7 +63,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
           {!user && (
             <button
               onClick={onWaitlistOpen}
-              className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+              className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
             >
               Get access
             </button>
