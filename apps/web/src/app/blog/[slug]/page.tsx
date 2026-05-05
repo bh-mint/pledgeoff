@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImage = `/api/og?title=${encodeURIComponent(article.title)}&tag=${encodeURIComponent(article.tag)}`;
 
   return {
-    title: `${article.title} — PledgeOFF`,
+    title: article.title,
     description: article.excerpt,
     openGraph: {
       title: article.title,
