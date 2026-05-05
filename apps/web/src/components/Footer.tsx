@@ -26,15 +26,15 @@ function IconInstagram() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--border)] mt-auto bg-[var(--canvas)]">
+    <footer className="border-t border-(--border) mt-auto bg-(--canvas)">
       {/* Main row */}
-      <div className="max-w-[1320px] mx-auto px-6 sm:px-8 py-6 sm:py-5 flex flex-col sm:grid sm:grid-cols-3 sm:items-center gap-4 sm:gap-0">
+      <div className="max-w-330 mx-auto px-6 sm:px-8 py-6 sm:py-5 flex flex-col sm:grid sm:grid-cols-3 sm:items-center gap-4 sm:gap-0">
         {/* Logo + tagline */}
         <div className="flex items-baseline gap-3">
-          <p className="display text-[15px] font-semibold text-[var(--t1)]">
-            Pledge<span className="text-[var(--accent)]">OFF</span>
+          <p className="display text-[15px] font-semibold text-(--t1)">
+            Pledge<span className="text-(--accent)">OFF</span>
           </p>
-          <span className="mono text-[11px] text-[var(--t3)] tracking-[0.04em]">
+          <span className="mono text-[11px] text-(--t3) tracking-[0.04em]">
             Every number is sourced
           </span>
         </div>
@@ -45,7 +45,7 @@ export function Footer() {
             href="https://x.com/pledgeoff"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
+            className="text-(--t3) hover:text-(--t1) transition-colors"
             aria-label="X (Twitter)"
           >
             <IconX />
@@ -54,7 +54,7 @@ export function Footer() {
             href="https://tiktok.com/@pledgeoff"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
+            className="text-(--t3) hover:text-(--t1) transition-colors"
             aria-label="TikTok"
           >
             <IconTikTok />
@@ -63,7 +63,7 @@ export function Footer() {
             href="https://instagram.com/pledgeoff"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--t3)] hover:text-[var(--t1)] transition-colors"
+            className="text-(--t3) hover:text-(--t1) transition-colors"
             aria-label="Instagram"
           >
             <IconInstagram />
@@ -71,18 +71,18 @@ export function Footer() {
         </div>
 
         {/* Nav links */}
-        <div className="flex items-center gap-5 sm:justify-end text-[11px] text-[var(--t3)]">
-          <Link href="/privacy" className="hover:text-[var(--t2)] transition-colors">Privacy</Link>
-          <Link href="/terms" className="hover:text-[var(--t2)] transition-colors">Terms</Link>
-          <Link href="/changelog" className="hover:text-[var(--t2)] transition-colors">Changelog</Link>
+        <div className="flex items-center gap-5 sm:justify-end text-[11px] text-(--t3)">
+          <Link href="/privacy" className="hover:text-(--t2) transition-colors">Privacy</Link>
+          <Link href="/terms" className="hover:text-(--t2) transition-colors">Terms</Link>
+          <Link href="/changelog" className="hover:text-(--t2) transition-colors">Changelog</Link>
         </div>
       </div>
 
       {/* Copyright */}
-      <div className="border-t border-[var(--border)]">
-        <div className="max-w-[1320px] mx-auto px-8 py-3">
-          <p className="text-[11px] mono text-[var(--t3)]">
-            © 2026 <span className="text-[var(--t1)]">Pledge</span><span className="text-[var(--accent)]">OFF</span> · Built to kill bad ideas early.
+      <div className="border-t border-(--border)">
+        <div className="max-w-330 mx-auto px-8 py-3">
+          <p className="text-[11px] mono text-(--t3)">
+            © 2026 <span className="text-(--t1)">Pledge</span><span className="text-(--accent)">OFF</span> · Built to kill bad ideas early.
           </p>
         </div>
       </div>

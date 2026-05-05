@@ -22,8 +22,7 @@ export function getCachedIdea(userId: string, ideaId: string): Omit<Entry, 'expi
     store.delete(`${userId}:${ideaId}`);
     return undefined;
   }
-  const { expiresAt: _, ...data } = entry;
-  return data;
+  return { idea: entry.idea, decision: entry.decision, signals: entry.signals };
 }
 
 export function setCachedIdea(
