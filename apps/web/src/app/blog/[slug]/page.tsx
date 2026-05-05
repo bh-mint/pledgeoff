@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
-import { getAllArticles, getArticleBySlug, getRelatedArticles } from "@/lib/mdx";
+import { getAllArticles, getArticleBySlug, getRelatedArticles, getSeeAlsoArticles, CLUSTER_META } from "@/lib/mdx";
 import { formatDate } from "@/lib/mdx-utils";
 import { ReadingProgress } from "@/components/blog/ReadingProgress";
 import { PreLoginNav } from "@/components/PreLoginNav";
@@ -64,8 +64,10 @@ export default async function ArticlePage({ params }: Props) {
   if (!article) notFound();
 
   const related = getRelatedArticles(slug, article.tag, 2);
+  const seeAlso = getSeeAlsoArticles(slug, article.tag, 2);
+  const cluster = CLUSTER_META[article.tag];
 
-  const jsonLd = {
+  const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: article.title,
@@ -83,11 +85,25 @@ export default async function ArticlePage({ params }: Props) {
     },
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Blog", item: "https://pledgeoff.com/blog" },
+      { "@type": "ListItem", position: 2, name: cluster.label, item: `https://pledgeoff.com/blog/${cluster.slug}` },
+      { "@type": "ListItem", position: 3, name: article.title, item: `https://pledgeoff.com/blog/${slug}` },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <ReadingProgress />
 
@@ -226,15 +242,50 @@ export default async function ArticlePage({ params }: Props) {
             </a>
           </div>
 
-          {/* Related */}
+          {/* Related — same cluster */}
           {related.length > 0 && (
             <div className="mt-16">
-              <div className="mono text-[10px] mb-4" style={{ color: "var(--t3)" }}>CONTINUE READING</div>
+              <div className="mono text-[10px] mb-4" style={{ color: "var(--t3)" }}>CONTINUE READING · {cluster.label.toUpperCase()}</div>
               <div
                 className="rounded-md border divide-y"
                 style={{ borderColor: "var(--border)", background: "var(--surface)" }}
               >
                 {related.map((a) => (
+                  <Link
+                    key={a.slug}
+                    href={`/blog/${a.slug}`}
+                    className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/5"
+                  >
+                    <div>
+                      <div className="display text-[15px]" style={{ color: "var(--t1)" }}>{a.title}</div>
+                      <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+                        {TAG_LABELS[a.tag] ?? a.tag} · {a.readingTime} MIN
+                      </div>
+                    </div>
+                    <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>→</span>
+                  </Link>
+                ))}
+                <Link
+                  href={`/blog/${cluster.slug}`}
+                  className="flex items-center justify-between px-5 py-3 transition-colors hover:bg-white/5"
+                >
+                  <span className="mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+                    All {cluster.label} articles →
+                  </span>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* See also — cross-cluster */}
+          {seeAlso.length > 0 && (
+            <div className="mt-8">
+              <div className="mono text-[10px] mb-4" style={{ color: "var(--t3)" }}>SEE ALSO</div>
+              <div
+                className="rounded-md border divide-y"
+                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              >
+                {seeAlso.map((a) => (
                   <Link
                     key={a.slug}
                     href={`/blog/${a.slug}`}
