@@ -175,20 +175,20 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-4 sm:gap-8">
             <Link
               href="/dashboard"
-              className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]"
+              className="display text-[15px] font-semibold tracking-tight text-(--t1)"
             >
               Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
             </Link>
-            <nav className="flex items-center gap-4 text-[13px] text-[var(--t2)]">
-              <span className="text-[var(--t1)]">Dashboard</span>
-              <Link href="/ideas/new" className="hover:text-[var(--t1)] transition-colors">
+            <nav className="flex items-center gap-4 text-[13px] text-(--t2)">
+              <span className="text-(--t1)">Dashboard</span>
+              <Link href="/ideas/new" className="hover:text-(--t1) transition-colors">
                 Validator
               </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 mono text-[11px] text-[var(--t2)]">
-              <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
+            <div className="flex items-center gap-2 mono text-[11px] text-(--t2)">
+              <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
               <span>live</span>
             </div>
             <ProfileButton email={user.email ?? ""} initials={userInitials} />
@@ -201,63 +201,63 @@ export default async function DashboardPage() {
         <div className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           {/* Ideas validated */}
           <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
-            <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
+            <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
               ideas validated
             </div>
             <div className="flex items-baseline justify-between mt-2">
-              <div className="display text-[36px] tnum font-semibold leading-none text-[var(--t1)]">
+              <div className="display text-[36px] tnum font-semibold leading-none text-(--t1)">
                 {withDecision.length}
               </div>
               <Spark data={sparkValidated} color="var(--accent)" />
             </div>
-            <div className="mono text-[10px] tnum mt-2 text-[var(--validated)]">
+            <div className="mono text-[10px] tnum mt-2 text-(--validated)">
               {withDecision.length > 0 ? `+${withDecision.length} total` : "start validating"}
             </div>
           </div>
 
           {/* Average score */}
           <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
-            <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
+            <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
               average score
             </div>
             <div className="flex items-baseline justify-between mt-2">
-              <div className="display text-[36px] tnum font-semibold leading-none text-[var(--t1)]">
+              <div className="display text-[36px] tnum font-semibold leading-none text-(--t1)">
                 {avgScore ?? "—"}
               </div>
               <Spark data={sparkScores} color="var(--validated)" />
             </div>
-            <div className="mono text-[10px] tnum mt-2 text-[var(--validated)]">
+            <div className="mono text-[10px] tnum mt-2 text-(--validated)">
               {avgScore ? `out of 100` : "no data yet"}
             </div>
           </div>
 
           {/* Killed early */}
           <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
-            <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
+            <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
               ideas killed early
             </div>
             <div className="flex items-baseline justify-between mt-2">
-              <div className="display text-[36px] tnum font-semibold leading-none text-[var(--t1)]">
+              <div className="display text-[36px] tnum font-semibold leading-none text-(--t1)">
                 {killed}
               </div>
               <Spark data={sparkKilled} color="var(--kill)" />
             </div>
-            <div className="mono text-[10px] tnum mt-2 text-[var(--t2)]">
+            <div className="mono text-[10px] tnum mt-2 text-(--t2)">
               {killed > 0 ? `≈ ${killed * 50}h saved` : "none yet"}
             </div>
           </div>
 
           {/* Days to first GO */}
           <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
-            <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
+            <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
               days · first launch-ready
             </div>
             <div className="flex items-baseline justify-between mt-2">
-              <div className="display text-[36px] tnum font-semibold leading-none text-[var(--t1)]">
+              <div className="display text-[36px] tnum font-semibold leading-none text-(--t1)">
                 {daysToFirstGo ?? "—"}
               </div>
             </div>
-            <div className="mono text-[10px] tnum mt-2 text-[var(--validated)]">
+            <div className="mono text-[10px] tnum mt-2 text-(--validated)">
               {daysToFirstGo ? "Pledge avg 23" : "no GO verdict yet"}
             </div>
           </div>
@@ -276,10 +276,10 @@ export default async function DashboardPage() {
             >
               <div className="flex items-baseline justify-between mb-5">
                 <div className="flex-1 min-w-0 pr-4">
-                  <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
+                  <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
                     your top idea · launch-ready progress
                   </div>
-                  <h2 className="display text-[18px] font-semibold tracking-tight mt-1.5 text-[var(--t1)] truncate">
+                  <h2 className="display text-[18px] font-semibold tracking-tight mt-1.5 text-(--t1) truncate">
                     {pipelineRow?.idea.text ?? rows[0].idea.text}
                   </h2>
                 </div>
@@ -290,7 +290,7 @@ export default async function DashboardPage() {
                   >
                     {stepsLeft}
                   </div>
-                  <div className="mono text-[10px] mt-1 text-[var(--t3)]">
+                  <div className="mono text-[10px] mt-1 text-(--t3)">
                     steps from launch-ready
                   </div>
                 </div>
@@ -309,7 +309,7 @@ export default async function DashboardPage() {
                       }}
                     />
                     <div className="mt-2 flex items-baseline gap-1.5">
-                      <span className="mono text-[10px] tnum text-[var(--t3)]">
+                      <span className="mono text-[10px] tnum text-(--t3)">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span
@@ -325,7 +325,7 @@ export default async function DashboardPage() {
                         {s.k}
                       </span>
                     </div>
-                    <div className="mono text-[10px] mt-1 text-[var(--t3)]">
+                    <div className="mono text-[10px] mt-1 text-(--t3)">
                       {s.done ? "complete" : s.active ? "in progress" : "pending"}
                     </div>
                   </div>
@@ -345,14 +345,14 @@ export default async function DashboardPage() {
             className="border rounded-md p-5 flex items-center gap-4"
             style={{ borderColor: "var(--border)", background: "var(--surface)" }}
           >
-            <div className="display text-[40px] tnum font-semibold leading-none text-[var(--t1)]">
+            <div className="display text-[40px] tnum font-semibold leading-none text-(--t1)">
               {daysSinceJoin}
             </div>
             <div>
-              <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
+              <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
                 day streak
               </div>
-              <div className="text-[12px] mt-1 text-[var(--t2)]">
+              <div className="text-[12px] mt-1 text-(--t2)">
                 keep validating daily
               </div>
             </div>
@@ -381,12 +381,12 @@ export default async function DashboardPage() {
               style={{ borderColor: "var(--border)" }}
             >
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
-                <span className="display text-[13px] font-semibold tracking-tight text-[var(--t1)]">
+                <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
+                <span className="display text-[13px] font-semibold tracking-tight text-(--t1)">
                   Today&apos;s goldmine
                 </span>
               </div>
-              <span className="mono text-[10px] text-[var(--t3)]">3 of 12 · Pro</span>
+              <span className="mono text-[10px] text-(--t3)">3 of 12 · Pro</span>
             </div>
             {GOLDMINE_ITEMS.map((g) => (
               <div
@@ -403,18 +403,18 @@ export default async function DashboardPage() {
                   {g.score}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="mono text-[10px] text-[var(--t3)]">{g.cat}</div>
-                  <div className="text-[12px] mt-1 leading-snug text-[var(--t1)]">
+                  <div className="mono text-[10px] text-(--t3)">{g.cat}</div>
+                  <div className="text-[12px] mt-1 leading-snug text-(--t1)">
                     {g.title}
                   </div>
-                  <div className="mono text-[10px] mt-1 text-[var(--t3)]">
+                  <div className="mono text-[10px] mt-1 text-(--t3)">
                     {g.mentions} mentions · 7d
                   </div>
                 </div>
-                <span className="mono text-[10px] text-[var(--accent)]">→</span>
+                <span className="mono text-[10px] text-(--accent)">→</span>
               </div>
             ))}
-            <div className="px-5 py-3 mono text-[10px] text-center text-[var(--t3)]">
+            <div className="px-5 py-3 mono text-[10px] text-center text-(--t3)">
               unlock all 12 with Pro →
             </div>
           </div>
@@ -426,12 +426,12 @@ export default async function DashboardPage() {
         className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 flex items-center justify-between border-t"
         style={{ borderColor: "var(--border)" }}
       >
-        <span className="mono text-[10px] text-[var(--t3)]">
+        <span className="mono text-[10px] text-(--t3)">
           {displayName} · free plan · {rows.length} idea{rows.length !== 1 ? "s" : ""} · {daysSinceJoin}d streak
         </span>
         <Link
           href="/pricing"
-          className="mono text-[10px] text-[var(--t3)] hover:text-[var(--t2)] transition-colors"
+          className="mono text-[10px] text-(--t3) hover:text-(--t2) transition-colors"
         >
           upgrade to Pro →
         </Link>

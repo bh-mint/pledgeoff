@@ -56,10 +56,10 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
         className="px-4 sm:px-6 py-4 border-b flex flex-wrap gap-3 items-center"
         style={{ borderColor: "var(--border)" }}
       >
-        <h2 className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]">
+        <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">
           All validations
         </h2>
-        <span className="mono text-[10px] text-[var(--t3)]">
+        <span className="mono text-[10px] text-(--t3)">
           {totalCount}
         </span>
         <div
@@ -117,8 +117,8 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
           >
             {/* Idea */}
             <div className="sm:col-span-6 min-w-0 mb-1.5 sm:mb-0">
-              <div className="text-[13px] text-[var(--t1)] truncate">{row.text}</div>
-              <div className="mono text-[10px] mt-0.5 text-[var(--t3)]">
+              <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
+              <div className="mono text-[10px] mt-0.5 text-(--t3)">
                 val_{row.id.slice(0, 8)}
               </div>
             </div>
@@ -146,7 +146,7 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
                     </div>
                   </>
                 ) : (
-                  <span className="mono text-[10px] text-[var(--t3)]">—</span>
+                  <span className="mono text-[10px] text-(--t3)">—</span>
                 )}
               </div>
 
@@ -159,12 +159,12 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
               </div>
 
               {/* Status */}
-              <div className="sm:col-span-2 mono text-[10px] text-[var(--t2)] flex-shrink-0">
+              <div className="sm:col-span-2 mono text-[10px] text-(--t2) flex-shrink-0">
                 {STATUS_LABEL[row.status]}
               </div>
 
               {/* Date */}
-              <div className="sm:col-span-1 ml-auto sm:ml-0 sm:text-right mono text-[10px] text-[var(--t3)] flex-shrink-0">
+              <div className="sm:col-span-1 ml-auto sm:ml-0 sm:text-right mono text-[10px] text-(--t3) flex-shrink-0">
                 {shortDate(row.createdAt)}
               </div>
             </div>
@@ -175,12 +175,12 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
       {/* Empty */}
       {filtered.length === 0 && (
         <div className="px-6 py-16 text-center">
-          <div className="display text-[18px] font-semibold tracking-tight text-[var(--t1)] mb-2">
+          <div className="display text-[18px] font-semibold tracking-tight text-(--t1) mb-2">
             {search ? "No results." : "No validations yet."}
           </div>
           {!search && (
             <>
-              <p className="text-[13px] text-[var(--t2)] max-w-[420px] mx-auto">
+              <p className="text-[13px] text-(--t2) max-w-[420px] mx-auto">
                 Type a one-sentence idea. Get a score in 15 seconds.
               </p>
               <Link

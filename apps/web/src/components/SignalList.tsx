@@ -6,9 +6,9 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 
 const SENTIMENT_CONFIG = {
-  positive: { label: "POSITIVE", color: "text-[var(--validated)]" },
-  negative: { label: "NEGATIVE", color: "text-[var(--kill)]" },
-  neutral:  { label: "NEUTRAL",  color: "text-[var(--t3)]" },
+  positive: { label: "POSITIVE", color: "text-(--validated)" },
+  negative: { label: "NEGATIVE", color: "text-(--kill)" },
+  neutral:  { label: "NEUTRAL",  color: "text-(--t3)" },
 } as const;
 
 interface SignalListProps {
@@ -18,7 +18,7 @@ interface SignalListProps {
 export function SignalList({ signals }: SignalListProps) {
   if (signals.length === 0) {
     return (
-      <p className="text-[13px] text-[var(--t3)]">No signals collected yet.</p>
+      <p className="text-[13px] text-(--t3)">No signals collected yet.</p>
     );
   }
 
@@ -31,7 +31,7 @@ export function SignalList({ signals }: SignalListProps) {
     <div className="space-y-8">
       {Object.entries(bySource).map(([source, items]) => (
         <div key={source}>
-          <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em] mb-3">
+          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
             {SOURCE_LABELS[source] ?? source} · {items.length} signal{items.length !== 1 ? "s" : ""}
           </p>
           <div className="space-y-3">
@@ -40,14 +40,14 @@ export function SignalList({ signals }: SignalListProps) {
               return (
                 <div
                   key={signal.id}
-                  className="bg-[var(--surface)] border border-[var(--border)] rounded-md p-4"
+                  className="bg-(--surface) border border-(--border) rounded-md p-4"
                 >
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <a
                       href={signal.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[13px] text-[var(--t1)] font-medium hover:text-[var(--accent)] transition-colors leading-snug"
+                      className="text-[13px] text-(--t1) font-medium hover:text-(--accent) transition-colors leading-snug"
                     >
                       {signal.title}
                     </a>
@@ -58,7 +58,7 @@ export function SignalList({ signals }: SignalListProps) {
                     </span>
                   </div>
                   {signal.summary && (
-                    <p className="text-[12px] text-[var(--t3)] leading-relaxed">
+                    <p className="text-[12px] text-(--t3) leading-relaxed">
                       {signal.summary}
                     </p>
                   )}

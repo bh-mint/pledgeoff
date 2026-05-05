@@ -62,7 +62,7 @@ export function TableOfContents() {
 
   return (
     <nav aria-label="Table of contents">
-      <p className="mono text-[10px] uppercase tracking-[0.12em] text-[var(--t3)] mb-3">
+      <p className="mono text-[10px] uppercase tracking-[0.12em] text-(--t3) mb-3">
         On this page
       </p>
       <ul className="space-y-1">
@@ -72,8 +72,8 @@ export function TableOfContents() {
               href={`#${item.id}`}
               className={`block text-[12px] leading-relaxed transition-colors py-0.5 ${
                 active === item.id
-                  ? "text-[var(--accent)]"
-                  : "text-[var(--t3)] hover:text-[var(--t2)]"
+                  ? "text-(--accent)"
+                  : "text-(--t3) hover:text-(--t2)"
               }`}
             >
               {item.text}

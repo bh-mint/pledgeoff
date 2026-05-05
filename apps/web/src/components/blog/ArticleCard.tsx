@@ -15,13 +15,13 @@ const TAG_LABELS: Record<string, string> = {
 };
 
 export function ArticleCard({ article }: { article: ArticleFrontmatter }) {
-  const tagColor = TAG_COLORS[article.tag] ?? "text-[var(--t3)]";
+  const tagColor = TAG_COLORS[article.tag] ?? "text-(--t3)";
   const tagLabel = TAG_LABELS[article.tag] ?? article.tag;
 
   return (
     <Link
       href={`/blog/${article.slug}`}
-      className="group block bg-[var(--surface)] border border-[var(--border)] rounded-md p-6 hover:border-[var(--t3)] transition-colors"
+      className="group block bg-(--surface) border border-(--border) rounded-md p-6 hover:border-(--t3) transition-colors"
     >
       <span
         className={`mono text-[10px] uppercase tracking-[0.12em] px-2 py-0.5 rounded border ${tagColor}`}
@@ -29,21 +29,21 @@ export function ArticleCard({ article }: { article: ArticleFrontmatter }) {
         {tagLabel}
       </span>
 
-      <h2 className="display text-[17px] font-semibold text-[var(--t1)] mt-3 mb-2 leading-snug group-hover:text-[var(--accent)] transition-colors">
+      <h2 className="display text-[17px] font-semibold text-(--t1) mt-3 mb-2 leading-snug group-hover:text-(--accent) transition-colors">
         {article.title}
       </h2>
 
-      <p className="text-[13px] text-[var(--t2)] leading-relaxed line-clamp-2">
+      <p className="text-[13px] text-(--t2) leading-relaxed line-clamp-2">
         {article.excerpt}
       </p>
 
       <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center gap-3 mono text-[11px] text-[var(--t3)] uppercase tracking-[0.06em]">
+        <div className="flex items-center gap-3 mono text-[11px] text-(--t3) uppercase tracking-[0.06em]">
           <span>{article.readingTime} min read</span>
           <span>·</span>
           <span>{formatDate(article.publishedAt)}</span>
         </div>
-        <span className="text-[var(--t3)] group-hover:text-[var(--accent)] transition-colors text-[13px]">
+        <span className="text-(--t3) group-hover:text-(--accent) transition-colors text-[13px]">
           →
         </span>
       </div>

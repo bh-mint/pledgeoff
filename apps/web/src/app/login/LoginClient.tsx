@@ -204,7 +204,7 @@ export function LoginClient() {
               placeholder="you@example.com"
               required
               disabled={isLoading}
-              className="w-full text-[13px] bg-transparent outline-none placeholder:text-[var(--t3)]"
+              className="w-full text-[13px] bg-transparent outline-none placeholder:text-(--t3)"
               style={{ color: "var(--t1)" }}
             />
           </div>
@@ -229,7 +229,7 @@ export function LoginClient() {
               required
               minLength={mode === "signup" ? 8 : 6}
               disabled={isLoading}
-              className="w-full text-[13px] bg-transparent outline-none placeholder:text-[var(--t3)]"
+              className="w-full text-[13px] bg-transparent outline-none placeholder:text-(--t3)"
               style={{ color: "var(--t1)" }}
             />
           </div>
