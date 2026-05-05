@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getCachedIdea, setCachedIdea, invalidateCachedIdea } from '../idea-cache';
 import type { Idea, Decision, Signal } from '@pledgeoff/core';
 
-const idea: Idea = { id: 'i1', text: 'test idea', userId: 'u1', createdAt: '2026-01-01T00:00:00Z', status: 'pending' };
+const idea: Idea = { id: 'i1', text: 'test idea', userId: 'u1', createdAt: '2026-01-01T00:00:00Z' };
 const decision: Decision = { id: 'd1', ideaId: 'i1', verdict: 'GO', confidence: 0.8, reasoning: 'good', signalIds: [], createdAt: '2026-01-01T00:00:10Z' };
 const signals: Signal[] = [];
 
