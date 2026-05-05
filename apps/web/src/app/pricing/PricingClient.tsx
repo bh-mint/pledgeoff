@@ -143,8 +143,8 @@ export function PricingClient() {
 
       {/* Hero */}
       <div className="border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-[1200px] mx-auto px-8 py-16 grid grid-cols-12 gap-8 items-end">
-          <div className="col-span-7">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-10 sm:py-16 flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-end gap-6">
+          <div className="sm:col-span-7">
             <div
               className="mono text-[10px] uppercase tracking-[0.14em] mb-4"
               style={{ color: "var(--t3)" }}
@@ -152,7 +152,7 @@ export function PricingClient() {
               upgrade
             </div>
             <h1
-              className="display text-[56px] font-semibold tracking-tight leading-[0.95]"
+              className="display text-[36px] sm:text-[56px] font-semibold tracking-tight leading-[0.95]"
               style={{ color: "var(--t1)" }}
             >
               Free until you&apos;re sure.
@@ -162,7 +162,7 @@ export function PricingClient() {
               </span>
             </h1>
             <p
-              className="mt-6 max-w-[520px] text-[15px] leading-[1.6]"
+              className="mt-6 max-w-[520px] text-[14px] sm:text-[15px] leading-[1.6]"
               style={{ color: "var(--t2)" }}
             >
               Validate unlimited ideas, open the simulator, and turn Otto into
@@ -171,7 +171,7 @@ export function PricingClient() {
             </p>
           </div>
           {/* Billing toggle */}
-          <div className="col-span-5 flex justify-end items-center gap-3">
+          <div className="sm:col-span-5 flex sm:justify-end items-center gap-3">
             <span
               className="mono text-[11px]"
               style={{ color: billing === "month" ? "var(--t1)" : "var(--t3)" }}
@@ -213,15 +213,15 @@ export function PricingClient() {
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-8 py-12">
-        {/* Plans — joined grid */}
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+        {/* Plans */}
         <div
-          className="grid grid-cols-3 border rounded-md overflow-hidden"
+          className="grid grid-cols-1 sm:grid-cols-3 border rounded-md overflow-hidden"
           style={{ borderColor: "var(--border)" }}
         >
           {/* Free */}
           <div
-            className="p-8 border-r"
+            className="p-8 border-b sm:border-b-0 sm:border-r"
             style={{
               borderColor: "var(--border)",
               background: "var(--surface)",
@@ -268,7 +268,7 @@ export function PricingClient() {
 
           {/* Pro */}
           <div
-            className="p-8 border-r relative"
+            className="p-8 border-b sm:border-b-0 sm:border-r relative"
             style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
           >
             {/* Accent top bar */}
@@ -371,18 +371,19 @@ export function PricingClient() {
         </div>
 
         {/* Feature comparison table */}
-        <div className="mt-16">
+        <div className="mt-12 sm:mt-16">
           <h2
-            className="display text-[28px] font-semibold tracking-tight mb-2"
+            className="display text-[24px] sm:text-[28px] font-semibold tracking-tight mb-2"
             style={{ color: "var(--t1)" }}
           >
             What&apos;s actually included.
           </h2>
-          <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
+          <p className="text-[13px] mb-6 sm:mb-8" style={{ color: "var(--t2)" }}>
             Specific numbers, not &ldquo;Limited&rdquo; vs &ldquo;Full access&rdquo;.
           </p>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
           <div
-            className="border rounded-md overflow-hidden"
+            className="border rounded-md overflow-hidden min-w-[560px] mx-4 sm:mx-0"
             style={{ borderColor: "var(--border)" }}
           >
             {/* Column headers */}
@@ -434,6 +435,7 @@ export function PricingClient() {
               </div>
             ))}
           </div>
+          </div>
         </div>
 
         {/* Social proof */}
@@ -444,7 +446,7 @@ export function PricingClient() {
           >
             What changes when you go Pro.
           </h2>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               {
                 k: "You stop second-guessing.",
@@ -516,7 +518,7 @@ export function PricingClient() {
 
         {/* Final CTA */}
         <div
-          className="mt-20 mb-10 flex items-center justify-between border-t pt-10"
+          className="mt-16 mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between border-t pt-10 gap-6 sm:gap-0"
           style={{ borderColor: "var(--border)" }}
         >
           <div>
