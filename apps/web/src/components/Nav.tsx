@@ -55,7 +55,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
           </Link>
           <Link
             href="/blog"
-            className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+            className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
           >
             Blog
           </Link>
