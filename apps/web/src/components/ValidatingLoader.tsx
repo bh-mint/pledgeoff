@@ -107,7 +107,7 @@ export function ValidatingLoader() {
             {timerS}s
           </span>
         </div>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {STAGES.map((stage, i) => {
             const isDone = i < stageIndex;
             const isActive = i === stageIndex;

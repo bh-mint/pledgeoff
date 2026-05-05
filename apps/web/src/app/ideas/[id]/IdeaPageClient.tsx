@@ -86,13 +86,14 @@ export function IdeaPageClient({
               Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
             </span>
             <span>·</span>
-            <span>validation</span>
-            <span>·</span>
+            <span className="hidden sm:inline">validation ·</span>
             <span>{valId}</span>
           </div>
           <div className="mono text-[10px] text-[var(--t3)]">
-            scored just now
-            {analysisS !== null && ` · ${analysisS}s analysis`}
+            {analysisS !== null ? `${analysisS}s` : "scored"}
+            <span className="hidden sm:inline">
+              {analysisS !== null ? " analysis" : " just now"}
+            </span>
           </div>
         </div>
       )}
