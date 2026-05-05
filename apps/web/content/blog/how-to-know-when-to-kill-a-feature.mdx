@@ -1,0 +1,131 @@
+---
+title: "How to know when to kill a feature"
+slug: "how-to-know-when-to-kill-a-feature"
+excerpt: "Every feature you keep is a feature someone has to maintain, explain, and route support tickets around. Killing features is product management. Here's when to do it."
+publishedAt: "2025-04-16"
+updatedAt: "2025-04-16"
+tag: "product-decisions"
+readingTime: 7
+affiliateDisclosure: false
+---
+
+Adding features is celebrated. Removing them is political.
+
+Every feature in your product was built because someone made a case for it.
+Removing it means telling that person — or their successor, or their customers —
+that it shouldn't have been there.
+
+So features accumulate. The product grows. Complexity multiplies.
+New users get lost. Existing users file support tickets about things that are broken
+because they interact with the feature that 3% of users rely on.
+
+Killing features is product management. Here's how to know when to do it.
+
+## The cost of a living feature
+
+Every feature that ships continues to cost money after launch:
+
+- **Maintenance cost** — bugs in that feature need fixing, dependencies need updating
+- **Design cost** — new UI work has to consider how it interacts with existing features
+- **Testing cost** — every release needs to test that existing features still work
+- **Cognitive cost** — every feature a new user sees is a choice they have to make
+- **Support cost** — every feature that exists generates support tickets
+
+These costs are invisible in the short term and compounding in the long term.
+
+A product with 200 features that 5% of users use each is harder to maintain
+than a product with 50 features that 50% of users use each — and harder to explain,
+harder to onboard, and harder to build on.
+
+## The signals that a feature should die
+
+### Signal 1: Adoption is below threshold
+
+Define your threshold before you measure. What percentage of users
+need to use a feature regularly for it to justify its existence?
+
+For core features: 40%+ monthly active users. For secondary features: 15%+.
+For power features: 5%+ but deeply used by those who need it.
+
+Anything below these thresholds for more than 6 months is a candidate for removal.
+Run this audit quarterly on every feature in your product.
+
+### Signal 2: The support-to-usage ratio is inverted
+
+Some features are used by 5% of users and generate 30% of support tickets.
+These features are net-negative. They consume disproportionate resources
+while serving a small minority.
+
+If a feature is generating more support volume than its adoption rate justifies,
+it's a signal the feature is confusing, broken in edge cases, or solving the wrong problem.
+
+### Signal 3: It conflicts with the core narrative
+
+Every product has a core narrative — a one-sentence description of what it does.
+When features exist that don't fit the narrative, they create cognitive dissonance
+for both users and prospects.
+
+"It's a project management tool... but it also has a CRM module and a time tracker."
+Now it's not a project management tool anymore. It's trying to be three things.
+
+Features that dilute the narrative make it harder to explain the product,
+harder to market it, and harder for users to know what to rely on it for.
+
+### Signal 4: The feature exists only for a churned segment
+
+Sometimes a segment of customers who needed a specific feature has largely churned
+or the product's focus has shifted away from them.
+
+The feature remains. Nobody new needs it. It exists as a monument to an old strategy.
+
+If you can identify that a feature is primarily used by customers who don't
+represent your current target segment — and the segment you're targeting doesn't need it —
+the feature is a liability, not an asset.
+
+## How to kill a feature without losing customers
+
+The reason features don't get killed isn't that teams don't know they should.
+It's that they're afraid of the backlash from the users who rely on them.
+
+Here's a process that manages that:
+
+**Step 1: Identify the actual users**
+Pull usage data. How many users used this feature in the last 90 days?
+How many are active paying customers?
+
+If 12 paying customers use a feature: you have 12 conversations to have.
+That's manageable.
+
+**Step 2: Reach out before you remove**
+Email the users directly. Explain that the feature will be deprecated in 90 days.
+Offer a migration path if one exists. Offer a call to understand their workflow.
+
+Two outcomes: some users describe use cases that change your mind (rarely, but it happens).
+Most users either acknowledge they don't use it much, or migrate without issue.
+
+**Step 3: Deprecate with a long runway**
+Announce → stop new access → remove from docs → remove from UI → remove the code.
+Minimum 60 days from announcement to code removal. 90 is better.
+
+This gives users time to adapt and gives your support team time to handle questions
+before they escalate.
+
+**Step 4: Track the outcome**
+After removal: did support tickets decrease? Did activation improve?
+Did any paying customers churn specifically because of the removal?
+
+This builds organizational confidence in future feature removals.
+The first time is the hardest. Once teams see that removing a feature
+improved NPS and didn't tank revenue, the next removal is less political.
+
+## What killing features does for your product
+
+The products most loved by their users are not the ones with the most features.
+They're the ones where every feature is understood, trusted, and used.
+
+When users open your product and every element they see is relevant to their task —
+when there's no UI they need to mentally ignore — the product feels powerful.
+
+That feeling comes from subtraction, not addition.
+
+[Build only what your market actually needs →](https://pledgeoff.com)

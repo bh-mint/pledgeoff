@@ -1,0 +1,135 @@
+---
+title: "How to validate a feature idea without coding it"
+slug: "how-to-validate-a-feature-idea-without-coding-it"
+excerpt: "Building a feature to find out if users want it is expensive. There are five faster methods that give you the same signal without touching the codebase."
+publishedAt: "2025-04-30"
+updatedAt: "2025-04-30"
+tag: "product-decisions"
+readingTime: 7
+affiliateDisclosure: false
+---
+
+The most expensive way to validate a feature is to build it.
+
+You scope it, design it, code it, test it, ship it.
+Eight weeks of work. Then you check the usage data.
+5% of users tried it once. None of them came back.
+
+Those eight weeks are gone. The code sits in the codebase, accruing maintenance cost.
+The team moves on to the next feature, slightly more demoralized.
+
+The alternative: validate before you build.
+Not with a survey. With methods that reveal whether users will actually act
+— before a line of code is written.
+
+## Method 1: The fake door test
+
+Add the feature to your UI as if it exists. When users click it, show a message:
+"This feature is coming soon. Want to be notified when it's ready?"
+
+Track the click rate. A high click rate (5%+ of users) means the feature
+is visible, relevant, and desired. A low click rate means either
+users aren't looking for it or the placement doesn't match where they'd expect to find it.
+
+The fake door test answers: do users, unprompted, reach for this feature?
+
+It doesn't answer: will they use it once it works?
+But it filters out features that nobody seeks — which is most unvalidated features.
+
+**Implementation note:** this requires real production access, so the test
+takes a few hours of engineering work. Still far less than building the feature itself.
+
+## Method 2: The concierge MVP
+
+Instead of building automation, do the thing manually for real users.
+
+You're building an automatic competitor analysis feature.
+Before building it: offer to run a competitor analysis for your 10 most engaged users.
+You do it manually. You send them the output. You charge them for it if it's valuable.
+
+This validates:
+- Whether users want the output (will they read it, act on it, pay for it?)
+- What the output needs to look like (you'll iterate in days, not sprints)
+- What edge cases exist (manual execution surfaces all the exceptions)
+
+Concierge MVP is the fastest way to validate output quality before you build the engine.
+
+## Method 3: The Figma prototype test
+
+Build a pixel-perfect mockup of the feature in Figma.
+Make it clickable — not full interactivity, just enough to simulate the core flow.
+
+Put 5 users in front of it (over video call, screen share, or in person).
+Give them a task. Don't help. Watch what they do.
+
+You're testing two things:
+1. Do they understand what the feature does?
+2. Can they complete the task without assistance?
+
+If users complete the task in under 2 minutes without questions: good signal.
+If users hesitate, ask "wait, how do I...?", or take a wrong path: the UX needs work
+before you invest in building.
+
+Figma prototype tests regularly change the feature scope.
+What looked like a 3-screen flow in planning becomes a 1-screen flow when you watch
+users try to use the 3-screen version.
+
+## Method 4: The email announcement test
+
+Draft the email you'd send to users when the feature launches.
+Describe what it does, why it matters, and how to use it.
+Include a call-to-action: "Click here to try it first."
+
+Send it to a segment of your most engaged users. Don't build the feature yet.
+When they click the CTA, show them a "this is coming soon" page and capture their email.
+
+Track click rate and capture rate. High click rate on the announcement email
+means the messaging resonates. High capture rate means the desire is strong enough
+to take an action.
+
+This test is particularly good for features that require a marketing narrative —
+you're validating the story before you build the thing the story is about.
+
+## Method 5: The pricing test
+
+The cleanest signal: would users pay more for this?
+
+In your pricing page or plan comparison, list the feature under a higher tier
+that doesn't exist yet. See if users ask about upgrading to access it.
+
+Or in a conversation with high-intent users: "We're considering adding [feature].
+If we did, it would move you from the €29 plan to the €49 plan. Would that be worth it to you?"
+
+Willingness to pay is the strongest validation signal.
+It filters out users who say they want something but won't change their behavior for it.
+
+## Choosing the right method
+
+Different methods answer different questions:
+
+| Method | Best for | Time required |
+|--------|----------|---------------|
+| Fake door | Discovery: do users seek this? | 2-4 hours (deploy) |
+| Concierge MVP | Value: is the output worth anything? | 1-2 days |
+| Figma prototype | Usability: can users understand it? | 1-3 days (design) |
+| Email announcement | Messaging: does the story resonate? | 2-4 hours (copy) |
+| Pricing test | Intent: will users pay for it? | 1 hour (conversation) |
+
+For most features, run two methods in sequence:
+First, a quick test (fake door or email) to confirm basic demand.
+Then, a deeper test (prototype or concierge) to validate the execution.
+
+## The insight that changes how you build
+
+Every method above shares a principle: separate the hypothesis from the build.
+
+The hypothesis is: users want X and will use it in Y way.
+The build is: the code that implements X.
+
+These are different things. You can test hypotheses without building.
+And you should — every time — before you build.
+
+Teams that build this habit ship fewer features and get more results.
+Not because they're doing less work. Because they're doing the right work.
+
+[Validate your product direction →](https://pledgeoff.com)

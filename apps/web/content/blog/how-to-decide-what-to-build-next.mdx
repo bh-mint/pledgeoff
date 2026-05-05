@@ -1,0 +1,144 @@
+---
+title: "How to decide what to build next"
+slug: "how-to-decide-what-to-build-next"
+excerpt: "The next feature you build should be the one most likely to move your most important metric. Here's how to identify it — before your backlog makes the decision for you."
+publishedAt: "2025-04-02"
+updatedAt: "2025-04-02"
+tag: "product-decisions"
+readingTime: 8
+affiliateDisclosure: true
+---
+
+The backlog is not a roadmap.
+
+A backlog is a list of things people wanted at some point.
+A roadmap is a sequence of decisions made in service of a goal.
+
+Most teams confuse the two. They treat the backlog as the source of truth
+for what to build next. The oldest items accumulate authority simply by
+having waited the longest. The most vocal stakeholders push their items up.
+The result is a product that builds whatever is loudest — not whatever matters most.
+
+Here's how to replace that with an actual decision process.
+
+## Start with the one metric that matters
+
+Before any feature discussion, identify your most important metric right now.
+
+Not your OKRs. Not your investor metrics. The one number that, if it moved,
+would make everything else better.
+
+For most early-stage products, this is one of three things:
+- **Activation rate** — the percentage of signups who complete the core action
+- **Retention rate** — the percentage of users who come back in week 2, month 2
+- **Revenue** — a specific ARR or MRR target you're behind on
+
+Pick one. For your current stage, one matters more than the others.
+
+If you're pre-product-market-fit: activation and retention.
+If you have retention but need to grow: revenue and acquisition.
+If you have both: retention and expansion.
+
+Everything you build next should move that metric directly.
+If you can't draw a clear line from a feature to the metric, the feature goes to the bottom.
+
+## The decision sequence
+
+Once you know your metric, apply this sequence to every candidate feature:
+
+**Step 1: Does this affect the metric?**
+
+For each feature ask: if we shipped this tomorrow, would our target metric
+measurably improve within 30 days?
+
+If yes: move to step 2.
+If no: defer. Add the feature to a backlog with a note about which metric it affects,
+so you can revisit it when that metric becomes the priority.
+
+**Step 2: What's the evidence?**
+
+For features that affect the metric, demand evidence:
+
+- For activation: where in the onboarding flow do users drop off? (Funnel data)
+- For retention: what do churned users say? What do retained users do differently?
+- For revenue: where are deals stalling? What objections are you hearing?
+
+Features backed by data get built. Features backed by opinions get deprioritized
+until data arrives or something more evidenced takes its place.
+
+**Step 3: What's the scope?**
+
+Given the evidence, what's the smallest version of this feature
+that would test whether it moves the metric?
+
+Not the complete version. Not the version with all edge cases handled.
+The version you can ship in a week that gives you a signal.
+
+Smaller scope = faster feedback = less risk of building the wrong thing.
+
+## The traps that derail good decisions
+
+**The competitor trap:**
+"[Competitor] just shipped X, we need to respond."
+
+Maybe. But does X move your most important metric for your specific customer?
+Copying competitors is a way to build the same product as everyone else.
+Your job is to be meaningfully different for a specific segment — not to match features.
+
+**The customer request trap:**
+"Our biggest customer asked for this."
+
+A customer request is a symptom. The underlying need might be solvable differently,
+better, in half the time. Always ask: what problem is the customer trying to solve?
+Build for the problem, not the requested solution.
+
+**The "while we're in there" trap:**
+"We're already touching that part of the codebase, might as well add..."
+
+Scope creep disguised as efficiency. Every "while we're in there" doubles
+the time estimate and halves the chance you ship on time. Add it to the backlog.
+
+**The completeness trap:**
+"We should finish this properly before moving on."
+
+Polish is infinite. A feature that works for 80% of cases ships in a week.
+A feature that handles all edge cases ships in two months. Ship the 80% version,
+validate it moves the metric, then decide whether the remaining 20% is worth the effort.
+
+## A practical weekly decision rhythm
+
+Once a week, before sprint planning, spend 20 minutes on this:
+
+1. Look at your target metric. Did it move last week?
+2. If yes: what drove the movement? Do more of that.
+3. If no: what's the biggest blocker? Is there a feature that directly removes it?
+4. From the backlog: what's the top item that maps to the blocker?
+5. That's what you build this week.
+
+This sounds simple. It is. Most teams don't do it because stakeholder pressure,
+Slack notifications, and "urgent" requests fill the space before this question gets asked.
+
+Schedule the 20 minutes. Protect it. Make the decision before the week starts.
+
+## The tools that help
+
+**[Linear](https://linear.app)** — the roadmap view makes it easy to sequence
+work by priority without losing track of context. The "cycles" feature enforces
+time-boxing, which prevents single items from expanding indefinitely.
+
+**[Mixpanel](https://mixpanel.com)** — the funnel analysis shows exactly where
+users drop off, which makes the activation problem concrete rather than theoretical.
+If 60% of users never complete setup, that's your next feature — regardless of what's loudest in the backlog.
+
+## The default answer
+
+When you genuinely can't decide between two features of equal priority and evidence:
+build the one you can ship faster.
+
+Speed of iteration beats correctness of choice.
+If you're wrong about which feature matters more, you'll know in two weeks instead of two months.
+
+The goal isn't to always pick the right feature.
+The goal is to build a system where you find out quickly when you've picked wrong.
+
+[Validate your product decisions with real market signals →](https://pledgeoff.com)

@@ -1,0 +1,146 @@
+---
+title: "How to use data to make faster product decisions"
+slug: "how-to-use-data-to-make-faster-product-decisions"
+excerpt: "Data doesn't slow down decisions — bad data infrastructure does. Here's how to set up the right signals so product decisions take hours, not weeks."
+publishedAt: "2025-05-21"
+updatedAt: "2025-05-21"
+tag: "product-decisions"
+readingTime: 8
+affiliateDisclosure: true
+---
+
+The frustration isn't having too little data.
+
+Most product teams have too much data — dashboards with 40 charts,
+analytics platforms full of events nobody queries, weekly reports that get
+skimmed and archived.
+
+The problem is that none of this data is organized around the questions
+that drive product decisions. It's organized around what was easy to track.
+
+Data that doesn't answer specific questions is noise.
+Here's how to build the small, focused data infrastructure that makes
+product decisions fast and confident.
+
+## The three questions every product team needs answered fast
+
+**Question 1: Is our core value being delivered?**
+
+This is your north star metric. Not DAU or revenue — the specific action
+that indicates a user is getting the core value of your product.
+
+For a project management tool: tasks marked complete per week.
+For a validation tool: analyses run per user per month.
+For a CRM: deals moved to next stage per week.
+
+When this metric is healthy: you're delivering value. Build on that.
+When it's declining: something is wrong. Find out what before building anything new.
+
+**Question 2: Where are users failing?**
+
+Define your core user journey — the sequence of actions from signup to first value.
+For each step in the sequence, track the completion rate.
+
+The step with the lowest completion rate is your highest-priority problem.
+Not the step that stakeholders talk about most. The step where data shows users stop.
+
+This question should take 5 minutes to answer.
+If it takes 3 days of analytics work: your data infrastructure is wrong.
+
+**Question 3: What are your best users doing that others aren't?**
+
+Segment your users by retention. Take the top 20% (most active, longest retained).
+What do they do in their first week that churned users don't?
+
+This is your activation pattern. Build your onboarding around replicating it.
+Reduce everything in the new user experience that doesn't lead toward that pattern.
+
+## Building the minimal data setup
+
+You don't need a data warehouse. You need 4 things:
+
+**1. Event tracking on the core actions**
+
+Instrument these events at minimum:
+- Signup
+- First core action completed
+- Core action repeated (day 7, day 30)
+- Upgrade
+- Cancellation
+
+If you have these five events with timestamps, you can answer all three questions above.
+
+Every event needs: user ID, timestamp, and relevant context (e.g., which plan, which feature).
+
+**2. A funnel view**
+
+The funnel from signup → first core action → repeated core action is the most important
+visualization you have. It shows exactly where users fall off.
+
+Build this view so you can check it in 2 minutes, not 2 hours.
+
+**3. Cohort retention**
+
+Group users by signup week. For each cohort: what percentage are still active at week 4, week 8, week 12?
+
+Improving this chart is the most direct path to a healthier business.
+Every product decision should be evaluated against: does this improve the cohort chart?
+
+**4. A single decision log**
+
+When you make a product decision, write down:
+- What changed
+- What metric you expected to move
+- What the metric actually did after 30 days
+
+This log is the most valuable internal document a product team can have.
+It tells you which of your instincts were right and which were wrong —
+and it builds pattern recognition faster than any other practice.
+
+## The anti-patterns that make data slow
+
+**Tracking everything without a question in mind.**
+Events without questions produce reports nobody reads.
+Track what you need to answer your three core questions. Nothing else for now.
+
+**Waiting for statistical significance on every change.**
+At early-stage scale, you'll rarely get statistical significance.
+Make decisions based on directional signal and speed up your next experiment.
+Waiting for significance on a cohort of 200 users will take months.
+
+**Using data to confirm, not to challenge.**
+The most common misuse of data is cherry-picking the chart that supports
+the decision you already made. Decide what question you're asking first.
+Then look at the data. Accept what it says.
+
+**Building dashboards instead of answering questions.**
+A dashboard with 40 charts is not a data practice.
+It's a way of feeling organized while avoiding the hard question of what matters.
+Delete 80% of your charts. Keep the 3 that answer your core questions.
+
+## The tools that make this practical
+
+**[Mixpanel](https://mixpanel.com)** — the best tool for funnel analysis and
+cohort retention at early-stage scale. The event tracking setup takes a day.
+After that, answering "where are users dropping off?" takes minutes.
+
+**[Hotjar](https://hotjar.com)** — session recordings answer the qualitative version
+of the same question: not just where users stop, but why.
+When the funnel shows 40% drop-off at step 3, Hotjar shows you what
+those users are actually doing before they leave.
+
+## The decision velocity target
+
+A team with good data infrastructure should be able to:
+- Answer "is our core value being delivered?" in 5 minutes
+- Answer "where are users failing?" in 10 minutes
+- Evaluate a feature's impact 30 days after shipping in 15 minutes
+
+If any of these takes longer, the bottleneck is instrumentation — not analysis.
+Fix the tracking. The analysis follows automatically.
+
+Fast decisions aren't reckless decisions.
+They're decisions made by teams who know what they're measuring
+and can see the signal clearly.
+
+[Validate your product decisions with market data →](https://pledgeoff.com)
