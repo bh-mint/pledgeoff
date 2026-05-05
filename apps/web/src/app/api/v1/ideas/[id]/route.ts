@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { container } from '@/lib/container';
+import { getCachedIdea, setCachedIdea } from '@/lib/idea-cache';
 
 function unauthorizedResponse(traceId: string) {
   return Response.json(
@@ -25,6 +26,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
   const userId = await resolveUserId(req.headers.get('authorization'));
   if (!userId) return unauthorizedResponse(traceId);
+
+  // Cache check — keyed by userId+ideaId so users never see each other's data
+  const cached = getCachedIdea(userId, id);
+  if (cached) {
+    return Response.json(
+      { data: cached },
+      { status: 200, headers: { 'X-Trace-Id': traceId, 'X-Cache': 'HIT' } },
+    );
+  }
 
   const ideaResult = await container._repos.ideaRepo.findById(id);
   if (ideaResult.isErr()) {
@@ -58,8 +68,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const decision = decisionResult.isOk() ? decisionResult.value : null;
   const signals = signalsResult.isOk() ? signalsResult.value : [];
 
+  setCachedIdea(userId, id, idea, decision, signals);
+
   return Response.json(
     { data: { idea, decision, signals } },
-    { status: 200, headers: { 'X-Trace-Id': traceId } },
+    { status: 200, headers: { 'X-Trace-Id': traceId, 'X-Cache': 'MISS' } },
   );
 }
