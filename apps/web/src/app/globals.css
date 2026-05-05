@@ -8,7 +8,7 @@
 
   --t1:        #F5F5F4;
   --t2:        #A1A1A6;
-  --t3:        #52525B;
+  --t3:        #808088;  /* WCAG AA: 4.81:1 on --surface, 5.19:1 on --canvas */
 
   --accent:    #D6FF3D;
   --validated: #7DD66B;
