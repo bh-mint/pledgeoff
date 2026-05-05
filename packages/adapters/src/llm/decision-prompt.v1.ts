@@ -38,5 +38,6 @@ Rules:
 - confidence reflects how much evidence supports the verdict (0.5 = weak, 0.9 = strong)
 - reasoning must cite specific evidence from the signals
 - dimensions.score: 0-100 per dimension based on signals; weights must sum to 1.0
+- reasoning: write in the same language as the IDEA text above
 - Do NOT include any text outside the JSON object`;
 }
