@@ -11,11 +11,11 @@ const ARTICLES_PER_PAGE = 9;
 
 type Category = "all" | "idea-validation" | "product-decisions" | "founder";
 
-const CATEGORIES: { value: Category; label: string }[] = [
+const CATEGORIES: { value: Category; label: string; color?: string }[] = [
   { value: "all", label: "All" },
-  { value: "idea-validation", label: "Validation" },
-  { value: "product-decisions", label: "Strategy" },
-  { value: "founder", label: "Field notes" },
+  { value: "idea-validation", label: "Idea Validation", color: "var(--validated)" },
+  { value: "product-decisions", label: "Product Decisions", color: "var(--accent)" },
+  { value: "founder", label: "Founder Mindset", color: "var(--caution)" },
 ];
 
 function categoryLabel(tag: string) {
@@ -93,24 +93,38 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
             ))}
           </div>
 
-          {/* Browse by topic */}
+          {/* Browse by topic — filters in-page */}
           <div className="mt-10 max-w-xl">
             <div className="mono text-[10px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>Browse by topic</div>
             <div className="flex flex-wrap gap-2">
-              {[
-                { href: "/blog/idea-validation", label: "Idea Validation", color: "var(--validated)" },
-                { href: "/blog/product-decisions", label: "Product Decisions", color: "var(--accent)" },
-                { href: "/blog/founder", label: "Founder Mindset", color: "var(--caution)" },
-              ].map((t) => (
-                <Link
-                  key={t.href}
-                  href={t.href}
-                  className="mono text-[11px] rounded-full border h-7 px-3 inline-flex items-center transition-colors hover:border-[var(--t3)]"
-                  style={{ borderColor: "var(--border)", color: t.color }}
+              {CATEGORIES.filter((c) => c.value !== "all").map((c) => {
+                const isActive = activeTag === c.value;
+                return (
+                  <button
+                    key={c.value}
+                    onClick={() => handleTagChange(c.value)}
+                    className="mono text-[11px] rounded-full border h-7 px-3 inline-flex items-center transition-all"
+                    style={{
+                      borderColor: isActive ? c.color : "var(--border)",
+                      color: isActive ? c.color : "var(--t3)",
+                      background: isActive ? `${c.color}12` : "transparent",
+                      fontWeight: isActive ? 600 : 400,
+                    }}
+                  >
+                    {isActive && <span className="mr-1.5 text-[8px]">●</span>}
+                    {c.label}
+                  </button>
+                );
+              })}
+              {activeTag !== "all" && (
+                <button
+                  onClick={() => handleTagChange("all")}
+                  className="mono text-[11px] rounded-full border h-7 px-3 inline-flex items-center transition-colors"
+                  style={{ borderColor: "var(--border)", color: "var(--t3)" }}
                 >
-                  {t.label}
-                </Link>
-              ))}
+                  × clear
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -122,28 +136,30 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
         style={{ borderColor: "var(--border)", background: "rgba(10,10,11,0.85)" }}
       >
         <div className="max-w-[1100px] mx-auto px-8 h-12 flex items-center justify-between">
-          <div className="flex items-center gap-2 mono text-[11px]">
-            {CATEGORIES.map(({ value, label }) => {
+          <div className="flex items-center gap-2 mono text-[11px] overflow-x-auto">
+            {CATEGORIES.map(({ value, label, color }) => {
               const count = tagCount(value);
               const active = activeTag === value;
+              const activeColor = color ?? "var(--accent)";
               return (
                 <button
                   key={value}
                   onClick={() => handleTagChange(value)}
-                  className="rounded-full border h-7 px-3 inline-flex items-center transition-colors"
+                  className="rounded-full border h-7 px-3 inline-flex items-center transition-all flex-shrink-0"
                   style={
                     active
-                      ? { borderColor: "var(--accent)", background: "var(--surface)", color: "var(--t1)" }
+                      ? { borderColor: activeColor, background: `${activeColor}15`, color: "var(--t1)" }
                       : { borderColor: "var(--border)", color: "var(--t2)" }
                   }
                 >
+                  {active && <span className="mr-1 text-[8px]" style={{ color: activeColor }}>●</span>}
                   {label}
                   <span className="ml-1.5 mono text-[10px]" style={{ color: "var(--t3)" }}>{count}</span>
                 </button>
               );
             })}
           </div>
-          <div className="mono text-[10px]" style={{ color: "var(--t3)" }}>SORT · NEWEST FIRST</div>
+          <div className="mono text-[10px] hidden sm:block flex-shrink-0 ml-4" style={{ color: "var(--t3)" }}>SORT · NEWEST FIRST</div>
         </div>
       </section>
 

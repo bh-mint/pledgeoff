@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Terms of Service — PledgeOFF",
   description: "Terms governing your use of the PledgeOFF platform. Read before signing up.",
+  alternates: { canonical: "https://pledgeoff.com/terms" },
   robots: { index: true, follow: true },
 };
 
