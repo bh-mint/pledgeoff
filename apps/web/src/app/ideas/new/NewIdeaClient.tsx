@@ -85,8 +85,8 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
       />
 
       {/* Minimal top bar */}
-      <div className="relative px-10 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-6">
+      <div className="relative px-4 sm:px-10 py-4 sm:py-6 flex items-center justify-between">
+        <div className="flex items-center gap-4 sm:gap-6">
           <Link
             href="/dashboard"
             className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]"
@@ -100,11 +100,11 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
             onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t1)")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
           >
-            ← back to Dashboard
+            ← Dashboard
           </Link>
         </div>
-        <span className="mono text-[11px] text-[var(--t3)]">
-          new validation · {validationsLeft} left this month
+        <span className="mono text-[10px] sm:text-[11px] text-[var(--t3)]">
+          {validationsLeft} left
         </span>
       </div>
 
@@ -113,7 +113,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
         onSubmit={handleSubmit}
         className="relative flex-1 flex items-start"
       >
-        <div className="max-w-[760px] w-full mx-auto px-10 py-12">
+        <div className="max-w-[760px] w-full mx-auto px-4 sm:px-10 py-8 sm:py-12">
           <div
             className="mono text-[10px] uppercase tracking-[0.14em] mb-4"
             style={{ color: "var(--t3)" }}
@@ -124,7 +124,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
           {/* Q1 — idea */}
           <label className="block">
             <div
-              className="display text-[44px] font-semibold tracking-tight leading-[1.05] mb-4"
+              className="display text-[28px] sm:text-[44px] font-semibold tracking-tight leading-[1.05] mb-4"
               style={{ color: "var(--t1)" }}
             >
               What&apos;s the idea?
@@ -133,7 +133,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="AI-powered meal planner that adapts to your gym schedule"
-              className="w-full bg-transparent outline-none border-b pb-3 display text-[22px] font-semibold tracking-tight"
+              className="w-full bg-transparent outline-none border-b pb-3 display text-[18px] sm:text-[22px] font-semibold tracking-tight"
               style={{
                 borderColor: title ? "var(--accent)" : "var(--border)",
                 color: "var(--t1)",
@@ -250,11 +250,11 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
           )}
 
           {/* CTA */}
-          <div className="mt-10 flex items-center gap-4">
+          <div className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             <button
               type="submit"
               disabled={!valid || status === "loading"}
-              className="display text-[14px] font-semibold px-6 h-12 rounded-md flex items-center gap-2 transition-all"
+              className="display text-[14px] font-semibold px-6 h-12 rounded-md flex items-center justify-center gap-2 transition-all"
               style={{
                 background: valid ? "var(--accent)" : "var(--surface)",
                 color: valid ? "#000" : "var(--t3)",
