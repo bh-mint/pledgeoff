@@ -53,24 +53,17 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
     >
       {/* Table header */}
       <div
-        className="px-6 py-4 border-b flex items-center gap-3"
+        className="px-4 sm:px-6 py-4 border-b flex flex-wrap gap-3 items-center"
         style={{ borderColor: "var(--border)" }}
       >
         <h2 className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]">
           All validations
         </h2>
         <span className="mono text-[10px] text-[var(--t3)]">
-          {totalCount} · sortable
+          {totalCount}
         </span>
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="search ideas…"
-          className="ml-auto bg-transparent outline-none px-3 h-7 text-[12px] rounded-md border w-52"
-          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-        />
         <div
-          className="flex rounded border overflow-hidden"
+          className="ml-auto flex rounded border overflow-hidden"
           style={{ borderColor: "var(--border)" }}
         >
           {(["date", "score"] as SortKey[]).map((key) => (
@@ -87,11 +80,18 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
             </button>
           ))}
         </div>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="search ideas…"
+          className="w-full sm:w-44 bg-transparent outline-none px-3 h-8 sm:h-7 text-[12px] rounded-md border"
+          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+        />
       </div>
 
-      {/* Column headers */}
+      {/* Column headers — desktop only */}
       <div
-        className="px-6 py-2.5 grid grid-cols-12 gap-3 border-b mono text-[10px] uppercase tracking-[0.14em]"
+        className="hidden sm:grid px-6 py-2.5 grid-cols-12 gap-3 border-b mono text-[10px] uppercase tracking-[0.14em]"
         style={{ borderColor: "var(--border)", color: "var(--t3)" }}
       >
         <div className="col-span-6">Idea</div>
@@ -108,7 +108,7 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
           <Link
             key={row.id}
             href={`/ideas/${row.id}`}
-            className="px-6 py-3 grid grid-cols-12 gap-3 border-b items-center cursor-pointer transition-colors"
+            className="px-4 sm:px-6 py-3 sm:grid sm:grid-cols-12 sm:gap-3 border-b items-center cursor-pointer transition-colors"
             style={{ borderColor: "var(--border)" }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.background = "rgba(255,255,255,0.015)")
@@ -116,54 +116,57 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
             {/* Idea */}
-            <div className="col-span-6 min-w-0">
+            <div className="sm:col-span-6 min-w-0 mb-1.5 sm:mb-0">
               <div className="text-[13px] text-[var(--t1)] truncate">{row.text}</div>
               <div className="mono text-[10px] mt-0.5 text-[var(--t3)]">
                 val_{row.id.slice(0, 8)}
               </div>
             </div>
 
-            {/* Score + mini bar */}
-            <div className="col-span-2 flex items-center gap-2">
-              {row.score !== null ? (
-                <>
-                  <span
-                    className="display tnum text-[16px] font-semibold w-7 flex-shrink-0"
-                    style={{ color }}
-                  >
-                    {row.score}
-                  </span>
-                  <div
-                    className="flex-1 h-[3px] rounded-full"
-                    style={{ background: "var(--border)" }}
-                  >
+            {/* Mobile meta row */}
+            <div className="sm:contents flex items-center gap-3">
+              {/* Score + mini bar */}
+              <div className="sm:col-span-2 flex items-center gap-2 flex-1 sm:flex-none">
+                {row.score !== null ? (
+                  <>
+                    <span
+                      className="display tnum text-[14px] sm:text-[16px] font-semibold w-7 flex-shrink-0"
+                      style={{ color }}
+                    >
+                      {row.score}
+                    </span>
                     <div
-                      className="h-[3px] rounded-full"
-                      style={{ width: `${row.score}%`, background: color }}
-                    />
-                  </div>
-                </>
-              ) : (
-                <span className="mono text-[10px] text-[var(--t3)]">—</span>
-              )}
-            </div>
+                      className="flex-1 h-[3px] rounded-full"
+                      style={{ background: "var(--border)" }}
+                    >
+                      <div
+                        className="h-[3px] rounded-full"
+                        style={{ width: `${row.score}%`, background: color }}
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <span className="mono text-[10px] text-[var(--t3)]">—</span>
+                )}
+              </div>
 
-            {/* Verdict */}
-            <div
-              className="col-span-1 mono text-[10px]"
-              style={{ color }}
-            >
-              {row.verdict ?? "—"}
-            </div>
+              {/* Verdict */}
+              <div
+                className="sm:col-span-1 mono text-[10px] flex-shrink-0"
+                style={{ color }}
+              >
+                {row.verdict ?? "—"}
+              </div>
 
-            {/* Status */}
-            <div className="col-span-2 mono text-[10px] text-[var(--t2)]">
-              {STATUS_LABEL[row.status]}
-            </div>
+              {/* Status */}
+              <div className="sm:col-span-2 mono text-[10px] text-[var(--t2)] flex-shrink-0">
+                {STATUS_LABEL[row.status]}
+              </div>
 
-            {/* Date */}
-            <div className="col-span-1 text-right mono text-[10px] text-[var(--t3)]">
-              {shortDate(row.createdAt)}
+              {/* Date */}
+              <div className="sm:col-span-1 ml-auto sm:ml-0 sm:text-right mono text-[10px] text-[var(--t3)] flex-shrink-0">
+                {shortDate(row.createdAt)}
+              </div>
             </div>
           </Link>
         );

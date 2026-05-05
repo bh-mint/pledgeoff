@@ -295,7 +295,7 @@ export default async function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                 {pipelineSteps.map((s, i) => (
                   <div key={s.k}>
                     <div
