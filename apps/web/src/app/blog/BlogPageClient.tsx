@@ -137,21 +137,24 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
             <section className="border-b" style={{ borderColor: "var(--border)" }}>
               <Link
                 href={`/blog/${featured.slug}`}
-                className="block max-w-[1100px] mx-auto px-8 py-10 transition-colors hover:bg-white/[0.01]"
+                className="block max-w-[1100px] mx-auto px-4 sm:px-8 py-8 sm:py-10 transition-colors hover:bg-white/[0.01]"
               >
-                <div className="grid grid-cols-12 gap-8 items-start">
-                  <div className="col-span-3">
+                <div className="flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-start gap-3">
+                  <div className="sm:col-span-3 flex items-center gap-3 sm:block">
                     <div className="mono text-[10px]" style={{ color: "var(--accent)" }}>▎ FEATURED</div>
-                    <div className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
+                    <div className="mono text-[10px] sm:mt-2" style={{ color: "var(--t3)" }}>
                       {formatDate(featured.publishedAt).toUpperCase()}
                     </div>
+                    <div className="sm:hidden ml-auto mono text-[10px]" style={{ color: "var(--t3)" }}>
+                      {featured.readingTime} MIN
+                    </div>
                   </div>
-                  <div className="col-span-7">
+                  <div className="sm:col-span-7">
                     <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{ color: "var(--t3)" }}>
                       {categoryLabel(featured.tag)}
                     </div>
                     <h2
-                      className="display text-[36px] font-semibold leading-[1.05] transition-colors group-hover:text-[var(--accent)]"
+                      className="display text-[28px] sm:text-[36px] font-semibold leading-[1.05]"
                       style={{ color: "var(--t1)" }}
                     >
                       {featured.title}
@@ -160,7 +163,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                       {featured.excerpt}
                     </p>
                   </div>
-                  <div className="col-span-2 text-right">
+                  <div className="hidden sm:block sm:col-span-2 text-right">
                     <div className="mono text-[10px]" style={{ color: "var(--t3)" }}>
                       {featured.readingTime} MIN
                     </div>
@@ -172,31 +175,37 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
           {/* Article list rows */}
           <section>
-            <div className="max-w-[1100px] mx-auto px-8">
+            <div className="max-w-[1100px] mx-auto px-4 sm:px-8">
               <div className="divide-y" style={{ borderColor: "var(--border)" }}>
                 {rest.map((article) => (
                   <Link
                     key={article.slug}
                     href={`/blog/${article.slug}`}
-                    className="grid grid-cols-12 gap-6 items-center py-6 border-b transition-colors hover:bg-white/[0.015]"
+                    className="flex flex-col sm:grid sm:grid-cols-12 sm:gap-6 sm:items-center py-5 sm:py-6 border-b transition-colors hover:bg-white/[0.015]"
                     style={{ borderColor: "var(--border)" }}
                   >
-                    <div className="col-span-2 mono text-[11px]" style={{ color: "var(--t3)" }}>
-                      {formatDate(article.publishedAt).toUpperCase()}
-                    </div>
-                    <div className="col-span-1 mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>
-                      {categoryLabel(article.tag)}
+                    <div className="flex items-center gap-3 mb-1 sm:contents">
+                      <div className="sm:col-span-2 mono text-[10px] sm:text-[11px]" style={{ color: "var(--t3)" }}>
+                        {formatDate(article.publishedAt).toUpperCase()}
+                      </div>
+                      <div className="sm:col-span-1 mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>
+                        {categoryLabel(article.tag)}
+                      </div>
+                      <div className="sm:hidden ml-auto flex items-center gap-2 mono text-[10px]" style={{ color: "var(--t3)" }}>
+                        <span>{article.readingTime} MIN</span>
+                        <span>→</span>
+                      </div>
                     </div>
                     <div
-                      className="col-span-7 display text-[18px] font-medium transition-colors"
+                      className="sm:col-span-7 display text-[16px] sm:text-[18px] font-medium leading-snug"
                       style={{ color: "var(--t1)" }}
                     >
                       {article.title}
                     </div>
-                    <div className="col-span-1 mono text-[11px]" style={{ color: "var(--t3)" }}>
+                    <div className="hidden sm:block sm:col-span-1 mono text-[11px]" style={{ color: "var(--t3)" }}>
                       {article.readingTime} MIN
                     </div>
-                    <div className="col-span-1 mono text-[11px] text-right" style={{ color: "var(--t3)" }}>
+                    <div className="hidden sm:block sm:col-span-1 mono text-[11px] text-right" style={{ color: "var(--t3)" }}>
                       →
                     </div>
                   </Link>
