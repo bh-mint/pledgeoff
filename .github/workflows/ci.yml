@@ -7,6 +7,49 @@ on:
     branches: [main]
 
 jobs:
+  rls:
+    name: RLS Adversarial Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: pledgeoff_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGDATABASE: pledgeoff_test
+      PGUSER: postgres
+      PGPASSWORD: postgres
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup auth schema + roles
+        run: psql -f infra/tests/rls-ci-setup.sql
+
+      - name: Apply migrations
+        run: |
+          for f in $(ls infra/supabase/migrations/*.sql | sort); do
+            echo "Applying $f"
+            psql -f "$f"
+          done
+
+      - name: Run RLS adversarial tests
+        run: psql -f infra/tests/rls-adversarial.sql
+
   ci:
     name: Typecheck · Test · Lint · Build
     runs-on: ubuntu-latest
