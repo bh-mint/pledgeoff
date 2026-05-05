@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { CreateIdeaRequestSchema } from '@pledgeoff/contracts';
 import { container } from '@/lib/container';
@@ -142,6 +143,14 @@ export async function POST(req: Request) {
     resourceType: 'idea',
     resourceId: idea.id,
     traceId,
+  });
+
+  // Run pipeline in background after 201 is sent — non-blocking
+  after(async () => {
+    // Step 1: idea.created.v1 → FetchSignals (Reddit || GitHub parallel)
+    await container.eventBus.processOutbox();
+    // Step 2: signals.fetched.v1 → DecideUseCase (LLM)
+    await container.eventBus.processOutbox();
   });
 
   return Response.json(
