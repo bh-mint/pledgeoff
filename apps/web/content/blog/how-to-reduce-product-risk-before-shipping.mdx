@@ -1,0 +1,147 @@
+---
+title: "How to reduce product risk before shipping"
+slug: "how-to-reduce-product-risk-before-shipping"
+excerpt: "Every feature you ship is a bet. Here's how to de-risk the bet before you've written the code — so you're shipping things that are likely to work, not hoping they do."
+publishedAt: "2025-04-23"
+updatedAt: "2025-04-23"
+tag: "product-decisions"
+readingTime: 8
+affiliateDisclosure: false
+---
+
+Every product decision is a bet.
+
+You're betting that a specific feature, for a specific user,
+in a specific context, will produce a specific outcome.
+
+Most teams treat this bet as a certainty — they've done their research,
+they understand the user, they're confident. They build. They ship.
+And frequently, the bet doesn't pay off the way they expected.
+
+The feature gets ignored. Or it's used in unexpected ways.
+Or it solves the stated problem but not the underlying one.
+
+Risk reduction isn't about avoiding bets. It's about making smaller bets
+with faster feedback loops, so when you're wrong you find out quickly
+and the cost is low.
+
+## The four types of product risk
+
+Before you can reduce risk, you need to know what kind of risk you're taking.
+
+**Desirability risk:** Do users actually want this?
+**Usability risk:** Can users understand and use it?
+**Feasibility risk:** Can we build it reliably?
+**Viability risk:** Does shipping this help the business?
+
+Most teams focus almost entirely on feasibility — can we build it?
+This is the least important risk for most features. You can almost always build it.
+The question is whether you should.
+
+## Reducing desirability risk
+
+Before building, validate that users want the thing — not just that they said they would.
+
+The techniques:
+
+**Show the concept, not the code.**
+Create a mockup, a screenshot, or a Figma prototype.
+Put it in front of 5 current users. Watch what they do.
+Do they immediately understand what it's for? Do they ask "where has this been?"
+Or do they need explanation?
+
+If users need 3 sentences of context to understand a feature, reconsider.
+Features that need explanation are features fighting against user expectations.
+
+**Ask for pre-commitment.**
+"If we built this, would you use it regularly?" is a weak question.
+"If we built this, would you pay €X more per month for it?" is strong.
+"If we built this, can we schedule time to test it next week?" is stronger.
+
+Pre-commitment reveals whether the expressed desire is real.
+
+**Check if users are solving this manually today.**
+If users are solving the problem with a workaround, the desirability is confirmed.
+Your job is to understand the workaround and build something better.
+
+## Reducing usability risk
+
+You can build the right feature and ship it in a form users can't understand.
+
+Usability risk is highest for:
+- New interaction patterns (things users haven't seen before)
+- Workflows that span multiple steps
+- Features that require configuration before they work
+
+Reduce it by testing before you build at full fidelity:
+
+**Corridor testing:** Show a prototype to 3 people who've never seen it.
+Ask them to accomplish a specific task. Watch in silence.
+Where they hesitate or ask questions = where the UI needs work.
+
+**Written walkthrough test:** Send a written description of the flow to users via email.
+Ask them to describe back to you how they would use it.
+If their description doesn't match your intent, the communication is failing.
+
+**Benchmark against familiar patterns.**
+Users have mental models built from years of using other software.
+A feature that matches an existing mental model requires zero learning.
+A feature that contradicts a mental model requires relearning.
+Default to familiar patterns unless you have a strong reason to deviate.
+
+## Reducing feasibility risk
+
+Feasibility risk is usually the easiest to address — your engineers know the codebase.
+But two patterns consistently cause feasibility surprises:
+
+**Hidden dependencies:** The feature requires a change to something foundational
+(data model, auth system, external API integration) that makes it 5x larger than estimated.
+De-risk by having engineering spike on the unknown parts before committing to a timeline.
+
+**Performance at scale:** The feature works fine in development and breaks in production
+when real users run it on real data. De-risk by testing with production-scale data early.
+
+## Reducing viability risk
+
+The most underrated risk: you build it, users love it, and it still doesn't help the business.
+
+Viability risk surfaces as:
+- Features that attract users who don't convert to paid
+- Features that increase support volume without increasing revenue
+- Features that attract a segment outside your target ICP
+
+Before building, ask: which of our metrics does this feature move?
+If you can't answer clearly, that's a viability risk.
+
+The test: write one sentence — "If this feature succeeds, [metric] will increase by [amount]
+within [timeframe]." If you can write it, you have a viability hypothesis.
+If you can't, you're building without a success definition.
+
+## The minimum viable feature
+
+Every feature has a version that can be shipped in a week and a version that takes a month.
+
+Ship the week version first. Not to cut corners — to de-risk.
+
+The week version answers the desirability and usability questions faster.
+If users engage: invest in the full version.
+If users don't: you've lost a week instead of a month.
+
+Fast is not the same as sloppy. The week version should be functional and reliable
+for the core case. It just doesn't handle edge cases, configuration options, or polish.
+
+## The risk you can't eliminate
+
+No amount of research eliminates shipping risk entirely.
+
+Users behave differently in real conditions than in tests.
+Context matters. Timing matters. What else is on their screen matters.
+
+The goal isn't zero risk. It's to enter each bet knowing what you're assuming,
+having tested the assumptions you can test cheaply, and having a plan for
+how you'll know if the bet paid off.
+
+That's the difference between a team that ships and learns
+and a team that ships and hopes.
+
+[Validate your product decisions before you build →](https://pledgeoff.com)

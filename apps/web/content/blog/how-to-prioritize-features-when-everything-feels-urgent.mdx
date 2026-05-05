@@ -1,0 +1,130 @@
+---
+title: "How to prioritize features when everything feels urgent"
+slug: "how-to-prioritize-features-when-everything-feels-urgent"
+excerpt: "When every feature request feels critical and every stakeholder has a top priority, most teams either freeze or build everything at once. Here's how to decide with clarity."
+publishedAt: "2025-03-26"
+updatedAt: "2025-03-26"
+tag: "product-decisions"
+readingTime: 9
+affiliateDisclosure: true
+---
+
+Every product team eventually hits the same wall.
+
+The backlog has 140 items. Every item was added by someone with a good reason.
+Sales wants the enterprise integration. Support wants the bulk action.
+Marketing wants the shareable link. Customers want 12 different things.
+And the CEO wants all of it by end of quarter.
+
+The problem isn't that everything is urgent. The problem is that "urgent"
+has stopped meaning anything useful.
+
+When everything is urgent, you have no prioritization — you have a list.
+Here's how to turn the list into a decision.
+
+## Why most prioritization frameworks fail
+
+The standard advice is to use a framework: MoSCoW, RICE, ICE, Kano.
+Pick a scoring system, assign numbers, sort by score, build in order.
+
+This fails for a consistent reason: the inputs are opinions dressed as numbers.
+
+When you score "Impact" from 1 to 10, what you're actually doing is letting
+whoever fills out the spreadsheet encode their priorities into fake precision.
+Sales gives their integration a 10 for impact. Engineering gives it a 3.
+Average is 6.5. That number means nothing.
+
+The framework creates the appearance of objectivity while preserving the same
+subjective disagreements that existed before.
+
+What actually works is replacing opinion with evidence — and being explicit
+about which questions the evidence answers.
+
+## The three questions that cut through the noise
+
+Before touching a backlog, answer three questions for each candidate feature:
+
+**Question 1: Does this unblock revenue?**
+Is there a specific deal, contract, or upgrade that requires this feature?
+Not "sales thinks this would help" — a named customer who will pay when it's built.
+
+**Question 2: Does this reduce churn?**
+Is there a measurable pattern of customers leaving or downgrading because this is missing?
+Not "customers have asked for it" — evidence that absence causes loss.
+
+**Question 3: Does this affect the core loop?**
+The core loop is the action users repeat most often. For a project manager: creating tasks.
+For an analytics tool: viewing dashboards. For a validation tool: running analyses.
+Anything that makes the core loop faster, clearer, or more reliable compounds.
+
+Features that answer yes to any of these questions get built first.
+Features that answer no to all three get deferred until the ones above are done.
+
+This isn't a scoring system. It's a filter. Most features fail it.
+
+## The evidence you need for each question
+
+**For revenue unblocking:** a named account in your CRM, a specific dollar amount,
+a written commitment from the prospect. "Sales thinks" doesn't count.
+
+**For churn reduction:** churned customers who cited the missing feature,
+support ticket volume, NPS comments mentioning it. Anecdotes don't count.
+
+**For core loop impact:** usage data showing where users slow down or drop off,
+session recordings showing friction, A/B test results. Gut feel doesn't count.
+
+If you can't produce evidence, the feature goes to the bottom of the queue
+until you can — or until something with evidence displaces it permanently.
+
+## The tie-breaker: reversibility
+
+When two features pass the filter and seem equally important, ask:
+which one is harder to undo?
+
+A feature that's architecturally difficult to change or remove should be built
+with more care and pushed later. A feature you can ship in a day and roll back
+in an hour should be shipped first.
+
+Fast experiments beat slow certainties. If you can validate a feature in a week,
+do that before spending a month on something you're confident about.
+
+Confidence is not the same as evidence.
+
+## What to do with the rest of the backlog
+
+The 90% of features that don't pass the filter aren't deleted — they're deferred.
+
+The practical system: move everything that fails the filter to a "someday" bucket.
+Review that bucket once a month. If a feature has sat there for three months
+without gaining evidence, delete it. If it gains evidence (a named deal, a churn pattern),
+move it to the queue.
+
+Most "someday" features never come back. That's fine. Backlog grooming is mostly deletion.
+
+## The tools that make this easier
+
+**[Linear](https://linear.app)** — keeps the roadmap clean and connected
+to actual issues. The triage workflow makes it easy to sort features
+into "now," "next," and "someday" without losing context.
+
+**[Mixpanel](https://mixpanel.com)** — shows you which features users
+actually engage with versus which ones you think are important.
+Usage data regularly surprises teams who are confident they know what matters.
+
+## The uncomfortable truth about urgent
+
+Most things that feel urgent aren't.
+
+They feel urgent because someone articulate made a compelling case for them.
+Because a big customer mentioned it in a meeting. Because a competitor just shipped it.
+
+None of these make something actually urgent. Urgency is defined by consequence:
+what happens if you don't build this in the next two weeks?
+
+If the answer is "probably nothing material" — it's not urgent.
+If the answer is "we lose the €80k deal" — it's urgent.
+
+Separating felt urgency from actual urgency is the core skill of product prioritization.
+The framework above forces that separation. The evidence either exists or it doesn't.
+
+[Make smarter product decisions →](https://pledgeoff.com)
