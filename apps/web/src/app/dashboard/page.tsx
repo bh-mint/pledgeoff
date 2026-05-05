@@ -171,15 +171,15 @@ export default async function DashboardPage() {
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
       {/* Dashboard nav */}
       <div className="border-b sticky top-0 z-50 " style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
-        <div className="max-w-[1440px] mx-auto px-10 h-12 flex items-center justify-between">
-          <div className="flex items-center gap-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 h-12 flex items-center justify-between">
+          <div className="flex items-center gap-4 sm:gap-8">
             <Link
               href="/"
               className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]"
             >
               Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
             </Link>
-            <nav className="flex items-center gap-5 text-[13px] text-[var(--t2)]">
+            <nav className="hidden sm:flex items-center gap-5 text-[13px] text-[var(--t2)]">
               <span className="text-[var(--t1)]">Dashboard</span>
               <Link href="/ideas/new" className="hover:text-[var(--t1)] transition-colors">
                 Validator
@@ -198,9 +198,9 @@ export default async function DashboardPage() {
 
       {/* Stats bar */}
       <div className="border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-[1440px] mx-auto px-10 py-10 grid grid-cols-12 gap-6">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           {/* Ideas validated */}
-          <div className="col-span-3 border-l pl-4" style={{ borderColor: "var(--border)" }}>
+          <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
             <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
               ideas validated
             </div>
@@ -216,7 +216,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Average score */}
-          <div className="col-span-3 border-l pl-4" style={{ borderColor: "var(--border)" }}>
+          <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
             <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
               average score
             </div>
@@ -232,7 +232,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Killed early */}
-          <div className="col-span-3 border-l pl-4" style={{ borderColor: "var(--border)" }}>
+          <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
             <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
               ideas killed early
             </div>
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Days to first GO */}
-          <div className="col-span-3 border-l pl-4" style={{ borderColor: "var(--border)" }}>
+          <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
             <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)]">
               days · first launch-ready
             </div>
@@ -265,7 +265,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Main grid */}
-      <div className="max-w-[1440px] mx-auto px-10 py-10 grid grid-cols-12 gap-6">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-12 gap-6">
         {/* LEFT — pipeline + table */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
           {/* Pipeline */}
@@ -423,7 +423,7 @@ export default async function DashboardPage() {
 
       {/* Footer */}
       <div
-        className="max-w-[1440px] mx-auto px-10 py-6 flex items-center justify-between border-t"
+        className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 flex items-center justify-between border-t"
         style={{ borderColor: "var(--border)" }}
       >
         <span className="mono text-[10px] text-[var(--t3)]">

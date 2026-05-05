@@ -152,37 +152,26 @@ export function DecisionCard({ decision }: DecisionCardProps) {
                 return (
                   <div
                     key={d.name}
-                    className="grid grid-cols-12 items-center gap-3 py-2 border-b"
+                    className="py-2 border-b"
                     style={{ borderColor: "var(--border)" }}
                   >
-                    <div className="col-span-4 text-[12px] text-[var(--t1)]">
-                      {d.name}
-                    </div>
-                    <div className="col-span-1 mono text-[9px] text-[var(--t3)]">
-                      {Math.round(d.weight * 100)}%
-                    </div>
-                    <div className="col-span-6">
-                      <div
-                        className="h-[3px] rounded-full"
-                        style={{ background: "var(--border)" }}
-                      >
-                        <div
-                          className="h-[3px] rounded-full"
-                          style={{
-                            width: barsVisible ? `${d.score}%` : "0%",
-                            background: dimColor,
-                            transition:
-                              "width 800ms cubic-bezier(0.16,1,0.3,1)",
-                            transitionDelay: `${i * 120}ms`,
-                          }}
-                        />
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="text-[12px] text-[var(--t1)]">{d.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="mono text-[9px] text-[var(--t3)]">{Math.round(d.weight * 100)}%</span>
+                        <span className="mono tnum text-[11px]" style={{ color: dimColor }}>{d.score}</span>
                       </div>
                     </div>
-                    <div
-                      className="col-span-1 mono tnum text-[11px] text-right"
-                      style={{ color: dimColor }}
-                    >
-                      {d.score}
+                    <div className="h-[3px] rounded-full" style={{ background: "var(--border)" }}>
+                      <div
+                        className="h-[3px] rounded-full"
+                        style={{
+                          width: barsVisible ? `${d.score}%` : "0%",
+                          background: dimColor,
+                          transition: "width 800ms cubic-bezier(0.16,1,0.3,1)",
+                          transitionDelay: `${i * 120}ms`,
+                        }}
+                      />
                     </div>
                   </div>
                 );
@@ -215,20 +204,18 @@ export function DecisionCard({ decision }: DecisionCardProps) {
                 return (
                   <div
                     key={d.name}
-                    className="flex items-center justify-between px-3 py-2"
+                    className="px-3 py-2"
                     style={{ borderColor: "var(--border)" }}
                   >
-                    <span className="text-[12px] text-[var(--t2)]">{d.name}</span>
-                    <div className="flex items-center gap-3 mono text-[11px]">
-                      <span className="text-[var(--t3)]">
-                        scored <span style={{ color: dimColor }}>{d.score}/100</span>
-                      </span>
-                      <span className="text-[var(--t3)]">×</span>
-                      <span className="text-[var(--t3)]">{Math.round(d.weight * 100)}% weight</span>
-                      <span className="text-[var(--t3)]">=</span>
-                      <span className="font-semibold" style={{ color: dimColor, minWidth: "2.5rem", textAlign: "right" }}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[12px] text-[var(--t2)]">{d.name}</span>
+                      <span className="mono text-[12px] font-semibold" style={{ color: dimColor }}>
                         {contribution} pts
                       </span>
+                    </div>
+                    <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>
+                      <span style={{ color: dimColor }}>{d.score}/100</span>
+                      {" × "}{Math.round(d.weight * 100)}% weight
                     </div>
                   </div>
                 );
@@ -267,7 +254,7 @@ export function DecisionCard({ decision }: DecisionCardProps) {
 
         {/* CTAs */}
         <div
-          className="mt-6 flex items-center gap-3 transition-all duration-500"
+          className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 transition-all duration-500"
           style={{
             opacity: revealed ? 1 : 0,
             transform: revealed ? "none" : "translateY(6px)",
@@ -276,13 +263,13 @@ export function DecisionCard({ decision }: DecisionCardProps) {
         >
           <button
             disabled
-            className="mono text-[11px] px-4 h-8 rounded border border-[var(--border)] text-[var(--t3)] cursor-not-allowed opacity-40"
+            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-[var(--border)] text-[var(--t3)] cursor-not-allowed opacity-40"
           >
             Simulate Revenue →
           </button>
           <button
             onClick={handleShare}
-            className="mono text-[11px] px-4 h-8 rounded border border-[var(--border)] text-[var(--t2)] hover:border-[var(--t3)] transition-colors"
+            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-[var(--border)] text-[var(--t2)] hover:border-[var(--t3)] transition-colors"
           >
             {copied ? "Copied ✓" : "Share result ↗"}
           </button>
