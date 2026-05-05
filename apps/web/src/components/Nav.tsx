@@ -7,10 +7,12 @@ import type { User } from "@supabase/supabase-js";
 
 interface NavProps {
   onWaitlistOpen?: () => void;
+  loggedIn?: boolean;
 }
 
-export function Nav({ onWaitlistOpen }: NavProps) {
+export function Nav({ onWaitlistOpen, loggedIn: loggedInProp }: NavProps) {
   const [user, setUser] = useState<User | null>(null);
+  const isLoggedIn = loggedInProp ?? !!user;
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export function Nav({ onWaitlistOpen }: NavProps) {
         {/* Logo + live indicator */}
         <div className="flex items-center gap-8">
           <Link
-            href={user ? "/dashboard" : "/"}
+            href={isLoggedIn ? "/dashboard" : "/"}
             className="display text-[15px] font-semibold text-[var(--t1)] tracking-tight"
           >
             Pledge<span className="text-[var(--accent)]">OFF</span>

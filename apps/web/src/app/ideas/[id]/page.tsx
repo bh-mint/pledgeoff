@@ -61,7 +61,7 @@ export default async function IdeaPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[var(--canvas)]">
-      <Nav />
+      <Nav loggedIn={true} />
 
       <div className="max-w-[720px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Back */}

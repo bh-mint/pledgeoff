@@ -174,7 +174,7 @@ export default async function DashboardPage() {
         <div className="max-w-[1440px] mx-auto px-4 sm:px-10 h-12 flex items-center justify-between">
           <div className="flex items-center gap-4 sm:gap-8">
             <Link
-              href="/"
+              href="/dashboard"
               className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]"
             >
               Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
