@@ -22,19 +22,19 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
             Pledge<span className="text-[var(--accent)]">OFF</span>
           </Link>
 
-          <nav className="flex items-center gap-5">
-            <Link href="/" className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
+          <nav className="flex items-center gap-3 sm:gap-5">
+            <Link href="/" className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
               ← Back to main page
             </Link>
-            <Link href="/pricing" className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
+            <Link href="/pricing" className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
               Pricing
             </Link>
-            <Link href="/blog" className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
+            <Link href="/blog" className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
               Blog
             </Link>
             <button
               onClick={() => setModalOpen(true)}
-              className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+              className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
             >
               Get access
             </button>

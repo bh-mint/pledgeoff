@@ -27,9 +27,9 @@ function IconInstagram() {
 export function Footer() {
   return (
     <footer className="border-t border-[var(--border)] mt-auto bg-[var(--canvas)]">
-      {/* Main row — 3 coloane */}
-      <div className="max-w-[1320px] mx-auto px-8 py-5 grid grid-cols-3 items-center">
-        {/* Left: logo + tagline */}
+      {/* Main row */}
+      <div className="max-w-[1320px] mx-auto px-6 sm:px-8 py-6 sm:py-5 flex flex-col sm:grid sm:grid-cols-3 sm:items-center gap-4 sm:gap-0">
+        {/* Logo + tagline */}
         <div className="flex items-baseline gap-3">
           <p className="display text-[15px] font-semibold text-[var(--t1)]">
             Pledge<span className="text-[var(--accent)]">OFF</span>
@@ -39,8 +39,8 @@ export function Footer() {
           </span>
         </div>
 
-        {/* Center: social icons */}
-        <div className="flex items-center justify-center gap-4">
+        {/* Social icons */}
+        <div className="flex items-center gap-4 sm:justify-center">
           <a
             href="https://x.com/pledgeoff"
             target="_blank"
@@ -70,8 +70,8 @@ export function Footer() {
           </a>
         </div>
 
-        {/* Right: nav links */}
-        <div className="flex items-center justify-end gap-6 text-[11px] text-[var(--t3)]">
+        {/* Nav links */}
+        <div className="flex items-center gap-5 sm:justify-end text-[11px] text-[var(--t3)]">
           <Link href="/privacy" className="hover:text-[var(--t2)] transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-[var(--t2)] transition-colors">Terms</Link>
           <Link href="/changelog" className="hover:text-[var(--t2)] transition-colors">Changelog</Link>
