@@ -90,6 +90,13 @@ export function Nav({ onWaitlistOpen, loggedIn: loggedInProp }: NavProps) {
                   >
                     Dashboard
                   </Link>
+                  <Link
+                    href="/settings"
+                    className="block px-4 py-2.5 text-[11px] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--border)] transition-colors border-t border-[var(--border)]"
+                    onClick={() => setDropdownOpen(false)}
+                  >
+                    Settings
+                  </Link>
                   <button
                     onClick={handleSignOut}
                     className="w-full text-left px-4 py-2.5 text-[11px] text-[var(--t2)] hover:text-[var(--t1)] hover:bg-[var(--border)] transition-colors border-t border-[var(--border)]"
