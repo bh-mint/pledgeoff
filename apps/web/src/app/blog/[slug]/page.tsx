@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { mdxComponents } from "@/lib/mdx-components";
 import { getAllArticles, getArticleBySlug, getRelatedArticles, getSeeAlsoArticles, CLUSTER_META } from "@/lib/mdx";
 import { formatDate } from "@/lib/mdx-utils";
 import { ReadingProgress } from "@/components/blog/ReadingProgress";
@@ -67,18 +68,26 @@ export default async function ArticlePage({ params }: Props) {
   const seeAlso = getSeeAlsoArticles(slug, article.tag, 2);
   const cluster = CLUSTER_META[article.tag];
 
+  const ogImage = `/api/og?title=${encodeURIComponent(article.title)}&tag=${encodeURIComponent(article.tag)}`;
+
   const articleJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: article.title,
     description: article.excerpt,
     datePublished: article.publishedAt,
     dateModified: article.updatedAt,
+    author: {
+      "@type": "Organization",
+      name: "PledgeOFF",
+      url: "https://pledgeoff.com",
+    },
     publisher: {
       "@type": "Organization",
       name: "PledgeOFF",
       url: "https://pledgeoff.com",
     },
+    image: `https://pledgeoff.com${ogImage}`,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `https://pledgeoff.com/blog/${slug}`,
@@ -155,7 +164,7 @@ export default async function ArticlePage({ params }: Props) {
 
           {/* Body */}
           <div className="prose-pledgeoff mt-8">
-            <MDXRemote source={article.content} />
+            <MDXRemote source={article.content} components={mdxComponents} />
           </div>
 
           {/* Affiliate disclosure */}
