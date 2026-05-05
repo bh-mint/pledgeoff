@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/dashboard/", "/auth/"],
+      disallow: ["/api/", "/dashboard/", "/auth/", "/settings/", "/ideas/"],
     },
     sitemap: "https://pledgeoff.com/sitemap.xml",
   };

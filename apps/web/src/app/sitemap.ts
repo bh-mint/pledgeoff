@@ -16,6 +16,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/blog/product-decisions`, lastModified: SITE_LAST_UPDATED },
     { url: `${SITE_URL}/blog/founder`, lastModified: SITE_LAST_UPDATED },
     { url: `${SITE_URL}/pricing`, lastModified: SITE_LAST_UPDATED },
+    { url: `${SITE_URL}/changelog`, lastModified: SITE_LAST_UPDATED },
+    { url: `${SITE_URL}/terms`, lastModified: SITE_LAST_UPDATED },
+    { url: `${SITE_URL}/privacy`, lastModified: SITE_LAST_UPDATED },
   ];
 
   const articleRoutes: MetadataRoute.Sitemap = articles.map((a) => ({
