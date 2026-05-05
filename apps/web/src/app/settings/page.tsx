@@ -37,16 +37,16 @@ export default async function SettingsPage() {
       <div className="max-w-[720px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <Link
           href="/dashboard"
-          className="mono text-[11px] text-[var(--t3)] hover:text-[var(--t2)] transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
+          className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
         >
           ← Back to Dashboard
         </Link>
 
         <div className="mb-8">
-          <div className="mono text-[10px] uppercase tracking-[0.14em] text-[var(--t3)] mb-2">
+          <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3) mb-2">
             Account settings
           </div>
-          <h1 className="display text-[28px] font-semibold tracking-tight text-[var(--t1)]">
+          <h1 className="display text-[28px] font-semibold tracking-tight text-(--t1)">
             Settings
           </h1>
         </div>

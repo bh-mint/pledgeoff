@@ -51,7 +51,7 @@ export default function FounderPage() {
 
           {/* Breadcrumb */}
           <div className="mono text-[10px] uppercase tracking-[0.1em] mb-6 flex items-center gap-2" style={{ color: "var(--t3)" }}>
-            <Link href="/blog" className="hover:text-[var(--t2)] transition-colors">Blog</Link>
+            <Link href="/blog" className="hover:text-(--t2) transition-colors">Blog</Link>
             <span>›</span>
             <span style={{ color: TAG_COLOR }}>Founder Mindset</span>
           </div>
@@ -111,7 +111,7 @@ export default function FounderPage() {
                 <Link
                   key={o.slug}
                   href={`/blog/${o.slug}`}
-                  className="flex-1 rounded-md border px-4 py-3 transition-colors hover:border-[var(--t3)]"
+                  className="flex-1 rounded-md border px-4 py-3 transition-colors hover:border-(--t3)"
                   style={{ borderColor: "var(--border)", background: "var(--surface)" }}
                 >
                   <div className="display text-[14px] font-semibold mb-1" style={{ color: "var(--t1)" }}>{o.label}</div>

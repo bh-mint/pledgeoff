@@ -60,22 +60,22 @@ export default async function IdeaPage({ params }: Props) {
   const { title, description, category } = parseIdeaText(idea.text);
 
   return (
-    <div className="min-h-screen bg-[var(--canvas)]">
+    <div className="min-h-screen bg-(--canvas)">
       <Nav loggedIn={true} />
 
       <div className="max-w-[720px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Back */}
         <Link
           href="/dashboard"
-          className="mono text-[11px] text-[var(--t3)] hover:text-[var(--t2)] transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
+          className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
         >
           ← Back to Dashboard
         </Link>
 
         {/* Idea */}
-        <div className="mb-10 pb-10 border-b border-[var(--border)]">
+        <div className="mb-10 pb-10 border-b border-(--border)">
           <div className="flex items-center gap-3 mb-3">
-            <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em]">
+            <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
               Idea · {formatDate(idea.createdAt)}
             </p>
             {category && (
@@ -91,11 +91,11 @@ export default async function IdeaPage({ params }: Props) {
               </span>
             )}
           </div>
-          <h1 className="display text-[22px] font-semibold tracking-tight text-[var(--t1)] leading-snug mb-3">
+          <h1 className="display text-[22px] font-semibold tracking-tight text-(--t1) leading-snug mb-3">
             {title}
           </h1>
           {description && (
-            <p className="text-[14px] text-[var(--t2)] leading-relaxed">
+            <p className="text-[14px] text-(--t2) leading-relaxed">
               {description}
             </p>
           )}

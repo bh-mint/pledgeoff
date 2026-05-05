@@ -100,7 +100,7 @@ export function ValidatingLoader() {
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
         <div className="flex items-center justify-between mb-3">
-          <span className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em]">
+          <span className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
             Analysis pipeline
           </span>
           <span className="mono tnum text-[11px]" style={{ color: "var(--accent)" }}>
@@ -116,7 +116,7 @@ export function ValidatingLoader() {
               <div key={stage.id}>
                 <div className="flex items-center gap-1 mb-1.5">
                   {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 pulse-dot bg-[var(--accent)]" />
+                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 pulse-dot bg-(--accent)" />
                   )}
                   {isDone && (
                     <span className="text-[9px] flex-shrink-0" style={{ color: "var(--validated)" }}>
@@ -132,10 +132,10 @@ export function ValidatingLoader() {
                   <span
                     className={`mono text-[9px] uppercase tracking-[0.08em] truncate ${
                       isActive
-                        ? "text-[var(--t1)]"
+                        ? "text-(--t1)"
                         : isDone
-                        ? "text-[var(--validated)]"
-                        : "text-[var(--t3)]"
+                        ? "text-(--validated)"
+                        : "text-(--t3)"
                     }`}
                   >
                     {stage.label}
@@ -172,12 +172,12 @@ export function ValidatingLoader() {
               style={{ borderColor: "var(--border)" }}
             >
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
-                <span className="mono text-[9px] text-[var(--t2)] uppercase tracking-[0.1em]">
+                <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
+                <span className="mono text-[9px] text-(--t2) uppercase tracking-[0.1em]">
                   Reddit
                 </span>
               </div>
-              <span className="mono tnum text-[9px] text-[var(--t3)]">
+              <span className="mono tnum text-[9px] text-(--t3)">
                 {signalCounter} signals
               </span>
             </div>
@@ -192,10 +192,10 @@ export function ValidatingLoader() {
                     animationDelay: `${i * 0.1}s`,
                   }}
                 >
-                  <span className="mono text-[9px] text-[var(--t3)]">
+                  <span className="mono text-[9px] text-(--t3)">
                     {post.sub} · {post.user}
                   </span>
-                  <p className="text-[11px] text-[var(--t1)] mt-0.5 leading-snug">
+                  <p className="text-[11px] text-(--t1) mt-0.5 leading-snug">
                     &ldquo;{post.text}&rdquo;
                   </p>
                 </div>
@@ -214,14 +214,14 @@ export function ValidatingLoader() {
             >
               <div className="flex items-center gap-2">
                 {stageIndex >= 1 ? (
-                  <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
+                  <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
                 ) : (
                   <span
                     className="w-1.5 h-1.5 rounded-full"
                     style={{ background: "var(--border)" }}
                   />
                 )}
-                <span className="mono text-[9px] text-[var(--t2)] uppercase tracking-[0.1em]">
+                <span className="mono text-[9px] text-(--t2) uppercase tracking-[0.1em]">
                   Trends
                 </span>
               </div>
@@ -254,7 +254,7 @@ export function ValidatingLoader() {
                   strokeLinejoin="round"
                 />
               </svg>
-              <p className="mono text-[9px] text-[var(--t3)] mt-2">
+              <p className="mono text-[9px] text-(--t3) mt-2">
                 {trendProgress >= 1 ? "+34% YoY trend momentum" : "fetching trend data…"}
               </p>
             </div>
@@ -271,14 +271,14 @@ export function ValidatingLoader() {
             >
               <div className="flex items-center gap-2">
                 {stageIndex >= 2 ? (
-                  <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-[var(--accent)]" />
+                  <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
                 ) : (
                   <span
                     className="w-1.5 h-1.5 rounded-full"
                     style={{ background: "var(--border)" }}
                   />
                 )}
-                <span className="mono text-[9px] text-[var(--t2)] uppercase tracking-[0.1em]">
+                <span className="mono text-[9px] text-(--t2) uppercase tracking-[0.1em]">
                   Competitors
                 </span>
               </div>
@@ -306,10 +306,10 @@ export function ValidatingLoader() {
                     key={i}
                     style={{ opacity: isVisible ? 1 : 0.2, transition: "opacity 0.3s" }}
                   >
-                    <div className="mono text-[9px] text-[var(--t3)] mb-0.5">
+                    <div className="mono text-[9px] text-(--t3) mb-0.5">
                       {comp.name}
                     </div>
-                    <div className="text-[11px] text-[var(--t1)] leading-snug">
+                    <div className="text-[11px] text-(--t1) leading-snug">
                       {stageIndex > 2 ? comp.weakness : comp.weakness.slice(0, chars)}
                       {isTyping && (
                         <span className="animate-pulse ml-px" style={{ color: "var(--accent)" }}>
@@ -334,11 +334,11 @@ export function ValidatingLoader() {
             }}
           >
             <div className="text-center">
-              <span className="w-3 h-3 rounded-full pulse-dot bg-[var(--accent)] inline-block mb-4" />
-              <p className="display text-[18px] font-semibold text-[var(--t1)]">
+              <span className="w-3 h-3 rounded-full pulse-dot bg-(--accent) inline-block mb-4" />
+              <p className="display text-[18px] font-semibold text-(--t1)">
                 Computing verdict…
               </p>
-              <p className="mono text-[10px] text-[var(--t3)] mt-2 uppercase tracking-[0.1em]">
+              <p className="mono text-[10px] text-(--t3) mt-2 uppercase tracking-[0.1em]">
                 weighted scoring · 4 dimensions
               </p>
             </div>

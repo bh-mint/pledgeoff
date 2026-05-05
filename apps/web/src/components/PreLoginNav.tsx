@@ -33,27 +33,27 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
         <div className="max-w-[1320px] mx-auto px-8 h-12 flex items-center justify-between">
           <Link
             href={loggedIn ? "/dashboard" : "/"}
-            className="display text-[15px] font-semibold text-[var(--t1)] tracking-tight"
+            className="display text-[15px] font-semibold text-(--t1) tracking-tight"
           >
-            Pledge<span className="text-[var(--accent)]">OFF</span>
+            Pledge<span className="text-(--accent)">OFF</span>
           </Link>
 
           <nav className="flex items-center gap-3 sm:gap-5">
             {!loggedIn && (
-              <Link href="/" className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
+              <Link href="/" className="hidden sm:inline text-[11px] text-(--t2) hover:text-(--t1) transition-colors">
                 ← Back to main page
               </Link>
             )}
-            <Link href="/pricing" className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
+            <Link href="/pricing" className="hidden sm:inline text-[11px] text-(--t2) hover:text-(--t1) transition-colors">
               Pricing
             </Link>
-            <Link href="/blog" className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors">
+            <Link href="/blog" className="hidden sm:inline text-[11px] text-(--t2) hover:text-(--t1) transition-colors">
               Blog
             </Link>
             {!loggedIn && (
               <button
                 onClick={() => setModalOpen(true)}
-                className="hidden sm:inline text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+                className="hidden sm:inline text-[11px] text-(--t2) hover:text-(--t1) transition-colors"
               >
                 Get access
               </button>
@@ -61,7 +61,7 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
             {extraLink && (
               <Link
                 href={extraLink.href}
-                className="text-[11px] text-[var(--t2)] hover:text-[var(--t1)] transition-colors"
+                className="text-[11px] text-(--t2) hover:text-(--t1) transition-colors"
               >
                 {extraLink.label}
               </Link>
@@ -69,14 +69,14 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
             {loggedIn ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center h-7 px-3 rounded-md bg-[var(--accent)] text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center h-7 px-3 rounded-md bg-(--accent) text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
               >
                 Dashboard →
               </Link>
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center h-7 px-3 rounded-md bg-[var(--accent)] text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center h-7 px-3 rounded-md bg-(--accent) text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
               >
                 Sign in
               </Link>

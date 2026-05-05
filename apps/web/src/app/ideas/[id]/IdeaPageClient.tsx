@@ -81,15 +81,15 @@ export function IdeaPageClient({
           className="flex items-center justify-between pb-4 border-b"
           style={{ borderColor: "var(--border)" }}
         >
-          <div className="flex items-center gap-2 mono text-[11px] text-[var(--t3)]">
-            <span className="text-[var(--t1)] font-medium">
+          <div className="flex items-center gap-2 mono text-[11px] text-(--t3)">
+            <span className="text-(--t1) font-medium">
               Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
             </span>
             <span>·</span>
             <span className="hidden sm:inline">validation ·</span>
             <span>{valId}</span>
           </div>
-          <div className="mono text-[10px] text-[var(--t3)]">
+          <div className="mono text-[10px] text-(--t3)">
             {analysisS !== null ? `${analysisS}s` : "scored"}
             <span className="hidden sm:inline">
               {analysisS !== null ? " analysis" : " just now"}
@@ -100,7 +100,7 @@ export function IdeaPageClient({
 
       {/* Decision */}
       <section>
-        <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em] mb-4">
+        <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
           Verdict
         </p>
         {decision ? (
@@ -119,7 +119,7 @@ export function IdeaPageClient({
       {signals.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.12em]">
+            <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
               Evidence wall · {signals.length} signal
               {signals.length !== 1 ? "s" : ""}
             </p>
@@ -136,7 +136,7 @@ export function IdeaPageClient({
               >
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="mono text-[10px] text-[var(--t2)] font-medium">
+                    <span className="mono text-[10px] text-(--t2) font-medium">
                       {signal.source === "reddit"
                         ? `r/${signal.title.split(" ").slice(0, 2).join("_").toLowerCase()}`
                         : "github"}
@@ -148,7 +148,7 @@ export function IdeaPageClient({
                       ↑ {signal.sentiment}
                     </span>
                   </div>
-                  <p className="text-[13px] text-[var(--t1)] leading-relaxed italic">
+                  <p className="text-[13px] text-(--t1) leading-relaxed italic">
                     &ldquo;{signal.summary}&rdquo;
                   </p>
                 </div>
@@ -156,7 +156,7 @@ export function IdeaPageClient({
                   href={signal.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mono text-[10px] text-[var(--t3)] hover:text-[var(--t2)] transition-colors"
+                  className="mono text-[10px] text-(--t3) hover:text-(--t2) transition-colors"
                 >
                   View on {signal.source === "reddit" ? "Reddit" : "GitHub"}{" "}
                   ↗
@@ -169,7 +169,7 @@ export function IdeaPageClient({
 
       {/* Timeout message */}
       {!decision && polls >= MAX_POLLS && (
-        <p className="text-[13px] text-[var(--t3)]">
+        <p className="text-[13px] text-(--t3)">
           Analysis is taking longer than expected. Refresh the page in a few
           seconds.
         </p>

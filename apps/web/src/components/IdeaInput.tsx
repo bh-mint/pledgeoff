@@ -59,15 +59,15 @@ export function IdeaInput() {
           placeholder="Describe your idea. What problem does it solve? Who has this problem? Be specific — the more context, the better the verdict."
           rows={6}
           maxLength={MAX}
-          className="w-full px-4 py-3 rounded-md bg-[var(--canvas)] border border-[var(--border)] text-[14px] text-[var(--t1)] placeholder-[var(--t3)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none leading-relaxed"
+          className="w-full px-4 py-3 rounded-md bg-(--canvas) border border-(--border) text-[14px] text-(--t1) placeholder-(--t3) focus:outline-none focus:border-(--accent) transition-colors resize-none leading-relaxed"
         />
         <span
           className={`absolute bottom-3 right-3 mono text-[11px] ${
             chars > MAX * 0.9
-              ? "text-[var(--kill)]"
+              ? "text-(--kill)"
               : chars >= MIN
-              ? "text-[var(--validated)]"
-              : "text-[var(--t3)]"
+              ? "text-(--validated)"
+              : "text-(--t3)"
           }`}
         >
           {chars}/{MAX}
@@ -75,18 +75,18 @@ export function IdeaInput() {
       </div>
 
       {errorMsg && (
-        <p className="text-[12px] text-[var(--kill)]">{errorMsg}</p>
+        <p className="text-[12px] text-(--kill)">{errorMsg}</p>
       )}
 
       <button
         type="submit"
         disabled={!valid || status === "loading"}
-        className="display w-full h-12 rounded-md bg-[var(--accent)] text-black text-[14px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+        className="display w-full h-12 rounded-md bg-(--accent) text-black text-[14px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
       >
         {status === "loading" ? "Analyzing…" : "Get verdict →"}
       </button>
 
-      <p className="mono text-[11px] text-[var(--t3)] text-center uppercase tracking-[0.08em]">
+      <p className="mono text-[11px] text-(--t3) text-center uppercase tracking-[0.08em]">
         {MIN} – {MAX} characters · Takes ~15 seconds
       </p>
     </form>

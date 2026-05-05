@@ -120,8 +120,8 @@ export function DecisionCard({ decision }: DecisionCardProps) {
             >
               {cfg.label}
             </div>
-            <div className="text-[13px] text-[var(--t3)]">{cfg.description}</div>
-            <div className="mono text-[10px] text-[var(--t3)] mt-2 uppercase tracking-[0.1em]">
+            <div className="text-[13px] text-(--t3)">{cfg.description}</div>
+            <div className="mono text-[10px] text-(--t3) mt-2 uppercase tracking-[0.1em]">
               {hasDimensions ? `${decision.dimensions!.length} dimensions` : "confidence"} ·{" "}
               {Math.round(decision.confidence * 100)}%
             </div>
@@ -138,7 +138,7 @@ export function DecisionCard({ decision }: DecisionCardProps) {
               transitionDelay: "100ms",
             }}
           >
-            <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.1em] mb-3">
+            <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.1em] mb-3">
               Score breakdown
             </p>
             <div>
@@ -156,9 +156,9 @@ export function DecisionCard({ decision }: DecisionCardProps) {
                     style={{ borderColor: "var(--border)" }}
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <div className="text-[12px] text-[var(--t1)]">{d.name}</div>
+                      <div className="text-[12px] text-(--t1)">{d.name}</div>
                       <div className="flex items-center gap-2">
-                        <span className="mono text-[9px] text-[var(--t3)]">{Math.round(d.weight * 100)}%</span>
+                        <span className="mono text-[9px] text-(--t3)">{Math.round(d.weight * 100)}%</span>
                         <span className="mono tnum text-[11px]" style={{ color: dimColor }}>{d.score}</span>
                       </div>
                     </div>
@@ -190,7 +190,7 @@ export function DecisionCard({ decision }: DecisionCardProps) {
               transitionDelay: "200ms",
             }}
           >
-            <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.1em] mb-3">
+            <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.1em] mb-3">
               How this score was calculated
             </p>
             <div
@@ -208,7 +208,7 @@ export function DecisionCard({ decision }: DecisionCardProps) {
                     style={{ borderColor: "var(--border)" }}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-[12px] text-[var(--t2)]">{d.name}</span>
+                      <span className="text-[12px] text-(--t2)">{d.name}</span>
                       <span className="mono text-[12px] font-semibold" style={{ color: dimColor }}>
                         {contribution} pts
                       </span>
@@ -224,10 +224,10 @@ export function DecisionCard({ decision }: DecisionCardProps) {
                 className="flex items-center justify-between px-3 py-2"
                 style={{ borderColor: "var(--border)", background: "var(--surface)" }}
               >
-                <span className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em]">
+                <span className="mono text-[11px] text-(--t3) uppercase tracking-[0.08em]">
                   Final score
                 </span>
-                <span className="mono text-[13px] font-semibold text-[var(--t1)]">
+                <span className="mono text-[13px] font-semibold text-(--t1)">
                   {score} / 100
                 </span>
               </div>
@@ -244,10 +244,10 @@ export function DecisionCard({ decision }: DecisionCardProps) {
             transitionDelay: "300ms",
           }}
         >
-          <p className="mono text-[10px] text-[var(--t3)] uppercase tracking-[0.1em] mb-3">
+          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.1em] mb-3">
             Reasoning
           </p>
-          <p className="text-[14px] text-[var(--t2)] leading-relaxed">
+          <p className="text-[14px] text-(--t2) leading-relaxed">
             {decision.reasoning}
           </p>
         </div>
@@ -263,13 +263,13 @@ export function DecisionCard({ decision }: DecisionCardProps) {
         >
           <button
             disabled
-            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-[var(--border)] text-[var(--t3)] cursor-not-allowed opacity-40"
+            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t3) cursor-not-allowed opacity-40"
           >
             Simulate Revenue →
           </button>
           <button
             onClick={handleShare}
-            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-[var(--border)] text-[var(--t2)] hover:border-[var(--t3)] transition-colors"
+            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t2) hover:border-(--t3) transition-colors"
           >
             {copied ? "Copied ✓" : "Share result ↗"}
           </button>
@@ -281,14 +281,14 @@ export function DecisionCard({ decision }: DecisionCardProps) {
 
 export function DecisionPending() {
   return (
-    <div className="rounded-md border border-[var(--border)] bg-[var(--surface)] p-8 flex flex-col items-center justify-center gap-4 min-h-[180px]">
+    <div className="rounded-md border border-(--border) bg-(--surface) p-8 flex flex-col items-center justify-center gap-4 min-h-[180px]">
       <div className="flex items-center gap-2">
-        <span className="pulse-dot w-2 h-2 rounded-full bg-[var(--accent)] inline-block" />
-        <span className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.1em]">
+        <span className="pulse-dot w-2 h-2 rounded-full bg-(--accent) inline-block" />
+        <span className="mono text-[11px] text-(--t3) uppercase tracking-[0.1em]">
           Analyzing signals…
         </span>
       </div>
-      <p className="text-[13px] text-[var(--t3)] text-center max-w-xs">
+      <p className="text-[13px] text-(--t3) text-center max-w-xs">
         We&apos;re scanning Reddit and GitHub. This takes ~15 seconds.
       </p>
     </div>

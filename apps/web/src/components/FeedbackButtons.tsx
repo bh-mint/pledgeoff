@@ -37,7 +37,7 @@ export function FeedbackButtons({ ideaId, decisionId }: FeedbackButtonsProps) {
 
   if (voted) {
     return (
-      <p className="mono text-[11px] text-[var(--validated)] uppercase tracking-[0.08em]">
+      <p className="mono text-[11px] text-(--validated) uppercase tracking-[0.08em]">
         ✓ Thanks for your feedback.
       </p>
     );
@@ -45,13 +45,13 @@ export function FeedbackButtons({ ideaId, decisionId }: FeedbackButtonsProps) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="mono text-[11px] text-[var(--t3)] uppercase tracking-[0.08em]">
+      <span className="mono text-[11px] text-(--t3) uppercase tracking-[0.08em]">
         Was this verdict helpful?
       </span>
       <button
         onClick={() => handleVote("thumbs_up")}
         disabled={loading}
-        className="h-8 w-8 rounded border border-[var(--border)] text-[16px] hover:border-[var(--validated)] hover:bg-[var(--validated)]/10 transition-colors disabled:opacity-50"
+        className="h-8 w-8 rounded border border-(--border) text-[16px] hover:border-(--validated) hover:bg-(--validated)/10 transition-colors disabled:opacity-50"
         aria-label="Thumbs up"
       >
         👍
@@ -59,7 +59,7 @@ export function FeedbackButtons({ ideaId, decisionId }: FeedbackButtonsProps) {
       <button
         onClick={() => handleVote("thumbs_down")}
         disabled={loading}
-        className="h-8 w-8 rounded border border-[var(--border)] text-[16px] hover:border-[var(--kill)] hover:bg-[var(--kill)]/10 transition-colors disabled:opacity-50"
+        className="h-8 w-8 rounded border border-(--border) text-[16px] hover:border-(--kill) hover:bg-(--kill)/10 transition-colors disabled:opacity-50"
         aria-label="Thumbs down"
       >
         👎

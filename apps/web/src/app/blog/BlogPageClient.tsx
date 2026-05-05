@@ -260,7 +260,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className="rounded-md border h-8 px-3 inline-flex items-center disabled:opacity-40 transition-colors hover:border-[var(--t3)]"
+                      className="rounded-md border h-8 px-3 inline-flex items-center disabled:opacity-40 transition-colors hover:border-(--t3)"
                       style={{ borderColor: "var(--border)" }}
                     >
                       ← prev

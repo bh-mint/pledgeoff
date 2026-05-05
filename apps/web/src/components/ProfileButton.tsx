@@ -35,7 +35,7 @@ export function ProfileButton({ email, initials }: ProfileButtonProps) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-7 h-7 rounded-full border display text-[11px] font-semibold flex items-center justify-center text-[var(--t1)] hover:border-[var(--t2)] transition-colors"
+        className="w-7 h-7 rounded-full border display text-[11px] font-semibold flex items-center justify-center text-(--t1) hover:border-(--t2) transition-colors"
         style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
       >
         {initials}
@@ -55,7 +55,7 @@ export function ProfileButton({ email, initials }: ProfileButtonProps) {
           <Link
             href="/settings"
             onClick={() => setOpen(false)}
-            className="block w-full text-left px-3 py-2 text-[12px] hover:bg-[var(--border)] transition-colors"
+            className="block w-full text-left px-3 py-2 text-[12px] hover:bg-(--border) transition-colors"
             style={{ color: "var(--t2)" }}
           >
             Settings
@@ -63,7 +63,7 @@ export function ProfileButton({ email, initials }: ProfileButtonProps) {
           <div style={{ borderTop: "1px solid var(--border)" }} />
           <button
             onClick={handleSignOut}
-            className="w-full text-left px-3 py-2 text-[12px] hover:bg-[var(--border)] transition-colors"
+            className="w-full text-left px-3 py-2 text-[12px] hover:bg-(--border) transition-colors"
             style={{ color: "var(--t2)" }}
           >
             Sign out

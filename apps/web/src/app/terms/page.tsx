@@ -547,10 +547,10 @@ export default function TermsPage() {
             </Subsection>
           </Section>
 
-          <div className="mt-12 pt-8 border-t border-[var(--border)]">
-            <p className="text-[13px] text-[var(--t3)]">
+          <div className="mt-12 pt-8 border-t border-(--border)">
+            <p className="text-[13px] text-(--t3)">
               See also:{" "}
-              <Link href="/privacy" className="text-[var(--accent)] hover:opacity-80">
+              <Link href="/privacy" className="text-(--accent) hover:opacity-80">
                 Privacy Policy
               </Link>
             </p>
@@ -575,7 +575,7 @@ function Section({
 }) {
   return (
     <section id={id} className="mb-10" style={{ scrollMarginTop: "156px" }}>
-      <h2 className="text-[18px] font-bold text-[var(--t1)] mb-4 mt-8">{title}</h2>
+      <h2 className="text-[18px] font-bold text-(--t1) mb-4 mt-8">{title}</h2>
       <div className="space-y-3">{children}</div>
     </section>
   );
@@ -590,7 +590,7 @@ function Subsection({
 }) {
   return (
     <div className="mb-4">
-      <h3 className="text-[14px] font-semibold text-[var(--t1)] mb-2">{title}</h3>
+      <h3 className="text-[14px] font-semibold text-(--t1) mb-2">{title}</h3>
       <div className="space-y-2">{children}</div>
     </div>
   );

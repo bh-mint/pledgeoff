@@ -89,7 +89,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
         <div className="flex items-center gap-4 sm:gap-6">
           <Link
             href="/dashboard"
-            className="display text-[15px] font-semibold tracking-tight text-[var(--t1)]"
+            className="display text-[15px] font-semibold tracking-tight text-(--t1)"
           >
             Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
           </Link>
@@ -103,7 +103,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
             ← Dashboard
           </Link>
         </div>
-        <span className="mono text-[10px] sm:text-[11px] text-[var(--t3)]">
+        <span className="mono text-[10px] sm:text-[11px] text-(--t3)">
           {validationsLeft} left
         </span>
       </div>
@@ -246,7 +246,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
 
           {/* Error */}
           {errorMsg && (
-            <p className="mt-4 text-[12px] text-[var(--kill)]">{errorMsg}</p>
+            <p className="mt-4 text-[12px] text-(--kill)">{errorMsg}</p>
           )}
 
           {/* CTA */}
