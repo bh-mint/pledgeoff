@@ -65,7 +65,7 @@ function makeSignalRepo(signals: Signal[] = [makeSignal('github'), makeSignal('g
 
 function makeLLM(response = llmResponse): ILLMClient {
   return {
-    generateDecision: vi.fn(),
+    generateSearchQueries: vi.fn(), generateDecision: vi.fn(),
     generateSimulation: vi.fn(),
     generateLanding: vi.fn(),
     analyzeCustomers: vi.fn(),
@@ -113,7 +113,7 @@ describe('AnalyzeBuildUseCase', () => {
   it('propagates LLM error', async () => {
     const llmError = new LLMClientError('timeout');
     const llm: ILLMClient = {
-      generateDecision: vi.fn(),
+      generateSearchQueries: vi.fn(), generateDecision: vi.fn(),
       generateSimulation: vi.fn(),
       generateLanding: vi.fn(),
       analyzeCustomers: vi.fn(),

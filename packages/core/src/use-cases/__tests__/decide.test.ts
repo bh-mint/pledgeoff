@@ -45,6 +45,7 @@ function makeDecisionRepo(): IDecisionRepository {
 
 function makeLLMClient(response = llmResponse): ILLMClient {
   return {
+    generateSearchQueries: vi.fn(),
     generateDecision: vi.fn().mockResolvedValue(ok(response)),
     generateSimulation: vi.fn(),
     generateLanding: vi.fn(),
@@ -95,7 +96,7 @@ describe('DecideUseCase', () => {
     const useCase = new DecideUseCase(
       makeSignalRepo(),
       makeDecisionRepo(),
-      { generateDecision: vi.fn().mockResolvedValue(err(llmError)), generateSimulation: vi.fn(), generateLanding: vi.fn(), analyzeCustomers: vi.fn(), analyzeBuild: vi.fn() },
+      { generateSearchQueries: vi.fn(), generateDecision: vi.fn().mockResolvedValue(err(llmError)), generateSimulation: vi.fn(), generateLanding: vi.fn(), analyzeCustomers: vi.fn(), analyzeBuild: vi.fn() },
       makeEventBus(),
       makeIdempotencyStore(false),
     );

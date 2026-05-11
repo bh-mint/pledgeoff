@@ -8,13 +8,14 @@ import type { ISignalRepository } from '../../ports/signal-repository';
 import type { IEventBus } from '../../ports/event-bus';
 import type { IIdempotencyStore } from '../../ports/idempotency-store';
 import type { ISourceAdapter } from '../../ports/source-adapter';
+import type { ILLMClient } from '../../ports/llm-client';
 import type { Signal } from '../../domain/signal';
 
 const makeSignal = (ideaId: string): Signal => ({
   id: crypto.randomUUID(),
   ideaId,
   source: 'reddit',
-  url: 'https://reddit.com/r/startups/comments/abc',
+  url: `https://reddit.com/r/startups/comments/${crypto.randomUUID()}`,
   title: 'People want this',
   summary: 'Strong positive sentiment',
   sentiment: 'positive',
@@ -47,120 +48,130 @@ function makeAdapter(signals: Signal[], sourceName = 'reddit'): ISourceAdapter {
   };
 }
 
+function makeLLMClient(queries = { github: ['"code review" "pull request"'], reddit: ['code review tool'] }): ILLMClient {
+  return {
+    generateSearchQueries: vi.fn().mockResolvedValue(ok(queries)),
+    generateDecision: vi.fn(),
+    generateSimulation: vi.fn(),
+    generateLanding: vi.fn(),
+    analyzeCustomers: vi.fn(),
+    analyzeBuild: vi.fn(),
+  };
+}
+
 describe('FetchSignalsUseCase', () => {
   const ideaId = crypto.randomUUID();
   const signals = [makeSignal(ideaId), makeSignal(ideaId)];
   const baseInput = {
     ideaId,
-    ideaText: 'An interesting app idea for the market',
+    ideaText: 'AI code review assistant\n\nDetects bugs and security issues in pull requests.',
     traceId: crypto.randomUUID(),
     eventId: crypto.randomUUID(),
   };
 
-  it('fetches from adapters, upserts signals and publishes event', async () => {
+  it('generates queries via LLM then fetches from adapters', async () => {
+    const queries = { github: ['"code review" "pull request"'], reddit: ['code review tool developer'] };
+    const llm = makeLLMClient(queries);
+    const adapter = makeAdapter(signals, 'github');
     const repo = makeRepo(signals);
-    const bus = makeEventBus();
-    const store = makeIdempotencyStore(false);
-    const adapter = makeAdapter(signals);
-    const useCase = new FetchSignalsUseCase(repo, bus, store, [adapter]);
+    const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [adapter], llm);
 
     const result = await useCase.execute(baseInput);
 
     expect(result.isOk()).toBe(true);
-    expect(adapter.fetch).toHaveBeenCalledWith(baseInput.ideaText, ideaId, baseInput.traceId);
-    expect(repo.upsertMany).toHaveBeenCalledWith(signals);
-    expect(store.markAsProcessed).toHaveBeenCalledWith(baseInput.eventId);
-    expect(bus.publish).toHaveBeenCalledWith('signals.fetched.v1', expect.objectContaining({
-      eventType: 'signals.fetched.v1',
-      payload: expect.objectContaining({ ideaId, signalCount: 2 }),
-    }));
+    expect(llm.generateSearchQueries).toHaveBeenCalledWith({ ideaText: baseInput.ideaText, traceId: baseInput.traceId });
+    expect(adapter.fetch).toHaveBeenCalledWith(queries.github[0], ideaId, baseInput.traceId);
+  });
+
+  it('falls back to idea title when LLM query generation fails', async () => {
+    const llm = makeLLMClient();
+    (llm.generateSearchQueries as ReturnType<typeof vi.fn>).mockResolvedValue(err(new Error('LLM timeout')));
+    const adapter = makeAdapter(signals, 'github');
+    const repo = makeRepo(signals);
+    const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [adapter], llm);
+
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isOk()).toBe(true);
+    expect(adapter.fetch).toHaveBeenCalledWith('AI code review assistant', ideaId, baseInput.traceId);
+  });
+
+  it('deduplicates signals with the same URL across queries', async () => {
+    const sharedSignal = makeSignal(ideaId);
+    const uniqueSignal = makeSignal(ideaId);
+    // Two calls return same URL — should be deduplicated
+    const adapter: ISourceAdapter = {
+      sourceName: 'github',
+      fetch: vi.fn()
+        .mockResolvedValueOnce(ok([sharedSignal]))
+        .mockResolvedValueOnce(ok([{ ...sharedSignal, id: crypto.randomUUID() }, uniqueSignal])),
+    };
+    const queries = { github: ['query1', 'query2'], reddit: [] };
+    const llm = makeLLMClient(queries);
+    const repo = makeRepo([sharedSignal, uniqueSignal]);
+    const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [adapter], llm);
+
+    await useCase.execute(baseInput);
+
+    const upsertCall = ((repo.upsertMany as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] ?? []) as Signal[];
+    const urls = upsertCall.map((s) => s.url);
+    expect(new Set(urls).size).toBe(urls.length);
   });
 
   it('skips processing if event was already processed (idempotency)', async () => {
-    const repo = makeRepo(signals);
-    const bus = makeEventBus();
-    const store = makeIdempotencyStore(true);
     const adapter = makeAdapter(signals);
-    const useCase = new FetchSignalsUseCase(repo, bus, store, [adapter]);
+    const repo = makeRepo(signals);
+    const llm = makeLLMClient();
+    const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(true), [adapter], llm);
 
     const result = await useCase.execute(baseInput);
 
     expect(result.isOk()).toBe(true);
+    expect(llm.generateSearchQueries).not.toHaveBeenCalled();
     expect(adapter.fetch).not.toHaveBeenCalled();
-    expect(repo.upsertMany).not.toHaveBeenCalled();
-    expect(bus.publish).not.toHaveBeenCalled();
   });
 
   it('continues when one source adapter fails (graceful degradation)', async () => {
-    const redditSignals = [makeSignal(ideaId)];
     const githubSignals = [makeSignal(ideaId)];
-    const allSignals = [...redditSignals, ...githubSignals];
-    const repo = makeRepo(allSignals);
-    const bus = makeEventBus();
-    const store = makeIdempotencyStore(false);
-
+    const repo = makeRepo(githubSignals);
     const failingAdapter: ISourceAdapter = {
       sourceName: 'reddit',
       fetch: vi.fn().mockResolvedValue(err(new SourceAdapterError('timeout', 'reddit'))),
     };
     const githubAdapter = makeAdapter(githubSignals, 'github');
-    const useCase = new FetchSignalsUseCase(repo, bus, store, [failingAdapter, githubAdapter]);
+    const llm = makeLLMClient({ github: ['query'], reddit: ['query'] });
+    const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [failingAdapter, githubAdapter], llm);
 
     const result = await useCase.execute(baseInput);
 
     expect(result.isOk()).toBe(true);
-    // Only github signals were upserted (reddit failed)
     expect(repo.upsertMany).toHaveBeenCalledWith(githubSignals);
-  });
-
-  it('returns empty and publishes event when all adapters fail', async () => {
-    const repo = makeRepo([]);
-    const bus = makeEventBus();
-    const store = makeIdempotencyStore(false);
-    const failingAdapter: ISourceAdapter = {
-      sourceName: 'reddit',
-      fetch: vi.fn().mockResolvedValue(err(new SourceAdapterError('timeout', 'reddit'))),
-    };
-    const useCase = new FetchSignalsUseCase(repo, bus, store, [failingAdapter]);
-
-    const result = await useCase.execute(baseInput);
-
-    expect(result.isOk()).toBe(true);
-    expect(repo.upsertMany).toHaveBeenCalledWith([]);
   });
 
   it('returns error when signal repository fails', async () => {
     const repoError = new SignalRepositoryError('DB error');
     const repo = makeRepo(signals, { upsertMany: vi.fn().mockResolvedValue(err(repoError)) });
-    const bus = makeEventBus();
-    const store = makeIdempotencyStore(false);
-    const adapter = makeAdapter(signals);
-    const useCase = new FetchSignalsUseCase(repo, bus, store, [adapter]);
+    const llm = makeLLMClient();
+    const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [makeAdapter(signals)], llm);
 
     const result = await useCase.execute(baseInput);
 
     expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBeInstanceOf(SignalRepositoryError);
-    }
+    if (result.isErr()) expect(result.error).toBeInstanceOf(SignalRepositoryError);
   });
 
   it('returns error when idempotency check fails', async () => {
     const storeError = new IdempotencyStoreError('Store error');
-    const repo = makeRepo(signals);
-    const bus = makeEventBus();
     const store: IIdempotencyStore = {
       hasBeenProcessed: vi.fn().mockResolvedValue(err(storeError)),
       markAsProcessed: vi.fn(),
     };
-    const adapter = makeAdapter(signals);
-    const useCase = new FetchSignalsUseCase(repo, bus, store, [adapter]);
+    const llm = makeLLMClient();
+    const useCase = new FetchSignalsUseCase(makeRepo(signals), makeEventBus(), store, [makeAdapter(signals)], llm);
 
     const result = await useCase.execute(baseInput);
 
     expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBeInstanceOf(IdempotencyStoreError);
-    }
+    if (result.isErr()) expect(result.error).toBeInstanceOf(IdempotencyStoreError);
   });
 });

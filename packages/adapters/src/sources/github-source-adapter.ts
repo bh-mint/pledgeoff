@@ -3,7 +3,6 @@ import type { Signal } from '@pledgeoff/core';
 import type { ISourceAdapter, ICache } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
-import { extractSearchKeywords } from './keyword-extractor';
 
 const log = createLogger({ adapter: 'github' });
 const tracer = getTracer('github-source-adapter');
@@ -27,7 +26,7 @@ function scoreSentiment(reactions: GitHubIssue['reactions']): Signal['sentiment'
   return 'neutral';
 }
 
-const CACHE_TTL_SECONDS = 3600; // 1 hour
+const CACHE_TTL_SECONDS = 3600;
 
 export class GitHubSourceAdapter implements ISourceAdapter {
   readonly sourceName = 'github';
@@ -39,10 +38,10 @@ export class GitHubSourceAdapter implements ISourceAdapter {
     private readonly cache?: ICache,
   ) {}
 
-  async fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
+  async fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
     return tracer.startActiveSpan('github.fetch', async (span) => {
       span.setAttributes({ 'adapter.name': 'github', 'trace.id': traceId, 'idea.id': ideaId });
-      const result = await this._fetch(ideaText, ideaId, traceId);
+      const result = await this._fetch(query, ideaId, traceId);
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
       } else {
@@ -54,13 +53,11 @@ export class GitHubSourceAdapter implements ISourceAdapter {
     });
   }
 
-  private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const queryText = extractSearchKeywords(ideaText);
-    const query = encodeURIComponent(queryText);
-    const url = `https://api.github.com/search/issues?q=${query}&sort=reactions&per_page=10`;
+  private async _fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
+    const url = `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&sort=reactions&per_page=5`;
 
     if (this.cache) {
-      const cacheKey = `pledgeoff:github:v1:${queryText}`;
+      const cacheKey = `pledgeoff:github:v2:${query}`;
       const cached = await this.cache.get<Signal[]>(cacheKey);
       if (cached) {
         log.info({ traceId, target: 'github', operation: 'search', outcome: 'success', cacheHit: true, signalCount: cached.length }, 'GitHub cache hit');
@@ -110,7 +107,7 @@ export class GitHubSourceAdapter implements ISourceAdapter {
         );
 
         if (this.cache) {
-          const cacheKey = `pledgeoff:github:v1:${queryText}`;
+          const cacheKey = `pledgeoff:github:v2:${query}`;
           await this.cache.set(cacheKey, signals, CACHE_TTL_SECONDS);
         }
 

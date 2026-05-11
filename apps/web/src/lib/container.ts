@@ -88,6 +88,7 @@ function buildContainer() {
     eventBus,
     idempotencyStore,
     sourceAdapters,
+    llmClient,
   );
   const decideUseCase = new DecideUseCase(
     signalRepo,

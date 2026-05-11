@@ -14,5 +14,5 @@ export class SourceAdapterError extends Error {
 
 export interface ISourceAdapter {
   readonly sourceName: string;
-  fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>>;
+  fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>>;
 }

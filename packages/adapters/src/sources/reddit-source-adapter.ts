@@ -3,7 +3,6 @@ import type { Signal } from '@pledgeoff/core';
 import type { ISourceAdapter, ICache } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
-import { extractSearchKeywords } from './keyword-extractor';
 
 const log = createLogger({ adapter: 'reddit' });
 const tracer = getTracer('reddit-source-adapter');
@@ -29,7 +28,7 @@ function scoreSentiment(score: number): Signal['sentiment'] {
   return 'neutral';
 }
 
-const CACHE_TTL_SECONDS = 3600; // 1 hour
+const CACHE_TTL_SECONDS = 3600;
 
 export class RedditSourceAdapter implements ISourceAdapter {
   readonly sourceName = 'reddit';
@@ -40,10 +39,10 @@ export class RedditSourceAdapter implements ISourceAdapter {
     private readonly cache?: ICache,
   ) {}
 
-  async fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
+  async fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
     return tracer.startActiveSpan('reddit.fetch', async (span) => {
       span.setAttributes({ 'adapter.name': 'reddit', 'trace.id': traceId, 'idea.id': ideaId });
-      const result = await this._fetch(ideaText, ideaId, traceId);
+      const result = await this._fetch(query, ideaId, traceId);
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
       } else {
@@ -55,13 +54,11 @@ export class RedditSourceAdapter implements ISourceAdapter {
     });
   }
 
-  private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const queryText = extractSearchKeywords(ideaText);
-    const query = encodeURIComponent(queryText);
-    const url = `https://www.reddit.com/search.json?q=${query}&sort=relevance&limit=10&type=link,self`;
+  private async _fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
+    const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&sort=relevance&limit=5&type=link,self`;
 
     if (this.cache) {
-      const cacheKey = `pledgeoff:reddit:v1:${queryText}`;
+      const cacheKey = `pledgeoff:reddit:v2:${query}`;
       const cached = await this.cache.get<Signal[]>(cacheKey);
       if (cached) {
         log.info({ traceId, target: 'reddit', operation: 'search', outcome: 'success', cacheHit: true, signalCount: cached.length }, 'Reddit cache hit');
@@ -107,7 +104,7 @@ export class RedditSourceAdapter implements ISourceAdapter {
         );
 
         if (this.cache) {
-          const cacheKey = `pledgeoff:reddit:v1:${queryText}`;
+          const cacheKey = `pledgeoff:reddit:v2:${query}`;
           await this.cache.set(cacheKey, signals, CACHE_TTL_SECONDS);
         }
 

@@ -71,11 +71,22 @@ export interface LLMBuildResponse {
   readonly gaps: TechGap[];
 }
 
+export interface LLMSearchQueriesRequest {
+  readonly ideaText: string;
+  readonly traceId: string;
+}
+
+export interface LLMSearchQueriesResponse {
+  readonly github: string[];
+  readonly reddit: string[];
+}
+
 export class LLMClientError extends Error {
   readonly code = 'LLM_CLIENT_ERROR' as const;
 }
 
 export interface ILLMClient {
+  generateSearchQueries(request: LLMSearchQueriesRequest): Promise<Result<LLMSearchQueriesResponse, LLMClientError>>;
   generateDecision(request: LLMDecisionRequest): Promise<Result<LLMDecisionResponse, LLMClientError>>;
   generateSimulation(request: LLMSimulationRequest): Promise<Result<LLMSimulationResponse, LLMClientError>>;
   generateLanding(request: LLMLandingRequest): Promise<Result<LLMLandingResponse, LLMClientError>>;

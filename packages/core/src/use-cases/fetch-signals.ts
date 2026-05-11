@@ -4,6 +4,7 @@ import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-r
 import type { IEventBus, EventBusError } from '../ports/event-bus';
 import type { IIdempotencyStore, IdempotencyStoreError } from '../ports/idempotency-store';
 import type { ISourceAdapter, SourceAdapterError } from '../ports/source-adapter';
+import type { ILLMClient } from '../ports/llm-client';
 
 export interface FetchSignalsInput {
   readonly ideaId: string;
@@ -20,6 +21,7 @@ export class FetchSignalsUseCase {
     private readonly eventBus: IEventBus,
     private readonly idempotencyStore: IIdempotencyStore,
     private readonly sourceAdapters: ISourceAdapter[],
+    private readonly llmClient: ILLMClient,
   ) {}
 
   async execute(input: FetchSignalsInput): Promise<Result<Signal[], FetchSignalsError>> {
@@ -27,13 +29,36 @@ export class FetchSignalsUseCase {
     if (alreadyProcessed.isErr()) return err(alreadyProcessed.error);
     if (alreadyProcessed.value) return ok([]);
 
-    const results = await Promise.allSettled(
-      this.sourceAdapters.map((a) => a.fetch(input.ideaText, input.ideaId, input.traceId)),
-    );
+    // Generate targeted search queries via LLM; fall back to idea title on failure
+    const fallbackQuery = input.ideaText.split('\n')[0] ?? input.ideaText;
+    const queriesResult = await this.llmClient.generateSearchQueries({
+      ideaText: input.ideaText,
+      traceId: input.traceId,
+    });
+    const queries: Record<string, string[]> = queriesResult.isOk()
+      ? { github: queriesResult.value.github, reddit: queriesResult.value.reddit }
+      : { github: [fallbackQuery], reddit: [fallbackQuery] };
+
+    // Fetch from each adapter for each query in parallel
+    const fetchPromises = this.sourceAdapters.flatMap((adapter) => {
+      const adapterQueries = queries[adapter.sourceName] ?? [fallbackQuery];
+      return adapterQueries.map((query) => adapter.fetch(query, input.ideaId, input.traceId));
+    });
+
+    const results = await Promise.allSettled(fetchPromises);
+
+    // Merge results, deduplicate by URL
+    const seen = new Set<string>();
     const signals: Signal[] = [];
     for (const r of results) {
-      if (r.status === 'fulfilled' && r.value.isOk()) signals.push(...r.value.value);
-      // Partial failure: one source down doesn't abort — log and continue
+      if (r.status === 'fulfilled' && r.value.isOk()) {
+        for (const s of r.value.value) {
+          if (!seen.has(s.url)) {
+            seen.add(s.url);
+            signals.push(s);
+          }
+        }
+      }
     }
 
     const upsertResult = await this.signalRepo.upsertMany(signals);
