@@ -10,7 +10,7 @@ import {
   SupabaseCustomerAnalysisRepository,
   SupabaseBuildAnalysisRepository,
   RedditSourceAdapter,
-  GitHubSourceAdapter,
+  HNSourceAdapter,
   GroqLLMAdapter,
   AnthropicLLMAdapter,
   InMemoryCacheAdapter,
@@ -74,7 +74,7 @@ function buildContainer() {
 
   const sourceAdapters = [
     new RedditSourceAdapter(10_000, 3, cache),
-    new GitHubSourceAdapter(requireEnv('GITHUB_PAT'), 10_000, 3, cache),
+    new HNSourceAdapter(10_000, 3, cache),
   ];
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
   const llmClient =

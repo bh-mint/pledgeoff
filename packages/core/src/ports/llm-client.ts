@@ -77,7 +77,7 @@ export interface LLMSearchQueriesRequest {
 }
 
 export interface LLMSearchQueriesResponse {
-  readonly github: string[];
+  readonly hn: string[];
   readonly reddit: string[];
 }
 

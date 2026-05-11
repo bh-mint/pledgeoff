@@ -22,7 +22,7 @@ export type SentimentBreakdown = z.infer<typeof SentimentBreakdownSchema>;
 
 export const CustomerQuoteSchema = z.object({
   text: z.string().min(1).max(400),
-  source: z.enum(['reddit', 'github']),
+  source: z.enum(['reddit', 'hn', 'github']),
   url: z.string().url(),
 });
 export type CustomerQuote = z.infer<typeof CustomerQuoteSchema>;
