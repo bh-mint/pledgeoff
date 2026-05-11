@@ -11,6 +11,29 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "1.1",
+    date: "May 2026",
+    tag: "UI",
+    items: [
+      "Two-column layout on idea page — verdict sticky left, signals scrollable right",
+      "Compact signal cards: title truncated, sentiment dot, View ↗ button",
+      "Light mode repaired — accent color (#4D6C00 olive), canvas/surface separation, visible borders",
+      "ThemeToggle: 3 buttons replaced with single dropdown",
+    ],
+  },
+  {
+    version: "1.0",
+    date: "May 2026",
+    tag: "SIGNALS",
+    items: [
+      "LLM-generated search queries replace keyword extractor — signals now match full idea text",
+      "GitHub: removed sort=reactions (now uses best-match ranking) + in:title qualifier",
+      "Reddit: removed type filter that silently returned 0 results",
+      "Parallel fetch: 2 queries × 2 sources, deduplicated by URL before save",
+      "Prod DB synced — 6 missing migrations applied via supabase db push",
+    ],
+  },
+  {
     version: "0.9",
     date: "May 2026",
     tag: "UI",
@@ -84,6 +107,7 @@ const TAG_COLORS: Record<string, string> = {
   CONTENT:     "var(--caution)",
   INTELLIGENCE:"var(--accent)",
   SIGNALS:     "var(--validated)",
+  FIX:         "var(--caution)",
   LAUNCH:      "var(--accent)",
 };
 
