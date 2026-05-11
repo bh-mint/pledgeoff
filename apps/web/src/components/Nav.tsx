@@ -42,7 +42,7 @@ export function Nav({ onWaitlistOpen, loggedIn: loggedInProp }: NavProps) {
             aria-label="PledgeOFF home"
           >
             <Logo size={22} />
-            <span className="font-[InterTight] font-bold tracking-[-0.045em] text-[15px]">
+            <span className="display text-[15px] font-semibold tracking-tight">
               Pledge<span className="text-(--accent)">OFF</span>
             </span>
           </Link>

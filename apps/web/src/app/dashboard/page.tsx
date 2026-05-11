@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { container } from "@/lib/container";
 import { DashboardClient, type TableRow } from "./DashboardClient";
 import { ProfileButton } from "@/components/ProfileButton";
+import { Logo } from "@/components/brand/Logo";
 import type { Decision } from "@pledgeoff/core";
 
 export const metadata: Metadata = {
@@ -175,9 +176,13 @@ export default async function DashboardPage() {
           <div className="flex items-center gap-4 sm:gap-8">
             <Link
               href="/dashboard"
-              className="display text-[15px] font-semibold tracking-tight text-(--t1)"
+              className="flex items-center gap-2 text-(--t1)"
+              aria-label="PledgeOFF home"
             >
-              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+              <Logo size={22} />
+              <span className="display text-[15px] font-semibold tracking-tight">
+                Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+              </span>
             </Link>
             <nav className="flex items-center gap-4 text-[13px] text-(--t2)">
               <span className="text-(--t1)">Dashboard</span>
