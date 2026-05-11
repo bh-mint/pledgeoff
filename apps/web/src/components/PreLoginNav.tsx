@@ -31,7 +31,7 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
         className="border-b sticky top-0 z-50"
         style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
       >
-        <div className="max-w-[1320px] mx-auto px-8 h-12 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 h-12 flex items-center justify-between">
           <Link
             href={loggedIn ? "/dashboard" : "/"}
             className="flex items-center gap-2 text-(--t1)"
