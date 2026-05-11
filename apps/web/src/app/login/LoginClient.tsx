@@ -35,7 +35,7 @@ export function LoginClient() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding` },
       });
       if (error) {
         setErrorMsg(error.message);
@@ -59,7 +59,7 @@ export function LoginClient() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/onboarding` },
     });
     if (error) {
       setErrorMsg(error.message);
