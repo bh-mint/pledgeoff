@@ -1,3 +1,5 @@
+export { InMemoryCacheAdapter } from './cache/in-memory-cache-adapter';
+export { UpstashRedisCacheAdapter } from './cache/upstash-redis-cache-adapter';
 export { SupabaseIdeaRepository } from './storage/supabase-idea-repository';
 export { SupabaseSignalRepository } from './storage/supabase-signal-repository';
 export { SupabaseDecisionRepository } from './storage/supabase-decision-repository';

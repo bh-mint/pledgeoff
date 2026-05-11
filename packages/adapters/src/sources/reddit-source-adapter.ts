@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow';
 import type { Signal } from '@pledgeoff/core';
-import type { ISourceAdapter } from '@pledgeoff/core';
+import type { ISourceAdapter, ICache } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 
@@ -28,12 +28,15 @@ function scoreSentiment(score: number): Signal['sentiment'] {
   return 'neutral';
 }
 
+const CACHE_TTL_SECONDS = 3600; // 1 hour
+
 export class RedditSourceAdapter implements ISourceAdapter {
   readonly sourceName = 'reddit';
 
   constructor(
     private readonly timeoutMs = 10_000,
     private readonly maxRetries = 3,
+    private readonly cache?: ICache,
   ) {}
 
   async fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
@@ -52,8 +55,18 @@ export class RedditSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const query = encodeURIComponent(ideaText.slice(0, 100));
+    const queryText = ideaText.slice(0, 100);
+    const query = encodeURIComponent(queryText);
     const url = `https://www.reddit.com/search.json?q=${query}&sort=relevance&limit=10&type=link,self`;
+
+    if (this.cache) {
+      const cacheKey = `pledgeoff:reddit:v1:${queryText}`;
+      const cached = await this.cache.get<Signal[]>(cacheKey);
+      if (cached) {
+        log.info({ traceId, target: 'reddit', operation: 'search', outcome: 'success', cacheHit: true, signalCount: cached.length }, 'Reddit cache hit');
+        return ok(cached.map((s) => ({ ...s, id: crypto.randomUUID(), ideaId })));
+      }
+    }
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       const start = Date.now();
@@ -91,6 +104,12 @@ export class RedditSourceAdapter implements ISourceAdapter {
           { traceId, target: 'reddit', operation: 'search', latencyMs: Date.now() - start, outcome: 'success', signalCount: signals.length },
           'Reddit signals fetched',
         );
+
+        if (this.cache) {
+          const cacheKey = `pledgeoff:reddit:v1:${queryText}`;
+          await this.cache.set(cacheKey, signals, CACHE_TTL_SECONDS);
+        }
+
         return ok(signals);
       } catch (error) {
         if (attempt === this.maxRetries) {

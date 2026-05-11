@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow';
 import type { Signal } from '@pledgeoff/core';
-import type { ISourceAdapter } from '@pledgeoff/core';
+import type { ISourceAdapter, ICache } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 
@@ -26,6 +26,8 @@ function scoreSentiment(reactions: GitHubIssue['reactions']): Signal['sentiment'
   return 'neutral';
 }
 
+const CACHE_TTL_SECONDS = 3600; // 1 hour
+
 export class GitHubSourceAdapter implements ISourceAdapter {
   readonly sourceName = 'github';
 
@@ -33,6 +35,7 @@ export class GitHubSourceAdapter implements ISourceAdapter {
     private readonly pat: string,
     private readonly timeoutMs = 10_000,
     private readonly maxRetries = 3,
+    private readonly cache?: ICache,
   ) {}
 
   async fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
@@ -51,8 +54,18 @@ export class GitHubSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const query = encodeURIComponent(ideaText.slice(0, 100));
+    const queryText = ideaText.slice(0, 100);
+    const query = encodeURIComponent(queryText);
     const url = `https://api.github.com/search/issues?q=${query}&sort=reactions&per_page=10`;
+
+    if (this.cache) {
+      const cacheKey = `pledgeoff:github:v1:${queryText}`;
+      const cached = await this.cache.get<Signal[]>(cacheKey);
+      if (cached) {
+        log.info({ traceId, target: 'github', operation: 'search', outcome: 'success', cacheHit: true, signalCount: cached.length }, 'GitHub cache hit');
+        return ok(cached.map((s) => ({ ...s, id: crypto.randomUUID(), ideaId })));
+      }
+    }
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       const start = Date.now();
@@ -94,6 +107,12 @@ export class GitHubSourceAdapter implements ISourceAdapter {
           { traceId, target: 'github', operation: 'search', latencyMs: Date.now() - start, outcome: 'success', signalCount: signals.length },
           'GitHub signals fetched',
         );
+
+        if (this.cache) {
+          const cacheKey = `pledgeoff:github:v1:${queryText}`;
+          await this.cache.set(cacheKey, signals, CACHE_TTL_SECONDS);
+        }
+
         return ok(signals);
       } catch (error) {
         if (attempt === this.maxRetries) {
