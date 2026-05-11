@@ -13,7 +13,7 @@ import {
   UpstashRedisCacheAdapter,
 } from '@pledgeoff/adapters';
 import type { ICache } from '@pledgeoff/core';
-import { PostgresEventBus } from '@pledgeoff/eventbus';
+import { PostgresEventBus, RedisStreamsEventBus } from '@pledgeoff/eventbus';
 import {
   CreateIdeaUseCase,
   FetchSignalsUseCase,
@@ -40,7 +40,15 @@ function buildContainer() {
   const feedbackRepo = new SupabaseFeedbackRepository(supabase);
   const idempotencyStore = new SupabaseIdempotencyStore(supabase);
 
-  const eventBus = new PostgresEventBus(supabase);
+  const eventBusProvider = process.env.EVENT_BUS_PROVIDER ?? 'postgres';
+  const eventBus =
+    eventBusProvider === 'redis-streams'
+      ? new RedisStreamsEventBus(
+          supabase,
+          requireEnv('UPSTASH_REDIS_REST_URL'),
+          requireEnv('UPSTASH_REDIS_REST_TOKEN'),
+        )
+      : new PostgresEventBus(supabase);
 
   const cacheProvider = process.env.CACHE_PROVIDER ?? 'memory';
   const cache: ICache =

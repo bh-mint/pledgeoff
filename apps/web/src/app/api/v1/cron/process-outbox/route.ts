@@ -8,7 +8,7 @@ export async function GET(req: Request): Promise<Response> {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const stats = await container.eventBus.processOutbox();
+  const stats = await container.eventBus.processEvents();
 
   return Response.json({ ok: true, ...stats });
 }

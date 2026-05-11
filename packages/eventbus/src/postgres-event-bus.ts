@@ -43,6 +43,11 @@ export class PostgresEventBus implements IEventBus {
     this.handlers.set(eventType, [...existing, handler as Handler<unknown>]);
   }
 
+  // Unified entry point for cron
+  async processEvents(limit = 50): Promise<{ processed: number; failed: number }> {
+    return this.processOutbox(limit);
+  }
+
   async processOutbox(limit = 50): Promise<{ processed: number; failed: number }> {
     const { data, error } = await this.supabase
       .from('outbox')
