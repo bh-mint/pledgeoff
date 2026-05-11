@@ -33,7 +33,7 @@ export function Footer() {
         {/* Logo + tagline */}
         <div className="flex items-center gap-3">
           <Logo size={18} className="text-(--t1)" />
-          <p className="font-[InterTight] font-bold tracking-[-0.045em] text-[15px] text-(--t1)">
+          <p className="display text-[15px] font-semibold tracking-tight text-(--t1)">
             Pledge<span className="text-(--accent)">OFF</span>
           </p>
           <span className="mono text-[11px] text-(--t3) tracking-[0.04em]">

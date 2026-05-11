@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { WaitlistModal } from "./WaitlistModal";
+import { Logo } from "@/components/brand/Logo";
 
 interface PreLoginNavProps {
   extraLink?: { href: string; label: string };
@@ -33,9 +34,13 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
         <div className="max-w-[1320px] mx-auto px-8 h-12 flex items-center justify-between">
           <Link
             href={loggedIn ? "/dashboard" : "/"}
-            className="display text-[15px] font-semibold text-(--t1) tracking-tight"
+            className="flex items-center gap-2 text-(--t1)"
+            aria-label="PledgeOFF home"
           >
-            Pledge<span className="text-(--accent)">OFF</span>
+            <Logo size={22} />
+            <span className="display text-[15px] font-semibold tracking-tight">
+              Pledge<span className="text-(--accent)">OFF</span>
+            </span>
           </Link>
 
           <nav className="flex items-center gap-3 sm:gap-5">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Logo } from "@/components/brand/Logo";
 
 const CATEGORIES = ["SaaS", "Consumer", "Marketplace", "Hardware", "Service", "Other"] as const;
 
@@ -89,9 +90,13 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
         <div className="flex items-center gap-4 sm:gap-6">
           <Link
             href="/dashboard"
-            className="display text-[15px] font-semibold tracking-tight text-(--t1)"
+            className="flex items-center gap-2 text-(--t1)"
+            aria-label="PledgeOFF home"
           >
-            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+            <Logo size={22} />
+            <span className="display text-[15px] font-semibold tracking-tight">
+              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+            </span>
           </Link>
           <Link
             href="/dashboard"
