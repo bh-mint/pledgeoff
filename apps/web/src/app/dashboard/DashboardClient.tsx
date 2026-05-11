@@ -27,12 +27,6 @@ const VERDICT_COLOR: Record<string, string> = {
   PIVOT: "var(--caution)",
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  pending:   "pending",
-  validated: "validated",
-  killed:    "archived",
-  pivoting:  "pivoting",
-};
 
 type SortKey = "date" | "score";
 
