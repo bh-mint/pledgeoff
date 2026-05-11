@@ -14,6 +14,22 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "Pricing — PledgeOFF",
+  description: "Free until you're sure. Then €19.99/mo. Validate unlimited startup ideas with real Reddit and trend signals.",
+  url: "https://pledgeoff.com/pricing",
+};
+
 export default function PricingPage() {
-  return <PricingClient />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <PricingClient />
+    </>
+  );
 }
