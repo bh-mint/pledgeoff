@@ -47,6 +47,7 @@ function makeLLMClient(response = llmResponse): ILLMClient {
   return {
     generateDecision: vi.fn().mockResolvedValue(ok(response)),
     generateSimulation: vi.fn(),
+    generateLanding: vi.fn(),
   };
 }
 
@@ -93,7 +94,7 @@ describe('DecideUseCase', () => {
     const useCase = new DecideUseCase(
       makeSignalRepo(),
       makeDecisionRepo(),
-      { generateDecision: vi.fn().mockResolvedValue(err(llmError)), generateSimulation: vi.fn() },
+      { generateDecision: vi.fn().mockResolvedValue(err(llmError)), generateSimulation: vi.fn(), generateLanding: vi.fn() },
       makeEventBus(),
       makeIdempotencyStore(false),
     );
