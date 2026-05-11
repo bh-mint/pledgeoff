@@ -184,23 +184,31 @@ export default async function ArticlePage({ params }: Props) {
             className="mt-16 rounded-md border p-6"
             style={{ borderColor: "var(--border)", background: "var(--surface)" }}
           >
-            <div className="mono text-[10px] mb-3" style={{ color: "var(--t3)" }}>END_OF_ARTICLE · CTA</div>
+            <div className="mono text-[10px] mb-3" style={{ color: "var(--t3)" }}>
+              You just learned how.
+            </div>
             <div
               className="display font-semibold leading-tight"
               style={{ fontSize: "22px", color: "var(--t1)" }}
             >
-              Validate your idea now.
+              Now let the data decide.
             </div>
             <p className="text-[14px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-              Get a verdict in 15 seconds. Four dimensions, one composite, full per-axis breakdown.
+              PledgeOFF scans 847 live signals from Reddit and GitHub and returns GO / KILL / PIVOT in 15 seconds.
+              No surveys. No guesswork. Just evidence.
             </p>
-            <Link
-              href="/ideas/new"
-              className="mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-              style={{ background: "var(--accent)", color: "#000" }}
-            >
-              Run a validation →
-            </Link>
+            <div className="mt-5 flex flex-wrap items-center gap-4">
+              <Link
+                href="/ideas/new"
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
+                style={{ background: "var(--accent)", color: "#000" }}
+              >
+                Validate your idea →
+              </Link>
+              <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+                Free to start · 3 validations/month · No credit card
+              </span>
+            </div>
           </div>
 
           {/* Author */}

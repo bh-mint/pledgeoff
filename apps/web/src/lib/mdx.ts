@@ -39,6 +39,14 @@ export function getAllArticles(): ArticleFrontmatter[] {
     );
 }
 
+function injectMidArticleCTA(content: string): string {
+  const paragraphs = content.split(/\n\n+/);
+  if (paragraphs.length < 4) return content;
+  const insertAt = Math.floor(paragraphs.length * 0.4);
+  paragraphs.splice(insertAt, 0, "<MidArticleCTA />");
+  return paragraphs.join("\n\n");
+}
+
 export function getArticleBySlug(slug: string): Article | null {
   const filePath = path.join(CONTENT_DIR, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) return null;
@@ -49,7 +57,7 @@ export function getArticleBySlug(slug: string): Article | null {
 
   return {
     ...(data as ArticleFrontmatter),
-    content,
+    content: injectMidArticleCTA(content),
     readingTimeText: stats.text,
   };
 }
