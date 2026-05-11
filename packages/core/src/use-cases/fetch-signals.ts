@@ -36,8 +36,8 @@ export class FetchSignalsUseCase {
       traceId: input.traceId,
     });
     const queries: Record<string, string[]> = queriesResult.isOk()
-      ? { hn: queriesResult.value.hn, reddit: queriesResult.value.reddit }
-      : { hn: [fallbackQuery], reddit: [fallbackQuery] };
+      ? { producthunt: queriesResult.value.producthunt, google: queriesResult.value.google }
+      : { producthunt: [fallbackQuery], google: [fallbackQuery] };
 
     // Fetch from each adapter for each query in parallel
     const fetchPromises = this.sourceAdapters.flatMap((adapter) => {
