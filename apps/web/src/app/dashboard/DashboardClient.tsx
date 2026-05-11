@@ -4,6 +4,13 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { VerdictMark } from "@/components/brand/VerdictMark";
 
+export type ToolStatus = {
+  simulate: boolean;
+  landing: boolean;
+  customers: boolean;
+  build: boolean;
+};
+
 export type TableRow = {
   id: string;
   text: string;
@@ -11,6 +18,7 @@ export type TableRow = {
   score: number | null;
   verdict: string | null;
   status: "pending" | "validated" | "killed" | "pivoting";
+  tools: ToolStatus;
 };
 
 const VERDICT_COLOR: Record<string, string> = {
@@ -96,16 +104,22 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
         style={{ borderColor: "var(--border)", color: "var(--t3)" }}
       >
         <div className="col-span-1" />
-        <div className="col-span-5">Idea</div>
+        <div className="col-span-4">Idea</div>
         <div className="col-span-2">Score</div>
         <div className="col-span-1">Verdict</div>
-        <div className="col-span-2">Status</div>
+        <div className="col-span-3">Tools</div>
         <div className="col-span-1 text-right">Date</div>
       </div>
 
       {/* Rows */}
       {filtered.map((row) => {
         const color = row.verdict ? (VERDICT_COLOR[row.verdict] ?? "var(--t3)") : "var(--t3)";
+        const toolList = [
+          { key: "simulate" as const, label: "Sim" },
+          { key: "landing" as const, label: "Land" },
+          { key: "customers" as const, label: "Cust" },
+          { key: "build" as const, label: "Build" },
+        ];
         return (
           <Link
             key={row.id}
@@ -127,7 +141,7 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
             </div>
 
             {/* Idea */}
-            <div className="sm:col-span-5 min-w-0 mb-1.5 sm:mb-0">
+            <div className="sm:col-span-4 min-w-0 mb-1.5 sm:mb-0">
               <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
               <div className="mono text-[10px] mt-0.5 text-(--t3)">
                 val_{row.id.slice(0, 8)}
@@ -169,9 +183,21 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
                 {row.verdict ?? "—"}
               </div>
 
-              {/* Status */}
-              <div className="sm:col-span-2 mono text-[10px] text-(--t2) flex-shrink-0">
-                {STATUS_LABEL[row.status]}
+              {/* Tools pills */}
+              <div className="sm:col-span-3 hidden sm:flex items-center gap-1">
+                {toolList.map(({ key, label }) => (
+                  <span
+                    key={key}
+                    className="mono text-[9px] px-1.5 py-0.5 rounded"
+                    style={{
+                      background: row.tools[key] ? "rgba(125,214,107,0.12)" : "rgba(255,255,255,0.04)",
+                      color: row.tools[key] ? "var(--validated)" : "var(--t3)",
+                      border: `1px solid ${row.tools[key] ? "rgba(125,214,107,0.3)" : "var(--border)"}`,
+                    }}
+                  >
+                    {row.tools[key] ? "✓" : "○"} {label}
+                  </span>
+                ))}
               </div>
 
               {/* Date */}

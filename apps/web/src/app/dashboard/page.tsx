@@ -60,13 +60,6 @@ const GOLDMINE_ITEMS = [
   { score: 84, cat: "CREATOR",     title: "Sponsorship rate-card calculator priced by real engagement", mentions: 289 },
 ];
 
-const PIPELINE_STEPS = [
-  { k: "Validate",  done: true,  active: false },
-  { k: "Simulate",  done: false, active: false },
-  { k: "Landing",   done: false, active: false },
-  { k: "Customers", done: false, active: false },
-  { k: "Build",     done: false, active: false },
-];
 
 export default async function DashboardPage() {
   const user = await requireUser();
@@ -77,14 +70,24 @@ export default async function DashboardPage() {
   const ideasResult = await container._repos.ideaRepo.findByUserId(user.id);
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
 
-  const decisionResults = await Promise.all(
-    ideas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))
-  );
+  const [decisionResults, simulateResults, landingResults, customerResults, buildResults] = await Promise.all([
+    Promise.all(ideas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))),
+    Promise.all(ideas.map((idea) => container._repos.simulationRepo.findByIdeaId(idea.id))),
+    Promise.all(ideas.map((idea) => container._repos.landingPageRepo.findByIdeaId(idea.id))),
+    Promise.all(ideas.map((idea) => container._repos.customerAnalysisRepo.findByIdeaId(idea.id))),
+    Promise.all(ideas.map((idea) => container._repos.buildAnalysisRepo.findByIdeaId(idea.id))),
+  ]);
 
   const rows = ideas
     .map((idea, i) => ({
       idea,
       decision: decisionResults[i].isOk() ? decisionResults[i].value : null,
+      tools: {
+        simulate: !!(simulateResults[i].isOk() && simulateResults[i].value),
+        landing: !!(landingResults[i].isOk() && landingResults[i].value),
+        customers: !!(customerResults[i].isOk() && customerResults[i].value),
+        build: !!(buildResults[i].isOk() && buildResults[i].value),
+      },
     }))
     .sort(
       (a, b) =>
@@ -132,13 +135,16 @@ export default async function DashboardPage() {
     .map((_, i) => i + 1)
     .slice(-10);
 
-  // Pipeline — update first step status
+  // Pipeline — dynamic status based on top GO idea's tool completions
   const pipelineRow = rows.find((r) => r.decision?.verdict === "GO");
-  const pipelineSteps = PIPELINE_STEPS.map((s, i) => ({
-    ...s,
-    done: i === 0 && pipelineRow ? true : s.done,
-    active: i === 1 && pipelineRow ? true : s.active,
-  }));
+  const pt = pipelineRow?.tools;
+  const pipelineSteps = [
+    { k: "Validate",  done: !!pipelineRow, active: false },
+    { k: "Simulate",  done: !!pt?.simulate, active: !!pipelineRow && !pt?.simulate },
+    { k: "Landing",   done: !!pt?.landing, active: !!pt?.simulate && !pt?.landing },
+    { k: "Customers", done: !!pt?.customers, active: !!pt?.landing && !pt?.customers },
+    { k: "Build",     done: !!pt?.build, active: !!pt?.customers && !pt?.build },
+  ];
   const stepsLeft = pipelineSteps.filter((s) => !s.done).length;
 
   // Days since account created (proxy for streak)
@@ -150,7 +156,7 @@ export default async function DashboardPage() {
   );
 
   // Table rows
-  const tableRows: TableRow[] = rows.map(({ idea, decision }) => ({
+  const tableRows: TableRow[] = rows.map(({ idea, decision, tools }) => ({
     id: idea.id,
     text: idea.text,
     createdAt: idea.createdAt,
@@ -163,6 +169,7 @@ export default async function DashboardPage() {
       : decision.verdict === "KILL"
       ? "killed"
       : "pivoting",
+    tools,
   }));
 
   const userInitials = (user.email ?? "?")
