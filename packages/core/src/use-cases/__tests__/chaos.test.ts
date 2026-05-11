@@ -130,6 +130,7 @@ describe('Chaos: LLM (Groq) down', () => {
       generateDecision: vi.fn().mockResolvedValue(
         err(new LLMClientError('connection timeout')),
       ),
+      generateSimulation: vi.fn(),
     };
 
     const useCase = new DecideUseCase(signalRepo, decisionRepo, llm, makeEventBus(), makeIdempotencyStore());

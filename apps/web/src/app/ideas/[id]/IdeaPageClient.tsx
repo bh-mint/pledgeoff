@@ -105,7 +105,7 @@ export function IdeaPageClient({
         </p>
         {decision ? (
           <>
-            <DecisionCard decision={decision} />
+            <DecisionCard decision={decision} ideaId={idea.id} />
             <div className="mt-4">
               <FeedbackButtons ideaId={idea.id} decisionId={decision.id} />
             </div>
