@@ -286,6 +286,42 @@ export default async function DashboardPage() {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-12 gap-6">
         {/* LEFT — pipeline + table */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
+          {/* Welcome banner — first-time users */}
+          {rows.length === 0 && (
+            <div
+              className="rounded-md border p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+              style={{ borderColor: "rgba(214,255,61,0.3)", background: "rgba(214,255,61,0.04)" }}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="mono text-[10px] uppercase tracking-[0.1em] mb-1" style={{ color: "var(--accent)" }}>
+                  Welcome to PledgeOFF
+                </div>
+                <h2 className="display text-[18px] font-semibold tracking-tight mb-1" style={{ color: "var(--t1)" }}>
+                  Validate your first idea in 15 seconds.
+                </h2>
+                <p className="text-[13px]" style={{ color: "var(--t2)" }}>
+                  Write one sentence. We fetch real signals from Reddit and GitHub and give you a GO · KILL · PIVOT verdict.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                <Link
+                  href="/ideas/new"
+                  className="display text-[13px] font-semibold px-5 h-10 rounded-md flex items-center justify-center transition-opacity hover:opacity-90"
+                  style={{ background: "var(--accent)", color: "#000" }}
+                >
+                  Start →
+                </Link>
+                <Link
+                  href="/onboarding"
+                  className="mono text-[11px] px-4 h-10 rounded-md border flex items-center justify-center transition-colors hover:border-(--t2)"
+                  style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                >
+                  How it works
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Pipeline */}
           {rows.length > 0 && (
             <div
