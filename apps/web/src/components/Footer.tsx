@@ -73,10 +73,12 @@ export function Footer() {
         </div>
 
         {/* Nav links */}
-        <div className="flex items-center gap-5 sm:justify-end text-[11px] text-(--t3)">
+        <div className="flex items-center gap-5 sm:justify-end text-[11px] text-(--t3) flex-wrap">
+          <Link href="/about" className="hover:text-(--t2) transition-colors">About</Link>
           <Link href="/privacy" className="hover:text-(--t2) transition-colors">Privacy</Link>
           <Link href="/terms" className="hover:text-(--t2) transition-colors">Terms</Link>
           <Link href="/changelog" className="hover:text-(--t2) transition-colors">Changelog</Link>
+          <a href="mailto:contact@pledgeoff.com" className="hover:text-(--t2) transition-colors">Contact</a>
         </div>
       </div>
 
