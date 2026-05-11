@@ -21,21 +21,22 @@
 }
 
 [data-theme="light"] {
-  --canvas:    #FAFAF9;
-  --surface:   #F5F5F4;
-  --surface-2: #EEEEEC;
-  --border:    #E5E5E3;
-  --border-2:  #D6D6D2;
+  --canvas:    #EEEEED;   /* warm grey — so white cards pop */
+  --surface:   #FFFFFF;
+  --surface-2: #F4F4F2;
+  --border:    #D4D4D1;
+  --border-2:  #BEBEBB;
 
   --t1:        #0A0A0B;
-  --t2:        #5C5C63;
-  --t3:        #8A8A90;
+  --t2:        #46464E;
+  --t3:        #78787F;
 
-  --accent-fg:   #0A0A0B;
-  --accent-text: #5C6E00;
-  --validated:   #2E7D32;
-  --caution:     #B8860B;
-  --kill:        #C62828;
+  --accent:      #4D6C00;   /* deep olive — brand hue, works on white */
+  --accent-fg:   #FFFFFF;   /* white text on olive bg */
+  --accent-text: #4D6C00;
+  --validated:   #2A7030;
+  --caution:     #A07710;
+  --kill:        #BE2A2A;
 }
 
 ::selection {
@@ -238,6 +239,10 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(77,108,0,0.06) 0%, transparent 60%);
+}
+
+[data-theme="dark"] .ambient-accent {
   background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(214,255,61,0.05) 0%, transparent 60%);
 }
 
@@ -254,10 +259,16 @@ body {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 30%, transparent 80%);
+}
+
+[data-theme="dark"] .grid-bg {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
 }
 
 /* Blinking cursor */
@@ -273,7 +284,7 @@ body {
 .callout {
   border-left: 2px solid var(--accent);
   padding: 14px 18px;
-  background: rgba(214,255,61,0.04);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
   color: var(--t2);
   font-style: italic;
   font-size: 15px;
