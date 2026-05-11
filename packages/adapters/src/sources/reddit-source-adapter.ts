@@ -55,10 +55,10 @@ export class RedditSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&sort=relevance&limit=5&type=link,self`;
+    const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&sort=relevance&limit=5`;
 
     if (this.cache) {
-      const cacheKey = `pledgeoff:reddit:v2:${query}`;
+      const cacheKey = `pledgeoff:reddit:v3:${query}`;
       const cached = await this.cache.get<Signal[]>(cacheKey);
       if (cached) {
         log.info({ traceId, target: 'reddit', operation: 'search', outcome: 'success', cacheHit: true, signalCount: cached.length }, 'Reddit cache hit');
@@ -104,7 +104,7 @@ export class RedditSourceAdapter implements ISourceAdapter {
         );
 
         if (this.cache) {
-          const cacheKey = `pledgeoff:reddit:v2:${query}`;
+          const cacheKey = `pledgeoff:reddit:v3:${query}`;
           await this.cache.set(cacheKey, signals, CACHE_TTL_SECONDS);
         }
 
