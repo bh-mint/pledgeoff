@@ -54,7 +54,8 @@ export class GitHubSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const queryText = ideaText.slice(0, 100);
+    // Use first 5 words as keywords — GitHub issue search works better with short queries
+    const queryText = ideaText.trim().split(/\s+/).slice(0, 5).join(' ');
     const query = encodeURIComponent(queryText);
     const url = `https://api.github.com/search/issues?q=${query}&sort=reactions&per_page=10`;
 

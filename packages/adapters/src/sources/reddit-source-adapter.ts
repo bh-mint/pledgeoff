@@ -55,7 +55,8 @@ export class RedditSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const queryText = ideaText.slice(0, 100);
+    // Use first 5 words as keywords — full sentences don't match Reddit posts
+    const queryText = ideaText.trim().split(/\s+/).slice(0, 5).join(' ');
     const query = encodeURIComponent(queryText);
     const url = `https://www.reddit.com/search.json?q=${query}&sort=relevance&limit=10&type=link,self`;
 
