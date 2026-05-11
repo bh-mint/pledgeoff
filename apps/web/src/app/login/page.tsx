@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LoginClient } from "./LoginClient";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { FooterMicro } from "@/components/FooterMicro";
 
 export const metadata: Metadata = {
   title: "Sign in — PledgeOFF",
@@ -10,29 +12,31 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen relative" style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-      {/* Ambient glow */}
-      <div className="ambient-accent" />
-
-      {/* Top bar */}
-      <div
-        className="relative z-10 px-8 h-14 flex items-center justify-between border-b"
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: "var(--canvas)", color: "var(--t1)" }}
+    >
+      {/* Minimal auth nav — logo centered, toggle right */}
+      <nav
+        className="relative h-14 border-b flex items-center px-4 sm:px-8 flex-shrink-0"
         style={{ borderColor: "var(--border)" }}
       >
-        <Link
-          href="/"
-          className="display text-[14px] font-semibold reveal"
-          style={{ animationDelay: "50ms" }}
-        >
-          Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-        </Link>
-        <span className="mono text-[11px] reveal" style={{ color: "var(--t3)", animationDelay: "120ms" }}>
-          val_auth · session_new
-        </span>
-      </div>
+        <div className="absolute left-1/2 -translate-x-1/2">
+          <Link
+            href="/"
+            className="display text-[15px] font-semibold"
+            style={{ color: "var(--t1)" }}
+          >
+            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+          </Link>
+        </div>
+        <div className="ml-auto">
+          <ThemeToggle />
+        </div>
+      </nav>
 
-      {/* Card area */}
-      <div className="relative z-10 flex items-start justify-center px-6 py-16 min-h-[calc(100vh-3.5rem-5rem)]">
+      {/* Centered form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
         <Suspense
           fallback={
             <div
@@ -45,14 +49,7 @@ export default function LoginPage() {
         </Suspense>
       </div>
 
-      {/* Footer */}
-      <div
-        className="relative z-10 px-8 py-6 border-t flex items-center justify-between"
-        style={{ borderColor: "var(--border)" }}
-      >
-        <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>© 2026 PledgeOFF</span>
-        <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>production uses single state</span>
-      </div>
+      <FooterMicro />
     </div>
   );
 }

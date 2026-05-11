@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { WaitlistModal } from "./WaitlistModal";
 import { Logo } from "@/components/brand/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface PreLoginNavProps {
   extraLink?: { href: string; label: string };
@@ -16,10 +17,8 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data }) => {
-      setLoggedIn(!!data.session);
-    });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.getSession().then(({ data }) => setLoggedIn(!!data.session));
+    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
       setLoggedIn(!!session);
     });
     return () => listener.subscription.unsubscribe();
@@ -31,70 +30,87 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
         className="border-b sticky top-0 z-50"
         style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
       >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 h-12 flex items-center justify-between">
-          <Link
-            href={loggedIn ? "/dashboard" : "/"}
-            className="flex items-center gap-2 text-(--t1)"
-            aria-label="PledgeOFF home"
-          >
-            <Logo size={22} />
-            <span className="display text-[15px] font-semibold tracking-tight">
-              Pledge<span className="text-(--accent)">OFF</span>
-            </span>
-          </Link>
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 h-14 flex items-center justify-between">
+          {/* Left — logo + nav links */}
+          <div className="flex items-center gap-8 sm:gap-10">
+            <Link
+              href={loggedIn ? "/dashboard" : "/"}
+              className="flex items-center gap-2"
+              style={{ color: "var(--t1)" }}
+              aria-label="PledgeOFF home"
+            >
+              <Logo size={22} />
+              <span className="display text-[15px] font-semibold tracking-tight">
+                Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+              </span>
+            </Link>
 
-          <nav className="flex items-center gap-3 sm:gap-5">
-            {!loggedIn && (
-              <Link href="/" className="hidden sm:inline text-[11px] text-(--t2) hover:text-(--t1) transition-colors">
-                ← Back to main page
+            <nav className="hidden sm:flex items-center gap-7">
+              <Link href="/pricing" className="text-[13px] transition-colors" style={{ color: "var(--t2)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
+                Pricing
               </Link>
-            )}
-            <Link href="/pricing" className="hidden sm:inline text-[11px] text-(--t2) hover:text-(--t1) transition-colors">
-              Pricing
-            </Link>
-            <Link href="/blog" className="hidden sm:inline text-[11px] text-(--t2) hover:text-(--t1) transition-colors">
-              Blog
-            </Link>
-            {!loggedIn && (
-              <button
-                onClick={() => setModalOpen(true)}
-                className="hidden sm:inline text-[11px] text-(--t2) hover:text-(--t1) transition-colors"
-              >
-                Get access
-              </button>
-            )}
-            {extraLink && (
-              <Link
-                href={extraLink.href}
-                className="text-[11px] text-(--t2) hover:text-(--t1) transition-colors"
-              >
-                {extraLink.label}
+              <Link href="/blog" className="text-[13px] transition-colors" style={{ color: "var(--t2)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
+                Blog
               </Link>
-            )}
+              <Link href="/about" className="text-[13px] transition-colors" style={{ color: "var(--t2)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
+                About
+              </Link>
+              {extraLink && (
+                <Link href={extraLink.href} className="text-[13px] transition-colors" style={{ color: "var(--t2)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
+                  {extraLink.label}
+                </Link>
+              )}
+            </nav>
+          </div>
+
+          {/* Right — separator + toggle + buttons */}
+          <div className="flex items-center">
+            <div className="hidden sm:block w-px h-4 mx-4" style={{ background: "var(--border)" }} />
+            <div className="hidden sm:block mr-3">
+              <ThemeToggle />
+            </div>
+
             {loggedIn ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center h-7 px-3 rounded-md bg-(--accent) text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
+                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
               >
                 Dashboard →
               </Link>
             ) : (
-              <Link
-                href="/login"
-                className="inline-flex items-center h-7 px-3 rounded-md bg-(--accent) text-black text-[11px] font-semibold hover:opacity-90 transition-opacity"
-              >
-                Sign in
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center h-9 px-4 rounded-md border text-[13px] transition-colors"
+                  style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}
+                >
+                  Login
+                </Link>
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className="inline-flex items-center h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
+                  style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+                >
+                  Start free →
+                </button>
+              </div>
             )}
-          </nav>
+          </div>
         </div>
       </header>
 
-      <WaitlistModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        source="nav"
-      />
+      <WaitlistModal isOpen={modalOpen} onClose={() => setModalOpen(false)} source="nav" />
     </>
   );
 }

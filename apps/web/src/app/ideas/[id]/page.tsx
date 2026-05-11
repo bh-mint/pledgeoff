@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
 import { Nav } from "@/components/Nav";
 import { IdeaPageClient } from "./IdeaPageClient";
+import { FooterMicro } from "@/components/FooterMicro";
 import { formatDate } from "@/lib/mdx-utils";
 
 interface Props {
@@ -108,6 +109,7 @@ export default async function IdeaPage({ params }: Props) {
           initialSignals={signals}
         />
       </div>
+      <FooterMicro />
     </div>
   );
 }
