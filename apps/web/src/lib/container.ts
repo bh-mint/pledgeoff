@@ -9,8 +9,8 @@ import {
   SupabaseLandingPageRepository,
   SupabaseCustomerAnalysisRepository,
   SupabaseBuildAnalysisRepository,
-  RedditSourceAdapter,
-  HNSourceAdapter,
+  ProductHuntSourceAdapter,
+  GoogleSearchSourceAdapter,
   GroqLLMAdapter,
   AnthropicLLMAdapter,
   InMemoryCacheAdapter,
@@ -73,8 +73,20 @@ function buildContainer() {
       : new InMemoryCacheAdapter();
 
   const sourceAdapters = [
-    new RedditSourceAdapter(5_000, 2, cache),
-    new HNSourceAdapter(5_000, 2, cache),
+    new ProductHuntSourceAdapter(
+      requireEnv('PRODUCT_HUNT_API_KEY'),
+      requireEnv('PRODUCT_HUNT_API_SECRET'),
+      10_000,
+      2,
+      cache,
+    ),
+    new GoogleSearchSourceAdapter(
+      requireEnv('GOOGLE_SEARCH_API_KEY'),
+      requireEnv('GOOGLE_SEARCH_ENGINE_ID'),
+      10_000,
+      2,
+      cache,
+    ),
   ];
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
   const llmClient =
