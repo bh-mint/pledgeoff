@@ -74,9 +74,9 @@ export default async function IdeaPage({ params }: Props) {
     <div className="min-h-screen bg-(--canvas)">
       <Nav loggedIn={true} />
 
-      <div className="max-w-[1140px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+      <div className="max-w-285 mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Back + Idea header — narrow */}
-        <div className="max-w-[720px]">
+        <div className="max-w-180">
           <Link
             href="/dashboard"
             className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
@@ -91,7 +91,7 @@ export default async function IdeaPage({ params }: Props) {
               </p>
               {category && (
                 <span
-                  className="mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
+                  className="mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded"
                   style={{
                     color: "var(--accent)",
                     background: "rgba(214,255,61,0.08)",
@@ -122,7 +122,7 @@ export default async function IdeaPage({ params }: Props) {
 
         {/* Intelligence Tools hub — narrow */}
         {decision && (
-          <div className="max-w-[720px] mt-12 pt-10 border-t border-(--border)">
+          <div className="max-w-180 mt-12 pt-10 border-t border-(--border)">
             <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-5">
               Intelligence tools
             </p>
