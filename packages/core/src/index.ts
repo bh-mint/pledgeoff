@@ -14,6 +14,7 @@ export * from './ports/idempotency-store';
 export * from './ports/llm-client';
 export * from './ports/source-adapter';
 export * from './ports/audit-log';
+export * from './ports/cache';
 
 // Use cases
 export * from './use-cases/create-idea';

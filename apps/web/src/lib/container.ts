@@ -9,7 +9,10 @@ import {
   GitHubSourceAdapter,
   GroqLLMAdapter,
   AnthropicLLMAdapter,
+  InMemoryCacheAdapter,
+  UpstashRedisCacheAdapter,
 } from '@pledgeoff/adapters';
+import type { ICache } from '@pledgeoff/core';
 import { PostgresEventBus } from '@pledgeoff/eventbus';
 import {
   CreateIdeaUseCase,
@@ -39,9 +42,18 @@ function buildContainer() {
 
   const eventBus = new PostgresEventBus(supabase);
 
+  const cacheProvider = process.env.CACHE_PROVIDER ?? 'memory';
+  const cache: ICache =
+    cacheProvider === 'redis'
+      ? new UpstashRedisCacheAdapter(
+          requireEnv('UPSTASH_REDIS_REST_URL'),
+          requireEnv('UPSTASH_REDIS_REST_TOKEN'),
+        )
+      : new InMemoryCacheAdapter();
+
   const sourceAdapters = [
-    new RedditSourceAdapter(),
-    new GitHubSourceAdapter(requireEnv('GITHUB_PAT')),
+    new RedditSourceAdapter(10_000, 3, cache),
+    new GitHubSourceAdapter(requireEnv('GITHUB_PAT'), 10_000, 3, cache),
   ];
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
   const llmClient =

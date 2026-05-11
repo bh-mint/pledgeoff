@@ -16,6 +16,7 @@
     "@pledgeoff/core": "workspace:*",
     "@pledgeoff/observability": "workspace:*",
     "@supabase/supabase-js": "^2.49.4",
+    "@upstash/redis": "^1.38.0",
     "groq-sdk": "^0.9.1",
     "neverthrow": "^8.2.0",
     "zod": "^3.24.2"
