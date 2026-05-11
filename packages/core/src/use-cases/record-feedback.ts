@@ -7,6 +7,7 @@ export interface RecordFeedbackInput {
   readonly decisionId: string;
   readonly userId: string;
   readonly vote: FeedbackVote;
+  readonly comment?: string;
   readonly traceId: string;
 }
 
@@ -22,6 +23,7 @@ export class RecordFeedbackUseCase {
       decisionId: input.decisionId,
       userId: input.userId,
       vote: input.vote,
+      ...(input.comment ? { comment: input.comment } : {}),
       createdAt: new Date().toISOString(),
     };
 

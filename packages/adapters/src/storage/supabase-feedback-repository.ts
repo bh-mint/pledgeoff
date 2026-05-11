@@ -9,6 +9,7 @@ type FeedbackRow = {
   decision_id: string;
   user_id: string;
   vote: string;
+  comment: string | null;
   created_at: string;
 };
 
@@ -19,6 +20,7 @@ function rowToFeedback(row: FeedbackRow): Feedback {
     decisionId: row.decision_id,
     userId: row.user_id,
     vote: row.vote as Feedback['vote'],
+    ...(row.comment ? { comment: row.comment } : {}),
     createdAt: row.created_at,
   };
 }
@@ -35,6 +37,7 @@ export class SupabaseFeedbackRepository implements IFeedbackRepository {
         decision_id: feedback.decisionId,
         user_id: feedback.userId,
         vote: feedback.vote,
+        comment: feedback.comment ?? null,
         created_at: feedback.createdAt,
       })
       .select()
