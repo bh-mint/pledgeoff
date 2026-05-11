@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/blog/idea-validation`, lastModified: SITE_LAST_UPDATED },
     { url: `${SITE_URL}/blog/product-decisions`, lastModified: SITE_LAST_UPDATED },
     { url: `${SITE_URL}/blog/founder`, lastModified: SITE_LAST_UPDATED },
+    { url: `${SITE_URL}/about`, lastModified: "2026-05-11" },
     { url: `${SITE_URL}/pricing`, lastModified: SITE_LAST_UPDATED },
     { url: `${SITE_URL}/changelog`, lastModified: SITE_LAST_UPDATED },
     { url: `${SITE_URL}/terms`, lastModified: SITE_LAST_UPDATED },
