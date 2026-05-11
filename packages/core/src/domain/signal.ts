@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const SignalSourceSchema = z.enum(['reddit', 'github']);
+export const SignalSourceSchema = z.enum(['reddit', 'hn', 'github']);
 export type SignalSource = z.infer<typeof SignalSourceSchema>;
 
 export const SignalSchema = z.object({

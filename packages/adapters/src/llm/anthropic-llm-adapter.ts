@@ -67,7 +67,7 @@ const LLMCustomerResponseSchema = z.object({
   }),
   quotes: z.array(z.object({
     text: z.string().min(1).max(400),
-    source: z.enum(['reddit', 'github']),
+    source: z.enum(['reddit', 'hn', 'github']),
     url: z.string().url(),
   })).max(10),
 });
@@ -99,7 +99,7 @@ const LLMBuildResponseSchemaA = z.object({
 });
 
 const LLMSearchQueriesResponseSchemaA = z.object({
-  github: z.array(z.string().min(1)).min(1).max(5),
+  hn: z.array(z.string().min(1)).min(1).max(5),
   reddit: z.array(z.string().min(1)).min(1).max(5),
 });
 
