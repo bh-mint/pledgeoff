@@ -3,6 +3,7 @@ import type { Signal } from '@pledgeoff/core';
 import type { ISourceAdapter, ICache } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
+import { extractSearchKeywords } from './keyword-extractor';
 
 const log = createLogger({ adapter: 'reddit' });
 const tracer = getTracer('reddit-source-adapter');
@@ -55,8 +56,7 @@ export class RedditSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    // Use first 5 words as keywords — full sentences don't match Reddit posts
-    const queryText = ideaText.trim().split(/\s+/).slice(0, 5).join(' ');
+    const queryText = extractSearchKeywords(ideaText);
     const query = encodeURIComponent(queryText);
     const url = `https://www.reddit.com/search.json?q=${query}&sort=relevance&limit=10&type=link,self`;
 
