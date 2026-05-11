@@ -6,6 +6,7 @@ export * from './domain/feedback';
 export * from './domain/simulation';
 export * from './domain/landing-page';
 export * from './domain/customer-analysis';
+export * from './domain/build-analysis';
 
 // Ports
 export * from './ports/idea-repository';
@@ -15,6 +16,7 @@ export * from './ports/feedback-repository';
 export * from './ports/simulation-repository';
 export * from './ports/landing-page-repository';
 export * from './ports/customer-analysis-repository';
+export * from './ports/build-analysis-repository';
 export * from './ports/event-bus';
 export * from './ports/idempotency-store';
 export * from './ports/llm-client';
@@ -30,3 +32,4 @@ export * from './use-cases/record-feedback';
 export * from './use-cases/simulate-revenue';
 export * from './use-cases/generate-landing';
 export * from './use-cases/analyze-customers';
+export * from './use-cases/analyze-build';

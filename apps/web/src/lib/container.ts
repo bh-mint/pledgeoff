@@ -8,6 +8,7 @@ import {
   SupabaseSimulationRepository,
   SupabaseLandingPageRepository,
   SupabaseCustomerAnalysisRepository,
+  SupabaseBuildAnalysisRepository,
   RedditSourceAdapter,
   GitHubSourceAdapter,
   GroqLLMAdapter,
@@ -25,6 +26,7 @@ import {
   SimulateRevenueUseCase,
   GenerateLandingUseCase,
   AnalyzeCustomersUseCase,
+  AnalyzeBuildUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -48,6 +50,7 @@ function buildContainer() {
   const simulationRepo = new SupabaseSimulationRepository(supabase);
   const landingPageRepo = new SupabaseLandingPageRepository(supabase);
   const customerAnalysisRepo = new SupabaseCustomerAnalysisRepository(supabase);
+  const buildAnalysisRepo = new SupabaseBuildAnalysisRepository(supabase);
 
   const eventBusProvider = process.env.EVENT_BUS_PROVIDER ?? 'postgres';
   const eventBus =
@@ -96,6 +99,7 @@ function buildContainer() {
   const simulateRevenueUseCase = new SimulateRevenueUseCase(simulationRepo, signalRepo, llmClient);
   const generateLandingUseCase = new GenerateLandingUseCase(landingPageRepo, llmClient);
   const analyzeCustomersUseCase = new AnalyzeCustomersUseCase(customerAnalysisRepo, signalRepo, llmClient);
+  const analyzeBuildUseCase = new AnalyzeBuildUseCase(buildAnalysisRepo, signalRepo, llmClient);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -129,9 +133,10 @@ function buildContainer() {
     simulateRevenueUseCase,
     generateLandingUseCase,
     analyzeCustomersUseCase,
+    analyzeBuildUseCase,
     eventBus,
     auditLog,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo },
+    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo },
   };
 }
 
