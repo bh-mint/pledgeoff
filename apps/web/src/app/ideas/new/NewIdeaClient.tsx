@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/brand/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const CATEGORIES = ["SaaS", "Consumer", "Marketplace", "Hardware", "Service", "Other"] as const;
 
@@ -108,9 +109,13 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
             ← Dashboard
           </Link>
         </div>
-        <span className="mono text-[10px] sm:text-[11px] text-(--t3)">
-          {validationsLeft} left
-        </span>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <div className="w-px h-4" style={{ background: "var(--border)" }} />
+          <span className="mono text-[10px] sm:text-[11px] text-(--t3)">
+            {validationsLeft} left
+          </span>
+        </div>
       </div>
 
       {/* Form */}
