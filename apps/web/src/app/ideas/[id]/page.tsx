@@ -74,54 +74,55 @@ export default async function IdeaPage({ params }: Props) {
     <div className="min-h-screen bg-(--canvas)">
       <Nav loggedIn={true} />
 
-      <div className="max-w-[720px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
-        {/* Back */}
-        <Link
-          href="/dashboard"
-          className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
-        >
-          ← Back to Dashboard
-        </Link>
+      <div className="max-w-[1140px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+        {/* Back + Idea header — narrow */}
+        <div className="max-w-[720px]">
+          <Link
+            href="/dashboard"
+            className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
+          >
+            ← Back to Dashboard
+          </Link>
 
-        {/* Idea */}
-        <div className="mb-10 pb-10 border-b border-(--border)">
-          <div className="flex items-center gap-3 mb-3">
-            <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
-              Idea · {formatDate(idea.createdAt)}
-            </p>
-            {category && (
-              <span
-                className="mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
-                style={{
-                  color: "var(--accent)",
-                  background: "rgba(214,255,61,0.08)",
-                  border: "1px solid rgba(214,255,61,0.2)",
-                }}
-              >
-                {category}
-              </span>
+          <div className="mb-10 pb-10 border-b border-(--border)">
+            <div className="flex items-center gap-3 mb-3">
+              <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
+                Idea · {formatDate(idea.createdAt)}
+              </p>
+              {category && (
+                <span
+                  className="mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
+                  style={{
+                    color: "var(--accent)",
+                    background: "rgba(214,255,61,0.08)",
+                    border: "1px solid rgba(214,255,61,0.2)",
+                  }}
+                >
+                  {category}
+                </span>
+              )}
+            </div>
+            <h1 className="display text-[22px] font-semibold tracking-tight text-(--t1) leading-snug mb-3">
+              {title}
+            </h1>
+            {description && (
+              <p className="text-[14px] text-(--t2) leading-relaxed">
+                {description}
+              </p>
             )}
           </div>
-          <h1 className="display text-[22px] font-semibold tracking-tight text-(--t1) leading-snug mb-3">
-            {title}
-          </h1>
-          {description && (
-            <p className="text-[14px] text-(--t2) leading-relaxed">
-              {description}
-            </p>
-          )}
         </div>
 
-        {/* Decision + Signals (client, polls if pending) */}
+        {/* Decision + Signals — two-column */}
         <IdeaPageClient
           idea={idea}
           initialDecision={decision}
           initialSignals={signals}
         />
 
-        {/* Intelligence Tools hub */}
+        {/* Intelligence Tools hub — narrow */}
         {decision && (
-          <div className="mt-12 pt-10 border-t border-(--border)">
+          <div className="max-w-[720px] mt-12 pt-10 border-t border-(--border)">
             <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-5">
               Intelligence tools
             </p>
