@@ -2,6 +2,7 @@ import { Result } from 'neverthrow';
 import type { Signal } from '../domain/signal';
 import type { Verdict, Dimension } from '../domain/decision';
 import type { SimulationScenario } from '../domain/simulation';
+import type { CustomerSegment, PainPoint, SentimentBreakdown, CustomerQuote } from '../domain/customer-analysis';
 
 export interface LLMDecisionRequest {
   readonly ideaText: string;
@@ -45,6 +46,19 @@ export interface LLMLandingResponse {
   readonly waitlistHeadline: string;
 }
 
+export interface LLMCustomerRequest {
+  readonly ideaText: string;
+  readonly signals: Signal[];
+  readonly traceId: string;
+}
+
+export interface LLMCustomerResponse {
+  readonly segments: CustomerSegment[];
+  readonly painPoints: PainPoint[];
+  readonly sentiment: SentimentBreakdown;
+  readonly quotes: CustomerQuote[];
+}
+
 export class LLMClientError extends Error {
   readonly code = 'LLM_CLIENT_ERROR' as const;
 }
@@ -53,4 +67,5 @@ export interface ILLMClient {
   generateDecision(request: LLMDecisionRequest): Promise<Result<LLMDecisionResponse, LLMClientError>>;
   generateSimulation(request: LLMSimulationRequest): Promise<Result<LLMSimulationResponse, LLMClientError>>;
   generateLanding(request: LLMLandingRequest): Promise<Result<LLMLandingResponse, LLMClientError>>;
+  analyzeCustomers(request: LLMCustomerRequest): Promise<Result<LLMCustomerResponse, LLMClientError>>;
 }

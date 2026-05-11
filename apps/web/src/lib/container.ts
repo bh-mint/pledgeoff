@@ -7,6 +7,7 @@ import {
   SupabaseAuditLogAdapter,
   SupabaseSimulationRepository,
   SupabaseLandingPageRepository,
+  SupabaseCustomerAnalysisRepository,
   RedditSourceAdapter,
   GitHubSourceAdapter,
   GroqLLMAdapter,
@@ -23,6 +24,7 @@ import {
   RecordFeedbackUseCase,
   SimulateRevenueUseCase,
   GenerateLandingUseCase,
+  AnalyzeCustomersUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -45,6 +47,7 @@ function buildContainer() {
   const idempotencyStore = new SupabaseIdempotencyStore(supabase);
   const simulationRepo = new SupabaseSimulationRepository(supabase);
   const landingPageRepo = new SupabaseLandingPageRepository(supabase);
+  const customerAnalysisRepo = new SupabaseCustomerAnalysisRepository(supabase);
 
   const eventBusProvider = process.env.EVENT_BUS_PROVIDER ?? 'postgres';
   const eventBus =
@@ -92,6 +95,7 @@ function buildContainer() {
   const recordFeedbackUseCase = new RecordFeedbackUseCase(feedbackRepo);
   const simulateRevenueUseCase = new SimulateRevenueUseCase(simulationRepo, signalRepo, llmClient);
   const generateLandingUseCase = new GenerateLandingUseCase(landingPageRepo, llmClient);
+  const analyzeCustomersUseCase = new AnalyzeCustomersUseCase(customerAnalysisRepo, signalRepo, llmClient);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -124,9 +128,10 @@ function buildContainer() {
     recordFeedbackUseCase,
     simulateRevenueUseCase,
     generateLandingUseCase,
+    analyzeCustomersUseCase,
     eventBus,
     auditLog,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo },
+    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo },
   };
 }
 
