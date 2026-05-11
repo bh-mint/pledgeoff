@@ -9,6 +9,7 @@ export const FeedbackSchema = z.object({
   decisionId: z.string().uuid(),
   userId: z.string().uuid(),
   vote: FeedbackVoteSchema,
+  comment: z.string().max(500).optional(),
   createdAt: z.string().datetime(),
 });
 

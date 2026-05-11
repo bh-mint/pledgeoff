@@ -8,6 +8,7 @@ const FeedbackSchema = z.object({
   ideaId: z.string().uuid(),
   decisionId: z.string().uuid(),
   vote: z.enum(["thumbs_up", "thumbs_down"]),
+  comment: z.string().max(500).optional(),
 });
 
 async function resolveUserId(authHeader: string | null): Promise<string | null> {
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
     decisionId: parsed.data.decisionId,
     userId,
     vote: parsed.data.vote,
+    comment: parsed.data.comment,
     traceId,
   });
 
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest) {
   }
 
   logger.info(
-    { traceId, userId, action: 'submit_feedback', resourceId: parsed.data.ideaId, vote: parsed.data.vote, outcome: 'success' },
+    { traceId, userId, action: 'submit_feedback', resourceId: parsed.data.ideaId, vote: parsed.data.vote, hasComment: !!parsed.data.comment, outcome: 'success' },
     'Feedback recorded',
   );
 
