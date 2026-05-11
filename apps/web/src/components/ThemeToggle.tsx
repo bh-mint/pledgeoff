@@ -107,7 +107,7 @@ export function ThemeToggle() {
         onClick={() => setOpen((v) => !v)}
         aria-label="Change theme"
         aria-expanded={open}
-        className="inline-flex items-center gap-1.5 px-2.5 mono text-[11px] uppercase tracking-[0.1em] cursor-pointer transition-colors rounded-md border"
+        className="inline-flex items-center gap-1.5 px-2.5 mono text-[11px] uppercase tracking-widest cursor-pointer transition-colors rounded-md border"
         style={{
           height: 32,
           background: "transparent",
@@ -142,7 +142,7 @@ export function ThemeToggle() {
               <button
                 key={value}
                 onClick={() => select(value)}
-                className="w-full flex items-center gap-2 px-3 mono text-[11px] uppercase tracking-[0.1em] cursor-pointer transition-colors text-left border-0"
+                className="w-full flex items-center gap-2 px-3 mono text-[11px] uppercase tracking-widest cursor-pointer transition-colors text-left border-0"
                 style={{
                   height: 34,
                   background: active ? "var(--accent)" : "transparent",
