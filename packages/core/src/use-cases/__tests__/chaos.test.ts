@@ -62,6 +62,17 @@ function makeSource(name: 'reddit' | 'github', fail = false): ISourceAdapter {
   };
 }
 
+function makeLLMClient(): ILLMClient {
+  return {
+    generateSearchQueries: vi.fn().mockResolvedValue(ok({ github: ['query'], reddit: ['query'] })),
+    generateDecision: vi.fn(),
+    generateSimulation: vi.fn(),
+    generateLanding: vi.fn(),
+    analyzeCustomers: vi.fn(),
+    analyzeBuild: vi.fn(),
+  };
+}
+
 // Chaos 1: Reddit down — GitHub still works, signals published with partial results
 describe('Chaos: Reddit adapter down', () => {
   it('publishes signals from GitHub only — does not throw', async () => {
@@ -72,6 +83,7 @@ describe('Chaos: Reddit adapter down', () => {
       eventBus,
       makeIdempotencyStore(),
       [makeSource('reddit', true), makeSource('github', false)],
+      makeLLMClient(),
     );
 
     const result = await useCase.execute({ ideaId: IDEA_ID, ideaText: IDEA_TEXT, traceId: TRACE_ID, eventId: EVENT_ID });
@@ -91,6 +103,7 @@ describe('Chaos: GitHub adapter down', () => {
       eventBus,
       makeIdempotencyStore(),
       [makeSource('reddit', false), makeSource('github', true)],
+      makeLLMClient(),
     );
 
     const result = await useCase.execute({ ideaId: IDEA_ID, ideaText: IDEA_TEXT, traceId: TRACE_ID, eventId: EVENT_ID });
@@ -110,6 +123,7 @@ describe('Chaos: Both adapters down', () => {
       eventBus,
       makeIdempotencyStore(),
       [makeSource('reddit', true), makeSource('github', true)],
+      makeLLMClient(),
     );
 
     const result = await useCase.execute({ ideaId: IDEA_ID, ideaText: IDEA_TEXT, traceId: TRACE_ID, eventId: EVENT_ID });
@@ -127,12 +141,14 @@ describe('Chaos: LLM (Groq) down', () => {
     const decisionRepo = makeDecisionRepo();
 
     const llm: ILLMClient = {
+      generateSearchQueries: vi.fn(),
       generateDecision: vi.fn().mockResolvedValue(
         err(new LLMClientError('connection timeout')),
       ),
       generateSimulation: vi.fn(),
       generateLanding: vi.fn(),
-      analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(),
+      analyzeCustomers: vi.fn(),
+      analyzeBuild: vi.fn(),
     };
 
     const useCase = new DecideUseCase(signalRepo, decisionRepo, llm, makeEventBus(), makeIdempotencyStore());

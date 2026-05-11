@@ -27,7 +27,7 @@ function makeLandingRepo(existing: LandingPage | null = null): ILandingPageRepos
 
 function makeLLMClient(response = llmResponse): ILLMClient {
   return {
-    generateDecision: vi.fn(),
+    generateSearchQueries: vi.fn(), generateDecision: vi.fn(),
     generateSimulation: vi.fn(),
     generateLanding: vi.fn().mockResolvedValue(ok(response)),
     analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(),
@@ -74,7 +74,7 @@ describe('GenerateLandingUseCase', () => {
 
   it('returns LLM error when LLM call fails', async () => {
     const llm: ILLMClient = {
-      generateDecision: vi.fn(),
+      generateSearchQueries: vi.fn(), generateDecision: vi.fn(),
       generateSimulation: vi.fn(),
       generateLanding: vi.fn().mockResolvedValue(err(new LLMClientError('timeout'))),
       analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(),
