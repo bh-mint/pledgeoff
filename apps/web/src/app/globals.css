@@ -4,16 +4,38 @@
 :root {
   --canvas:    #0A0A0B;
   --surface:   #111114;
+  --surface-2: #15151A;
   --border:    #1F1F23;
+  --border-2:  #2A2A30;
 
   --t1:        #F5F5F4;
   --t2:        #A1A1A6;
   --t3:        #808088;  /* WCAG AA: 4.81:1 on --surface, 5.19:1 on --canvas */
 
-  --accent:    #D6FF3D;
-  --validated: #7DD66B;
-  --caution:   #E8B341;
-  --kill:      #E55B3C;
+  --accent:      #D6FF3D;
+  --accent-fg:   #000000;  /* text ON accent background */
+  --accent-text: #D6FF3D;  /* accent-colored text */
+  --validated:   #7DD66B;
+  --caution:     #E8B341;
+  --kill:        #E55B3C;
+}
+
+[data-theme="light"] {
+  --canvas:    #FAFAF9;
+  --surface:   #F5F5F4;
+  --surface-2: #EEEEEC;
+  --border:    #E5E5E3;
+  --border-2:  #D6D6D2;
+
+  --t1:        #0A0A0B;
+  --t2:        #5C5C63;
+  --t3:        #8A8A90;
+
+  --accent-fg:   #0A0A0B;
+  --accent-text: #5C6E00;
+  --validated:   #2E7D32;
+  --caution:     #B8860B;
+  --kill:        #C62828;
 }
 
 ::selection {

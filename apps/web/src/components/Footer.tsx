@@ -1,93 +1,128 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 function IconX() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M9.3 7.1 14 2h-1.4L8.7 6.5 5.6 2H2l4.9 6.9L2 14h1.4l4.2-4.8L11 14h3.6L9.3 7.1Zm-1.5 1.7-.5-.7L4 3.1h1.7l3.2 4.5.5.7 4 5.5h-1.7L7.8 8.8Z" fill="currentColor" />
     </svg>
   );
 }
 
-function IconTikTok() {
+function IconGitHub() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.23 8.23 0 0 0 4.82 1.54V6.78a4.85 4.85 0 0 1-1.05-.09z" />
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M8 1.5a6.5 6.5 0 0 0-2 12.7c.3 0 .5-.2.5-.4v-1.5c-1.8.4-2.2-.9-2.2-.9-.3-.7-.7-.9-.7-.9-.6-.4 0-.4 0-.4.7 0 1 .7 1 .7.6 1 1.5.7 1.9.5.1-.4.2-.7.4-.9-1.4-.2-2.9-.7-2.9-3.2 0-.7.3-1.3.7-1.7-.1-.2-.3-.9.1-1.8 0 0 .6-.2 1.8.7a6 6 0 0 1 3.3 0c1.2-.9 1.8-.7 1.8-.7.3.9.1 1.6 0 1.8.5.4.7 1 .7 1.7 0 2.5-1.5 3-2.9 3.2.2.2.4.6.4 1.2v1.7c0 .2.1.4.5.4A6.5 6.5 0 0 0 8 1.5Z" fill="currentColor" />
     </svg>
   );
 }
 
-function IconInstagram() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
-    </svg>
-  );
-}
+const NAV_COLS = [
+  {
+    label: "Product",
+    links: [
+      { href: "/ideas/new", text: "Validator" },
+      { href: "/dashboard", text: "Dashboard" },
+      { href: "/pricing", text: "Pricing" },
+      { href: "/changelog", text: "Changelog" },
+    ],
+  },
+  {
+    label: "Company",
+    links: [
+      { href: "/about", text: "About" },
+      { href: "/blog", text: "Blog" },
+      { href: "mailto:contact@pledgeoff.com", text: "Contact", external: true },
+    ],
+  },
+  {
+    label: "Legal",
+    links: [
+      { href: "/privacy", text: "Privacy" },
+      { href: "/terms", text: "Terms" },
+    ],
+  },
+];
 
 export function Footer() {
   return (
-    <footer className="border-t border-(--border) mt-auto bg-(--canvas)">
-      {/* Main row */}
-      <div className="max-w-330 mx-auto px-6 sm:px-8 py-6 sm:py-5 flex flex-col sm:grid sm:grid-cols-3 sm:items-center gap-4 sm:gap-0">
-        {/* Logo + tagline */}
-        <div className="flex items-center gap-3">
-          <Logo size={18} className="text-(--t1)" />
-          <p className="display text-[15px] font-semibold tracking-tight text-(--t1)">
-            Pledge<span className="text-(--accent)">OFF</span>
+    <footer className="border-t mt-auto" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
+      {/* Main grid */}
+      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 pt-10 pb-8 grid grid-cols-1 sm:grid-cols-12 gap-8">
+        {/* Col 1 — brand */}
+        <div className="sm:col-span-4 sm:pr-8">
+          <div className="flex items-center gap-2" style={{ color: "var(--t1)" }}>
+            <Logo size={20} />
+            <span className="display text-[15px] font-semibold tracking-tight">
+              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+            </span>
+          </div>
+          <p className="text-[13px] leading-relaxed mt-3" style={{ color: "var(--t2)" }}>
+            Decision intelligence for founders who ship.
           </p>
-          <span className="mono text-[11px] text-(--t3) tracking-[0.04em]">
-            Every number is sourced
-          </span>
+          <div className="mt-5">
+            <ThemeToggle />
+          </div>
         </div>
 
-        {/* Social icons */}
-        <div className="flex items-center gap-4 sm:justify-center">
-          <a
-            href="https://x.com/pledgeoff"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--t3) hover:text-(--t1) transition-colors"
-            aria-label="X (Twitter)"
-          >
-            <IconX />
-          </a>
-          <a
-            href="https://tiktok.com/@pledgeoff"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--t3) hover:text-(--t1) transition-colors"
-            aria-label="TikTok"
-          >
-            <IconTikTok />
-          </a>
-          <a
-            href="https://instagram.com/pledgeoff"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--t3) hover:text-(--t1) transition-colors"
-            aria-label="Instagram"
-          >
-            <IconInstagram />
-          </a>
-        </div>
-
-        {/* Nav links */}
-        <div className="flex items-center gap-5 sm:justify-end text-[11px] text-(--t3) flex-wrap">
-          <Link href="/about" className="hover:text-(--t2) transition-colors">About</Link>
-          <Link href="/privacy" className="hover:text-(--t2) transition-colors">Privacy</Link>
-          <Link href="/terms" className="hover:text-(--t2) transition-colors">Terms</Link>
-          <Link href="/changelog" className="hover:text-(--t2) transition-colors">Changelog</Link>
-          <a href="mailto:contact@pledgeoff.com" className="hover:text-(--t2) transition-colors">Contact</a>
-        </div>
+        {/* Nav cols */}
+        {NAV_COLS.map((col) => (
+          <div key={col.label} className="sm:col-span-2">
+            <div className="mono text-[11px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>
+              {col.label}
+            </div>
+            <ul className="space-y-3">
+              {col.links.map((link) => (
+                <li key={link.href}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      className="text-[13px] transition-colors text-(--t2) hover:text-(--t1)"
+                    >
+                      {link.text}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-[13px] transition-colors text-(--t2) hover:text-(--t1)"
+                    >
+                      {link.text}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
-      {/* Copyright */}
-      <div className="border-t border-(--border)">
-        <div className="max-w-330 mx-auto px-8 py-3">
-          <p className="text-[11px] mono text-(--t3)">
-            © 2026 <span className="text-(--t1)">Pledge</span><span className="text-(--accent)">OFF</span> · Built to kill bad ideas early.
-          </p>
+      {/* Copyright row */}
+      <div className="border-t" style={{ borderColor: "var(--border)" }}>
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 py-5 flex items-center justify-between">
+          <span className="mono text-[12px]" style={{ color: "var(--t3)" }}>
+            © 2026 PledgeOFF. All rights reserved.
+          </span>
+          <div className="flex items-center gap-1">
+            <a
+              href="https://x.com/pledgeoff"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="X / Twitter"
+              className="w-7 h-7 rounded-md inline-flex items-center justify-center transition-colors text-(--t3) hover:text-(--t1)"
+            >
+              <IconX />
+            </a>
+            <a
+              href="https://github.com/bh-mint/PledgeOFF"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="w-7 h-7 rounded-md inline-flex items-center justify-center transition-colors text-(--t3) hover:text-(--t1)"
+            >
+              <IconGitHub />
+            </a>
+          </div>
         </div>
       </div>
     </footer>

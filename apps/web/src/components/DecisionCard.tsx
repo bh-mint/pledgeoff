@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { Decision } from "@pledgeoff/core";
+import { VerdictMark } from "@/components/brand/VerdictMark";
 
 const VERDICT_CONFIG = {
   GO: {
@@ -114,11 +115,14 @@ export function DecisionCard({ decision }: DecisionCardProps) {
             {displayScore}
           </div>
           <div className="pb-2">
-            <div
-              className="display text-[28px] font-semibold mb-1"
-              style={{ color: cfg.color }}
-            >
-              {cfg.label}
+            <div className="flex items-center gap-3 mb-2">
+              <VerdictMark verdict={decision.verdict} size={40} />
+              <div
+                className="display text-[28px] font-semibold"
+                style={{ color: cfg.color }}
+              >
+                {cfg.label}
+              </div>
             </div>
             <div className="text-[13px] text-(--t3)">{cfg.description}</div>
             <div className="mono text-[10px] text-(--t3) mt-2 uppercase tracking-[0.1em]">

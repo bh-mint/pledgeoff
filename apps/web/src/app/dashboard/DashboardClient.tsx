@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { VerdictMark } from "@/components/brand/VerdictMark";
 
 export type TableRow = {
   id: string;
@@ -94,7 +95,8 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
         className="hidden sm:grid px-6 py-2.5 grid-cols-12 gap-3 border-b mono text-[10px] uppercase tracking-[0.14em]"
         style={{ borderColor: "var(--border)", color: "var(--t3)" }}
       >
-        <div className="col-span-6">Idea</div>
+        <div className="col-span-1" />
+        <div className="col-span-5">Idea</div>
         <div className="col-span-2">Score</div>
         <div className="col-span-1">Verdict</div>
         <div className="col-span-2">Status</div>
@@ -115,8 +117,17 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
             }
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
           >
+            {/* Verdict icon */}
+            <div className="hidden sm:flex sm:col-span-1 items-center" style={{ color: "var(--t1)" }}>
+              {row.verdict && (row.verdict === "GO" || row.verdict === "PIVOT" || row.verdict === "KILL") ? (
+                <VerdictMark verdict={row.verdict} size={24} />
+              ) : (
+                <span className="w-6 h-6" />
+              )}
+            </div>
+
             {/* Idea */}
-            <div className="sm:col-span-6 min-w-0 mb-1.5 sm:mb-0">
+            <div className="sm:col-span-5 min-w-0 mb-1.5 sm:mb-0">
               <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
               <div className="mono text-[10px] mt-0.5 text-(--t3)">
                 val_{row.id.slice(0, 8)}
