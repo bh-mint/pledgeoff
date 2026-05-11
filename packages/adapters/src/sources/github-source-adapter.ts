@@ -3,6 +3,7 @@ import type { Signal } from '@pledgeoff/core';
 import type { ISourceAdapter, ICache } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
+import { extractSearchKeywords } from './keyword-extractor';
 
 const log = createLogger({ adapter: 'github' });
 const tracer = getTracer('github-source-adapter');
@@ -54,8 +55,7 @@ export class GitHubSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    // Use first 5 words as keywords — GitHub issue search works better with short queries
-    const queryText = ideaText.trim().split(/\s+/).slice(0, 5).join(' ');
+    const queryText = extractSearchKeywords(ideaText);
     const query = encodeURIComponent(queryText);
     const url = `https://api.github.com/search/issues?q=${query}&sort=reactions&per_page=10`;
 
