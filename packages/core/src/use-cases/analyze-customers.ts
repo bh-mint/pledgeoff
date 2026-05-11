@@ -28,12 +28,19 @@ export class AnalyzeCustomersUseCase {
     const signalsResult = await this.signalRepo.findByIdeaId(input.ideaId);
     if (signalsResult.isErr()) return err(signalsResult.error);
 
+    const signals = signalsResult.value;
+
     const llmResult = await this.llmClient.analyzeCustomers({
       ideaText: input.ideaText,
-      signals: signalsResult.value,
+      signals,
       traceId: input.traceId,
     });
     if (llmResult.isErr()) return err(llmResult.error);
+
+    const signalUrls = new Set(signals.map((s) => s.url));
+    const safeQuotes = signals.length === 0
+      ? []
+      : llmResult.value.quotes.filter((q) => signalUrls.has(q.url));
 
     const analysis: CustomerAnalysis = {
       id: crypto.randomUUID(),
@@ -42,7 +49,7 @@ export class AnalyzeCustomersUseCase {
       segments: llmResult.value.segments,
       painPoints: llmResult.value.painPoints,
       sentiment: llmResult.value.sentiment,
-      quotes: llmResult.value.quotes,
+      quotes: safeQuotes,
       createdAt: new Date().toISOString(),
     };
 
