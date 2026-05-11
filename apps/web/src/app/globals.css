@@ -44,6 +44,14 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Logo draw-on animation — opt in with className="logo-animated" */
+@keyframes pof-draw-stem { from { stroke-dashoffset: 30 } to { stroke-dashoffset: 0 } }
+@keyframes pof-draw-arm  { from { stroke-dashoffset: 24 } to { stroke-dashoffset: 0 } }
+
+.logo-animated path:nth-child(1) { stroke-dasharray: 30; stroke-dashoffset: 30; animation: pof-draw-stem 700ms cubic-bezier(0.16,1,0.3,1) 100ms forwards; }
+.logo-animated path:nth-child(2) { stroke-dasharray: 24; stroke-dashoffset: 24; animation: pof-draw-arm  600ms cubic-bezier(0.16,1,0.3,1) 800ms forwards; }
+.logo-animated path:nth-child(3) { stroke-dasharray: 24; stroke-dashoffset: 24; animation: pof-draw-arm  600ms cubic-bezier(0.16,1,0.3,1) 1050ms forwards; }
+
 @keyframes pulseDot {
   0%, 100% { opacity: 0.4; transform: scale(1); }
   50%       { opacity: 1;   transform: scale(1.15); }
