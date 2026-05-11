@@ -28,9 +28,10 @@ import {
   AnalyzeCustomersUseCase,
   AnalyzeBuildUseCase,
 } from '@pledgeoff/core';
-import type { IdeaCreatedV1, SignalsFetchedV1 } from '@pledgeoff/contracts';
+import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
 import { createServiceRoleClient } from './supabase-server';
+import { sendVerdictEmail } from '@pledgeoff/adapters';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -112,7 +113,6 @@ function buildContainer() {
   });
 
   // Wire: signals.fetched.v1 → DecideUseCase
-  // Fetches idea text from DB since payload only has ideaId
   eventBus.subscribe<SignalsFetchedV1['payload']>('signals.fetched.v1', async (event: DomainEvent<SignalsFetchedV1['payload']>) => {
     const ideaResult = await ideaRepo.findById(event.payload.ideaId);
     if (ideaResult.isErr() || !ideaResult.value) return;
@@ -124,6 +124,29 @@ function buildContainer() {
       eventId: event.eventId,
     });
   });
+
+  // Wire: decision.ready.v1 → send verdict email (fire-and-forget, never blocks pipeline)
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (resendApiKey) {
+    eventBus.subscribe<DecisionReadyV1['payload']>('decision.ready.v1', async (event: DomainEvent<DecisionReadyV1['payload']>) => {
+      const ideaResult = await ideaRepo.findById(event.payload.ideaId);
+      if (ideaResult.isErr() || !ideaResult.value) return;
+      const idea = ideaResult.value;
+
+      const { data } = await supabase.auth.admin.getUserById(idea.userId);
+      const userEmail = data?.user?.email;
+      if (!userEmail) return;
+
+      await sendVerdictEmail(resendApiKey, {
+        to: userEmail,
+        ideaId: idea.id,
+        ideaText: idea.text,
+        verdict: event.payload.verdict,
+        score: Math.round(event.payload.confidence * 100),
+        traceId: event.traceId,
+      });
+    });
+  }
 
   return {
     createIdeaUseCase,

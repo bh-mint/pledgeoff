@@ -15,3 +15,5 @@ export { RedditSourceAdapter } from './sources/reddit-source-adapter';
 export { GitHubSourceAdapter } from './sources/github-source-adapter';
 export { GroqLLMAdapter } from './llm/groq-llm-adapter';
 export { AnthropicLLMAdapter } from './llm/anthropic-llm-adapter';
+export { sendVerdictEmail } from './email/resend-email-adapter';
+export type { VerdictEmailParams } from './email/resend-email-adapter';
