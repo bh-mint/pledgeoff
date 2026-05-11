@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
 
@@ -42,7 +42,15 @@ function IconSystem() {
   );
 }
 
-const SEGMENTS: { value: Theme; label: string; Icon: () => React.ReactElement }[] = [
+function IconChevron() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+      <path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const OPTIONS: { value: Theme; label: string; Icon: () => React.ReactElement }[] = [
   { value: "dark",   label: "Dark",   Icon: IconDark },
   { value: "light",  label: "Light",  Icon: IconLight },
   { value: "system", label: "System", Icon: IconSystem },
@@ -53,10 +61,11 @@ export function ThemeToggle() {
     if (typeof window === "undefined") return "dark";
     return (localStorage.getItem(STORAGE_KEY) as Theme) ?? "dark";
   });
+  const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     applyTheme(theme);
 
@@ -69,41 +78,90 @@ export function ThemeToggle() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
   function select(t: Theme) {
     setTheme(t);
     localStorage.setItem(STORAGE_KEY, t);
     applyTheme(t);
+    setOpen(false);
   }
 
   if (!mounted) return null;
 
+  const current = OPTIONS.find((o) => o.value === theme) ?? OPTIONS[0]!;
+  const CurrentIcon = current.Icon;
+
   return (
-    <div
-      role="group"
-      aria-label="Theme"
-      className="inline-flex items-stretch overflow-hidden rounded-md border"
-      style={{ height: 32, borderColor: "var(--border)" }}
-    >
-      {SEGMENTS.map(({ value, label, Icon }) => {
-        const active = theme === value;
-        return (
-          <button
-            key={value}
-            onClick={() => select(value)}
-            aria-pressed={active}
-            className="inline-flex items-center gap-1.5 px-3 mono text-[11px] uppercase tracking-[0.1em] border-0 cursor-pointer transition-colors"
-            style={{
-              background: active ? "var(--accent)" : "transparent",
-              color: active ? "var(--accent-fg)" : "var(--t2)",
-            }}
-            onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.color = "var(--t1)"; }}
-            onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.color = "var(--t2)"; }}
-          >
-            <Icon />
-            {label}
-          </button>
-        );
-      })}
+    <div ref={ref} className="relative inline-block">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Change theme"
+        aria-expanded={open}
+        className="inline-flex items-center gap-1.5 px-2.5 mono text-[11px] uppercase tracking-[0.1em] cursor-pointer transition-colors rounded-md border"
+        style={{
+          height: 32,
+          background: "transparent",
+          borderColor: open ? "var(--accent)" : "var(--border)",
+          color: open ? "var(--accent)" : "var(--t2)",
+        }}
+        onMouseEnter={(e) => {
+          if (!open) (e.currentTarget as HTMLButtonElement).style.color = "var(--t1)";
+        }}
+        onMouseLeave={(e) => {
+          if (!open) (e.currentTarget as HTMLButtonElement).style.color = "var(--t2)";
+        }}
+      >
+        <CurrentIcon />
+        <span>{current.label}</span>
+        <IconChevron />
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 rounded-md border overflow-hidden z-50"
+          style={{
+            background: "var(--surface)",
+            borderColor: "var(--border)",
+            minWidth: 110,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.18)",
+          }}
+        >
+          {OPTIONS.map(({ value, label, Icon }) => {
+            const active = theme === value;
+            return (
+              <button
+                key={value}
+                onClick={() => select(value)}
+                className="w-full flex items-center gap-2 px-3 mono text-[11px] uppercase tracking-[0.1em] cursor-pointer transition-colors text-left border-0"
+                style={{
+                  height: 34,
+                  background: active ? "var(--accent)" : "transparent",
+                  color: active ? "var(--accent-fg)" : "var(--t2)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) (e.currentTarget as HTMLButtonElement).style.background = "var(--surface-2)";
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                }}
+              >
+                <Icon />
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
