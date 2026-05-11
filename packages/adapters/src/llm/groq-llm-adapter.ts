@@ -3,10 +3,11 @@ import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
 import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
-import { createLogger } from '@pledgeoff/observability';
+import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
+const tracer = getTracer('groq-llm-adapter');
 
 const DimensionResponseSchema = z.object({
   name: z.string(),
@@ -34,6 +35,21 @@ export class GroqLLMAdapter implements ILLMClient {
   }
 
   async generateDecision(request: LLMDecisionRequest): Promise<Result<LLMDecisionResponse, LLMClientError>> {
+    return tracer.startActiveSpan('groq.generate-decision', async (span) => {
+      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
+      const result = await this._generateDecision(request);
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setAttributes({ 'llm.verdict': result.value.verdict, 'llm.confidence': result.value.confidence });
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  private async _generateDecision(request: LLMDecisionRequest): Promise<Result<LLMDecisionResponse, LLMClientError>> {
     const prompt = buildDecisionPrompt(request.ideaText, request.signals);
     const traceId = request.traceId;
     const start = Date.now();

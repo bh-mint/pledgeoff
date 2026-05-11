@@ -2,9 +2,10 @@ import { Result, ok, err } from 'neverthrow';
 import type { Signal } from '@pledgeoff/core';
 import type { ISourceAdapter } from '@pledgeoff/core';
 import { SourceAdapterError } from '@pledgeoff/core';
-import { createLogger } from '@pledgeoff/observability';
+import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 
 const log = createLogger({ adapter: 'github' });
+const tracer = getTracer('github-source-adapter');
 
 interface GitHubIssue {
   html_url: string;
@@ -35,6 +36,21 @@ export class GitHubSourceAdapter implements ISourceAdapter {
   ) {}
 
   async fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
+    return tracer.startActiveSpan('github.fetch', async (span) => {
+      span.setAttributes({ 'adapter.name': 'github', 'trace.id': traceId, 'idea.id': ideaId });
+      const result = await this._fetch(ideaText, ideaId, traceId);
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setAttributes({ 'signal.count': result.value.length });
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  private async _fetch(ideaText: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
     const query = encodeURIComponent(ideaText.slice(0, 100));
     const url = `https://api.github.com/search/issues?q=${query}&sort=reactions&per_page=10`;
 
