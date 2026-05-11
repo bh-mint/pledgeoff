@@ -1,13 +1,14 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
 import { buildSimulationPrompt, SIMULATION_PROMPT_VERSION } from './simulation-prompt.v1';
 import { buildLandingPrompt, LANDING_PROMPT_VERSION } from './landing-prompt.v1';
 import { buildCustomerPrompt, CUSTOMER_PROMPT_VERSION } from './customer-prompt.v1';
+import { buildBuildPrompt, BUILD_PROMPT_VERSION } from './build-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
 const tracer = getTracer('groq-llm-adapter');
@@ -68,6 +69,32 @@ const LLMCustomerResponseSchema = z.object({
     source: z.enum(['reddit', 'github']),
     url: z.string().url(),
   })).max(10),
+});
+
+const TechLibrarySchema = z.object({
+  name: z.string().min(1).max(80),
+  purpose: z.string().min(1).max(200),
+  githubUrl: z.string().url().optional(),
+  stars: z.number().int().nonnegative().optional(),
+});
+
+const TechComponentSchema = z.object({
+  name: z.string().min(1).max(80),
+  description: z.string().min(1).max(300),
+  decision: z.enum(['build', 'buy', 'oss']),
+  rationale: z.string().min(1).max(300),
+  libraries: z.array(TechLibrarySchema).max(5),
+});
+
+const TechGapSchema = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().min(1).max(300),
+  opportunity: z.string().min(1).max(300),
+});
+
+const LLMBuildResponseSchema = z.object({
+  stack: z.array(TechComponentSchema).min(1).max(8),
+  gaps: z.array(TechGapSchema).max(5),
 });
 
 const TIMEOUT_MS = 30_000;
@@ -151,6 +178,26 @@ export class GroqLLMAdapter implements ILLMClient {
         `You are a customer intelligence analyst using prompt version ${CUSTOMER_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMCustomerResponseSchema,
         'analyzeCustomers',
+        request.traceId,
+      );
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  async analyzeBuild(request: LLMBuildRequest): Promise<Result<LLMBuildResponse, LLMClientError>> {
+    return tracer.startActiveSpan('groq.analyze-build', async (span) => {
+      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
+      const result = await this._callGroq(
+        buildBuildPrompt(request.ideaText, request.signals),
+        `You are a senior software architect using prompt version ${BUILD_PROMPT_VERSION}. Always respond with valid JSON only.`,
+        LLMBuildResponseSchema,
+        'analyzeBuild',
         request.traceId,
       );
       if (result.isErr()) {

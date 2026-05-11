@@ -3,6 +3,7 @@ import type { Signal } from '../domain/signal';
 import type { Verdict, Dimension } from '../domain/decision';
 import type { SimulationScenario } from '../domain/simulation';
 import type { CustomerSegment, PainPoint, SentimentBreakdown, CustomerQuote } from '../domain/customer-analysis';
+import type { TechComponent, TechGap } from '../domain/build-analysis';
 
 export interface LLMDecisionRequest {
   readonly ideaText: string;
@@ -59,6 +60,17 @@ export interface LLMCustomerResponse {
   readonly quotes: CustomerQuote[];
 }
 
+export interface LLMBuildRequest {
+  readonly ideaText: string;
+  readonly signals: Signal[];
+  readonly traceId: string;
+}
+
+export interface LLMBuildResponse {
+  readonly stack: TechComponent[];
+  readonly gaps: TechGap[];
+}
+
 export class LLMClientError extends Error {
   readonly code = 'LLM_CLIENT_ERROR' as const;
 }
@@ -68,4 +80,5 @@ export interface ILLMClient {
   generateSimulation(request: LLMSimulationRequest): Promise<Result<LLMSimulationResponse, LLMClientError>>;
   generateLanding(request: LLMLandingRequest): Promise<Result<LLMLandingResponse, LLMClientError>>;
   analyzeCustomers(request: LLMCustomerRequest): Promise<Result<LLMCustomerResponse, LLMClientError>>;
+  analyzeBuild(request: LLMBuildRequest): Promise<Result<LLMBuildResponse, LLMClientError>>;
 }

@@ -132,7 +132,7 @@ describe('Chaos: LLM (Groq) down', () => {
       ),
       generateSimulation: vi.fn(),
       generateLanding: vi.fn(),
-      analyzeCustomers: vi.fn(),
+      analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(),
     };
 
     const useCase = new DecideUseCase(signalRepo, decisionRepo, llm, makeEventBus(), makeIdempotencyStore());

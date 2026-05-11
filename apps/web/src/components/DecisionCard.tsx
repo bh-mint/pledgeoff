@@ -304,6 +304,27 @@ export function DecisionCard({ decision, ideaId }: DecisionCardProps) {
           >
             See who wants this →
           </Link>
+          {decision.verdict === "GO" ? (
+            <Link
+              href={`/ideas/${ideaId}/build`}
+              className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+              style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+            >
+              See how to build it →
+            </Link>
+          ) : (
+            <div className="relative group inline-flex">
+              <button
+                disabled
+                className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t3) cursor-not-allowed opacity-40"
+              >
+                See how to build it →
+              </button>
+              <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 rounded border px-3 py-2 mono text-[10px] z-10" style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--t3)" }}>
+                Available for GO verdicts only
+              </div>
+            </div>
+          )}
           <button
             onClick={handleShare}
             className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t2) hover:border-(--t3) transition-colors"
