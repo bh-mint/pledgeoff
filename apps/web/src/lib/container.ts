@@ -73,8 +73,8 @@ function buildContainer() {
       : new InMemoryCacheAdapter();
 
   const sourceAdapters = [
-    new RedditSourceAdapter(10_000, 3, cache),
-    new HNSourceAdapter(10_000, 3, cache),
+    new RedditSourceAdapter(5_000, 2, cache),
+    new HNSourceAdapter(5_000, 2, cache),
   ];
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
   const llmClient =
@@ -105,12 +105,19 @@ function buildContainer() {
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
-    await fetchSignalsUseCase.execute({
-      ideaId: event.payload.ideaId,
-      ideaText: event.payload.text,
-      traceId: event.traceId,
-      eventId: event.eventId,
-    });
+    try {
+      const result = await fetchSignalsUseCase.execute({
+        ideaId: event.payload.ideaId,
+        ideaText: event.payload.text,
+        traceId: event.traceId,
+        eventId: event.eventId,
+      });
+      if (result.isErr()) {
+        console.error('[container] FetchSignalsUseCase error', { traceId: event.traceId, ideaId: event.payload.ideaId, error: result.error.message });
+      }
+    } catch (e) {
+      console.error('[container] FetchSignalsUseCase threw', { traceId: event.traceId, ideaId: event.payload.ideaId, error: String(e) });
+    }
   });
 
   // Wire: signals.fetched.v1 → DecideUseCase
@@ -118,12 +125,19 @@ function buildContainer() {
     const ideaResult = await ideaRepo.findById(event.payload.ideaId);
     if (ideaResult.isErr() || !ideaResult.value) return;
 
-    await decideUseCase.execute({
-      ideaId: event.payload.ideaId,
-      ideaText: ideaResult.value.text,
-      traceId: event.traceId,
-      eventId: event.eventId,
-    });
+    try {
+      const result = await decideUseCase.execute({
+        ideaId: event.payload.ideaId,
+        ideaText: ideaResult.value.text,
+        traceId: event.traceId,
+        eventId: event.eventId,
+      });
+      if (result.isErr()) {
+        console.error('[container] DecideUseCase error', { traceId: event.traceId, ideaId: event.payload.ideaId, error: result.error.message });
+      }
+    } catch (e) {
+      console.error('[container] DecideUseCase threw', { traceId: event.traceId, ideaId: event.payload.ideaId, error: String(e) });
+    }
   });
 
   // Wire: decision.ready.v1 → send verdict email (fire-and-forget, never blocks pipeline)
