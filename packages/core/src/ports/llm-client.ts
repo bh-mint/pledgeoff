@@ -77,8 +77,8 @@ export interface LLMSearchQueriesRequest {
 }
 
 export interface LLMSearchQueriesResponse {
-  readonly hn: string[];
-  readonly reddit: string[];
+  readonly producthunt: string[];
+  readonly google: string[];
 }
 
 export class LLMClientError extends Error {

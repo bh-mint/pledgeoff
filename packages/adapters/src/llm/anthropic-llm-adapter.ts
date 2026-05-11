@@ -99,8 +99,8 @@ const LLMBuildResponseSchemaA = z.object({
 });
 
 const LLMSearchQueriesResponseSchemaA = z.object({
-  hn: z.array(z.string().min(1)).min(1).max(5),
-  reddit: z.array(z.string().min(1)).min(1).max(5),
+  producthunt: z.array(z.string().min(1)).min(1).max(5),
+  google: z.array(z.string().min(1)).min(1).max(5),
 });
 
 const TIMEOUT_MS = 30_000;

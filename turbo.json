@@ -35,7 +35,11 @@
         "UPSTASH_REDIS_REST_TOKEN",
         "WEBHOOK_SECRET",
         "WEBHOOK_SECRET_NEW_USER",
-        "SENTRY_DSN"
+        "SENTRY_DSN",
+        "PRODUCT_HUNT_API_KEY",
+        "PRODUCT_HUNT_API_SECRET",
+        "GOOGLE_SEARCH_API_KEY",
+        "GOOGLE_SEARCH_ENGINE_ID"
       ]
     },
     "dev": {
