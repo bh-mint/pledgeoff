@@ -2,22 +2,19 @@ import { logger } from "@pledgeoff/observability";
 
 interface NewUserPayload {
   type: "INSERT";
-  table: "users";
-  schema: "auth";
+  table: "profiles";
+  schema: "public";
   record: {
     id: string;
     email: string;
-    raw_user_meta_data?: {
-      full_name?: string;
-      name?: string;
-      avatar_url?: string;
-    };
+    full_name?: string | null;
+    avatar_url?: string | null;
     created_at: string;
   };
 }
 
 function isAuthorized(req: Request): boolean {
-  const secret = process.env.WEBHOOK_SECRET;
+  const secret = process.env.WEBHOOK_SECRET_NEW_USER;
   if (!secret) return false;
   return req.headers.get("authorization") === `Bearer ${secret}`;
 }
@@ -90,12 +87,12 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  if (payload.type !== "INSERT" || payload.table !== "users") {
+  if (payload.type !== "INSERT" || payload.table !== "profiles") {
     return Response.json({ ok: true, skipped: true });
   }
 
-  const { id, email, raw_user_meta_data } = payload.record;
-  const name = raw_user_meta_data?.full_name ?? raw_user_meta_data?.name;
+  const { id, email, full_name } = payload.record;
+  const name = full_name ?? undefined;
 
   const traceId = id;
   const resendKey = process.env.RESEND_API_KEY;
