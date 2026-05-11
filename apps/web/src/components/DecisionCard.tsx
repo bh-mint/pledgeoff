@@ -297,6 +297,13 @@ export function DecisionCard({ decision, ideaId }: DecisionCardProps) {
               </div>
             </div>
           )}
+          <Link
+            href={`/ideas/${ideaId}/customers`}
+            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+          >
+            See who wants this →
+          </Link>
           <button
             onClick={handleShare}
             className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t2) hover:border-(--t3) transition-colors"

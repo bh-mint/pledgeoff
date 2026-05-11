@@ -1,12 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
 import { buildSimulationPrompt, SIMULATION_PROMPT_VERSION } from './simulation-prompt.v1';
 import { buildLandingPrompt, LANDING_PROMPT_VERSION } from './landing-prompt.v1';
+import { buildCustomerPrompt, CUSTOMER_PROMPT_VERSION } from './customer-prompt.v1';
 
 const log = createLogger({ adapter: 'anthropic' });
 const tracer = getTracer('anthropic-llm-adapter');
@@ -48,11 +49,33 @@ const LLMLandingResponseSchema = z.object({
   waitlistHeadline: z.string().min(1).max(120),
 });
 
+const CustomerSegmentSchema = z.object({
+  name: z.string().min(1).max(80),
+  description: z.string().min(1).max(300),
+  size: z.enum(['small', 'medium', 'large']),
+});
+
+const LLMCustomerResponseSchema = z.object({
+  segments: z.array(CustomerSegmentSchema).min(1).max(5),
+  painPoints: z.array(z.object({ text: z.string().min(1).max(200), rank: z.number().int().min(1) })).min(1).max(10),
+  sentiment: z.object({
+    positive: z.number().min(0).max(100),
+    negative: z.number().min(0).max(100),
+    neutral: z.number().min(0).max(100),
+  }),
+  quotes: z.array(z.object({
+    text: z.string().min(1).max(400),
+    source: z.enum(['reddit', 'github']),
+    url: z.string().url(),
+  })).max(10),
+});
+
 const TIMEOUT_MS = 30_000;
 
 const DECISION_SYSTEM_PROMPT = `You are a startup decision intelligence engine using prompt version ${PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const SIMULATION_SYSTEM_PROMPT = `You are a startup revenue simulation engine using prompt version ${SIMULATION_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const LANDING_SYSTEM_PROMPT = `You are a conversion copywriter using prompt version ${LANDING_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
+const CUSTOMER_SYSTEM_PROMPT = `You are a customer intelligence analyst using prompt version ${CUSTOMER_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 
 export class AnthropicLLMAdapter implements ILLMClient {
   private readonly client: Anthropic;
@@ -113,6 +136,26 @@ export class AnthropicLLMAdapter implements ILLMClient {
         LANDING_SYSTEM_PROMPT,
         LLMLandingResponseSchema,
         'generateLanding',
+        request.traceId,
+      );
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  async analyzeCustomers(request: LLMCustomerRequest): Promise<Result<LLMCustomerResponse, LLMClientError>> {
+    return tracer.startActiveSpan('anthropic.analyze-customers', async (span) => {
+      span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
+      const result = await this._callAnthropic(
+        buildCustomerPrompt(request.ideaText, request.signals),
+        CUSTOMER_SYSTEM_PROMPT,
+        LLMCustomerResponseSchema,
+        'analyzeCustomers',
         request.traceId,
       );
       if (result.isErr()) {
