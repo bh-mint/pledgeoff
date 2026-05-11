@@ -63,7 +63,7 @@ export default async function CustomersPage({ params }: Props) {
             Customer Intelligence
           </h1>
           <p className="text-[14px] leading-relaxed" style={{ color: "var(--t2)" }}>
-            Who wants this, what they struggle with, and what they're saying — extracted from your market signals.
+            Who wants this, what they struggle with, and what they&apos;re saying — extracted from your market signals.
           </p>
           {decision && (
             <div className="mt-4 flex items-center gap-3">

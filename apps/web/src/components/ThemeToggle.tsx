@@ -49,18 +49,20 @@ const SEGMENTS: { value: Theme; label: string; Icon: () => React.ReactElement }[
 ];
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "dark";
+    return (localStorage.getItem(STORAGE_KEY) as Theme) ?? "dark";
+  });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    const initial: Theme = stored ?? "dark";
-    setTheme(initial);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
+    applyTheme(theme);
 
-    if (theme === "system" || initial === "system") {
+    if (theme === "system") {
       const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      const handler = () => { if (initial === "system") applyTheme("system"); };
+      const handler = () => applyTheme("system");
       mq.addEventListener("change", handler);
       return () => mq.removeEventListener("change", handler);
     }
