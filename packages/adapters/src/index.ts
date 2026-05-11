@@ -13,6 +13,8 @@ export { SupabaseBuildAnalysisRepository } from './storage/supabase-build-analys
 export { InMemoryEventBus } from './in-memory-event-bus';
 export { RedditSourceAdapter } from './sources/reddit-source-adapter';
 export { HNSourceAdapter } from './sources/hn-source-adapter';
+export { ProductHuntSourceAdapter } from './sources/product-hunt-source-adapter';
+export { GoogleSearchSourceAdapter } from './sources/google-search-source-adapter';
 export { GroqLLMAdapter } from './llm/groq-llm-adapter';
 export { AnthropicLLMAdapter } from './llm/anthropic-llm-adapter';
 export { sendVerdictEmail } from './email/resend-email-adapter';
