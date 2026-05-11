@@ -21,11 +21,11 @@
 }
 
 [data-theme="light"] {
-  --canvas:    #EEEEED;   /* warm grey — so white cards pop */
-  --surface:   #FFFFFF;
-  --surface-2: #F4F4F2;
-  --border:    #D4D4D1;
-  --border-2:  #BEBEBB;
+  --canvas:    #E8E8E6;
+  --surface:   #F2F2F0;
+  --surface-2: #EAEAE8;
+  --border:    #A8A8A4;
+  --border-2:  #909090;
 
   --t1:        #0A0A0B;
   --t2:        #46464E;
