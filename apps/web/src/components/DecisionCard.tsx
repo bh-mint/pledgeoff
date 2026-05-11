@@ -261,77 +261,70 @@ export function DecisionCard({ decision, ideaId }: DecisionCardProps) {
 
         {/* CTAs */}
         <div
-          className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 transition-all duration-500"
+          className="mt-6 space-y-2 transition-all duration-500"
           style={{
             opacity: revealed ? 1 : 0,
             transform: revealed ? "none" : "translateY(6px)",
             transitionDelay: "400ms",
           }}
         >
-          {decision.verdict === "GO" ? (
-            <>
-              <Link
-                href={`/ideas/${ideaId}/simulate`}
-                className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                Simulate Revenue →
-              </Link>
-              <Link
-                href={`/ideas/${ideaId}/landing`}
-                className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                Generate Landing Page →
-              </Link>
-            </>
-          ) : (
-            <div className="relative group inline-flex">
-              <button
-                disabled
-                className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t3) cursor-not-allowed opacity-40"
-              >
-                Simulate Revenue →
-              </button>
-              <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 rounded border px-3 py-2 mono text-[10px] z-10" style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--t3)" }}>
-                Available for GO verdicts only
+          {/* Row 1: GO-gated intelligence tools */}
+          <div className="flex flex-wrap gap-2">
+            {decision.verdict === "GO" ? (
+              <>
+                <Link
+                  href={`/ideas/${ideaId}/simulate`}
+                  className="mono text-[11px] px-4 h-9 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+                  style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                >
+                  Simulate Revenue →
+                </Link>
+                <Link
+                  href={`/ideas/${ideaId}/landing`}
+                  className="mono text-[11px] px-4 h-9 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+                  style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                >
+                  Generate Landing Page →
+                </Link>
+                <Link
+                  href={`/ideas/${ideaId}/build`}
+                  className="mono text-[11px] px-4 h-9 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+                  style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                >
+                  How to build it →
+                </Link>
+              </>
+            ) : (
+              <div className="relative group">
+                <button
+                  disabled
+                  className="mono text-[11px] px-4 h-9 rounded border border-(--border) text-(--t3) cursor-not-allowed opacity-40"
+                >
+                  Intelligence tools (GO only)
+                </button>
+                <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-52 rounded border px-3 py-2 mono text-[10px] z-10" style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--t3)" }}>
+                  Simulate Revenue, Landing Page, and Build Analysis are available for GO verdicts only.
+                </div>
               </div>
-            </div>
-          )}
-          <Link
-            href={`/ideas/${ideaId}/customers`}
-            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
-            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-          >
-            See who wants this →
-          </Link>
-          {decision.verdict === "GO" ? (
+            )}
+          </div>
+
+          {/* Row 2: Always available */}
+          <div className="flex flex-wrap gap-2">
             <Link
-              href={`/ideas/${ideaId}/build`}
-              className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+              href={`/ideas/${ideaId}/customers`}
+              className="mono text-[11px] px-4 h-9 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
               style={{ borderColor: "var(--border)", color: "var(--t2)" }}
             >
-              See how to build it →
+              See who wants this →
             </Link>
-          ) : (
-            <div className="relative group inline-flex">
-              <button
-                disabled
-                className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t3) cursor-not-allowed opacity-40"
-              >
-                See how to build it →
-              </button>
-              <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 rounded border px-3 py-2 mono text-[10px] z-10" style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--t3)" }}>
-                Available for GO verdicts only
-              </div>
-            </div>
-          )}
-          <button
-            onClick={handleShare}
-            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t2) hover:border-(--t3) transition-colors"
-          >
-            {copied ? "Copied ✓" : "Share result ↗"}
-          </button>
+            <button
+              onClick={handleShare}
+              className="mono text-[11px] px-4 h-9 rounded border border-(--border) text-(--t2) hover:border-(--t3) transition-colors"
+            >
+              {copied ? "Copied ✓" : "Share result ↗"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
