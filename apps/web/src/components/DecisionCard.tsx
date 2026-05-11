@@ -77,7 +77,8 @@ export function DecisionCard({ decision, ideaId }: DecisionCardProps) {
 
   function handleShare() {
     if (typeof window === "undefined") return;
-    navigator.clipboard.writeText(window.location.href).then(
+    const shareUrl = `${window.location.origin}/v/${ideaId}`;
+    navigator.clipboard.writeText(shareUrl).then(
       () => { setCopied(true); setTimeout(() => setCopied(false), 2000); },
       () => {}
     );
