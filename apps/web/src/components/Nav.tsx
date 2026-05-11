@@ -33,7 +33,7 @@ export function Nav({ onWaitlistOpen, loggedIn: loggedInProp }: NavProps) {
 
   return (
     <nav className="border-b border-(--border) bg-(--canvas) sticky top-0 z-50">
-      <div className="max-w-330 mx-auto px-8 h-12 flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-10 h-12 flex items-center justify-between">
         {/* Logo + live indicator */}
         <div className="flex items-center gap-8">
           <Link
