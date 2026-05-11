@@ -31,6 +31,20 @@ export interface LLMSimulationResponse {
   readonly assumptions: string[];
 }
 
+export interface LLMLandingRequest {
+  readonly ideaText: string;
+  readonly reasoning: string;
+  readonly traceId: string;
+}
+
+export interface LLMLandingResponse {
+  readonly headline: string;
+  readonly subheadline: string;
+  readonly features: string[];
+  readonly ctaText: string;
+  readonly waitlistHeadline: string;
+}
+
 export class LLMClientError extends Error {
   readonly code = 'LLM_CLIENT_ERROR' as const;
 }
@@ -38,4 +52,5 @@ export class LLMClientError extends Error {
 export interface ILLMClient {
   generateDecision(request: LLMDecisionRequest): Promise<Result<LLMDecisionResponse, LLMClientError>>;
   generateSimulation(request: LLMSimulationRequest): Promise<Result<LLMSimulationResponse, LLMClientError>>;
+  generateLanding(request: LLMLandingRequest): Promise<Result<LLMLandingResponse, LLMClientError>>;
 }

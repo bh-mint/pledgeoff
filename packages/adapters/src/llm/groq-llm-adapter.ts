@@ -1,11 +1,12 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
 import { buildSimulationPrompt, SIMULATION_PROMPT_VERSION } from './simulation-prompt.v1';
+import { buildLandingPrompt, LANDING_PROMPT_VERSION } from './landing-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
 const tracer = getTracer('groq-llm-adapter');
@@ -37,6 +38,14 @@ const LLMSimulationResponseSchema = z.object({
   scenarios: z.array(SimulationScenarioSchema).length(3),
   breakEvenMonths: z.number().nonnegative(),
   assumptions: z.array(z.string()),
+});
+
+const LLMLandingResponseSchema = z.object({
+  headline: z.string().min(1).max(100),
+  subheadline: z.string().min(1).max(200),
+  features: z.array(z.string()).min(1).max(5),
+  ctaText: z.string().min(1).max(60),
+  waitlistHeadline: z.string().min(1).max(120),
 });
 
 const TIMEOUT_MS = 30_000;
@@ -80,6 +89,26 @@ export class GroqLLMAdapter implements ILLMClient {
         `You are a startup revenue simulation engine using prompt version ${SIMULATION_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMSimulationResponseSchema,
         'generateSimulation',
+        request.traceId,
+      );
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  async generateLanding(request: LLMLandingRequest): Promise<Result<LLMLandingResponse, LLMClientError>> {
+    return tracer.startActiveSpan('groq.generate-landing', async (span) => {
+      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
+      const result = await this._callGroq(
+        buildLandingPrompt(request.ideaText, request.reasoning),
+        `You are a conversion copywriter using prompt version ${LANDING_PROMPT_VERSION}. Always respond with valid JSON only.`,
+        LLMLandingResponseSchema,
+        'generateLanding',
         request.traceId,
       );
       if (result.isErr()) {

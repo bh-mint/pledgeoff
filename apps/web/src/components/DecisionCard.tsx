@@ -268,13 +268,22 @@ export function DecisionCard({ decision, ideaId }: DecisionCardProps) {
           }}
         >
           {decision.verdict === "GO" ? (
-            <Link
-              href={`/ideas/${ideaId}/simulate`}
-              className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
-              style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-            >
-              Simulate Revenue →
-            </Link>
+            <>
+              <Link
+                href={`/ideas/${ideaId}/simulate`}
+                className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+              >
+                Simulate Revenue →
+              </Link>
+              <Link
+                href={`/ideas/${ideaId}/landing`}
+                className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+              >
+                Generate Landing Page →
+              </Link>
+            </>
           ) : (
             <div className="relative group inline-flex">
               <button

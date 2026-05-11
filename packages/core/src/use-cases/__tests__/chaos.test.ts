@@ -131,6 +131,7 @@ describe('Chaos: LLM (Groq) down', () => {
         err(new LLMClientError('connection timeout')),
       ),
       generateSimulation: vi.fn(),
+      generateLanding: vi.fn(),
     };
 
     const useCase = new DecideUseCase(signalRepo, decisionRepo, llm, makeEventBus(), makeIdempotencyStore());
