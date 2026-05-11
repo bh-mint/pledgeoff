@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import type { Decision } from "@pledgeoff/core";
 import { VerdictMark } from "@/components/brand/VerdictMark";
 
@@ -45,9 +46,10 @@ function useCountUp(target: number, delay = 400, duration = 1200) {
 
 interface DecisionCardProps {
   decision: Decision;
+  ideaId: string;
 }
 
-export function DecisionCard({ decision }: DecisionCardProps) {
+export function DecisionCard({ decision, ideaId }: DecisionCardProps) {
   const cfg = VERDICT_CONFIG[decision.verdict];
   const [revealed, setRevealed] = useState(false);
   const [glowVisible, setGlowVisible] = useState(false);
@@ -265,12 +267,27 @@ export function DecisionCard({ decision }: DecisionCardProps) {
             transitionDelay: "400ms",
           }}
         >
-          <button
-            disabled
-            className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t3) cursor-not-allowed opacity-40"
-          >
-            Simulate Revenue →
-          </button>
+          {decision.verdict === "GO" ? (
+            <Link
+              href={`/ideas/${ideaId}/simulate`}
+              className="mono text-[11px] px-4 h-10 sm:h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+              style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+            >
+              Simulate Revenue →
+            </Link>
+          ) : (
+            <div className="relative group inline-flex">
+              <button
+                disabled
+                className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t3) cursor-not-allowed opacity-40"
+              >
+                Simulate Revenue →
+              </button>
+              <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block w-48 rounded border px-3 py-2 mono text-[10px] z-10" style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--t3)" }}>
+                Available for GO verdicts only
+              </div>
+            </div>
+          )}
           <button
             onClick={handleShare}
             className="mono text-[11px] px-4 h-10 sm:h-8 rounded border border-(--border) text-(--t2) hover:border-(--t3) transition-colors"
