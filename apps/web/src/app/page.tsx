@@ -19,6 +19,12 @@ const orgJsonLd = {
   "@type": "Organization",
   name: "PledgeOFF",
   url: "https://pledgeoff.com",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://pledgeoff.com/brand/logo-lockup.svg",
+    width: 200,
+    height: 48,
+  },
   description: "Decision Intelligence Platform — GO / KILL / PIVOT in 15 seconds using live market signals.",
   sameAs: [
     "https://twitter.com/pledgeoff",

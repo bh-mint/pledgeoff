@@ -24,14 +24,24 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_OG_BASE_URL ?? "https://pledgeoff.com"
   ),
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    other: [{ rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#D6FF3D" }],
+  },
   openGraph: {
     siteName: "PledgeOFF",
     type: "website",
     locale: "en_US",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "PledgeOFF" }],
   },
   twitter: {
     card: "summary_large_image",
     site: "@pledgeoff",
+    images: ["/og-default.png"],
+  },
+  other: {
+    "theme-color": "#0A0A0B",
   },
   robots: {
     index: true,

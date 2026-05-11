@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/brand/Logo";
 
 function IconX() {
   return (
@@ -30,8 +31,9 @@ export function Footer() {
       {/* Main row */}
       <div className="max-w-330 mx-auto px-6 sm:px-8 py-6 sm:py-5 flex flex-col sm:grid sm:grid-cols-3 sm:items-center gap-4 sm:gap-0">
         {/* Logo + tagline */}
-        <div className="flex items-baseline gap-3">
-          <p className="display text-[15px] font-semibold text-(--t1)">
+        <div className="flex items-center gap-3">
+          <Logo size={18} className="text-(--t1)" />
+          <p className="font-[InterTight] font-bold tracking-[-0.045em] text-[15px] text-(--t1)">
             Pledge<span className="text-(--accent)">OFF</span>
           </p>
           <span className="mono text-[11px] text-(--t3) tracking-[0.04em]">

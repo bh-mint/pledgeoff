@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { Logo } from "@/components/brand/Logo";
 
 interface NavProps {
   onWaitlistOpen?: () => void;
@@ -37,9 +38,13 @@ export function Nav({ onWaitlistOpen, loggedIn: loggedInProp }: NavProps) {
         <div className="flex items-center gap-8">
           <Link
             href={isLoggedIn ? "/dashboard" : "/"}
-            className="display text-[15px] font-semibold text-(--t1) tracking-tight"
+            className="flex items-center gap-2 text-(--t1)"
+            aria-label="PledgeOFF home"
           >
-            Pledge<span className="text-(--accent)">OFF</span>
+            <Logo size={22} />
+            <span className="font-[InterTight] font-bold tracking-[-0.045em] text-[15px]">
+              Pledge<span className="text-(--accent)">OFF</span>
+            </span>
           </Link>
           <div className="hidden md:flex items-center gap-1 mono text-[10px]">
             <span className="pulse-dot w-1.5 h-1.5 rounded-full bg-(--accent) inline-block" />
