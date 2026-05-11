@@ -16,10 +16,34 @@ interface IdeaPageClientProps {
 const POLL_INTERVAL_MS = 4000;
 const MAX_POLLS = 30;
 
-const SENTIMENT_COLORS: Record<Signal["sentiment"], string> = {
-  positive: "var(--validated)",
-  negative: "var(--kill)",
-  neutral: "var(--t3)",
+const SENTIMENT_DOT: Record<Signal["sentiment"], string> = {
+  positive: "bg-(--validated)",
+  negative: "bg-(--kill)",
+  neutral:  "bg-(--t3)",
+};
+
+const SENTIMENT_LABEL: Record<Signal["sentiment"], string> = {
+  positive: "Positive",
+  negative: "Negative",
+  neutral:  "Neutral",
+};
+
+const SOURCE_ICON: Record<string, React.ReactNode> = {
+  github: (
+    <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+    </svg>
+  ),
+  reddit: (
+    <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M20 10c0-5.52-4.48-10-10-10S0 4.48 0 10c0 5.51 4.48 10 10 10s10-4.49 10-10zm-13.5 1c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5zm6.5 3.5c-.69.69-1.8 1-3 1s-2.31-.31-3-1a.5.5 0 01.71-.71c.5.5 1.37.71 2.29.71s1.79-.21 2.29-.71a.5.5 0 01.71.71zM14 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5zm1.5-4.5a1 1 0 100 2 1 1 0 000-2zm-11 1a1 1 0 100 2 1 1 0 000-2zm3.65-3.77C7.19 3.51 6 4.31 6 5.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5c0-.42-.17-.8-.44-1.09l1.43-.99-.79-.18z" />
+    </svg>
+  ),
+};
+
+const SOURCE_NAME: Record<string, string> = {
+  github: "GitHub",
+  reddit: "Reddit",
 };
 
 export function IdeaPageClient({
@@ -73,36 +97,40 @@ export function IdeaPageClient({
 
   const valId = `val_${idea.id.slice(0, 8)}`;
 
-  return (
-    <div className="space-y-10">
-      {/* Top bar (visible when decision is ready) */}
-      {decision && (
-        <div
-          className="flex items-center justify-between pb-4 border-b"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <div className="flex items-center gap-2 mono text-[11px] text-(--t3)">
-            <span className="text-(--t1) font-medium">
-              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-            </span>
-            <span>·</span>
-            <span className="hidden sm:inline">validation ·</span>
-            <span>{valId}</span>
-          </div>
-          <div className="mono text-[10px] text-(--t3)">
-            {analysisS !== null ? `${analysisS}s` : "scored"}
-            <span className="hidden sm:inline">
-              {analysisS !== null ? " analysis" : " just now"}
-            </span>
-          </div>
-        </div>
-      )}
+  // Group signals by source for the right panel
+  const bySource = signals.reduce<Record<string, Signal[]>>((acc, s) => {
+    (acc[s.source] ??= []).push(s);
+    return acc;
+  }, {});
 
-      {/* Decision */}
-      <section>
+  return (
+    <div className="flex flex-col lg:flex-row gap-8 items-start">
+      {/* ── LEFT: verdict (sticky on desktop) ── */}
+      <div className="w-full lg:w-[480px] lg:flex-shrink-0 lg:sticky lg:top-6 lg:self-start">
+        {/* Top bar */}
+        {decision && (
+          <div
+            className="flex items-center justify-between pb-3 mb-4 border-b"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <div className="flex items-center gap-2 mono text-[11px] text-(--t3)">
+              <span className="text-(--t1) font-medium">
+                Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+              </span>
+              <span>·</span>
+              <span className="hidden sm:inline">validation ·</span>
+              <span>{valId}</span>
+            </div>
+            <div className="mono text-[10px] text-(--t3)">
+              {analysisS !== null ? `${analysisS}s analysis` : "scored"}
+            </div>
+          </div>
+        )}
+
         <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
           Verdict
         </p>
+
         {decision ? (
           <>
             <DecisionCard decision={decision} ideaId={idea.id} />
@@ -113,65 +141,74 @@ export function IdeaPageClient({
         ) : (
           <ValidatingLoader />
         )}
-      </section>
+      </div>
 
-      {/* Evidence wall */}
+      {/* ── RIGHT: signals (scrollable) ── */}
       {signals.length > 0 && (
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
-              Evidence wall · {signals.length} signal
-              {signals.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {signals.map((signal) => (
-              <div
-                key={signal.id}
-                className="rounded-md border p-4 flex flex-col justify-between gap-3"
-                style={{
-                  borderColor: "var(--border)",
-                  background: "var(--surface)",
-                }}
-              >
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="mono text-[10px] text-(--t2) font-medium">
-                      {signal.source === "reddit"
-                        ? `r/${signal.title.split(" ").slice(0, 2).join("_").toLowerCase()}`
-                        : "github"}
-                    </span>
-                    <span
-                      className="mono text-[9px] uppercase"
-                      style={{ color: SENTIMENT_COLORS[signal.sentiment] }}
-                    >
-                      ↑ {signal.sentiment}
-                    </span>
-                  </div>
-                  <p className="text-[13px] text-(--t1) leading-relaxed italic">
-                    &ldquo;{signal.summary}&rdquo;
-                  </p>
+        <div className="flex-1 min-w-0">
+          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
+            Evidence wall · {signals.length} signal{signals.length !== 1 ? "s" : ""}
+          </p>
+
+          <div className="space-y-6">
+            {Object.entries(bySource).map(([source, items]) => (
+              <div key={source}>
+                {/* Source heading */}
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-(--t3)">{SOURCE_ICON[source]}</span>
+                  <span className="mono text-[10px] text-(--t3) uppercase tracking-[0.1em]">
+                    {SOURCE_NAME[source] ?? source} · {items.length}
+                  </span>
                 </div>
-                <a
-                  href={signal.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mono text-[10px] text-(--t3) hover:text-(--t2) transition-colors"
-                >
-                  View on {signal.source === "reddit" ? "Reddit" : "GitHub"}{" "}
-                  ↗
-                </a>
+
+                {/* Signal cards */}
+                <div className="space-y-1.5">
+                  {items.map((signal) => (
+                    <a
+                      key={signal.id}
+                      href={signal.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 rounded border px-3 py-2.5 hover:border-(--accent) transition-colors group"
+                      style={{
+                        borderColor: "var(--border)",
+                        background: "var(--surface)",
+                      }}
+                    >
+                      {/* Sentiment dot */}
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SENTIMENT_DOT[signal.sentiment]}`}
+                      />
+
+                      {/* Title + meta */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] text-(--t1) font-medium truncate leading-snug group-hover:text-(--accent) transition-colors">
+                          {signal.title}
+                        </p>
+                        <p className="mono text-[10px] text-(--t3) mt-0.5">
+                          {SENTIMENT_LABEL[signal.sentiment]}
+                        </p>
+                      </div>
+
+                      {/* View button */}
+                      <span className="mono text-[10px] text-(--t3) group-hover:text-(--accent) transition-colors flex-shrink-0 whitespace-nowrap border rounded px-2 py-1"
+                        style={{ borderColor: "var(--border)" }}
+                      >
+                        View ↗
+                      </span>
+                    </a>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
       )}
 
       {/* Timeout message */}
       {!decision && polls >= MAX_POLLS && (
         <p className="text-[13px] text-(--t3)">
-          Analysis is taking longer than expected. Refresh the page in a few
-          seconds.
+          Analysis is taking longer than expected. Refresh the page in a few seconds.
         </p>
       )}
     </div>
