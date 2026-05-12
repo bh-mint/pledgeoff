@@ -65,6 +65,11 @@ const SOURCE_ICON: Record<string, React.ReactNode> = {
       <text x="50" y="68" textAnchor="middle" fontSize="42" fontWeight="bold" fill="white" fontFamily="monospace">DEV</text>
     </svg>
   ),
+  brave: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2L3 7v5c0 5.25 3.75 10.14 9 11.25C17.25 22.14 21 17.25 21 12V7L12 2z" fill="#FB542B"/>
+    </svg>
+  ),
 };
 
 const SOURCE_NAME: Record<string, string> = {
@@ -74,6 +79,7 @@ const SOURCE_NAME: Record<string, string> = {
   producthunt: "Product Hunt",
   google: "Google / Reddit",
   devto: "Dev.to",
+  brave: "Reddit (Brave)",
 };
 
 export function IdeaPageClient({

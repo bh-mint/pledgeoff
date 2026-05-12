@@ -39,7 +39,8 @@
         "PRODUCT_HUNT_API_KEY",
         "PRODUCT_HUNT_API_SECRET",
         "GOOGLE_SEARCH_API_KEY",
-        "GOOGLE_SEARCH_ENGINE_ID"
+        "GOOGLE_SEARCH_ENGINE_ID",
+        "BRAVE_SEARCH_API_KEY"
       ]
     },
     "dev": {
