@@ -32,9 +32,9 @@ export class GitHubSourceAdapter implements ISourceAdapter {
   readonly sourceName = 'github';
 
   constructor(
-    private readonly pat: string,
+    private readonly pat: string = '',
     private readonly timeoutMs = 10_000,
-    private readonly maxRetries = 3,
+    private readonly maxRetries = 2,
     private readonly cache?: ICache,
   ) {}
 
@@ -54,7 +54,7 @@ export class GitHubSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const url = `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&per_page=5`;
+    const url = `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&per_page=2&sort=reactions`;
 
     if (this.cache) {
       const cacheKey = `pledgeoff:github:v3:${query}`;
@@ -71,12 +71,14 @@ export class GitHubSourceAdapter implements ISourceAdapter {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), this.timeoutMs);
 
+        const headers: Record<string, string> = {
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        };
+        if (this.pat) headers['Authorization'] = `Bearer ${this.pat}`;
+
         const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${this.pat}`,
-            Accept: 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-          },
+          headers,
           signal: controller.signal,
         }).finally(() => clearTimeout(timer));
 

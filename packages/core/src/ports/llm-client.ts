@@ -77,7 +77,7 @@ export interface LLMSearchQueriesRequest {
 }
 
 export interface LLMSearchQueriesResponse {
-  readonly producthunt: string[];
+  readonly devto: string[];
   readonly google: string[];
 }
 

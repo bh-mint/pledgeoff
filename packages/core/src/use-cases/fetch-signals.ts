@@ -35,10 +35,10 @@ export class FetchSignalsUseCase {
       ideaText: input.ideaText,
       traceId: input.traceId,
     });
-    // HN reuses producthunt queries — both expect short keyword phrases (Algolia + PH search)
+    // HN, DevTo, GitHub all use devto queries (short keyword phrases); Google uses its own
     const queries: Record<string, string[]> = queriesResult.isOk()
-      ? { producthunt: queriesResult.value.producthunt, google: queriesResult.value.google, hn: queriesResult.value.producthunt }
-      : { producthunt: [fallbackQuery], google: [fallbackQuery], hn: [fallbackQuery] };
+      ? { devto: queriesResult.value.devto, google: queriesResult.value.google, hn: queriesResult.value.devto, github: queriesResult.value.devto }
+      : { devto: [fallbackQuery], google: [fallbackQuery], hn: [fallbackQuery], github: [fallbackQuery] };
 
     // Fetch from each adapter for each query in parallel
     const fetchPromises = this.sourceAdapters.flatMap((adapter) => {

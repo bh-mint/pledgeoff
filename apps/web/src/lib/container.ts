@@ -9,9 +9,10 @@ import {
   SupabaseLandingPageRepository,
   SupabaseCustomerAnalysisRepository,
   SupabaseBuildAnalysisRepository,
-  ProductHuntSourceAdapter,
   GoogleSearchSourceAdapter,
   HNSourceAdapter,
+  DevToSourceAdapter,
+  GitHubSourceAdapter,
   GroqLLMAdapter,
   AnthropicLLMAdapter,
   InMemoryCacheAdapter,
@@ -74,21 +75,16 @@ function buildContainer() {
       : new InMemoryCacheAdapter();
 
   const sourceAdapters = [
-    new ProductHuntSourceAdapter(
-      requireEnv('PRODUCT_HUNT_API_KEY'),
-      requireEnv('PRODUCT_HUNT_API_SECRET'),
-      10_000,
-      2,
-      cache,
-    ),
+    new HNSourceAdapter(8_000, 2, cache),
+    new DevToSourceAdapter(8_000, 2, cache),
+    new GitHubSourceAdapter(process.env.GITHUB_PAT ?? '', 8_000, 2, cache),
     new GoogleSearchSourceAdapter(
       requireEnv('GOOGLE_SEARCH_API_KEY'),
       requireEnv('GOOGLE_SEARCH_ENGINE_ID'),
-      10_000,
+      8_000,
       2,
       cache,
     ),
-    new HNSourceAdapter(8_000, 1, cache),
   ];
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
   const llmClient =

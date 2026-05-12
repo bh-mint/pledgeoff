@@ -54,7 +54,7 @@ export class HNSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=5&numericFilters=points%3E0`;
+    const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=2&numericFilters=points%3E0`;
 
     if (this.cache) {
       const cacheKey = `pledgeoff:hn:v1:${query}`;
