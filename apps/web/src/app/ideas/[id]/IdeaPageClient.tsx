@@ -1,16 +1,25 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { DecisionCard } from "@/components/DecisionCard";
 import { ValidatingLoader } from "@/components/ValidatingLoader";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import type { Idea, Decision, Signal } from "@pledgeoff/core";
 
+interface ToolStatus {
+  simulate: boolean;
+  landing: boolean;
+  customers: boolean;
+  build: boolean;
+}
+
 interface IdeaPageClientProps {
   idea: Idea;
   initialDecision: Decision | null;
   initialSignals: Signal[];
+  toolStatus: ToolStatus;
 }
 
 const POLL_INTERVAL_MS = 4000;
@@ -82,10 +91,46 @@ const SOURCE_NAME: Record<string, string> = {
   brave: "Reddit (Brave)",
 };
 
+const TOOLS = (id: string, verdict: string | undefined, status: ToolStatus) => [
+  {
+    num: "02",
+    label: "Simulate Revenue",
+    desc: "TAM, 3 pricing scenarios, break-even",
+    href: `/ideas/${id}/simulate`,
+    done: status.simulate,
+    available: verdict === "GO",
+  },
+  {
+    num: "03",
+    label: "Landing Page",
+    desc: "AI-generated headline, features, CTA",
+    href: `/ideas/${id}/landing`,
+    done: status.landing,
+    available: verdict === "GO",
+  },
+  {
+    num: "04",
+    label: "Customer Intelligence",
+    desc: "Segments, pain points, real quotes",
+    href: `/ideas/${id}/customers`,
+    done: status.customers,
+    available: true,
+  },
+  {
+    num: "05",
+    label: "Engineering Stack",
+    desc: "Tech stack, libraries, GitHub gaps",
+    href: `/ideas/${id}/build`,
+    done: status.build,
+    available: verdict === "GO",
+  },
+];
+
 export function IdeaPageClient({
   idea,
   initialDecision,
   initialSignals,
+  toolStatus,
 }: IdeaPageClientProps) {
   const [decision, setDecision] = useState<Decision | null>(initialDecision);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
@@ -172,6 +217,51 @@ export function IdeaPageClient({
             <DecisionCard decision={decision} ideaId={idea.id} />
             <div className="mt-4">
               <FeedbackButtons ideaId={idea.id} decisionId={decision.id} />
+            </div>
+
+            {/* Intelligence Tools — sticky with verdict */}
+            <div className="mt-8 pt-6 border-t" style={{ borderColor: "var(--border)" }}>
+              <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
+                Intelligence tools
+              </p>
+              <div className="space-y-2">
+                {TOOLS(idea.id, decision.verdict, toolStatus).map((tool) => (
+                  <div
+                    key={tool.num}
+                    className="rounded border px-3 py-2.5 flex items-center gap-3"
+                    style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                  >
+                    <span className="mono text-[10px] text-(--t3) w-5 flex-shrink-0">{tool.num}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-medium text-(--t1) leading-snug">{tool.label}</p>
+                      <p className="mono text-[10px] text-(--t3) truncate">{tool.desc}</p>
+                    </div>
+                    {tool.done && (
+                      <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
+                        style={{ background: "rgba(125,214,107,0.12)", color: "var(--validated)", border: "1px solid rgba(125,214,107,0.3)" }}>
+                        ✓
+                      </span>
+                    )}
+                    {tool.available ? (
+                      <Link
+                        href={tool.href}
+                        className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 transition-colors hover:border-(--accent) hover:text-(--accent)"
+                        style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                      >
+                        {tool.done ? "View →" : "Run →"}
+                      </Link>
+                    ) : (
+                      <span
+                        className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 opacity-35 cursor-not-allowed"
+                        style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                        title="Available for GO verdicts only"
+                      >
+                        GO only
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         ) : (
