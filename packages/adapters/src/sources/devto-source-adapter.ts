@@ -17,7 +17,7 @@ interface DevToArticle {
 
 const CACHE_TTL_SECONDS = 3600;
 const DEVTO_API_URL = 'https://dev.to/api/articles';
-const PER_PAGE = 5;
+const PER_PAGE = 10;
 const TOP_N = 2;
 
 function scoreSentiment(reactions: number): Signal['sentiment'] {
@@ -83,8 +83,13 @@ export class DevToSourceAdapter implements ISourceAdapter {
 
         const articles = (await response.json()) as DevToArticle[];
 
-        // Take top N by reactions — most relevant/validated articles first
-        const top = [...articles]
+        // Filter to articles containing at least one query keyword in title, then top N by reactions
+        const keywords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
+        const relevant = articles.filter((a) =>
+          keywords.some((kw) => a.title.toLowerCase().includes(kw)),
+        );
+        const pool = relevant.length > 0 ? relevant : articles;
+        const top = [...pool]
           .sort((a, b) => b.positive_reactions_count - a.positive_reactions_count)
           .slice(0, TOP_N);
 
