@@ -54,10 +54,10 @@ export class GitHubSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    const url = `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&per_page=2&sort=reactions`;
+    const url = `https://api.github.com/search/issues?q=${encodeURIComponent(query + ' is:issue')}&per_page=2`;
 
     if (this.cache) {
-      const cacheKey = `pledgeoff:github:v3:${query}`;
+      const cacheKey = `pledgeoff:github:v4:${query}`;
       const cached = await this.cache.get<Signal[]>(cacheKey);
       if (cached) {
         log.info({ traceId, target: 'github', operation: 'search', outcome: 'success', cacheHit: true, signalCount: cached.length }, 'GitHub cache hit');
@@ -109,7 +109,7 @@ export class GitHubSourceAdapter implements ISourceAdapter {
         );
 
         if (this.cache) {
-          const cacheKey = `pledgeoff:github:v3:${query}`;
+          const cacheKey = `pledgeoff:github:v4:${query}`;
           await this.cache.set(cacheKey, signals, CACHE_TTL_SECONDS);
         }
 

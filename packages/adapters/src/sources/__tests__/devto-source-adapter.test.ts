@@ -5,12 +5,12 @@ const ideaId = crypto.randomUUID();
 const traceId = crypto.randomUUID();
 const query = 'async meeting summarizer';
 
-const makeDevToResponse = (articles: { positive_reactions_count: number; description?: string | null }[] = []) => ({
+const makeDevToResponse = (articles: { positive_reactions_count: number; description?: string | null; title?: string }[] = []) => ({
   ok: true,
   json: async () =>
     articles.map((a, i) => ({
       id: i + 1,
-      title: `Article ${i + 1}`,
+      title: a.title ?? `Article ${i + 1}`,
       description: Object.prototype.hasOwnProperty.call(a, 'description') ? a.description : `Description for article ${i + 1}`,
       url: `https://dev.to/user/article-${i + 1}`,
       positive_reactions_count: a.positive_reactions_count,
@@ -87,6 +87,27 @@ describe('DevToSourceAdapter', () => {
 
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toHaveLength(0);
+  });
+
+  it('filters irrelevant articles when keyword matches exist', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(
+      makeDevToResponse([
+        { positive_reactions_count: 200, title: 'What was your win this week?' },
+        { positive_reactions_count: 150, title: 'Top 7 featured posts' },
+        { positive_reactions_count: 30,  title: 'Building an async meeting summarizer with AI' },
+        { positive_reactions_count: 10,  title: 'Summarizer tool for meeting notes' },
+      ]),
+    ));
+
+    const adapter = new DevToSourceAdapter();
+    const result = await adapter.fetch(query, ideaId, traceId);
+
+    expect(result.isOk()).toBe(true);
+    const signals = result._unsafeUnwrap();
+    expect(signals).toHaveLength(2);
+    // Should pick the relevant articles, not the high-reaction but irrelevant ones
+    expect(signals[0]!.title).toContain('summarizer');
+    expect(signals[1]!.title).toContain('Summarizer');
   });
 
   it('returns error on HTTP failure', async () => {
