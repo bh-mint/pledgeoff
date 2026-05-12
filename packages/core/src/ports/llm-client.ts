@@ -4,6 +4,7 @@ import type { Verdict, Dimension } from '../domain/decision';
 import type { SimulationScenario } from '../domain/simulation';
 import type { CustomerSegment, PainPoint, SentimentBreakdown, CustomerQuote } from '../domain/customer-analysis';
 import type { TechComponent, TechGap } from '../domain/build-analysis';
+import type { Competitor, CompetitorGap } from '../domain/competitor-analysis';
 
 export interface LLMDecisionRequest {
   readonly ideaText: string;
@@ -71,6 +72,17 @@ export interface LLMBuildResponse {
   readonly gaps: TechGap[];
 }
 
+export interface LLMCompetitorRequest {
+  readonly ideaText: string;
+  readonly signals: Signal[];
+  readonly traceId: string;
+}
+
+export interface LLMCompetitorResponse {
+  readonly competitors: Competitor[];
+  readonly gaps: CompetitorGap[];
+}
+
 export interface LLMSearchQueriesRequest {
   readonly ideaText: string;
   readonly traceId: string;
@@ -92,4 +104,5 @@ export interface ILLMClient {
   generateLanding(request: LLMLandingRequest): Promise<Result<LLMLandingResponse, LLMClientError>>;
   analyzeCustomers(request: LLMCustomerRequest): Promise<Result<LLMCustomerResponse, LLMClientError>>;
   analyzeBuild(request: LLMBuildRequest): Promise<Result<LLMBuildResponse, LLMClientError>>;
+  analyzeCompetitors(request: LLMCompetitorRequest): Promise<Result<LLMCompetitorResponse, LLMClientError>>;
 }

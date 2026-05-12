@@ -9,6 +9,7 @@ import {
   SupabaseLandingPageRepository,
   SupabaseCustomerAnalysisRepository,
   SupabaseBuildAnalysisRepository,
+  SupabaseCompetitorAnalysisRepository,
   HNSourceAdapter,
   DevToSourceAdapter,
   GitHubSourceAdapter,
@@ -29,6 +30,7 @@ import {
   GenerateLandingUseCase,
   AnalyzeCustomersUseCase,
   AnalyzeBuildUseCase,
+  AnalyzeCompetitorsUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -54,6 +56,7 @@ function buildContainer() {
   const landingPageRepo = new SupabaseLandingPageRepository(supabase);
   const customerAnalysisRepo = new SupabaseCustomerAnalysisRepository(supabase);
   const buildAnalysisRepo = new SupabaseBuildAnalysisRepository(supabase);
+  const competitorAnalysisRepo = new SupabaseCompetitorAnalysisRepository(supabase);
 
   const eventBusProvider = process.env.EVENT_BUS_PROVIDER ?? 'postgres';
   const eventBus =
@@ -108,6 +111,7 @@ function buildContainer() {
   const generateLandingUseCase = new GenerateLandingUseCase(landingPageRepo, llmClient);
   const analyzeCustomersUseCase = new AnalyzeCustomersUseCase(customerAnalysisRepo, signalRepo, llmClient);
   const analyzeBuildUseCase = new AnalyzeBuildUseCase(buildAnalysisRepo, signalRepo, llmClient);
+  const analyzeCompetitorsUseCase = new AnalyzeCompetitorsUseCase(competitorAnalysisRepo, signalRepo, llmClient);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -178,9 +182,10 @@ function buildContainer() {
     generateLandingUseCase,
     analyzeCustomersUseCase,
     analyzeBuildUseCase,
+    analyzeCompetitorsUseCase,
     eventBus,
     auditLog,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo },
+    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo },
   };
 }
 

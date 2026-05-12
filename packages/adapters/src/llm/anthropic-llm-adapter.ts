@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -10,6 +10,7 @@ import { buildLandingPrompt, LANDING_PROMPT_VERSION } from './landing-prompt.v1'
 import { buildCustomerPrompt, CUSTOMER_PROMPT_VERSION } from './customer-prompt.v1';
 import { buildBuildPrompt, BUILD_PROMPT_VERSION } from './build-prompt.v1';
 import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './search-queries-prompt.v1';
+import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
 
 const log = createLogger({ adapter: 'anthropic' });
 const tracer = getTracer('anthropic-llm-adapter');
@@ -103,6 +104,24 @@ const LLMSearchQueriesResponseSchemaA = z.object({
   google: z.array(z.string().min(1)).min(1).max(5),
 });
 
+const CompetitorItemSchemaA = z.object({
+  name: z.string().min(1).max(100),
+  url: z.string().url().optional(),
+  positioning: z.string().min(1).max(300),
+  signals: z.array(z.string().min(1).max(200)).min(1).max(5),
+});
+
+const CompetitorGapItemSchemaA = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().min(1).max(300),
+  opportunity: z.string().min(1).max(300),
+});
+
+const LLMCompetitorResponseSchemaA = z.object({
+  competitors: z.array(CompetitorItemSchemaA).max(8),
+  gaps: z.array(CompetitorGapItemSchemaA).max(5),
+});
+
 const TIMEOUT_MS = 30_000;
 
 const DECISION_SYSTEM_PROMPT = `You are a startup decision intelligence engine using prompt version ${PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
@@ -111,6 +130,7 @@ const LANDING_SYSTEM_PROMPT = `You are a conversion copywriter using prompt vers
 const CUSTOMER_SYSTEM_PROMPT = `You are a customer intelligence analyst using prompt version ${CUSTOMER_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const BUILD_SYSTEM_PROMPT = `You are a senior software architect using prompt version ${BUILD_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const SEARCH_QUERIES_SYSTEM_PROMPT = `You are a market research assistant using prompt version ${SEARCH_QUERIES_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
+const COMPETITOR_SYSTEM_PROMPT = `You are a competitive intelligence analyst using prompt version ${COMPETITOR_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 
 export class AnthropicLLMAdapter implements ILLMClient {
   private readonly client: Anthropic;
@@ -231,6 +251,26 @@ export class AnthropicLLMAdapter implements ILLMClient {
         BUILD_SYSTEM_PROMPT,
         LLMBuildResponseSchemaA,
         'analyzeBuild',
+        request.traceId,
+      );
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  async analyzeCompetitors(request: LLMCompetitorRequest): Promise<Result<LLMCompetitorResponse, LLMClientError>> {
+    return tracer.startActiveSpan('anthropic.analyze-competitors', async (span) => {
+      span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
+      const result = await this._callAnthropic(
+        buildCompetitorPrompt(request.ideaText, request.signals),
+        COMPETITOR_SYSTEM_PROMPT,
+        LLMCompetitorResponseSchemaA,
+        'analyzeCompetitors',
         request.traceId,
       );
       if (result.isErr()) {
