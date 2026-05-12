@@ -17,6 +17,7 @@ export { ProductHuntSourceAdapter } from './sources/product-hunt-source-adapter'
 export { GoogleSearchSourceAdapter } from './sources/google-search-source-adapter';
 export { DevToSourceAdapter } from './sources/devto-source-adapter';
 export { GitHubSourceAdapter } from './sources/github-source-adapter';
+export { BraveSearchSourceAdapter } from './sources/brave-search-source-adapter';
 export { GroqLLMAdapter } from './llm/groq-llm-adapter';
 export { AnthropicLLMAdapter } from './llm/anthropic-llm-adapter';
 export { sendVerdictEmail } from './email/resend-email-adapter';

@@ -9,10 +9,10 @@ import {
   SupabaseLandingPageRepository,
   SupabaseCustomerAnalysisRepository,
   SupabaseBuildAnalysisRepository,
-  GoogleSearchSourceAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
   GitHubSourceAdapter,
+  BraveSearchSourceAdapter,
   GroqLLMAdapter,
   AnthropicLLMAdapter,
   InMemoryCacheAdapter,
@@ -78,13 +78,9 @@ function buildContainer() {
     new HNSourceAdapter(8_000, 2, cache),
     new DevToSourceAdapter(8_000, 2, cache),
     new GitHubSourceAdapter(process.env.GITHUB_PAT ?? '', 8_000, 2, cache),
-    new GoogleSearchSourceAdapter(
-      requireEnv('GOOGLE_SEARCH_API_KEY'),
-      requireEnv('GOOGLE_SEARCH_ENGINE_ID'),
-      8_000,
-      2,
-      cache,
-    ),
+    ...(process.env.BRAVE_SEARCH_API_KEY
+      ? [new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 8_000, 2, cache)]
+      : []),
   ];
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
   const llmClient =

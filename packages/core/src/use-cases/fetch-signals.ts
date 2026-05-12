@@ -35,10 +35,10 @@ export class FetchSignalsUseCase {
       ideaText: input.ideaText,
       traceId: input.traceId,
     });
-    // HN, DevTo, GitHub all use devto queries (short keyword phrases); Google uses its own
+    // HN, DevTo, GitHub, Brave all use devto queries (short keyword phrases); Google uses its own
     const queries: Record<string, string[]> = queriesResult.isOk()
-      ? { devto: queriesResult.value.devto, google: queriesResult.value.google, hn: queriesResult.value.devto, github: queriesResult.value.devto }
-      : { devto: [fallbackQuery], google: [fallbackQuery], hn: [fallbackQuery], github: [fallbackQuery] };
+      ? { devto: queriesResult.value.devto, google: queriesResult.value.google, hn: queriesResult.value.devto, github: queriesResult.value.devto, brave: queriesResult.value.devto }
+      : { devto: [fallbackQuery], google: [fallbackQuery], hn: [fallbackQuery], github: [fallbackQuery], brave: [fallbackQuery] };
 
     // Fetch from each adapter for each query in parallel
     const fetchPromises = this.sourceAdapters.flatMap((adapter) => {
