@@ -11,6 +11,7 @@ import {
   SupabaseBuildAnalysisRepository,
   ProductHuntSourceAdapter,
   GoogleSearchSourceAdapter,
+  HNSourceAdapter,
   GroqLLMAdapter,
   AnthropicLLMAdapter,
   InMemoryCacheAdapter,
@@ -87,6 +88,7 @@ function buildContainer() {
       2,
       cache,
     ),
+    new HNSourceAdapter(8_000, 1, cache),
   ];
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
   const llmClient =

@@ -5,6 +5,8 @@ import { container } from '@/lib/container';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { logger } from '@pledgeoff/observability';
 
+export const maxDuration = 60;
+
 function unauthorizedResponse(traceId: string) {
   return Response.json(
     { error: { code: 'UNAUTHENTICATED', message: 'Valid authentication required' } },
@@ -147,10 +149,16 @@ export async function POST(req: Request) {
 
   // Run pipeline in background after 201 is sent — non-blocking
   after(async () => {
-    // Step 1: idea.created.v1 → FetchSignals (Reddit || GitHub parallel)
-    await container.eventBus.processOutbox();
-    // Step 2: signals.fetched.v1 → DecideUseCase (LLM)
-    await container.eventBus.processOutbox();
+    const t = Date.now();
+    // Step 1: idea.created.v1 → FetchSignals
+    const s1 = await container.eventBus.processOutbox();
+    logger.info({ traceId, ideaId: idea.id, step: 1, ...s1, elapsedMs: Date.now() - t }, 'pipeline step 1');
+    // Step 2: signals.fetched.v1 → DecideUseCase
+    const s2 = await container.eventBus.processOutbox();
+    logger.info({ traceId, ideaId: idea.id, step: 2, ...s2, elapsedMs: Date.now() - t }, 'pipeline step 2');
+    // Step 3: decision.ready.v1 → email (fire-and-forget)
+    const s3 = await container.eventBus.processOutbox();
+    logger.info({ traceId, ideaId: idea.id, step: 3, ...s3, elapsedMs: Date.now() - t }, 'pipeline step 3');
   });
 
   return Response.json(
