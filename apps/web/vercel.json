@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/v1/cron/process-outbox",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
