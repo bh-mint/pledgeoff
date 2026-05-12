@@ -48,7 +48,7 @@ function makeAdapter(signals: Signal[], sourceName = 'reddit'): ISourceAdapter {
   };
 }
 
-function makeLLMClient(queries = { producthunt: ['code review pull request automation'], google: ['code review tool'] }): ILLMClient {
+function makeLLMClient(queries = { devto: ['code review pull request automation'], google: ['code review tool'] }): ILLMClient {
   return {
     generateSearchQueries: vi.fn().mockResolvedValue(ok(queries)),
     generateDecision: vi.fn(),
@@ -70,9 +70,9 @@ describe('FetchSignalsUseCase', () => {
   };
 
   it('generates queries via LLM then fetches from adapters', async () => {
-    const queries = { producthunt: ['code review pull request automation'], google: ['code review tool developer'] };
+    const queries = { devto: ['code review pull request automation'], google: ['code review tool developer'] };
     const llm = makeLLMClient(queries);
-    const adapter = makeAdapter(signals, 'producthunt');
+    const adapter = makeAdapter(signals, 'devto');
     const repo = makeRepo(signals);
     const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [adapter], llm);
 
@@ -80,13 +80,13 @@ describe('FetchSignalsUseCase', () => {
 
     expect(result.isOk()).toBe(true);
     expect(llm.generateSearchQueries).toHaveBeenCalledWith({ ideaText: baseInput.ideaText, traceId: baseInput.traceId });
-    expect(adapter.fetch).toHaveBeenCalledWith(queries.producthunt[0], ideaId, baseInput.traceId);
+    expect(adapter.fetch).toHaveBeenCalledWith(queries.devto[0], ideaId, baseInput.traceId);
   });
 
   it('falls back to idea title when LLM query generation fails', async () => {
     const llm = makeLLMClient();
     (llm.generateSearchQueries as ReturnType<typeof vi.fn>).mockResolvedValue(err(new Error('LLM timeout')));
-    const adapter = makeAdapter(signals, 'producthunt');
+    const adapter = makeAdapter(signals, 'devto');
     const repo = makeRepo(signals);
     const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [adapter], llm);
 
@@ -101,12 +101,12 @@ describe('FetchSignalsUseCase', () => {
     const uniqueSignal = makeSignal(ideaId);
     // Two calls return same URL — should be deduplicated
     const adapter: ISourceAdapter = {
-      sourceName: 'producthunt',
+      sourceName: 'devto',
       fetch: vi.fn()
         .mockResolvedValueOnce(ok([sharedSignal]))
         .mockResolvedValueOnce(ok([{ ...sharedSignal, id: crypto.randomUUID() }, uniqueSignal])),
     };
-    const queries = { producthunt: ['query1', 'query2'], google: [] };
+    const queries = { devto: ['query1', 'query2'], google: [] };
     const llm = makeLLMClient(queries);
     const repo = makeRepo([sharedSignal, uniqueSignal]);
     const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [adapter], llm);
@@ -138,8 +138,8 @@ describe('FetchSignalsUseCase', () => {
       sourceName: 'reddit',
       fetch: vi.fn().mockResolvedValue(err(new SourceAdapterError('timeout', 'reddit'))),
     };
-    const hnAdapter = makeAdapter(githubSignals, 'producthunt');
-    const llm = makeLLMClient({ producthunt: ['query'], google: ['query'] });
+    const hnAdapter = makeAdapter(githubSignals, 'devto');
+    const llm = makeLLMClient({ devto: ['query'], google: ['query'] });
     const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [failingAdapter, hnAdapter], llm);
 
     const result = await useCase.execute(baseInput);

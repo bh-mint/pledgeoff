@@ -64,7 +64,7 @@ export class GoogleSearchSourceAdapter implements ISourceAdapter {
     url.searchParams.set('key', this.apiKey);
     url.searchParams.set('cx', this.searchEngineId);
     url.searchParams.set('q', siteQuery);
-    url.searchParams.set('num', '5');
+    url.searchParams.set('num', '2');
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       const start = Date.now();
