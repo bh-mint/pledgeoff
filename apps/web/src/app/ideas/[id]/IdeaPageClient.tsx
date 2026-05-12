@@ -13,6 +13,7 @@ interface ToolStatus {
   landing: boolean;
   customers: boolean;
   build: boolean;
+  competitors: boolean;
 }
 
 interface IdeaPageClientProps {
@@ -123,6 +124,14 @@ const TOOLS = (id: string, verdict: string | undefined, status: ToolStatus) => [
     href: `/ideas/${id}/build`,
     done: status.build,
     available: verdict === "GO",
+  },
+  {
+    num: "06",
+    label: "Competitor Intelligence",
+    desc: "Who exists, how they position, where the gaps are",
+    href: `/ideas/${id}/competitors`,
+    done: status.competitors,
+    available: true,
   },
 ];
 

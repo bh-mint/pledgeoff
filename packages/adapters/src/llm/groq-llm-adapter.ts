@@ -1,7 +1,7 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -10,6 +10,7 @@ import { buildLandingPrompt, LANDING_PROMPT_VERSION } from './landing-prompt.v1'
 import { buildCustomerPrompt, CUSTOMER_PROMPT_VERSION } from './customer-prompt.v1';
 import { buildBuildPrompt, BUILD_PROMPT_VERSION } from './build-prompt.v1';
 import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './search-queries-prompt.v1';
+import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
 const tracer = getTracer('groq-llm-adapter');
@@ -101,6 +102,24 @@ const LLMBuildResponseSchema = z.object({
 const LLMSearchQueriesResponseSchema = z.object({
   devto: z.array(z.string().min(1)).min(1).max(5),
   google: z.array(z.string().min(1)).min(1).max(5),
+});
+
+const CompetitorItemSchema = z.object({
+  name: z.string().min(1).max(100),
+  url: z.string().url().optional(),
+  positioning: z.string().min(1).max(300),
+  signals: z.array(z.string().min(1).max(200)).min(1).max(5),
+});
+
+const CompetitorGapItemSchema = z.object({
+  title: z.string().min(1).max(100),
+  description: z.string().min(1).max(300),
+  opportunity: z.string().min(1).max(300),
+});
+
+const LLMCompetitorResponseSchema = z.object({
+  competitors: z.array(CompetitorItemSchema).max(8),
+  gaps: z.array(CompetitorGapItemSchema).max(5),
 });
 
 const TIMEOUT_MS = 30_000;
@@ -224,6 +243,26 @@ export class GroqLLMAdapter implements ILLMClient {
         `You are a senior software architect using prompt version ${BUILD_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMBuildResponseSchema,
         'analyzeBuild',
+        request.traceId,
+      );
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  async analyzeCompetitors(request: LLMCompetitorRequest): Promise<Result<LLMCompetitorResponse, LLMClientError>> {
+    return tracer.startActiveSpan('groq.analyze-competitors', async (span) => {
+      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
+      const result = await this._callGroq(
+        buildCompetitorPrompt(request.ideaText, request.signals),
+        `You are a competitive intelligence analyst using prompt version ${COMPETITOR_PROMPT_VERSION}. Always respond with valid JSON only.`,
+        LLMCompetitorResponseSchema,
+        'analyzeCompetitors',
         request.traceId,
       );
       if (result.isErr()) {

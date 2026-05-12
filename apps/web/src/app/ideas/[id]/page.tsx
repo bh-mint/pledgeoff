@@ -51,13 +51,14 @@ export default async function IdeaPage({ params }: Props) {
   const idea = ideaResult.value;
   if (idea.userId !== user.id) notFound();
 
-  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult] = await Promise.all([
+  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult] = await Promise.all([
     container._repos.decisionRepo.findByIdeaId(id),
     container._repos.signalRepo.findByIdeaId(id),
     container._repos.simulationRepo.findByIdeaId(id),
     container._repos.landingPageRepo.findByIdeaId(id),
     container._repos.customerAnalysisRepo.findByIdeaId(id),
     container._repos.buildAnalysisRepo.findByIdeaId(id),
+    container._repos.competitorAnalysisRepo.findByIdeaId(id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -67,6 +68,7 @@ export default async function IdeaPage({ params }: Props) {
     landing: !!(landingResult.isOk() && landingResult.value),
     customers: !!(customersResult.isOk() && customersResult.value),
     build: !!(buildResult.isOk() && buildResult.value),
+    competitors: !!(competitorsResult.isOk() && competitorsResult.value),
   };
 
   const { title, description, category } = parseIdeaText(idea.text);

@@ -49,7 +49,7 @@ function makeLLMClient(response = llmResponse): ILLMClient {
     generateDecision: vi.fn().mockResolvedValue(ok(response)),
     generateSimulation: vi.fn(),
     generateLanding: vi.fn(),
-    analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(),
+    analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(),
   };
 }
 
@@ -96,7 +96,7 @@ describe('DecideUseCase', () => {
     const useCase = new DecideUseCase(
       makeSignalRepo(),
       makeDecisionRepo(),
-      { generateSearchQueries: vi.fn(), generateDecision: vi.fn().mockResolvedValue(err(llmError)), generateSimulation: vi.fn(), generateLanding: vi.fn(), analyzeCustomers: vi.fn(), analyzeBuild: vi.fn() },
+      { generateSearchQueries: vi.fn(), generateDecision: vi.fn().mockResolvedValue(err(llmError)), generateSimulation: vi.fn(), generateLanding: vi.fn(), analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn() },
       makeEventBus(),
       makeIdempotencyStore(false),
     );
