@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { LandingPage } from "@pledgeoff/core";
+import { createClient } from "@/lib/supabase/client";
 
 interface Props {
   ideaId: string;
@@ -20,7 +21,13 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/v1/ideas/${ideaId}/landing`, { method: "POST" });
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { setError("Not authenticated."); setLoading(false); return; }
+      const res = await fetch(`/api/v1/ideas/${ideaId}/landing`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setError((body as { error?: { message?: string } }).error?.message ?? "Generation failed. Try again.");
