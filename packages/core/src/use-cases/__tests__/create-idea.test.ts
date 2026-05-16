@@ -12,6 +12,7 @@ function makeRepo(overrides: Partial<IIdeaRepository> = {}): IIdeaRepository {
     save: vi.fn().mockResolvedValue(ok({ id: crypto.randomUUID(), userId: 'u1', text: 'test idea text ok', createdAt: new Date().toISOString() })),
     findById: vi.fn(),
     findByUserId: vi.fn(),
+    countThisMonth: vi.fn().mockResolvedValue(ok(0)),
     ...overrides,
   };
 }

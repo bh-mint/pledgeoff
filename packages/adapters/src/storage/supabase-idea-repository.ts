@@ -60,4 +60,19 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
     if (error) return err(new IdeaRepositoryError(error.message));
     return ok((data ?? []).map(rowToIdea));
   }
+
+  async countThisMonth(userId: string): Promise<Result<number, IdeaRepositoryError>> {
+    const startOfMonth = new Date();
+    startOfMonth.setUTCDate(1);
+    startOfMonth.setUTCHours(0, 0, 0, 0);
+
+    const { count, error } = await this.client
+      .from('ideas')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString());
+
+    if (error) return err(new IdeaRepositoryError(error.message));
+    return ok(count ?? 0);
+  }
 }
