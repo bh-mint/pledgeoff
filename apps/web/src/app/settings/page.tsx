@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { container } from "@/lib/container";
+import { effectivePlan } from "@pledgeoff/core";
 import { Nav } from "@/components/Nav";
 import { SettingsClient } from "./SettingsClient";
 
@@ -15,14 +16,17 @@ export default async function SettingsPage() {
   const user = await requireUser();
   const supabase = createServiceClient();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
-    .single();
+  const [profileResult, ideasResult, subResult] = await Promise.all([
+    supabase.from("profiles").select("full_name").eq("id", user.id).single(),
+    container._repos.ideaRepo.findByUserId(user.id),
+    container._repos.subscriptionRepo.findByUserId(user.id),
+  ]);
 
-  const ideasResult = await container._repos.ideaRepo.findByUserId(user.id);
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
+  const sub = subResult.isOk() ? subResult.value : null;
+  const plan = sub ? effectivePlan(sub) : "free";
+  const renewsAt = sub?.currentPeriodEnd ?? null;
+  const stripeCustomerId = sub?.stripeCustomerId ?? null;
 
   const now = new Date();
   const ideasThisMonth = ideas.filter((idea) => {
@@ -53,10 +57,11 @@ export default async function SettingsPage() {
 
         <SettingsClient
           email={user.email ?? ""}
-          fullName={profile?.full_name ?? null}
-          plan="free"
+          fullName={profileResult.data?.full_name ?? null}
+          plan={plan}
           ideasThisMonth={ideasThisMonth}
-          ideasLimit={3}
+          renewsAt={renewsAt}
+          stripeCustomerId={stripeCustomerId}
         />
       </div>
     </div>
