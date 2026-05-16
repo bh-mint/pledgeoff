@@ -101,7 +101,7 @@ const PREVIEW_POSTS = [
 function PreviewCard() {
   return (
     <div
-      className="rounded-md border overflow-hidden float origin-center w-full max-w-[560px]"
+      className="rounded-md border overflow-hidden float origin-center w-full max-w-140"
       style={{
         borderColor: "var(--border)",
         background: "var(--surface)",
@@ -141,8 +141,8 @@ function PreviewCard() {
               <div className="col-span-5 text-[10px] text-(--t1)">{d.k}</div>
               <div className="col-span-1 mono text-[8px] text-(--t3)">{d.w}</div>
               <div className="col-span-5">
-                <div className="h-[3px] rounded-full" style={{ background: "var(--border)" }}>
-                  <div className="h-[3px] rounded-full" style={{ width: `${d.v}%`, background: d.c }} />
+                <div className="h-0.75 rounded-full" style={{ background: "var(--border)" }}>
+                  <div className="h-0.75 rounded-full" style={{ width: `${d.v}%`, background: d.c }} />
                 </div>
               </div>
               <div className="col-span-1 mono tnum text-[10px] text-right text-(--t2)">{d.v}</div>
@@ -182,7 +182,7 @@ export function HomeClient() {
           }} />
         </div>
 
-        <div className="relative max-w-[1320px] mx-auto px-8 pt-24 pb-20 grid grid-cols-12 gap-8">
+        <div className="relative max-w-330 mx-auto px-8 pt-24 pb-20 grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-7 pt-8">
             <div className="mono text-[10px] mb-6 flex items-center gap-2" style={{ color: "var(--t2)" }}>
               <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
@@ -196,7 +196,7 @@ export function HomeClient() {
               <span className="text-(--t1)">asked for.</span>
             </h1>
 
-            <p className="mt-8 max-w-[540px] text-[14px] leading-[1.6] text-(--t2)">
+            <p className="mt-8 max-w-135 text-[14px] leading-[1.6] text-(--t2)">
               In 15 seconds, PledgeOFF scrapes Reddit, Google Trends, and your
               competitors live — then tells you whether your idea is a 0 or an 89,
               with the receipts.{" "}
@@ -237,7 +237,7 @@ export function HomeClient() {
 
       {/* ── LIVE SIGNALS TICKER ── */}
       <section className="border-b border-(--border) py-8 overflow-hidden bg-(--surface)">
-        <div className="max-w-[1320px] mx-auto px-8 mb-4 flex items-center justify-between">
+        <div className="max-w-330 mx-auto px-8 mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
             <span className="mono text-[10px] uppercase tracking-[0.14em] text-(--t2)">
@@ -267,12 +267,12 @@ export function HomeClient() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="max-w-[1320px] mx-auto px-8 py-20 border-b border-(--border)">
+      <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
         <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
           Process
         </p>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-          <h2 className="display text-[40px] font-black leading-[1] text-(--t1)">
+          <h2 className="display text-[40px] font-black leading-none text-(--t1)">
             From idea to verdict.
             <br />
             In 15s.
@@ -326,13 +326,13 @@ export function HomeClient() {
       </section>
 
       {/* ── EVIDENCE WALL ── */}
-      <section className="max-w-[1320px] mx-auto px-8 py-20 border-b border-(--border)">
+      <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
         <div className="flex items-start justify-between mb-10">
           <div>
             <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
               Evidence
             </p>
-            <h2 className="display text-[40px] font-black leading-[1] text-(--t1)">
+            <h2 className="display text-[40px] font-black leading-none text-(--t1)">
               Not opinions.
               <br />
               Verbatim posts.
@@ -371,7 +371,7 @@ export function HomeClient() {
       </section>
 
       {/* ── SOCIAL PROOF ── */}
-      <section className="max-w-[1320px] mx-auto px-8 py-20 border-b border-(--border)">
+      <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
         <div className="text-center mb-12">
           <p className="display text-[64px] font-black text-(--accent) tnum">
             $2.4M
@@ -407,8 +407,8 @@ export function HomeClient() {
       </section>
 
       {/* ── FINAL CTA ── */}
-      <section className="max-w-[1320px] mx-auto px-8 py-24 text-center">
-        <h2 className="display text-[40px] md:text-[56px] font-black leading-[1] text-(--t1) mb-4">
+      <section className="max-w-330 mx-auto px-8 py-24 text-center">
+        <h2 className="display text-[40px] md:text-[56px] font-black leading-none text-(--t1) mb-4">
           What&apos;s the idea
           <br />
           you keep putting off?
