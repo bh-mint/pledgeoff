@@ -164,12 +164,19 @@ function buildContainer() {
       const userEmail = data?.user?.email;
       if (!userEmail) return;
 
+      const decisionResult = await decisionRepo.findByIdeaId(event.payload.ideaId);
+      const decision = decisionResult.isOk() ? decisionResult.value : null;
+      const dims = decision?.dimensions;
+      const score = dims?.length
+        ? Math.round(dims.reduce((sum: number, d: { weight: number; score: number }) => sum + d.weight * d.score, 0))
+        : Math.round(event.payload.confidence * 100);
+
       await sendVerdictEmail(resendApiKey, {
         to: userEmail,
         ideaId: idea.id,
         ideaText: idea.text,
         verdict: event.payload.verdict,
-        score: Math.round(event.payload.confidence * 100),
+        score,
         traceId: event.traceId,
       });
     });
