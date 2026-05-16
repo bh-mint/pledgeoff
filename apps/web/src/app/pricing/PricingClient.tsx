@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
+import { PRICING } from "@/lib/pricing.config";
 
 const PRO_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID ?? "";
 const PRO_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID ?? "";
@@ -172,12 +173,12 @@ function UpgradeButton({
 export function PricingClient() {
   const [billing, setBilling] = useState<"month" | "year">("month");
 
-  const proPrice = billing === "month" ? "39" : "32";
-  const proSub = billing === "month" ? "/mo" : "/mo · billed annually · €374/yr";
+  const proPrice = billing === "month" ? String(PRICING.pro.monthly.eur) : String(PRICING.pro.monthly.annual_equivalent);
+  const proSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.pro.monthly.annual_total}/yr`;
   const proPriceId = billing === "month" ? PRO_MONTHLY_PRICE_ID : PRO_ANNUAL_PRICE_ID;
 
-  const proPlusPrice = billing === "month" ? "79" : "63";
-  const proPlusSub = billing === "month" ? "/mo" : "/mo · billed annually · €758/yr";
+  const proPlusPrice = billing === "month" ? String(PRICING.pro_plus.monthly.eur) : String(PRICING.pro_plus.monthly.annual_equivalent);
+  const proPlusSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.pro_plus.monthly.annual_total}/yr`;
   const proPlusPriceId = billing === "month" ? PRO_PLUS_MONTHLY_PRICE_ID : PRO_PLUS_ANNUAL_PRICE_ID;
 
   return (

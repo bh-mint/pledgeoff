@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { PricingClient } from "./PricingClient";
+import { PRICING } from "@/lib/pricing.config";
 
 export const metadata: Metadata = {
   title: "Pricing — PledgeOFF",
-  description:
-    "Free until you're sure. Then €39/mo for Pro or €79/mo for Pro+. Validate ideas with real signals from Reddit, GitHub, HN, and more.",
+  description: `Free until you're sure. Then €${PRICING.pro.monthly.eur}/mo for Pro or €${PRICING.pro_plus.monthly.eur}/mo for Pro+. Validate ideas with real signals from Reddit, GitHub, HN, and more.`,
   alternates: { canonical: "https://pledgeoff.com/pricing" },
   openGraph: {
     title: "Pricing — PledgeOFF",
-    description: "Free until you're sure. Then €39/mo for Pro or €79/mo for Pro+.",
+    description: `Free until you're sure. Then €${PRICING.pro.monthly.eur}/mo for Pro or €${PRICING.pro_plus.monthly.eur}/mo for Pro+.`,
     url: "https://pledgeoff.com/pricing",
     type: "website",
   },

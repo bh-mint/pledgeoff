@@ -225,7 +225,7 @@ export function HomeClient() {
               >
                 See a live validation
               </Link>
-              <span className="mono text-[10px] text-(--t3) ml-1">free · 3 ideas / mo</span>
+              <span className="mono text-[10px] text-(--t3) ml-1">free · 1 idea / mo</span>
             </div>
 
             <div className="mt-12 flex flex-wrap items-center gap-6 mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">

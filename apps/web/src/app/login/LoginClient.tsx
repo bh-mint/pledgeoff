@@ -180,7 +180,7 @@ export function LoginClient() {
       <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
         {mode === "signin"
           ? "Validate your next idea in 15 seconds."
-          : "3 free validations every month. No card."}
+          : "1 free validation every month. No card."}
       </p>
 
       {/* Error banner */}
