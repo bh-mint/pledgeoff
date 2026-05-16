@@ -97,6 +97,42 @@ export async function POST(req: Request) {
         break;
       }
 
+      case 'customer.subscription.created': {
+        const sub = event.data.object as {
+          id: string;
+          customer: string;
+          status: string;
+          metadata?: Record<string, string>;
+          items: { data: Array<{ price: { id: string }; current_period_end?: number }> };
+        };
+
+        const userId = sub.metadata?.userId;
+        if (!userId) {
+          console.warn('[webhook/stripe] subscription.created missing metadata.userId', { traceId, id: sub.id });
+          break;
+        }
+
+        const item = sub.items?.data?.[0];
+        const priceId = item?.price?.id ?? '';
+        const plan = priceIdToPlan(priceId);
+        const status = stripeStatusToInternal(sub.status);
+        const rawPeriodEnd = item?.current_period_end;
+        const currentPeriodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : null;
+        const stripeCustomerId = typeof sub.customer === 'string' ? sub.customer : null;
+
+        await container.subscriptionRepo.upsert({
+          userId,
+          stripeCustomerId,
+          stripeSubscriptionId: sub.id,
+          plan,
+          status,
+          currentPeriodEnd,
+        });
+
+        console.info('[webhook/stripe] subscription created → activated', { traceId, userId, plan, status });
+        break;
+      }
+
       case 'customer.subscription.updated': {
         const sub = event.data.object as {
           id: string;
