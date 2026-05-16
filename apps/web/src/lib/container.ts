@@ -123,38 +123,32 @@ function buildContainer() {
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
-    try {
-      const result = await fetchSignalsUseCase.execute({
-        ideaId: event.payload.ideaId,
-        ideaText: event.payload.text,
-        traceId: event.traceId,
-        eventId: event.eventId,
-      });
-      if (result.isErr()) {
-        console.error('[container] FetchSignalsUseCase error', { traceId: event.traceId, ideaId: event.payload.ideaId, error: result.error.message });
-      }
-    } catch (e) {
-      console.error('[container] FetchSignalsUseCase threw', { traceId: event.traceId, ideaId: event.payload.ideaId, error: String(e) });
+    const result = await fetchSignalsUseCase.execute({
+      ideaId: event.payload.ideaId,
+      ideaText: event.payload.text,
+      traceId: event.traceId,
+      eventId: event.eventId,
+    });
+    if (result.isErr()) {
+      throw new Error(`FetchSignalsUseCase failed: ${result.error.message}`);
     }
   });
 
   // Wire: signals.fetched.v1 → DecideUseCase
   eventBus.subscribe<SignalsFetchedV1['payload']>('signals.fetched.v1', async (event: DomainEvent<SignalsFetchedV1['payload']>) => {
     const ideaResult = await ideaRepo.findById(event.payload.ideaId);
-    if (ideaResult.isErr() || !ideaResult.value) return;
+    if (ideaResult.isErr() || !ideaResult.value) {
+      throw new Error(`Idea not found for DecideUseCase: ${event.payload.ideaId}`);
+    }
 
-    try {
-      const result = await decideUseCase.execute({
-        ideaId: event.payload.ideaId,
-        ideaText: ideaResult.value.text,
-        traceId: event.traceId,
-        eventId: event.eventId,
-      });
-      if (result.isErr()) {
-        console.error('[container] DecideUseCase error', { traceId: event.traceId, ideaId: event.payload.ideaId, error: result.error.message });
-      }
-    } catch (e) {
-      console.error('[container] DecideUseCase threw', { traceId: event.traceId, ideaId: event.payload.ideaId, error: String(e) });
+    const result = await decideUseCase.execute({
+      ideaId: event.payload.ideaId,
+      ideaText: ideaResult.value.text,
+      traceId: event.traceId,
+      eventId: event.eventId,
+    });
+    if (result.isErr()) {
+      throw new Error(`DecideUseCase failed: ${result.error.message}`);
     }
   });
 
