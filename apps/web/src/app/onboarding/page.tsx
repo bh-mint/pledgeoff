@@ -24,7 +24,7 @@ const STEPS = [
   {
     num: "03",
     title: "You get a verdict",
-    desc: "GO · KILL · PIVOT — with a score, reasoning, and traceable sources. In ~15 seconds.",
+    desc: "GO · KILL · PIVOT — with a score, reasoning, and traceable sources. In under 60 seconds.",
     icon: "⚡",
   },
   {
@@ -72,7 +72,7 @@ export default async function OnboardingPage() {
               Validate before you build.
             </h1>
             <p className="text-[15px] leading-relaxed" style={{ color: "var(--t2)" }}>
-              Stop wasting months on ideas nobody wants. Get a data-driven verdict in 15 seconds.
+              Stop wasting months on ideas nobody wants. Get a data-driven verdict in under 60 seconds.
             </p>
           </div>
 

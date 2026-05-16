@@ -231,7 +231,7 @@ export function LoginClient() {
       </h1>
       <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
         {mode === "signin"
-          ? "Validate your next idea in 15 seconds."
+          ? "Validate your next idea in under 60 seconds."
           : "1 free validation every month. No card."}
       </p>
 

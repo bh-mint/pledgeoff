@@ -87,7 +87,7 @@ export function IdeaInput() {
       </button>
 
       <p className="mono text-[11px] text-(--t3) text-center uppercase tracking-[0.08em]">
-        {MIN} – {MAX} characters · Takes ~15 seconds
+        {MIN} – {MAX} characters · Takes under 60 seconds
       </p>
     </form>
   );

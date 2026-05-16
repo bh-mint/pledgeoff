@@ -187,7 +187,7 @@ export default async function SharePage({ params }: Props) {
         {/* CTA */}
         <div className="mt-10 pt-8 border-t text-center" style={{ borderColor: "var(--border)" }}>
           <p className="text-[14px] mb-4" style={{ color: "var(--t2)" }}>
-            Validate your own startup idea — GO, KILL, or PIVOT in 15 seconds.
+            Validate your own startup idea — GO, KILL, or PIVOT in under 60 seconds.
           </p>
           <Link
             href="/login"

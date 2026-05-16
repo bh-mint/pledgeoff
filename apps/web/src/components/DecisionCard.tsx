@@ -289,7 +289,7 @@ export function DecisionPending() {
         </span>
       </div>
       <p className="text-[13px] text-(--t3) text-center max-w-xs">
-        We&apos;re scanning Reddit and GitHub. This takes ~15 seconds.
+        We&apos;re scanning Reddit and GitHub. This takes under 60 seconds.
       </p>
     </div>
   );

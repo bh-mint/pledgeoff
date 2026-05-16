@@ -194,7 +194,7 @@ export default async function ArticlePage({ params }: Props) {
               Now let the data decide.
             </div>
             <p className="text-[14px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-              PledgeOFF scans 847 live signals from Reddit and GitHub and returns GO / KILL / PIVOT in 15 seconds.
+              PledgeOFF scans 847 live signals from Reddit and GitHub and returns GO / KILL / PIVOT in under 60 seconds.
               No surveys. No guesswork. Just evidence.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-4">

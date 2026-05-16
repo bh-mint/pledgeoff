@@ -54,7 +54,7 @@ function MidArticleCTA() {
         Validate this idea right now.
       </div>
       <p className="text-[14px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-        You&apos;ve been reading about validation. Take 15 seconds and do it.
+        You&apos;ve been reading about validation. Take 60 seconds and do it.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-4">
         <Link

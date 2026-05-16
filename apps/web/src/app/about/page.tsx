@@ -6,12 +6,12 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
   title: { absolute: "About — PledgeOFF" },
   description:
-    "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in 15 seconds.",
+    "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in under 60 seconds.",
   alternates: { canonical: "https://pledgeoff.com/about" },
   openGraph: {
     title: "About — PledgeOFF",
     description:
-      "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in 15 seconds.",
+      "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in under 60 seconds.",
     url: "https://pledgeoff.com/about",
     type: "website",
   },
@@ -22,7 +22,7 @@ const webPageJsonLd = {
   "@type": "WebPage",
   name: "About PledgeOFF",
   description:
-    "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in 15 seconds.",
+    "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in under 60 seconds.",
   url: "https://pledgeoff.com/about",
   publisher: {
     "@type": "Organization",
@@ -65,7 +65,7 @@ export default function AboutPage() {
             <span style={{ color: "var(--validated)" }}> GO</span>,
             <span style={{ color: "var(--kill)" }}> KILL</span>, or
             <span style={{ color: "var(--caution)" }}> PIVOT</span>.
-            In 15 seconds. With sources.
+            In under 60 seconds. With sources.
           </p>
 
           <p className="mt-4 text-[16px] leading-relaxed" style={{ color: "var(--t2)" }}>

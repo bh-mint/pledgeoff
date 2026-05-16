@@ -197,7 +197,7 @@ export function HomeClient() {
             </h1>
 
             <p className="mt-8 max-w-135 text-[14px] leading-[1.6] text-(--t2)">
-              In 15 seconds, PledgeOFF scrapes Reddit, Google Trends, and your
+              In under 60 seconds, PledgeOFF scrapes Reddit, Google Trends, and your
               competitors live — then tells you whether your idea is a 0 or an 89,
               with the receipts.{" "}
               <span className="text-(--t3)">Every number has a permalink.</span>
@@ -414,7 +414,7 @@ export function HomeClient() {
           you keep putting off?
         </h2>
         <p className="text-[14px] text-(--t2) mb-8">
-          Type it. Get the verdict. 15 seconds.
+          Type it. Get the verdict. Under 60 seconds.
         </p>
         <Link
           href="/ideas/new"
