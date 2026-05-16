@@ -70,7 +70,7 @@ const LLMCustomerResponseSchema = z.object({
   quotes: z.array(z.object({
     text: z.string().min(1).max(400),
     source: z.enum(['reddit', 'hn', 'github']),
-    url: z.string().url(),
+    url: z.string().min(1),
   })).max(10),
 });
 
@@ -114,7 +114,7 @@ const LLMRelevanceResponseSchemaA = z.object({
 
 const CompetitorItemSchemaA = z.object({
   name: z.string().min(1).max(100),
-  url: z.string().url().optional(),
+  url: z.string().optional(),
   positioning: z.string().min(1).max(300),
   signals: z.array(z.string().min(1).max(200)).min(1).max(5),
 });
