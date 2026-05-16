@@ -9,6 +9,7 @@ type DecisionRow = {
   verdict: string;
   reasoning: string;
   confidence: number;
+  score: number | null;
   signal_ids: string[];
   dimensions: Dimension[] | null;
   created_at: string;
@@ -21,6 +22,7 @@ function rowToDecision(row: DecisionRow): Decision {
     verdict: row.verdict as Decision['verdict'],
     reasoning: row.reasoning,
     confidence: Number(row.confidence),
+    score: row.score ?? undefined,
     signalIds: row.signal_ids ?? [],
     dimensions: row.dimensions ?? undefined,
     createdAt: row.created_at,
@@ -39,6 +41,7 @@ export class SupabaseDecisionRepository implements IDecisionRepository {
         verdict: decision.verdict,
         reasoning: decision.reasoning,
         confidence: decision.confidence,
+        score: decision.score ?? null,
         signal_ids: decision.signalIds,
         dimensions: decision.dimensions ?? null,
         created_at: decision.createdAt,

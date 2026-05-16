@@ -1,5 +1,6 @@
 import { Result, err, ok } from 'neverthrow';
 import type { Decision } from '../domain/decision';
+import { computeScore } from '../domain/decision';
 import type { IDecisionRepository, DecisionRepositoryError } from '../ports/decision-repository';
 import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository';
 import type { ILLMClient, LLMClientError } from '../ports/llm-client';
@@ -49,14 +50,16 @@ export class DecideUseCase {
     });
     if (llmResult.isErr()) return err(llmResult.error);
 
+    const dims = llmResult.value.dimensions;
     const decision: Decision = {
       id: crypto.randomUUID(),
       ideaId: input.ideaId,
       verdict: llmResult.value.verdict,
       reasoning: llmResult.value.reasoning,
       confidence: llmResult.value.confidence,
+      score: computeScore(dims),
       signalIds: signalsResult.value.map((s) => s.id),
-      dimensions: llmResult.value.dimensions,
+      dimensions: dims,
       createdAt: new Date().toISOString(),
     };
 
