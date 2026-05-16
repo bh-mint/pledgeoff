@@ -20,9 +20,6 @@ function stripeStatusToInternal(status: string): SubscriptionStatus {
     : 'incomplete';
 }
 
-// Stripe requires raw body for signature verification — disable Next.js body parsing
-export const config = { api: { bodyParser: false } };
-
 export async function POST(req: Request) {
   const traceId = crypto.randomUUID();
 
