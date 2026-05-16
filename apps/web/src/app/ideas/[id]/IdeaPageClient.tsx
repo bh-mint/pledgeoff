@@ -247,7 +247,7 @@ function ToolRow({ tool }: { tool: ToolDef }) {
       <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{tool.num}</span>
       <div className="flex-1 min-w-0">
         <p className="text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{tool.label}</p>
-        <p className="mono text-[10px] truncate" style={{ color: "var(--t3)" }}>{tool.desc}</p>
+        <p className="mono text-[10px] leading-snug" style={{ color: "var(--t3)" }}>{tool.desc}</p>
       </div>
       {tool.done && (
         <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
@@ -326,34 +326,39 @@ export function IdeaPageClient({
     <>
       <style>{`
         @keyframes ottoBreath{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(1.18);opacity:1}}
-        @keyframes ottoRing{0%{transform:scale(1);opacity:.45}100%{transform:scale(2.4);opacity:0}}
+        @keyframes ottoRing{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.4);opacity:0}}
         .otto-dot{animation:ottoBreath 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
         .otto-ring{animation:ottoRing 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
       `}</style>
 
-      <div className="flex flex-col xl:flex-row gap-8 items-start">
+      {/* ── Full-width top bar ── */}
+      {decision && (
+        <div className="flex items-center justify-between pb-3 mb-1 border-b"
+          style={{ borderColor: "var(--border)" }}>
+          <div className="flex items-center gap-2 mono text-[11px] text-(--t3)">
+            <span className="text-(--t1) font-medium">
+              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+            </span>
+            <span>·</span>
+            <span className="hidden sm:inline">validation ·</span>
+            <span>{valId}</span>
+          </div>
+          <div className="mono text-[10px] text-(--t3)">
+            {analysisS !== null ? `${analysisS}s analysis` : "scored"}
+          </div>
+        </div>
+      )}
 
-        {/* ── LEFT: Analysis — sticky, scrolls with page ── */}
-        <div className="w-full xl:w-[400px] xl:flex-shrink-0 xl:sticky xl:top-6 xl:self-start">
-          {decision && (
-            <div className="flex items-center justify-between pb-3 mb-4 border-b"
-              style={{ borderColor: "var(--border)" }}>
-              <div className="flex items-center gap-2 mono text-[11px] text-(--t3)">
-                <span className="text-(--t1) font-medium">
-                  Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-                </span>
-                <span>·</span>
-                <span className="hidden sm:inline">validation ·</span>
-                <span>{valId}</span>
-              </div>
-              <div className="mono text-[10px] text-(--t3)">
-                {analysisS !== null ? `${analysisS}s analysis` : "scored"}
-              </div>
-            </div>
-          )}
+      {/* ── Full-width verdict label row ── */}
+      <div className="flex items-center pb-3 mb-6 border-b" style={{ borderColor: "var(--border)" }}>
+        <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">Verdict</p>
+      </div>
 
-          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">Verdict</p>
+      {/* ── 3-column grid ── */}
+      <div className="grid xl:grid-cols-[420px_1fr_320px] gap-8 items-start">
 
+        {/* ── LEFT: Analysis (sticky) ── */}
+        <div className="xl:sticky xl:top-6 xl:self-start">
           {decision ? (
             <>
               <DecisionCard decision={decision} ideaId={idea.id} />
@@ -366,25 +371,28 @@ export function IdeaPageClient({
           )}
         </div>
 
-        {/* ── MIDDLE: Otto + Intelligence Tools — scrolls normally ── */}
-        {decision && (
-          <div className="w-full xl:flex-1 min-w-0">
-            {/* Otto header — centered, prominent */}
-            <div className="flex flex-col items-center text-center gap-3 mb-8 pb-6 border-b"
+        {/* ── MIDDLE: Otto + Intelligence Tools ── */}
+        {decision ? (
+          <div className="min-w-0">
+            {/* Otto header — centered, large */}
+            <div className="flex flex-col items-center text-center gap-4 mb-8 pb-7 border-b"
               style={{ borderColor: "var(--border)" }}>
-              <div className="relative w-16 h-16 flex items-center justify-center">
-                <div className="absolute w-14 h-14 rounded-full otto-ring"
-                  style={{ background: "var(--accent)", opacity: 0.1 }} />
+              <div className="relative w-28 h-28 flex items-center justify-center">
+                <div className="absolute w-24 h-24 rounded-full otto-ring"
+                  style={{ background: "var(--accent)", opacity: 0.08 }} />
+                <div className="absolute w-16 h-16 rounded-full otto-ring"
+                  style={{ background: "var(--accent)", opacity: 0.15, animationDelay: "-1.5s" }} />
                 <div className="absolute w-9 h-9 rounded-full otto-ring"
-                  style={{ background: "var(--accent)", opacity: 0.2, animationDelay: "-1.8s" }} />
-                <div className="w-4 h-4 rounded-full otto-dot"
+                  style={{ background: "var(--accent)", opacity: 0.25, animationDelay: "-3s" }} />
+                <div className="w-5 h-5 rounded-full otto-dot"
                   style={{ background: "var(--accent)" }} />
               </div>
               <div>
-                <div className="display text-[26px] font-semibold tracking-tight" style={{ color: "var(--accent)" }}>
+                <div className="display text-[32px] font-semibold tracking-tight leading-none"
+                  style={{ color: "var(--accent)" }}>
                   Otto
                 </div>
-                <div className="mono text-[11px] mt-1" style={{ color: "var(--t3)" }}>
+                <div className="mono text-[11px] mt-1.5" style={{ color: "var(--t3)" }}>
                   your AI co-founder
                 </div>
               </div>
@@ -397,10 +405,12 @@ export function IdeaPageClient({
               toolStatus={toolStatus}
             />
           </div>
+        ) : (
+          <div />
         )}
 
         {/* ── RIGHT: Signals ── */}
-        <div className="w-full xl:w-[300px] xl:flex-shrink-0">
+        <div>
           {decision && signals.length === 0 && (
             <>
               <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
@@ -408,9 +418,8 @@ export function IdeaPageClient({
               </p>
               <div className="rounded border px-4 py-5 text-[12px] text-(--t3) leading-relaxed"
                 style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                No market signals found for this idea. The verdict above is based on
-                general AI knowledge — not live data. Try submitting the idea again in
-                a few minutes, or refine the description for better results.
+                No market signals found for this idea. The verdict is based on
+                general AI knowledge — not live data. Try refining your description.
               </div>
             </>
           )}
@@ -436,14 +445,14 @@ export function IdeaPageClient({
                           style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                           <div className="flex items-center gap-2 mb-1">
                             <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SENTIMENT_DOT[signal.sentiment]}`} />
-                            <span className="mono text-[10px] flex-shrink-0" style={{ color: "var(--t3)" }}>
+                            <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
                               {SENTIMENT_LABEL[signal.sentiment]}
                             </span>
                           </div>
                           <p className="text-[12px] text-(--t1) font-medium leading-snug group-hover:text-(--accent) transition-colors line-clamp-2">
                             {signal.title}
                           </p>
-                          <p className="mono text-[10px] mt-1.5 text-right" style={{ color: "var(--accent)" }}>
+                          <p className="mono text-[10px] mt-2 text-right" style={{ color: "var(--accent)" }}>
                             View ↗
                           </p>
                         </a>
