@@ -30,7 +30,9 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
     });
 
     if (!res.ok) {
-      setError("Analysis failed. Please try again.");
+      const body = await res.json().catch(() => ({}));
+      const msg = (body as { error?: { message?: string } }).error?.message;
+      setError(msg ?? "Analysis failed. Please try again.");
       setLoading(false);
       return;
     }

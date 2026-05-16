@@ -113,16 +113,16 @@ const LLMRelevanceResponseSchema = z.object({
 });
 
 const CompetitorItemSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().min(1),
   url: z.string().optional(),
-  positioning: z.string().min(1).max(300),
-  signals: z.array(z.string().min(1).max(200)).max(5),
+  positioning: z.string().min(1),
+  signals: z.array(z.string().min(1)),
 });
 
 const CompetitorGapItemSchema = z.object({
-  title: z.string().min(1).max(100),
-  description: z.string().min(1).max(300),
-  opportunity: z.string().min(1).max(300),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  opportunity: z.string().min(1),
 });
 
 const LLMCompetitorResponseSchema = z.object({
@@ -292,6 +292,7 @@ export class GroqLLMAdapter implements ILLMClient {
         LLMCompetitorResponseSchema,
         'analyzeCompetitors',
         request.traceId,
+        2048,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
@@ -309,6 +310,7 @@ export class GroqLLMAdapter implements ILLMClient {
     schema: z.ZodType<T>,
     operation: string,
     traceId: string,
+    maxTokens = 1024,
   ): Promise<Result<T, LLMClientError>> {
     const start = Date.now();
     try {
@@ -319,7 +321,7 @@ export class GroqLLMAdapter implements ILLMClient {
           { role: 'user', content: prompt },
         ],
         temperature: 0.3,
-        max_tokens: 1024,
+        max_tokens: maxTokens,
         response_format: { type: 'json_object' },
       });
 
