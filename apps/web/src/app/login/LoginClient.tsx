@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -24,7 +24,7 @@ export function LoginClient() {
   const [uiState, setUiState] = useState<State>(urlError ? "error" : "idle");
   const [errorMsg, setErrorMsg] = useState(urlError);
 
-  const handleEmailAuth = async (e: FormEvent) => {
+  const handleEmailAuth = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     setErrorMsg("");
     setUiState("loading");
