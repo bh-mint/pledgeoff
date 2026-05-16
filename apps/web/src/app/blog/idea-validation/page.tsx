@@ -92,7 +92,7 @@ export default function IdeaValidationPage() {
               Ready to validate your idea?
             </div>
             <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
-              Get a GO / KILL / PIVOT verdict in 15 seconds using real Reddit and GitHub signals.
+              Get a GO / KILL / PIVOT verdict in under 60 seconds using real Reddit and GitHub signals.
             </p>
             <Link
               href="/ideas/new"

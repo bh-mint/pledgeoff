@@ -56,7 +56,7 @@ function buildWelcomeEmail(email: string, name?: string): string {
       Hey ${displayName}, you're in.
     </h1>
     <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
-      PledgeOFF validates your startup ideas against real signals from Reddit and GitHub — and gives you a <strong style="color:#f5f5f5;">GO / KILL / PIVOT</strong> verdict in 15 seconds.
+      PledgeOFF validates your startup ideas against real signals from Reddit and GitHub — and gives you a <strong style="color:#f5f5f5;">GO / KILL / PIVOT</strong> verdict in under 60 seconds.
     </p>
     <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
       You get <strong style="color:#f5f5f5;">3 free validations</strong> to start. No card required.

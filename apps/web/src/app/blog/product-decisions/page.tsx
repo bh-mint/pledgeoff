@@ -92,7 +92,7 @@ export default function ProductDecisionsPage() {
               Make your next product decision with data.
             </div>
             <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
-              Run a validation on any feature idea — real signals, traceable sources, 15 seconds.
+              Run a validation on any feature idea — real signals, traceable sources, under 60 seconds.
             </p>
             <Link
               href="/ideas/new"

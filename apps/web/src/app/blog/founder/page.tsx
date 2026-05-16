@@ -92,7 +92,7 @@ export default function FounderPage() {
               Stop guessing. Start validating.
             </div>
             <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
-              Replace gut feeling with evidence. Real Reddit signals, GitHub trends, GO / KILL / PIVOT in 15 seconds.
+              Replace gut feeling with evidence. Real Reddit signals, GitHub trends, GO / KILL / PIVOT in under 60 seconds.
             </p>
             <Link
               href="/ideas/new"

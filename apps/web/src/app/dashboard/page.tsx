@@ -305,7 +305,7 @@ export default async function DashboardPage() {
                   Welcome to PledgeOFF
                 </div>
                 <h2 className="display text-[18px] font-semibold tracking-tight mb-1" style={{ color: "var(--t1)" }}>
-                  Validate your first idea in 15 seconds.
+                  Validate your first idea in under 60 seconds.
                 </h2>
                 <p className="text-[13px]" style={{ color: "var(--t2)" }}>
                   Write one sentence. We fetch real signals from Reddit and GitHub and give you a GO · KILL · PIVOT verdict.

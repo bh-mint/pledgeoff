@@ -212,7 +212,7 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
           {!search && (
             <>
               <p className="text-[13px] text-(--t2) max-w-[420px] mx-auto">
-                Type a one-sentence idea. Get a score in 15 seconds.
+                Type a one-sentence idea. Get a score in under 60 seconds.
               </p>
               <Link
                 href="/ideas/new"
