@@ -321,157 +321,146 @@ export function IdeaPageClient({
   }, {});
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 items-start">
-      {/* ── LEFT: verdict (sticky on desktop) ── */}
-      <div className="w-full lg:w-[480px] lg:flex-shrink-0 lg:sticky lg:top-6 lg:self-start">
-        {/* Top bar */}
+    <>
+      <style>{`
+        @keyframes ottoBreath{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(1.18);opacity:1}}
+        @keyframes ottoRing{0%{transform:scale(1);opacity:.45}100%{transform:scale(2.4);opacity:0}}
+        .otto-dot{animation:ottoBreath 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
+        .otto-ring{animation:ottoRing 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
+      `}</style>
+
+      <div className="flex flex-col xl:flex-row gap-6 items-start">
+
+        {/* ── LEFT: Analysis (sticky) ── */}
+        <div className="w-full xl:w-[300px] xl:flex-shrink-0 xl:sticky xl:top-6 xl:self-start">
+          {decision && (
+            <div className="flex items-center justify-between pb-3 mb-4 border-b"
+              style={{ borderColor: "var(--border)" }}>
+              <div className="flex items-center gap-2 mono text-[11px] text-(--t3)">
+                <span className="text-(--t1) font-medium">
+                  Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+                </span>
+                <span>·</span>
+                <span className="hidden sm:inline">validation ·</span>
+                <span>{valId}</span>
+              </div>
+              <div className="mono text-[10px] text-(--t3)">
+                {analysisS !== null ? `${analysisS}s analysis` : "scored"}
+              </div>
+            </div>
+          )}
+
+          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">Verdict</p>
+
+          {decision ? (
+            <>
+              <DecisionCard decision={decision} ideaId={idea.id} />
+              <div className="mt-4">
+                <FeedbackButtons ideaId={idea.id} decisionId={decision.id} />
+              </div>
+            </>
+          ) : (
+            <ValidatingLoader />
+          )}
+        </div>
+
+        {/* ── MIDDLE: Otto + Intelligence Tools (sticky) ── */}
         {decision && (
-          <div
-            className="flex items-center justify-between pb-3 mb-4 border-b"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <div className="flex items-center gap-2 mono text-[11px] text-(--t3)">
-              <span className="text-(--t1) font-medium">
-                Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-              </span>
-              <span>·</span>
-              <span className="hidden sm:inline">validation ·</span>
-              <span>{valId}</span>
-            </div>
-            <div className="mono text-[10px] text-(--t3)">
-              {analysisS !== null ? `${analysisS}s analysis` : "scored"}
-            </div>
-          </div>
-        )}
-
-        <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
-          Verdict
-        </p>
-
-        {decision ? (
-          <>
-            <DecisionCard decision={decision} ideaId={idea.id} />
-            <div className="mt-4">
-              <FeedbackButtons ideaId={idea.id} decisionId={decision.id} />
-            </div>
-
-            {/* Otto + Intelligence Tools */}
-            <div className="mt-8 pt-6 border-t" style={{ borderColor: "var(--border)" }}>
-              <style>{`
-                @keyframes ottoBreath{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(1.18);opacity:1}}
-                @keyframes ottoRing{0%{transform:scale(1);opacity:.45}100%{transform:scale(2.2);opacity:0}}
-                .otto-dot{animation:ottoBreath 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
-                .otto-ring{animation:ottoRing 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
-              `}</style>
-
-              {/* Otto header */}
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="relative w-5 h-5 flex items-center justify-center flex-shrink-0">
-                  <div className="absolute w-3.5 h-3.5 rounded-full otto-ring"
-                    style={{ background: "var(--accent)", opacity: 0.3 }} />
-                  <div className="w-2 h-2 rounded-full otto-dot"
-                    style={{ background: "var(--accent)" }} />
-                </div>
-                <span className="display text-[13px] font-semibold" style={{ color: "var(--accent)" }}>Otto</span>
-                <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>· your AI co-founder</span>
+          <div className="w-full xl:flex-1 xl:sticky xl:top-6 xl:self-start">
+            {/* Otto header — prominent */}
+            <div className="flex items-center gap-4 mb-6 pb-5 border-b" style={{ borderColor: "var(--border)" }}>
+              <div className="relative w-12 h-12 flex items-center justify-center flex-shrink-0">
+                <div className="absolute w-10 h-10 rounded-full otto-ring"
+                  style={{ background: "var(--accent)", opacity: 0.12 }} />
+                <div className="absolute w-6 h-6 rounded-full otto-ring"
+                  style={{ background: "var(--accent)", opacity: 0.22, animationDelay: "-1.8s" }} />
+                <div className="w-3.5 h-3.5 rounded-full otto-dot"
+                  style={{ background: "var(--accent)" }} />
               </div>
-
-              <OttoSection
-                verdict={decision.verdict as Verdict}
-                score={decision.score}
-                ideaId={idea.id}
-                toolStatus={toolStatus}
-              />
-            </div>
-          </>
-        ) : (
-          <ValidatingLoader />
-        )}
-      </div>
-
-      {/* ── RIGHT: signals (scrollable) ── */}
-      {decision && signals.length === 0 && (
-        <div className="flex-1 min-w-0">
-          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
-            Evidence wall · 0 signals
-          </p>
-          <div
-            className="rounded border px-4 py-5 text-[12px] text-(--t3) leading-relaxed"
-            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-          >
-            No market signals found for this idea. The verdict above is based on
-            general AI knowledge — not live data. Try submitting the idea again in
-            a few minutes, or refine the description for better results.
-          </div>
-        </div>
-      )}
-      {signals.length > 0 && (
-        <div className="flex-1 min-w-0">
-          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
-            Evidence wall · {signals.length} signal{signals.length !== 1 ? "s" : ""}
-          </p>
-
-          <div className="space-y-6">
-            {Object.entries(bySource).map(([source, items]) => (
-              <div key={source}>
-                {/* Source heading */}
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-(--t3)">{SOURCE_ICON[source]}</span>
-                  <span className="mono text-[10px] text-(--t3) uppercase tracking-[0.1em]">
-                    {SOURCE_NAME[source] ?? source} · {items.length}
-                  </span>
+              <div>
+                <div className="display text-[22px] font-semibold tracking-tight" style={{ color: "var(--accent)" }}>
+                  Otto
                 </div>
+                <div className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
+                  your AI co-founder
+                </div>
+              </div>
+            </div>
 
-                {/* Signal cards */}
-                <div className="space-y-1.5">
-                  {items.map((signal) => (
-                    <a
-                      key={signal.id}
-                      href={signal.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 rounded border px-3 py-2.5 hover:border-(--accent) transition-colors group"
-                      style={{
-                        borderColor: "var(--border)",
-                        background: "var(--surface)",
-                      }}
-                    >
-                      {/* Sentiment dot */}
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SENTIMENT_DOT[signal.sentiment]}`}
-                      />
+            <OttoSection
+              verdict={decision.verdict as Verdict}
+              score={decision.score}
+              ideaId={idea.id}
+              toolStatus={toolStatus}
+            />
+          </div>
+        )}
 
-                      {/* Title + meta */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] text-(--t1) font-medium truncate leading-snug group-hover:text-(--accent) transition-colors">
-                          {signal.title}
-                        </p>
-                        <p className="mono text-[10px] text-(--t3) mt-0.5">
-                          {SENTIMENT_LABEL[signal.sentiment]}
-                        </p>
-                      </div>
+        {/* ── RIGHT: Signals ── */}
+        <div className="w-full xl:w-[280px] xl:flex-shrink-0">
+          {decision && signals.length === 0 && (
+            <>
+              <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
+                Evidence wall · 0 signals
+              </p>
+              <div className="rounded border px-4 py-5 text-[12px] text-(--t3) leading-relaxed"
+                style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                No market signals found for this idea. The verdict above is based on
+                general AI knowledge — not live data. Try submitting the idea again in
+                a few minutes, or refine the description for better results.
+              </div>
+            </>
+          )}
 
-                      {/* View button */}
-                      <span className="mono text-[10px] text-(--t3) group-hover:text-(--accent) transition-colors flex-shrink-0 whitespace-nowrap border rounded px-2 py-1"
-                        style={{ borderColor: "var(--border)" }}
-                      >
-                        View ↗
+          {signals.length > 0 && (
+            <>
+              <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">
+                Evidence wall · {signals.length} signal{signals.length !== 1 ? "s" : ""}
+              </p>
+              <div className="space-y-6">
+                {Object.entries(bySource).map(([source, items]) => (
+                  <div key={source}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-(--t3)">{SOURCE_ICON[source]}</span>
+                      <span className="mono text-[10px] text-(--t3) uppercase tracking-[0.1em]">
+                        {SOURCE_NAME[source] ?? source} · {items.length}
                       </span>
-                    </a>
-                  ))}
-                </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      {items.map((signal) => (
+                        <a key={signal.id} href={signal.url} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-3 rounded border px-3 py-2.5 hover:border-(--accent) transition-colors group"
+                          style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SENTIMENT_DOT[signal.sentiment]}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] text-(--t1) font-medium truncate leading-snug group-hover:text-(--accent) transition-colors">
+                              {signal.title}
+                            </p>
+                            <p className="mono text-[10px] text-(--t3) mt-0.5">
+                              {SENTIMENT_LABEL[signal.sentiment]}
+                            </p>
+                          </div>
+                          <span className="mono text-[10px] text-(--t3) group-hover:text-(--accent) transition-colors flex-shrink-0 whitespace-nowrap border rounded px-2 py-1"
+                            style={{ borderColor: "var(--border)" }}>
+                            View ↗
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </>
+          )}
 
-      {/* Timeout message */}
-      {!decision && polls >= MAX_POLLS && (
-        <p className="text-[13px] text-(--t3)">
-          Analysis is taking longer than expected. Refresh the page in a few seconds.
-        </p>
-      )}
-    </div>
+          {!decision && polls >= MAX_POLLS && (
+            <p className="text-[13px] text-(--t3)">
+              Analysis is taking longer than expected. Refresh the page in a few seconds.
+            </p>
+          )}
+        </div>
+
+      </div>
+    </>
   );
 }
