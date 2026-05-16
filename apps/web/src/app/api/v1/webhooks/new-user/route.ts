@@ -95,6 +95,12 @@ export async function POST(req: Request) {
   const name = full_name ?? undefined;
 
   const traceId = id;
+
+  if (process.env.DISABLE_EMAIL === 'true') {
+    logger.info({ traceId, target: "resend" }, "Welcome email disabled via DISABLE_EMAIL flag");
+    return Response.json({ ok: true, skipped: true });
+  }
+
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     logger.error({ traceId, target: "resend" }, "RESEND_API_KEY not set");
