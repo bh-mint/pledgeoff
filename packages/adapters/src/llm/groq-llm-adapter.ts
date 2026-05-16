@@ -331,7 +331,8 @@ export class GroqLLMAdapter implements ILLMClient {
 
       let parsed: unknown;
       try {
-        parsed = JSON.parse(content);
+        const clean = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+        parsed = JSON.parse(clean);
       } catch {
         log.error({ traceId, target: 'groq', operation, latencyMs: Date.now() - start, outcome: 'error', errorCode: 'INVALID_JSON' }, 'Groq returned invalid JSON');
         return err(new LLMClientError(`Invalid JSON from LLM: ${content.slice(0, 200)}`));
