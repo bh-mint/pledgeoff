@@ -121,7 +121,7 @@ export default function ChangelogPage() {
         className="border-b sticky top-12 z-40"
         style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
       >
-        <div className="max-w-[1100px] mx-auto px-8 py-12">
+        <div className="max-w-275 mx-auto px-8 py-12">
           <div className="mono text-[10px] uppercase tracking-wider mb-3" style={{ color: "var(--t3)" }}>
             CHANGELOG · RELEASES
           </div>
@@ -131,14 +131,14 @@ export default function ChangelogPage() {
           >
             What&apos;s shipped.
           </h1>
-          <p className="mt-3 text-[13px] max-w-[480px]" style={{ color: "var(--t2)" }}>
+          <p className="mt-3 text-[13px] max-w-120" style={{ color: "var(--t2)" }}>
             Every meaningful change — features, fixes, and improvements — in reverse chronological order.
           </p>
         </div>
       </section>
 
       {/* Releases */}
-      <div className="max-w-[1100px] mx-auto px-8 py-12 space-y-0">
+      <div className="max-w-275 mx-auto px-8 py-12 space-y-0">
         {RELEASES.map((r, i) => (
           <div
             key={r.version}
@@ -154,7 +154,7 @@ export default function ChangelogPage() {
                 {r.date}
               </div>
               <span
-                className="inline-block mt-3 mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
+                className="inline-block mt-3 mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded"
                 style={{
                   color: TAG_COLORS[r.tag] ?? "var(--t3)",
                   background: `color-mix(in srgb, ${TAG_COLORS[r.tag] ?? "var(--t3)"} 12%, transparent)`,
@@ -169,7 +169,7 @@ export default function ChangelogPage() {
             <ul className="col-span-9 space-y-2">
               {r.items.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-[13px]" style={{ color: "var(--t2)" }}>
-                  <span className="mt-[5px] w-1 h-1 rounded-full flex-shrink-0" style={{ background: "var(--accent)" }} />
+                  <span className="mt-1.25 w-1 h-1 rounded-full shrink-0" style={{ background: "var(--accent)" }} />
                   {item}
                 </li>
               ))}

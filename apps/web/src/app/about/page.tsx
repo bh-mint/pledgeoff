@@ -92,7 +92,7 @@ export default function AboutPage() {
               { step: "04", label: "You decide in seconds", desc: "Kill the idea before you waste months. Or validate it before you talk to investors." },
             ].map(({ step, label, desc }) => (
               <div key={step} className="flex gap-5">
-                <div className="mono text-[11px] pt-0.5 flex-shrink-0" style={{ color: "var(--t3)" }}>{step}</div>
+                <div className="mono text-[11px] pt-0.5 shrink-0" style={{ color: "var(--t3)" }}>{step}</div>
                 <div>
                   <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>{label}</div>
                   <div className="text-[13px] mt-1 leading-relaxed" style={{ color: "var(--t2)" }}>{desc}</div>

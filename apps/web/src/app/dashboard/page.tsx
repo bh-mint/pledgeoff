@@ -189,7 +189,7 @@ export default async function DashboardPage() {
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
       {/* Dashboard nav */}
       <div className="border-b sticky top-0 z-50" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 h-14 flex items-center justify-between">
+        <div className="max-w-360 mx-auto px-4 sm:px-10 h-14 flex items-center justify-between">
           <div className="flex items-center gap-8 sm:gap-10">
             <Link
               href="/dashboard"
@@ -224,7 +224,7 @@ export default async function DashboardPage() {
 
       {/* Stats bar */}
       <div className="border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+        <div className="max-w-360 mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           {/* Ideas validated */}
           <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
             <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
@@ -291,7 +291,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Main grid */}
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-12 gap-6">
+      <div className="max-w-360 mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-12 gap-6">
         {/* LEFT — pipeline + table */}
         <div className="col-span-12 lg:col-span-8 space-y-6">
           {/* Welcome banner — first-time users */}
@@ -301,7 +301,7 @@ export default async function DashboardPage() {
               style={{ borderColor: "rgba(214,255,61,0.3)", background: "rgba(214,255,61,0.04)" }}
             >
               <div className="flex-1 min-w-0">
-                <div className="mono text-[10px] uppercase tracking-[0.1em] mb-1" style={{ color: "var(--accent)" }}>
+                <div className="mono text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--accent)" }}>
                   Welcome to PledgeOFF
                 </div>
                 <h2 className="display text-[18px] font-semibold tracking-tight mb-1" style={{ color: "var(--t1)" }}>
@@ -345,7 +345,7 @@ export default async function DashboardPage() {
                     {pipelineRow?.idea.text ?? rows[0].idea.text}
                   </h2>
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-right shrink-0">
                   <div
                     className="display text-[28px] tnum font-semibold leading-none"
                     style={{ color: "var(--validated)" }}
@@ -361,7 +361,7 @@ export default async function DashboardPage() {
                 {pipelineSteps.map((s, i) => (
                   <div key={s.k}>
                     <div
-                      className="h-[3px] rounded-full"
+                      className="h-0.75 rounded-full"
                       style={{
                         background: s.done
                           ? "var(--validated)"
@@ -457,7 +457,7 @@ export default async function DashboardPage() {
                 style={{ borderColor: "var(--border)" }}
               >
                 <div
-                  className="display text-[16px] tnum font-semibold w-7 flex-shrink-0"
+                  className="display text-[16px] tnum font-semibold w-7 shrink-0"
                   style={{
                     color: g.score >= 85 ? "var(--accent)" : "var(--t1)",
                   }}
@@ -485,7 +485,7 @@ export default async function DashboardPage() {
 
       {/* Footer */}
       <div
-        className="max-w-[1440px] mx-auto px-4 sm:px-10 py-6 flex items-center justify-between border-t"
+        className="max-w-360 mx-auto px-4 sm:px-10 py-6 flex items-center justify-between border-t"
         style={{ borderColor: "var(--border)" }}
       >
         <span className="mono text-[10px] text-(--t3)">

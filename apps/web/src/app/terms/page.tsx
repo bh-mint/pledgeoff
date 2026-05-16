@@ -37,7 +37,7 @@ export default function TermsPage() {
         className="border-b sticky top-12 z-40"
         style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
       >
-        <div className="max-w-[1100px] mx-auto px-8 py-4">
+        <div className="max-w-275 mx-auto px-8 py-4">
           <div className="mono text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>
             LEGAL · DOC_02
           </div>
@@ -58,11 +58,11 @@ export default function TermsPage() {
       </section>
 
       {/* 2-col layout */}
-      <div className="max-w-[1100px] mx-auto px-8 py-12 flex gap-12">
+      <div className="max-w-275 mx-auto px-8 py-12 flex gap-12">
 
         {/* TOC sidebar */}
-        <aside className="w-[220px] hidden md:block flex-shrink-0">
-          <div className="sticky top-[144px]">
+        <aside className="w-55 hidden md:block shrink-0">
+          <div className="sticky top-36">
             <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
               CONTENTS
             </div>

@@ -59,7 +59,7 @@ export default async function OnboardingPage() {
 
       {/* Content */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
-        <div className="max-w-[600px] w-full">
+        <div className="max-w-150 w-full">
           {/* Welcome */}
           <div className="mb-12 text-center">
             <div className="mono text-[10px] uppercase tracking-[0.14em] mb-3" style={{ color: "var(--accent)" }}>
