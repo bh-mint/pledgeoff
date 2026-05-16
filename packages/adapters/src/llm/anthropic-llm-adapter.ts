@@ -137,7 +137,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
 
   constructor(
     apiKey: string,
-    private readonly model = 'claude-haiku-4-5-20251001',
+    private readonly model = 'claude-sonnet-4-6',
   ) {
     this.client = new Anthropic({ apiKey, timeout: TIMEOUT_MS });
   }
