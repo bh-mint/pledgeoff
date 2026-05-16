@@ -16,9 +16,15 @@ export const DecisionSchema = z.object({
   verdict: VerdictSchema,
   reasoning: z.string().min(1).max(5000),
   confidence: z.number().min(0).max(1),
+  score: z.number().int().min(0).max(100).optional(),
   signalIds: z.array(z.string().uuid()),
   dimensions: z.array(DimensionSchema).optional(),
   createdAt: z.string().datetime(),
 });
+
+export function computeScore(dimensions?: Dimension[]): number | undefined {
+  if (!dimensions?.length) return undefined;
+  return Math.round(dimensions.reduce((sum, d) => sum + d.weight * d.score, 0));
+}
 
 export type Decision = z.infer<typeof DecisionSchema>;
