@@ -59,6 +59,23 @@ export async function POST(req: Request) {
   const userId = await resolveUserId(req.headers.get('authorization'));
   if (!userId) return unauthorizedResponse(traceId);
 
+  // Plan gate: Free tier = 1 verification/month
+  const subResult = await container.getOrCreateSubscriptionUseCase.execute({ userId });
+  if (subResult.isOk()) {
+    const { effectivePlan, PLAN_LIMITS } = await import('@pledgeoff/core');
+    const plan = effectivePlan(subResult.value);
+    const limit = PLAN_LIMITS[plan].verificationsPerMonth;
+    if (isFinite(limit)) {
+      const countResult = await container.ideaRepo.countThisMonth(userId);
+      if (countResult.isOk() && countResult.value >= limit) {
+        return Response.json(
+          { error: { code: 'PLAN_LIMIT_REACHED', message: `Your ${plan} plan allows ${limit} verification${limit === 1 ? '' : 's'} per month. Upgrade to continue.`, plan } },
+          { status: 403, headers: { 'X-Trace-Id': traceId } },
+        );
+      }
+    }
+  }
+
   // Rate limiting
   const rateLimit = checkRateLimit(userId);
   if (!rateLimit.allowed) {

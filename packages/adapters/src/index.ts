@@ -11,6 +11,9 @@ export { SupabaseLandingPageRepository } from './storage/supabase-landing-page-r
 export { SupabaseCustomerAnalysisRepository } from './storage/supabase-customer-analysis-repository';
 export { SupabaseBuildAnalysisRepository } from './storage/supabase-build-analysis-repository';
 export { SupabaseCompetitorAnalysisRepository } from './storage/supabase-competitor-analysis-repository';
+export { SupabaseSubscriptionRepository } from './storage/supabase-subscription-repository';
+export { StripeAdapter } from './stripe/stripe-adapter';
+export type { StripeAdapterError, CreateCheckoutSessionInput, CheckoutSession, StripeSubscriptionData } from './stripe/stripe-adapter';
 export { InMemoryEventBus } from './in-memory-event-bus';
 export { RedditSourceAdapter } from './sources/reddit-source-adapter';
 export { HNSourceAdapter } from './sources/hn-source-adapter';

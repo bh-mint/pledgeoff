@@ -1,5 +1,6 @@
 // Domain entities
 export * from './domain/idea';
+export * from './domain/subscription';
 export * from './domain/signal';
 export * from './domain/decision';
 export * from './domain/feedback';
@@ -19,6 +20,7 @@ export * from './ports/landing-page-repository';
 export * from './ports/customer-analysis-repository';
 export * from './ports/build-analysis-repository';
 export * from './ports/competitor-analysis-repository';
+export * from './ports/subscription-repository';
 export * from './ports/event-bus';
 export * from './ports/idempotency-store';
 export * from './ports/llm-client';
@@ -36,3 +38,4 @@ export * from './use-cases/generate-landing';
 export * from './use-cases/analyze-customers';
 export * from './use-cases/analyze-build';
 export * from './use-cases/analyze-competitors';
+export * from './use-cases/get-or-create-subscription';

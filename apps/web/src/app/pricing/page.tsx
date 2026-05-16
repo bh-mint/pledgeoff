@@ -4,11 +4,11 @@ import { PricingClient } from "./PricingClient";
 export const metadata: Metadata = {
   title: "Pricing — PledgeOFF",
   description:
-    "Free until you're sure. Then €19.99/mo. Validate unlimited ideas, access all signal sources, and stop wasting months on bad bets.",
+    "Free until you're sure. Then €39/mo for Pro or €79/mo for Pro+. Validate ideas with real signals from Reddit, GitHub, HN, and more.",
   alternates: { canonical: "https://pledgeoff.com/pricing" },
   openGraph: {
     title: "Pricing — PledgeOFF",
-    description: "Free until you're sure. Then €19.99/mo.",
+    description: "Free until you're sure. Then €39/mo for Pro or €79/mo for Pro+.",
     url: "https://pledgeoff.com/pricing",
     type: "website",
   },
@@ -18,7 +18,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   name: "Pricing — PledgeOFF",
-  description: "Free until you're sure. Then €19.99/mo. Validate unlimited startup ideas with real Reddit and trend signals.",
+  description: "Free until you're sure. Then €39/mo for Pro. Validate startup ideas with real Reddit, GitHub, and HN signals.",
   url: "https://pledgeoff.com/pricing",
 };
 

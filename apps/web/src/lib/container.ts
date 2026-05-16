@@ -10,6 +10,8 @@ import {
   SupabaseCustomerAnalysisRepository,
   SupabaseBuildAnalysisRepository,
   SupabaseCompetitorAnalysisRepository,
+  SupabaseSubscriptionRepository,
+  StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
   GitHubSourceAdapter,
@@ -31,6 +33,7 @@ import {
   AnalyzeCustomersUseCase,
   AnalyzeBuildUseCase,
   AnalyzeCompetitorsUseCase,
+  GetOrCreateSubscriptionUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -57,6 +60,10 @@ function buildContainer() {
   const customerAnalysisRepo = new SupabaseCustomerAnalysisRepository(supabase);
   const buildAnalysisRepo = new SupabaseBuildAnalysisRepository(supabase);
   const competitorAnalysisRepo = new SupabaseCompetitorAnalysisRepository(supabase);
+  const subscriptionRepo = new SupabaseSubscriptionRepository(supabase);
+
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const stripeAdapter = stripeSecretKey ? new StripeAdapter(stripeSecretKey) : null;
 
   const eventBusProvider = process.env.EVENT_BUS_PROVIDER ?? 'postgres';
   const eventBus =
@@ -112,6 +119,7 @@ function buildContainer() {
   const analyzeCustomersUseCase = new AnalyzeCustomersUseCase(customerAnalysisRepo, signalRepo, llmClient);
   const analyzeBuildUseCase = new AnalyzeBuildUseCase(buildAnalysisRepo, signalRepo, llmClient);
   const analyzeCompetitorsUseCase = new AnalyzeCompetitorsUseCase(competitorAnalysisRepo, signalRepo, llmClient);
+  const getOrCreateSubscriptionUseCase = new GetOrCreateSubscriptionUseCase(subscriptionRepo);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -183,9 +191,13 @@ function buildContainer() {
     analyzeCustomersUseCase,
     analyzeBuildUseCase,
     analyzeCompetitorsUseCase,
+    getOrCreateSubscriptionUseCase,
+    stripeAdapter,
+    subscriptionRepo,
+    ideaRepo,
     eventBus,
     auditLog,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo },
+    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, subscriptionRepo },
   };
 }
 
