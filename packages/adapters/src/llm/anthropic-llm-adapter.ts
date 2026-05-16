@@ -116,7 +116,7 @@ const CompetitorItemSchemaA = z.object({
   name: z.string().min(1).max(100),
   url: z.string().optional(),
   positioning: z.string().min(1).max(300),
-  signals: z.array(z.string().min(1).max(200)).min(1).max(5),
+  signals: z.array(z.string().min(1).max(200)).max(5),
 });
 
 const CompetitorGapItemSchemaA = z.object({
