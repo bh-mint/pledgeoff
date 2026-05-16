@@ -162,7 +162,7 @@ export function LoginClient() {
             key={m}
             onClick={() => switchMode(m)}
             disabled={isLoading}
-            className="rounded-[4px] py-1.5 text-[12px] font-semibold display transition-colors"
+            className="rounded-sm py-1.5 text-[12px] font-semibold display transition-colors"
             style={
               mode === m
                 ? { background: "var(--accent)", color: "#000" }

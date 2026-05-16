@@ -38,7 +38,7 @@ export default async function SettingsPage() {
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
       <Nav />
 
-      <div className="max-w-[720px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+      <div className="max-w-180 mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <Link
           href="/dashboard"
           className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
