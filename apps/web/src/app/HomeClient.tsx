@@ -1,60 +1,63 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 
 const TICKER_ITEMS = [
-  'r/Entrepreneur  ·  "none of the meal apps know your training calendar exists"  ·  ↑312',
-  'Google Trends   ·  "meal plan workout"  ·  +34% YoY',
-  'r/xxfitness     ·  "protein on rest day same as squat day makes zero sense"  ·  ↑247',
-  "GitHub          ·  847 open issues tagged \"nutrition api\"",
-  'r/leangains     ·  "the part that broke me was traveling — macros should auto-shift"  ·  ↑128',
-  "Product Hunt    ·  MealPrep AI  ·  142 upvotes",
+  'r/SaaS          ·  "every B2B cold email tool does the same generic personalization"  ·  ↑418',
+  'GitHub          ·  2,341 open issues tagged "meeting transcription"',
+  'r/Entrepreneur  ·  "spent 3 months building before talking to one customer. mistake."  ·  ↑892',
+  'HN              ·  "AI code review" — 47 comments, 3 competing products launched this week',
+  'r/indiehackers  ·  "churn is killing me and I have no idea why people are leaving"  ·  ↑276',
+  'GitHub          ·  "stripe webhook" — 1,204 open issues across top SaaS repos',
+  'r/startups      ·  "built a Notion alternative, got 400 signups, 2 paying. why?"  ·  ↑341',
+  'HN              ·  "Show HN: I replaced Calendly for my team" — 312 upvotes',
 ];
 
 const EVIDENCE_CARDS = [
   {
-    source: "r/Fitness",
-    upvotes: "↑312",
-    quote:
-      "4 hours sunday meal prepping for the week and my training split changed wednesday. all of it wrong macros. there has to be a better way.",
-    author: "u/throwaway_2847 · 14h ago",
-  },
-  {
-    source: "r/loseit",
-    upvotes: "↑184",
-    quote:
-      "anyone use an app that actually adjusts when you skip a workout? mfp just gives me the same 1800 cals whether i lifted or sat on my couch.",
-    author: "u/quietlifter88 · 2d ago",
-  },
-  {
     source: "r/Entrepreneur",
-    upvotes: "↑91",
+    upvotes: "↑892",
     quote:
-      "looked at meal planning apps for fun and the gap is wild — none of them know your training calendar exists. somebody build this please.",
+      "spent 3 months building before talking to one customer. the product was technically impressive and completely wrong. validation first, always.",
     author: "u/bootstrapped_jan · 6h ago",
   },
   {
-    source: "r/xxfitness",
-    upvotes: "↑247",
+    source: "r/SaaS",
+    upvotes: "↑418",
     quote:
-      "having protein on rest day same as squat day makes zero sense and yet every meal app does this. also pre-workout meals — none of them get this right.",
-    author: "u/curlsforthegirls · 1d ago",
+      "every B2B cold email tool does the same generic personalization. scrape LinkedIn title, paste into template, call it AI. nobody is solving the actual research problem.",
+    author: "u/founder_mode99 · 14h ago",
+  },
+  {
+    source: "r/indiehackers",
+    upvotes: "↑276",
+    quote:
+      "churn is killing me and I have no idea why people are leaving. built every feature users asked for. retention still goes down every month.",
+    author: "u/mrr_grinder · 2d ago",
+  },
+  {
+    source: "r/startups",
+    upvotes: "↑341",
+    quote:
+      "built a Notion alternative for developers. got 400 signups on launch, 2 paying after 30 days. the gap between interest and willingness to pay is brutal.",
+    author: "u/quietly_building · 1d ago",
   },
   {
     source: "r/SideProject",
-    upvotes: "↑64",
+    upvotes: "↑189",
     quote:
-      "tried to integrate hevy + cronometer with a zap. it's held together with duct tape but the value is real. there's a real product here.",
-    author: "u/calorie_kev · 3d ago",
+      "launched a Stripe analytics dashboard 6 months ago. $0. then I found out Baremetrics and ChartMogul exist. please validate your idea before you build.",
+    author: "u/late_pivot · 3d ago",
   },
   {
-    source: "r/leangains",
-    upvotes: "↑128",
+    source: "r/Entrepreneur",
+    upvotes: "↑512",
     quote:
-      "the part that broke me was traveling. away from my home gym, my macros and meals should auto-shift. they don't. nothing does this.",
-    author: "u/40plusplates · 9h ago",
+      "the market research phase used to take me 2 weeks minimum. reddit threads, google trends, competitor pricing. all manual. there has to be a better way.",
+    author: "u/serial_validator · 9h ago",
   },
 ];
 
@@ -168,6 +171,12 @@ function PreviewCard() {
 }
 
 export function HomeClient() {
+  const [secondsAgo, setSecondsAgo] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setSecondsAgo((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="min-h-screen bg-(--canvas)">
       <Nav />
@@ -220,12 +229,12 @@ export function HomeClient() {
             </div>
 
             <div className="mt-12 flex flex-wrap items-center gap-6 mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
-              <span>scraped today</span>
-              <span className="text-(--t2)">2.4M reddit posts</span>
+              <span>signals from</span>
+              <span className="text-(--t2)">Reddit</span>
               <span>·</span>
-              <span className="text-(--t2)">14k trend curves</span>
+              <span className="text-(--t2)">Hacker News</span>
               <span>·</span>
-              <span className="text-(--t2)">847 niches</span>
+              <span className="text-(--t2)">GitHub</span>
             </div>
           </div>
 
@@ -245,7 +254,7 @@ export function HomeClient() {
             </span>
           </div>
           <span className="mono text-[10px] text-(--t3)">
-            last update 47s ago · 2.4M posts indexed
+            page loaded {secondsAgo}s ago · Reddit · HN · GitHub
           </span>
         </div>
 
