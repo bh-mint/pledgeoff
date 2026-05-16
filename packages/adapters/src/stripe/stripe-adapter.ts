@@ -58,7 +58,13 @@ export class StripeAdapter {
       if (input.stripeCustomerId) {
         params.customer = input.stripeCustomerId;
       } else {
-        params.customer_email = input.userEmail;
+        // Create customer first so we can attach userId metadata — subscription_data.metadata
+        // is not reliably propagated to the subscription object in all Stripe API versions.
+        const customer = await this.stripe.customers.create({
+          email: input.userEmail,
+          metadata: { userId: input.userId },
+        });
+        params.customer = customer.id;
       }
 
       const session = await this.stripe.checkout.sessions.create(params);
@@ -103,6 +109,16 @@ export class StripeAdapter {
       });
     } catch (e) {
       return err(new StripeAdapterError('Failed to retrieve subscription', e));
+    }
+  }
+
+  async getCustomerUserId(customerId: string): Promise<Result<string | null, StripeAdapterError>> {
+    try {
+      const customer = await this.stripe.customers.retrieve(customerId);
+      if ('deleted' in customer) return ok(null);
+      return ok(customer.metadata?.userId ?? null);
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to retrieve customer', e));
     }
   }
 
