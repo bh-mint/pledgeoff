@@ -1,9 +1,7 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { HomeTickerCounter } from "./HomeTickerCounter";
 
 const TICKER_ITEMS = [
   'r/SaaS          ·  "every B2B cold email tool does the same generic personalization"  ·  ↑418',
@@ -171,12 +169,6 @@ function PreviewCard() {
 }
 
 export function HomeClient() {
-  const [secondsAgo, setSecondsAgo] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setSecondsAgo((s) => s + 1), 1000);
-    return () => clearInterval(id);
-  }, []);
-
   return (
     <div className="min-h-screen bg-(--canvas)">
       <Nav />
@@ -253,9 +245,7 @@ export function HomeClient() {
               live signals scraped today · auto-refresh every 60s
             </span>
           </div>
-          <span className="mono text-[10px] text-(--t3)">
-            page loaded {secondsAgo}s ago · Reddit · HN · GitHub
-          </span>
+          <HomeTickerCounter />
         </div>
 
         <div
@@ -284,7 +274,7 @@ export function HomeClient() {
           <h2 className="display text-[40px] font-black leading-none text-(--t1)">
             From idea to verdict.
             <br />
-            In 15s.
+            Under 60 seconds.
           </h2>
           <p className="text-[14px] text-(--t2) leading-relaxed self-end">
             No surveys. No landing pages. No spending €5k on ads to validate
