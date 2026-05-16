@@ -250,7 +250,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
               className="mono text-[11px] tnum flex-shrink-0"
               style={{ color: "var(--t3)" }}
             >
-              <60s
+              &lt;60s
             </span>
           </div>
 
