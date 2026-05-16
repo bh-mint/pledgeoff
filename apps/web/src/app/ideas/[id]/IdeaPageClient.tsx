@@ -92,56 +92,140 @@ const SOURCE_NAME: Record<string, string> = {
   brave: "Reddit (Brave)",
 };
 
-const TOOLS = (id: string, verdict: string | undefined, status: ToolStatus) => [
-  {
-    num: "01",
-    label: "Validate",
-    desc: "verdict + evidence wall",
-    href: null,
-    done: true,
-    available: true,
-  },
-  {
-    num: "02",
-    label: "Simulate Revenue",
-    desc: "TAM, 3 pricing scenarios, break-even",
-    href: `/ideas/${id}/simulate`,
-    done: status.simulate,
-    available: verdict === "GO",
-  },
-  {
-    num: "03",
-    label: "Landing Page",
-    desc: "AI-generated headline, features, CTA",
-    href: `/ideas/${id}/landing`,
-    done: status.landing,
-    available: verdict === "GO",
-  },
-  {
-    num: "04",
-    label: "Customer Intelligence",
-    desc: "Segments, pain points, real quotes",
-    href: `/ideas/${id}/customers`,
-    done: status.customers,
-    available: true,
-  },
-  {
-    num: "05",
-    label: "Engineering Stack",
-    desc: "Tech stack, libraries, GitHub gaps",
-    href: `/ideas/${id}/build`,
-    done: status.build,
-    available: verdict === "GO",
-  },
-  {
-    num: "06",
-    label: "Competitor Intelligence",
-    desc: "Who exists, how they position, where the gaps are",
-    href: `/ideas/${id}/competitors`,
-    done: status.competitors,
-    available: true,
-  },
-];
+type Verdict = "GO" | "KILL" | "PIVOT";
+
+const OTTO_MESSAGE: Record<Verdict, (score: number | undefined) => string> = {
+  GO: (score) =>
+    `Ideea ta a primit GO${score !== undefined ? ` cu scor ${score}/100` : ""}. Datele confirmă că durerea există și piața nu e suprasaturată. Ai lumina verde — acum e momentul să construiești inteligent. Rulează tool-urile de mai jos pentru a înțelege cine cumpără, cât poți câștiga, cine te concurează și ce trebuie să construiești.`,
+  PIVOT: (score) =>
+    `Ideea ta a primit PIVOT${score !== undefined ? ` cu scor ${score}/100` : ""}. Baza e solidă — există o durere reală în piață. Problema e direcția: modul în care o abordezi acum nu funcționează pe piața actuală. Rulează cele 2 tool-uri de mai jos pentru a înțelege unde e oportunitatea reală, apoi ajustează direcția și re-validează. Dacă obții GO, toate tool-urile se deblochează automat.`,
+  KILL: (score) =>
+    `Ideea ta a primit KILL${score !== undefined ? ` cu scor ${score}/100` : ""}. Datele arată că piața fie nu există la scară, fie e dominată de jucători consolidați pe care nu îi poți ataca acum. Înainte să treci mai departe, rulează Competitor Intelligence — înțelege exact de ce, ca să eviți aceeași capcană la ideea următoare.`,
+};
+
+interface ToolDef {
+  num: string;
+  label: string;
+  desc: string;
+  href: string;
+  done: boolean;
+  lockedReason?: string;
+}
+
+function getToolConfig(
+  verdict: Verdict,
+  ideaId: string,
+  toolStatus: ToolStatus,
+): { available: ToolDef[]; locked: ToolDef[] } {
+  const all = {
+    simulate: { num: "02", label: "Simulate Revenue", desc: "TAM, 3 pricing scenarios, break-even", href: `/ideas/${ideaId}/simulate`, done: toolStatus.simulate },
+    landing:   { num: "03", label: "Landing Page", desc: "AI-generated headline, features, CTA", href: `/ideas/${ideaId}/landing`, done: toolStatus.landing },
+    customers: { num: "04", label: "Customer Intelligence", desc: "Segments, pain points, real quotes", href: `/ideas/${ideaId}/customers`, done: toolStatus.customers },
+    build:     { num: "05", label: "Engineering Stack", desc: "Tech stack, libraries, GitHub gaps", href: `/ideas/${ideaId}/build`, done: toolStatus.build },
+    competitors: { num: "06", label: "Competitor Intelligence", desc: "Who exists, how they position, where the gaps are", href: `/ideas/${ideaId}/competitors`, done: toolStatus.competitors },
+  };
+
+  if (verdict === "GO") {
+    return {
+      available: [all.simulate, all.landing, all.customers, all.build, all.competitors],
+      locked: [],
+    };
+  }
+
+  if (verdict === "PIVOT") {
+    return {
+      available: [all.customers, all.competitors],
+      locked: [
+        { ...all.simulate, lockedReason: "Nu estimezi venit pentru o direcție care urmează să se schimbe. Rulează după ce confirmi noul unghi." },
+        { ...all.landing,  lockedReason: "Ai scrie copy pentru o idee care se va schimba. Pierzi timp și bani." },
+        { ...all.build,    lockedReason: "Stack-ul tehnic depinde de ce construiești exact. Stabilește direcția mai întâi." },
+      ],
+    };
+  }
+
+  return {
+    available: [all.competitors],
+    locked: [
+      { ...all.simulate,   lockedReason: "Nu proiectezi venit pentru o idee pe care nu o vei construi." },
+      { ...all.landing,    lockedReason: "Nu scrii copy pentru o idee pe care nu o vei lansa." },
+      { ...all.customers,  lockedReason: "Nu definești profilul clientului pentru o piață care nu există la scară." },
+      { ...all.build,      lockedReason: "Nu planifici arhitectura pentru ceva ce nu se va construi." },
+    ],
+  };
+}
+
+interface OttoSectionProps {
+  verdict: Verdict;
+  score: number | undefined;
+  ideaId: string;
+  toolStatus: ToolStatus;
+}
+
+function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
+  const message = OTTO_MESSAGE[verdict](score);
+  const { available, locked } = getToolConfig(verdict, ideaId, toolStatus);
+
+  return (
+    <div className="space-y-4">
+      <p className="text-[13px] leading-[1.65]" style={{ color: "var(--t2)" }}>
+        {message}
+      </p>
+
+      {available.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
+            {verdict === "GO" ? "Rulează acum" : "Rulează aceste 2 tool-uri"}
+          </p>
+          {available.map((tool) => (
+            <div key={tool.num} className="rounded border px-3 py-2.5 flex items-center gap-3"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+              <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{tool.num}</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{tool.label}</p>
+                <p className="mono text-[10px] truncate" style={{ color: "var(--t3)" }}>{tool.desc}</p>
+              </div>
+              {tool.done && (
+                <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
+                  style={{ background: "rgba(125,214,107,0.12)", color: "var(--validated)", border: "1px solid rgba(125,214,107,0.3)" }}>
+                  ✓
+                </span>
+              )}
+              <Link href={tool.href}
+                className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 transition-colors hover:border-(--accent) hover:text-(--accent)"
+                style={{ borderColor: "var(--border)", color: "var(--t2)" }}>
+                {tool.done ? "View →" : "Run →"}
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {locked.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
+            {verdict === "PIVOT" ? "Disponibile după re-validare" : "Indisponibile"}
+          </p>
+          {locked.map((tool) => (
+            <div key={tool.num} className="rounded border px-3 py-2.5"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", opacity: 0.45 }}>
+              <div className="flex items-center gap-3 mb-1">
+                <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{tool.num}</span>
+                <p className="flex-1 text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{tool.label}</p>
+                <span className="mono text-[9px] px-1.5 py-0.5 rounded border flex-shrink-0"
+                  style={{ borderColor: "var(--border)", color: "var(--t3)" }}>
+                  {verdict === "PIVOT" ? "după pivot" : "indisponibil"}
+                </span>
+              </div>
+              <p className="mono text-[10px] ml-8 leading-[1.55]" style={{ color: "var(--t3)" }}>
+                ↳ {tool.lockedReason}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function IdeaPageClient({
   idea,
@@ -236,49 +320,33 @@ export function IdeaPageClient({
               <FeedbackButtons ideaId={idea.id} decisionId={decision.id} />
             </div>
 
-            {/* Intelligence Tools — sticky with verdict */}
+            {/* Otto + Intelligence Tools */}
             <div className="mt-8 pt-6 border-t" style={{ borderColor: "var(--border)" }}>
-              <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
-                Intelligence tools
-              </p>
-              <div className="space-y-2">
-                {TOOLS(idea.id, decision.verdict, toolStatus).map((tool) => (
-                  <div
-                    key={tool.num}
-                    className="rounded border px-3 py-2.5 flex items-center gap-3"
-                    style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-                  >
-                    <span className="mono text-[10px] text-(--t3) w-5 flex-shrink-0">{tool.num}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-medium text-(--t1) leading-snug">{tool.label}</p>
-                      <p className="mono text-[10px] text-(--t3) truncate">{tool.desc}</p>
-                    </div>
-                    {tool.done && (
-                      <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
-                        style={{ background: "rgba(125,214,107,0.12)", color: "var(--validated)", border: "1px solid rgba(125,214,107,0.3)" }}>
-                        ✓
-                      </span>
-                    )}
-                    {tool.href === null ? null : tool.available ? (
-                      <Link
-                        href={tool.href}
-                        className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 transition-colors hover:border-(--accent) hover:text-(--accent)"
-                        style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-                      >
-                        {tool.done ? "View →" : "Run →"}
-                      </Link>
-                    ) : (
-                      <span
-                        className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 opacity-35 cursor-not-allowed"
-                        style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-                        title="Available for GO verdicts only"
-                      >
-                        GO only
-                      </span>
-                    )}
-                  </div>
-                ))}
+              <style>{`
+                @keyframes ottoBreath{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(1.18);opacity:1}}
+                @keyframes ottoRing{0%{transform:scale(1);opacity:.45}100%{transform:scale(2.2);opacity:0}}
+                .otto-dot{animation:ottoBreath 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
+                .otto-ring{animation:ottoRing 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
+              `}</style>
+
+              {/* Otto header */}
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="relative w-5 h-5 flex items-center justify-center flex-shrink-0">
+                  <div className="absolute w-3.5 h-3.5 rounded-full otto-ring"
+                    style={{ background: "var(--accent)", opacity: 0.3 }} />
+                  <div className="w-2 h-2 rounded-full otto-dot"
+                    style={{ background: "var(--accent)" }} />
+                </div>
+                <span className="display text-[13px] font-semibold" style={{ color: "var(--accent)" }}>Otto</span>
+                <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>· co-founder tău AI</span>
               </div>
+
+              <OttoSection
+                verdict={decision.verdict as Verdict}
+                score={decision.score}
+                ideaId={idea.id}
+                toolStatus={toolStatus}
+              />
             </div>
           </>
         ) : (
