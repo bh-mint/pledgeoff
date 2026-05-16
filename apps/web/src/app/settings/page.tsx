@@ -38,7 +38,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
-      <Nav />
+      <Nav loggedIn={true} />
 
       <div className="max-w-180 mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <Link

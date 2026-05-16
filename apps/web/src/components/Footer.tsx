@@ -33,7 +33,7 @@ const NAV_COLS = [
     links: [
       { href: "/about", text: "About" },
       { href: "/blog", text: "Blog" },
-      { href: "mailto:contact@pledgeoff.com", text: "Contact", external: true },
+      { href: "mailto:hello@pledgeoff.com", text: "Contact", external: true },
     ],
   },
   {

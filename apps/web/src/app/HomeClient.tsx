@@ -94,9 +94,9 @@ const PREVIEW_DIMENSIONS = [
 ];
 
 const PREVIEW_POSTS = [
-  { sub: "r/Fitness",      u: "u/throwaway_2847",   txt: "4 hours sunday meal prepping and my training split changed wednesday" },
-  { sub: "r/loseit",       u: "u/quietlifter88",    txt: "anyone use an app that adjusts when you skip a workout?" },
-  { sub: "r/Entrepreneur", u: "u/bootstrapped_jan", txt: "none of the meal apps know your training calendar exists" },
+  { sub: "r/SaaS",        u: "u/founder_mode99",    txt: "every cold email tool does the same generic personalization. nobody solves the research problem" },
+  { sub: "r/startups",    u: "u/quietly_building",  txt: "400 signups on launch, 2 paying after 30 days. the gap between interest and willingness to pay is brutal" },
+  { sub: "r/Entrepreneur", u: "u/bootstrapped_jan", txt: "spent 3 months building before talking to one customer. validation first, always" },
 ];
 
 function PreviewCard() {
@@ -123,13 +123,13 @@ function PreviewCard() {
         <div className="col-span-6">
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
-            <span className="mono text-[9px] text-(--t3)">847 LIVE SIGNALS</span>
+            <span className="mono text-[9px] text-(--t3)">LIVE SIGNALS</span>
           </div>
           <div className="display tnum font-semibold text-(--t1)" style={{ fontSize: 110, lineHeight: 0.85 }}>
             82
           </div>
           <div className="display text-[12px] mt-2" style={{ color: "var(--validated)" }}>VALIDATED</div>
-          <div className="text-[10px] mt-1 text-(--t3)">4 of 4 dimensions clear</div>
+          <div className="text-[10px] mt-1 text-(--t3)">AI code review tool for solo devs</div>
         </div>
 
         <div className="col-span-6 pt-2 space-y-0">
@@ -371,16 +371,13 @@ export function HomeClient() {
 
       {/* ── SOCIAL PROOF ── */}
       <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
-        <div className="text-center mb-12">
-          <p className="display text-[64px] font-black text-(--accent) tnum">
-            $2.4M
+        <div className="mb-12">
+          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
+            What founders say
           </p>
-          <p className="display text-[16px] font-semibold text-(--t1) mt-1">
-            saved in bad product bets
-          </p>
-          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.08em] mt-2">
-            estimated across 14,209 validated ideas
-          </p>
+          <h2 className="display text-[40px] font-black leading-none text-(--t1)">
+            From founders<br />who shipped.
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
