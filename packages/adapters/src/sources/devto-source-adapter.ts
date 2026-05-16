@@ -86,10 +86,13 @@ export class DevToSourceAdapter implements ISourceAdapter {
         // Filter to articles containing at least one query keyword in title, then top N by reactions
         const keywords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 3);
         const relevant = articles.filter((a) =>
-          keywords.some((kw) => a.title.toLowerCase().includes(kw)),
+          keywords.some((kw) => a.title.toLowerCase().includes(kw) || (a.description ?? '').toLowerCase().includes(kw)),
         );
-        const pool = relevant.length > 0 ? relevant : articles;
-        const top = [...pool]
+        if (relevant.length === 0) {
+          log.info({ traceId, target: 'devto', operation: 'search', latencyMs: Date.now() - start, outcome: 'success', signalCount: 0 }, 'DevTo: no keyword match, returning 0 signals');
+          return ok([]);
+        }
+        const top = [...relevant]
           .sort((a, b) => b.positive_reactions_count - a.positive_reactions_count)
           .slice(0, TOP_N);
 

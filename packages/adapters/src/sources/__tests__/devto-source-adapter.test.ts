@@ -22,14 +22,14 @@ afterEach(() => {
 });
 
 describe('DevToSourceAdapter', () => {
-  it('returns top 2 signals sorted by reactions', async () => {
+  it('returns top 2 signals sorted by reactions when titles match query', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(
       makeDevToResponse([
-        { positive_reactions_count: 10 },
-        { positive_reactions_count: 80 },
-        { positive_reactions_count: 5 },
-        { positive_reactions_count: 30 },
-        { positive_reactions_count: 120 },
+        { positive_reactions_count: 10,  title: 'Building an async summarizer' },
+        { positive_reactions_count: 80,  title: 'Meeting summarizer with AI' },
+        { positive_reactions_count: 5,   title: 'async task queue patterns' },
+        { positive_reactions_count: 30,  title: 'Meeting notes automation' },
+        { positive_reactions_count: 120, title: 'async meeting tools for remote teams' },
       ]),
     ));
 
@@ -45,11 +45,11 @@ describe('DevToSourceAdapter', () => {
     expect(signals.every((s) => s.ideaId === ideaId)).toBe(true);
   });
 
-  it('scores sentiment correctly', async () => {
+  it('scores sentiment correctly for matched articles', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(
       makeDevToResponse([
-        { positive_reactions_count: 3 },   // negative
-        { positive_reactions_count: 20 },  // neutral
+        { positive_reactions_count: 3,  title: 'async meeting notes tool' },
+        { positive_reactions_count: 20, title: 'Build a meeting summarizer' },
       ]),
     ));
 
@@ -65,8 +65,8 @@ describe('DevToSourceAdapter', () => {
   it('uses description if available, falls back to title', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(
       makeDevToResponse([
-        { positive_reactions_count: 50, description: 'Rich description here' },
-        { positive_reactions_count: 10, description: null },
+        { positive_reactions_count: 50, title: 'async meeting summarizer deep dive', description: 'Rich description here' },
+        { positive_reactions_count: 10, title: 'meeting notes with summarizer AI', description: null },
       ]),
     ));
 
@@ -76,7 +76,22 @@ describe('DevToSourceAdapter', () => {
     expect(result.isOk()).toBe(true);
     const signals = result._unsafeUnwrap();
     expect(signals[0]!.summary).toBe('Rich description here');
-    expect(signals[1]!.summary).toBe('Article 2'); // fallback to title
+    expect(signals[1]!.summary).toBe('meeting notes with summarizer AI'); // fallback to title
+  });
+
+  it('returns empty when no article title or description matches query keywords', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(
+      makeDevToResponse([
+        { positive_reactions_count: 200, title: 'What was your win this week?' },
+        { positive_reactions_count: 150, title: 'Top 7 featured posts of the month' },
+      ]),
+    ));
+
+    const adapter = new DevToSourceAdapter();
+    const result = await adapter.fetch(query, ideaId, traceId);
+
+    expect(result.isOk()).toBe(true);
+    expect(result._unsafeUnwrap()).toHaveLength(0);
   });
 
   it('returns empty array when API returns empty list', async () => {
