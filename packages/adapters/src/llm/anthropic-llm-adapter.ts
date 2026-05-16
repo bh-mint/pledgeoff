@@ -113,16 +113,16 @@ const LLMRelevanceResponseSchemaA = z.object({
 });
 
 const CompetitorItemSchemaA = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().min(1),
   url: z.string().optional(),
-  positioning: z.string().min(1).max(300),
-  signals: z.array(z.string().min(1).max(200)).max(5),
+  positioning: z.string().min(1),
+  signals: z.array(z.string().min(1)),
 });
 
 const CompetitorGapItemSchemaA = z.object({
-  title: z.string().min(1).max(100),
-  description: z.string().min(1).max(300),
-  opportunity: z.string().min(1).max(300),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  opportunity: z.string().min(1),
 });
 
 const LLMCompetitorResponseSchemaA = z.object({
@@ -301,6 +301,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
         LLMCompetitorResponseSchemaA,
         'analyzeCompetitors',
         request.traceId,
+        2048,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
@@ -318,12 +319,13 @@ export class AnthropicLLMAdapter implements ILLMClient {
     schema: z.ZodType<T>,
     operation: string,
     traceId: string,
+    maxTokens = 1024,
   ): Promise<Result<T, LLMClientError>> {
     const start = Date.now();
     try {
       const message = await this.client.messages.create({
         model: this.model,
-        max_tokens: 1024,
+        max_tokens: maxTokens,
         temperature: 0.3,
         system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: prompt }],
