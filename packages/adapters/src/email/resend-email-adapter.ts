@@ -21,6 +21,11 @@ export async function sendVerdictEmail(
   apiKey: string,
   params: VerdictEmailParams,
 ): Promise<void> {
+  if (process.env.DISABLE_EMAIL === 'true') {
+    log.info({ traceId: params.traceId, target: 'resend', operation: 'sendVerdictEmail' }, 'Email disabled via DISABLE_EMAIL flag');
+    return;
+  }
+
   const { to, ideaId, ideaText, verdict, score, traceId } = params;
 
   const ideaTitle = ideaText.split('\n\n')[0]?.slice(0, 80) ?? ideaText.slice(0, 80);
