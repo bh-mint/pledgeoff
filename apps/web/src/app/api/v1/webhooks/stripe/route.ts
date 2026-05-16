@@ -73,8 +73,13 @@ export async function POST(req: Request) {
         // Fetch full subscription from Stripe to get price + status
         const subDataResult = await container.stripeAdapter.getSubscription(stripeSubscriptionId);
         if (subDataResult.isErr()) {
-          console.error('[webhook/stripe] Failed to retrieve subscription', { traceId, error: subDataResult.error.message });
-          break;
+          console.error('[webhook/stripe] Failed to retrieve subscription — returning 500 for Stripe retry', {
+            traceId,
+            subscriptionId: stripeSubscriptionId,
+            error: subDataResult.error.message,
+            cause: String(subDataResult.error.cause),
+          });
+          return new Response('Failed to retrieve subscription', { status: 500 });
         }
 
         const subData = subDataResult.value;
