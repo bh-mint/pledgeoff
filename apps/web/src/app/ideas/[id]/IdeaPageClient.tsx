@@ -94,6 +94,14 @@ const SOURCE_NAME: Record<string, string> = {
 
 const TOOLS = (id: string, verdict: string | undefined, status: ToolStatus) => [
   {
+    num: "01",
+    label: "Validate",
+    desc: "verdict + evidence wall",
+    href: null,
+    done: true,
+    available: true,
+  },
+  {
     num: "02",
     label: "Simulate Revenue",
     desc: "TAM, 3 pricing scenarios, break-even",
@@ -251,7 +259,7 @@ export function IdeaPageClient({
                         ✓
                       </span>
                     )}
-                    {tool.available ? (
+                    {tool.href === null ? null : tool.available ? (
                       <Link
                         href={tool.href}
                         className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 transition-colors hover:border-(--accent) hover:text-(--accent)"

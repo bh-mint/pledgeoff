@@ -55,11 +55,6 @@ function Spark({
   );
 }
 
-const GOLDMINE_ITEMS = [
-  { score: 91, cat: "DEV·TOOLING", title: "AI code reviewer that understands your team's style guide", mentions: 412 },
-  { score: 87, cat: "FITNESS",     title: "Meal planner that adapts to your training calendar",        mentions: 347 },
-  { score: 84, cat: "CREATOR",     title: "Sponsorship rate-card calculator priced by real engagement", mentions: 289 },
-];
 
 
 export default async function DashboardPage() {
@@ -154,14 +149,6 @@ export default async function DashboardPage() {
     { k: "Build",     done: !!pt?.build, active: !!pt?.customers && !pt?.build },
   ];
   const stepsLeft = pipelineSteps.filter((s) => !s.done).length;
-
-  // Days since account created (proxy for streak)
-  // eslint-disable-next-line react-hooks/purity
-  const now = Date.now();
-  const daysSinceJoin = Math.max(
-    1,
-    Math.round((now - new Date(user.created_at).getTime()) / 86_400_000)
-  );
 
   // Table rows
   const tableRows: TableRow[] = rows.map(({ idea, decision, tools }) => ({
@@ -402,38 +389,47 @@ export default async function DashboardPage() {
 
         {/* RIGHT */}
         <div className="col-span-12 lg:col-span-4 space-y-6">
-          {/* Streak */}
-          <div
-            className="border rounded-md p-5 flex items-center gap-4"
-            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-          >
-            <div className="display text-[40px] tnum font-semibold leading-none text-(--t1)">
-              {daysSinceJoin}
-            </div>
-            <div>
-              <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
-                day streak
+          {/* Ideas this month */}
+          {(() => {
+            const now2 = new Date();
+            const ideasThisMonth = ideas.filter((idea) => {
+              const d = new Date(idea.createdAt);
+              return d.getFullYear() === now2.getFullYear() && d.getMonth() === now2.getMonth();
+            }).length;
+            return (
+              <div
+                className="border rounded-md p-5 flex items-center gap-4"
+                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              >
+                <div className="display text-[40px] tnum font-semibold leading-none text-(--t1)">
+                  {ideasThisMonth}
+                </div>
+                <div>
+                  <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
+                    ideas this month
+                  </div>
+                  <div className="text-[12px] mt-1 text-(--t2)">
+                    {ideasThisMonth === 0 ? "start validating" : ideasThisMonth === 1 ? "keep going" : "on a roll"}
+                  </div>
+                </div>
+                <div className="ml-auto flex items-end gap-1">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-1 rounded-full"
+                      style={{
+                        height: 4 + (i % 3) * 4,
+                        background: "var(--accent)",
+                        opacity: i < Math.min(ideasThisMonth, 10) ? 1 : 0.2,
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
-              <div className="text-[12px] mt-1 text-(--t2)">
-                keep validating daily
-              </div>
-            </div>
-            <div className="ml-auto flex items-end gap-1">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="w-1 rounded-full"
-                  style={{
-                    height: 4 + (i % 3) * 4,
-                    background: "var(--accent)",
-                    opacity: i < Math.min(daysSinceJoin, 10) ? 1 : 0.2,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+            );
+          })()}
 
-          {/* Goldmine preview */}
+          {/* Goldmine — coming soon */}
           <div
             className="border rounded-md"
             style={{ borderColor: "var(--border)", background: "var(--surface)" }}
@@ -443,41 +439,25 @@ export default async function DashboardPage() {
               style={{ borderColor: "var(--border)" }}
             >
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
+                <span className="w-1.5 h-1.5 rounded-full bg-(--border)" />
                 <span className="display text-[13px] font-semibold tracking-tight text-(--t1)">
-                  Today&apos;s goldmine
+                  Goldmine
                 </span>
               </div>
-              <span className="mono text-[10px] text-(--t3)">3 of 12 · Pro</span>
-            </div>
-            {GOLDMINE_ITEMS.map((g) => (
-              <div
-                key={g.title}
-                className="px-5 py-3.5 border-b last:border-0 flex items-start gap-3"
-                style={{ borderColor: "var(--border)" }}
+              <span
+                className="mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
+                style={{ background: "rgba(214,255,61,0.08)", color: "var(--accent)", border: "1px solid rgba(214,255,61,0.2)" }}
               >
-                <div
-                  className="display text-[16px] tnum font-semibold w-7 shrink-0"
-                  style={{
-                    color: g.score >= 85 ? "var(--accent)" : "var(--t1)",
-                  }}
-                >
-                  {g.score}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="mono text-[10px] text-(--t3)">{g.cat}</div>
-                  <div className="text-[12px] mt-1 leading-snug text-(--t1)">
-                    {g.title}
-                  </div>
-                  <div className="mono text-[10px] mt-1 text-(--t3)">
-                    {g.mentions} mentions · 7d
-                  </div>
-                </div>
-                <span className="mono text-[10px] text-(--accent)">→</span>
+                Soon
+              </span>
+            </div>
+            <div className="px-5 py-8 text-center">
+              <div className="display text-[13px] font-semibold text-(--t1) mb-2">
+                Daily curated ideas
               </div>
-            ))}
-            <div className="px-5 py-3 mono text-[10px] text-center text-(--t3)">
-              unlock all 12 with Pro →
+              <div className="mono text-[11px] text-(--t3)">
+                Top validated opportunities from across the web — coming with Pro+
+              </div>
             </div>
           </div>
         </div>
@@ -489,7 +469,7 @@ export default async function DashboardPage() {
         style={{ borderColor: "var(--border)" }}
       >
         <span className="mono text-[10px] text-(--t3)">
-          {displayName} · {plan} plan · {rows.length} idea{rows.length !== 1 ? "s" : ""} · {daysSinceJoin}d streak
+          {displayName} · {plan} plan · {rows.length} idea{rows.length !== 1 ? "s" : ""}
         </span>
         {!isPaidPlan && (
           <Link

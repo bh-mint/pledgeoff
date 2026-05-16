@@ -129,7 +129,7 @@ export default async function OnboardingPage() {
           </div>
 
           <p className="mt-6 text-center mono text-[10px]" style={{ color: "var(--t3)" }}>
-            Your first 3 validations are free. No credit card required.
+            1 free validation per month. No credit card required.
           </p>
         </div>
       </div>

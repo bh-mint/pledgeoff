@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { VerdictMark } from "@/components/brand/VerdictMark";
 
@@ -37,6 +38,16 @@ function shortDate(iso: string) {
 export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalCount: number }) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date");
+  const searchParams = useSearchParams();
+  const billingSuccess = searchParams.get("billing") === "success";
+  const [showBillingBanner, setShowBillingBanner] = useState(billingSuccess);
+
+  useEffect(() => {
+    if (!billingSuccess) return;
+    const t = setTimeout(() => setShowBillingBanner(false), 5000);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -50,6 +61,24 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
   }, [rows, search, sort]);
 
   return (
+    <>
+      {showBillingBanner && (
+        <div
+          className="rounded-md border px-5 py-3.5 flex items-center justify-between mb-4"
+          style={{ background: "rgba(214,255,61,0.06)", borderColor: "rgba(214,255,61,0.25)" }}
+        >
+          <span className="text-[13px]" style={{ color: "var(--accent)" }}>
+            Welcome to Pro! Your plan is now active.
+          </span>
+          <button
+            onClick={() => setShowBillingBanner(false)}
+            className="mono text-[11px] ml-4 shrink-0"
+            style={{ color: "var(--t3)" }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     <div
       className="rounded-md border"
       style={{ borderColor: "var(--border)", background: "var(--surface)" }}
@@ -226,5 +255,6 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
         </div>
       )}
     </div>
+    </>
   );
 }
