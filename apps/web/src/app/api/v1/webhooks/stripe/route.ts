@@ -106,9 +106,17 @@ export async function POST(req: Request) {
           items: { data: Array<{ price: { id: string }; current_period_end?: number }> };
         };
 
-        const userId = sub.metadata?.userId;
+        let userId = sub.metadata?.userId ?? null;
+
+        // Fallback: subscription_data.metadata is not always propagated by Stripe.
+        // Look up userId from the Stripe customer's metadata instead.
+        if (!userId && typeof sub.customer === 'string') {
+          const customerResult = await container.stripeAdapter.getCustomerUserId(sub.customer);
+          if (customerResult.isOk()) userId = customerResult.value;
+        }
+
         if (!userId) {
-          console.warn('[webhook/stripe] subscription.created missing metadata.userId', { traceId, id: sub.id });
+          console.warn('[webhook/stripe] subscription.created could not resolve userId', { traceId, id: sub.id });
           break;
         }
 
