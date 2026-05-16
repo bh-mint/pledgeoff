@@ -53,6 +53,7 @@ export class PostgresEventBus implements IEventBus {
       .from('outbox')
       .select('event_id, event_type, payload, attempts')
       .eq('processed', false)
+      .lte('attempts', 3)
       .order('created_at')
       .limit(limit);
 
@@ -62,18 +63,26 @@ export class PostgresEventBus implements IEventBus {
     let failed = 0;
 
     for (const row of data as OutboxRow[]) {
+      // Atomically claim the event before dispatching — prevents concurrent workers
+      // (cron + after()) from processing the same event simultaneously
+      const { data: claimed } = await this.supabase
+        .from('outbox')
+        .update({ processed: true, processed_at: new Date().toISOString() })
+        .eq('event_id', row.event_id)
+        .eq('processed', false)
+        .select('event_id');
+
+      if (!claimed?.length) continue;
+
       try {
         await this.dispatchOne(row.payload);
-        await this.supabase
-          .from('outbox')
-          .update({ processed: true, processed_at: new Date().toISOString() })
-          .eq('event_id', row.event_id);
         processed++;
       } catch (dispatchError) {
         const message = dispatchError instanceof Error ? dispatchError.message : 'unknown';
+        // Restore to unprocessed so it can be retried (up to max attempts)
         await this.supabase
           .from('outbox')
-          .update({ attempts: row.attempts + 1, last_error: message })
+          .update({ processed: false, attempts: row.attempts + 1, last_error: message })
           .eq('event_id', row.event_id);
         failed++;
       }
