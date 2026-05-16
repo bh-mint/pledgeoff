@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { container } from "@/lib/container";
+import { effectivePlan } from "@pledgeoff/core";
 import { DashboardClient, type TableRow } from "./DashboardClient";
 import { ProfileButton } from "@/components/ProfileButton";
 import { Logo } from "@/components/brand/Logo";
@@ -67,8 +68,15 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
   const displayName = profile?.full_name || user.email?.split("@")[0] || "—";
 
-  const ideasResult = await container._repos.ideaRepo.findByUserId(user.id);
+  const [ideasResult, subResult] = await Promise.all([
+    container._repos.ideaRepo.findByUserId(user.id),
+    container._repos.subscriptionRepo.findByUserId(user.id),
+  ]);
+  const sub = subResult.isOk() ? subResult.value : null;
+  const plan = sub ? effectivePlan(sub) : "free";
+  const isPaidPlan = plan !== "free";
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
+
 
   const [decisionResults, simulateResults, landingResults, customerResults, buildResults] = await Promise.all([
     Promise.all(ideas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))),
@@ -481,14 +489,16 @@ export default async function DashboardPage() {
         style={{ borderColor: "var(--border)" }}
       >
         <span className="mono text-[10px] text-(--t3)">
-          {displayName} · free plan · {rows.length} idea{rows.length !== 1 ? "s" : ""} · {daysSinceJoin}d streak
+          {displayName} · {plan} plan · {rows.length} idea{rows.length !== 1 ? "s" : ""} · {daysSinceJoin}d streak
         </span>
-        <Link
-          href="/pricing"
-          className="mono text-[10px] text-(--t3) hover:text-(--t2) transition-colors"
-        >
-          upgrade to Pro →
-        </Link>
+        {!isPaidPlan && (
+          <Link
+            href="/pricing"
+            className="mono text-[10px] text-(--t3) hover:text-(--t2) transition-colors"
+          >
+            upgrade to Pro →
+          </Link>
+        )}
       </div>
 
       <FooterMicro />
