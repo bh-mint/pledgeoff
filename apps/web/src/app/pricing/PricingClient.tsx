@@ -92,12 +92,12 @@ function FAQItem({ q, a }: { q: string; a: string }) {
         <span className="display text-[16px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
           {q}
         </span>
-        <span className="mono text-[14px] flex-shrink-0" style={{ color: "var(--t3)" }}>
+        <span className="mono text-[14px] shrink-0" style={{ color: "var(--t3)" }}>
           {open ? "−" : "+"}
         </span>
       </button>
       <div style={{ maxHeight: open ? 400 : 0, overflow: "hidden", transition: "max-height 400ms cubic-bezier(0.16,1,0.3,1)" }}>
-        <p className="text-[14px] leading-[1.65] pb-5 max-w-[680px]" style={{ color: "var(--t2)" }}>{a}</p>
+        <p className="text-[14px] leading-[1.65] pb-5 max-w-170" style={{ color: "var(--t2)" }}>{a}</p>
       </div>
     </div>
   );
@@ -150,7 +150,7 @@ function UpgradeButton({
       <button
         onClick={handleClick}
         disabled={loading}
-        className="display block w-full h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
+        className="display w-full h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
         style={{ background: "var(--accent)", color: "#000" }}
       >
         {loading ? "Redirecting…" : label}
@@ -162,7 +162,7 @@ function UpgradeButton({
     <button
       onClick={handleClick}
       disabled={loading}
-      className="block w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors disabled:opacity-60"
+      className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors disabled:opacity-60"
       style={{ borderColor: "var(--border)", color: "var(--t1)" }}
     >
       {loading ? "Redirecting…" : label}
@@ -187,7 +187,7 @@ export function PricingClient() {
 
       {/* Hero */}
       <div className="border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-10 sm:py-16 flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-end gap-6">
+        <div className="max-w-300 mx-auto px-4 sm:px-8 py-10 sm:py-16 flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-end gap-6">
           <div className="sm:col-span-7">
             <div className="mono text-[10px] uppercase tracking-[0.14em] mb-4" style={{ color: "var(--t3)" }}>
               upgrade
@@ -197,7 +197,7 @@ export function PricingClient() {
               <br />
               <span style={{ color: "var(--t3)" }}>Then validate without limits.</span>
             </h1>
-            <p className="mt-6 max-w-[520px] text-[14px] sm:text-[15px] leading-[1.6]" style={{ color: "var(--t2)" }}>
+            <p className="mt-6 max-w-130 text-[14px] sm:text-[15px] leading-[1.6]" style={{ color: "var(--t2)" }}>
               Validate ideas with real signals from Reddit, GitHub, HN, Dev.to, and more.{" "}
               <span style={{ color: "var(--t3)" }}>Cancel anytime — really.</span>
             </p>
@@ -221,7 +221,7 @@ export function PricingClient() {
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+      <div className="max-w-300 mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Plans — 4 columns */}
         <div className="grid grid-cols-1 sm:grid-cols-4 border rounded-md overflow-hidden" style={{ borderColor: "var(--border)" }}>
 
@@ -233,7 +233,7 @@ export function PricingClient() {
             <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>forever</div>
             <Link
               href="/login"
-              className="block w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors mb-5"
+              className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors mb-5"
               style={{ borderColor: "var(--border)", color: "var(--t1)" }}
             >
               Get started
@@ -246,13 +246,13 @@ export function PricingClient() {
                 "1 seat",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--t3)" }}>✓</span>
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--t3)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
                 </li>
               ))}
               {["Competitor Intelligence", "PDF / JSON export"].map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--border)" }}>—</span>
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
                   <span className="text-[12px]" style={{ color: "var(--t3)" }}>{f}</span>
                 </li>
               ))}
@@ -261,7 +261,7 @@ export function PricingClient() {
 
           {/* Pro */}
           <div className="p-6 border-b sm:border-b-0 sm:border-r relative flex flex-col" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
-            <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "var(--accent)" }} />
+            <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: "var(--accent)" }} />
             <div className="flex items-baseline justify-between mb-1">
               <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Pro</div>
               <span className="mono text-[10px]" style={{ color: "var(--accent)" }}>● best value</span>
@@ -285,7 +285,7 @@ export function PricingClient() {
                 "24h support SLA",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--accent)" }}>✓</span>
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f}</span>
                 </li>
               ))}
@@ -315,7 +315,7 @@ export function PricingClient() {
                 "Early access to features",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--validated)" }}>✓</span>
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f}</span>
                 </li>
               ))}
@@ -331,7 +331,7 @@ export function PricingClient() {
             <div className="mb-5">
               <a
                 href="mailto:hello@pledgeoff.com"
-                className="block w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
+                className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
                 style={{ borderColor: "var(--border)", color: "var(--t1)" }}
               >
                 Contact us
@@ -347,7 +347,7 @@ export function PricingClient() {
                 "4h dedicated SLA",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--t2)" }}>✓</span>
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--t2)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
                 </li>
               ))}
@@ -364,7 +364,7 @@ export function PricingClient() {
             Specific features, not &ldquo;Limited&rdquo; vs &ldquo;Full access&rdquo;.
           </p>
           <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <div className="border rounded-md overflow-hidden min-w-[640px] mx-4 sm:mx-0" style={{ borderColor: "var(--border)" }}>
+            <div className="border rounded-md overflow-hidden min-w-160 mx-4 sm:mx-0" style={{ borderColor: "var(--border)" }}>
               {/* Column headers */}
               <div
                 className="grid grid-cols-12 gap-3 px-6 py-3 mono text-[10px] uppercase tracking-[0.14em] border-b"
