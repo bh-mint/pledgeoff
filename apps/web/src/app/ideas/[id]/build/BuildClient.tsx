@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { BuildAnalysis, TechComponent } from "@pledgeoff/core";
 import { MIN_GITHUB_SIGNALS } from "@pledgeoff/core";
 import { createClient } from "@/lib/supabase/client";
@@ -27,7 +26,6 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
   const [analysis, setAnalysis] = useState<BuildAnalysis | null>(initialAnalysis);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   async function runAnalysis() {
     setLoading(true);
@@ -47,7 +45,6 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
       }
       const body = await res.json() as { data: BuildAnalysis };
       setAnalysis(body.data);
-      router.refresh();
     } catch {
       setError("Network error. Check connection and try again.");
     } finally {

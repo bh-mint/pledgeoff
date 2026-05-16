@@ -63,13 +63,11 @@ export default async function IdeaPage({ params }: Props) {
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
   const signals = signalsResult.isOk() ? signalsResult.value : [];
-  const toolStatus = {
-    simulate: !!(simulateResult.isOk() && simulateResult.value),
-    landing: !!(landingResult.isOk() && landingResult.value),
-    customers: !!(customersResult.isOk() && customersResult.value),
-    build: !!(buildResult.isOk() && buildResult.value),
-    competitors: !!(competitorsResult.isOk() && competitorsResult.value),
-  };
+  const initialSimulation = simulateResult.isOk() ? simulateResult.value : null;
+  const initialLanding = landingResult.isOk() ? landingResult.value : null;
+  const initialCustomers = customersResult.isOk() ? customersResult.value : null;
+  const initialBuild = buildResult.isOk() ? buildResult.value : null;
+  const initialCompetitors = competitorsResult.isOk() ? competitorsResult.value : null;
 
   const { title, description, category } = parseIdeaText(idea.text);
 
@@ -121,7 +119,11 @@ export default async function IdeaPage({ params }: Props) {
           idea={idea}
           initialDecision={decision}
           initialSignals={signals}
-          toolStatus={toolStatus}
+          initialSimulation={initialSimulation}
+          initialLanding={initialLanding}
+          initialCustomers={initialCustomers}
+          initialBuild={initialBuild}
+          initialCompetitors={initialCompetitors}
         />
       </div>
       <FooterMicro />

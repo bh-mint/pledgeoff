@@ -1,26 +1,26 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { DecisionCard } from "@/components/DecisionCard";
 import { ValidatingLoader } from "@/components/ValidatingLoader";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
-import type { Idea, Decision, Signal } from "@pledgeoff/core";
-
-interface ToolStatus {
-  simulate: boolean;
-  landing: boolean;
-  customers: boolean;
-  build: boolean;
-  competitors: boolean;
-}
+import { SimulateClient } from "./simulate/SimulateClient";
+import { LandingClient } from "./landing/LandingClient";
+import { CustomersClient } from "./customers/CustomersClient";
+import { BuildClient } from "./build/BuildClient";
+import { CompetitorsClient } from "./competitors/CompetitorsClient";
+import type { Idea, Decision, Signal, Simulation, LandingPage, CustomerAnalysis, BuildAnalysis, CompetitorAnalysis } from "@pledgeoff/core";
 
 interface IdeaPageClientProps {
   idea: Idea;
   initialDecision: Decision | null;
   initialSignals: Signal[];
-  toolStatus: ToolStatus;
+  initialSimulation: Simulation | null;
+  initialLanding: LandingPage | null;
+  initialCustomers: CustomerAnalysis | null;
+  initialBuild: BuildAnalysis | null;
+  initialCompetitors: CompetitorAnalysis | null;
 }
 
 const POLL_INTERVAL_MS = 4000;
@@ -93,6 +93,7 @@ const SOURCE_NAME: Record<string, string> = {
 };
 
 type Verdict = "GO" | "KILL" | "PIVOT";
+type ToolKey = "simulate" | "landing" | "customers" | "build" | "competitors";
 
 const OTTO_MESSAGE: Record<Verdict, (score: number | undefined) => string> = {
   GO: (score) =>
@@ -103,163 +104,185 @@ const OTTO_MESSAGE: Record<Verdict, (score: number | undefined) => string> = {
     `Your idea scored KILL${score !== undefined ? ` with a ${score}/100` : ""}. The data shows the market either doesn't exist at scale or is dominated by entrenched players you can't compete with right now. Before you move on, run Competitor Intelligence — understand exactly why, so you don't fall into the same trap with your next idea.`,
 };
 
-interface ToolDef {
-  num: string;
-  label: string;
-  desc: string;
-  href: string;
-  done: boolean;
-  lockedReason?: string;
-}
+const TOOL_META: Record<ToolKey, { num: string; label: string; desc: string }> = {
+  simulate:    { num: "02", label: "Simulate Revenue",        desc: "TAM, 3 pricing scenarios, break-even" },
+  landing:     { num: "03", label: "Landing Page",            desc: "AI-generated headline, features, CTA" },
+  customers:   { num: "04", label: "Customer Intelligence",   desc: "Segments, pain points, real quotes" },
+  build:       { num: "05", label: "Engineering Stack",       desc: "Tech stack, libraries, GitHub gaps" },
+  competitors: { num: "06", label: "Competitor Intelligence", desc: "Who exists, how they position, where the gaps are" },
+};
 
-function getToolConfig(
-  verdict: Verdict,
-  ideaId: string,
-  toolStatus: ToolStatus,
-): { available: ToolDef[]; locked: ToolDef[] } {
-  const all = {
-    simulate: { num: "02", label: "Simulate Revenue", desc: "TAM, 3 pricing scenarios, break-even", href: `/ideas/${ideaId}/simulate`, done: toolStatus.simulate },
-    landing:   { num: "03", label: "Landing Page", desc: "AI-generated headline, features, CTA", href: `/ideas/${ideaId}/landing`, done: toolStatus.landing },
-    customers: { num: "04", label: "Customer Intelligence", desc: "Segments, pain points, real quotes", href: `/ideas/${ideaId}/customers`, done: toolStatus.customers },
-    build:     { num: "05", label: "Engineering Stack", desc: "Tech stack, libraries, GitHub gaps", href: `/ideas/${ideaId}/build`, done: toolStatus.build },
-    competitors: { num: "06", label: "Competitor Intelligence", desc: "Who exists, how they position, where the gaps are", href: `/ideas/${ideaId}/competitors`, done: toolStatus.competitors },
-  };
+const LOCK_REASONS: Record<ToolKey, Record<"PIVOT" | "KILL", string>> = {
+  simulate: {
+    PIVOT: "Don't model revenue for a direction you're about to change. Run this after you confirm the new angle.",
+    KILL:  "No point projecting revenue for an idea you won't build.",
+  },
+  landing: {
+    PIVOT: "You'd be writing copy for an idea that needs to change. Wasted time and effort.",
+    KILL:  "No point writing copy for an idea you won't launch.",
+  },
+  customers: {
+    PIVOT: "",
+    KILL:  "No point defining a customer profile for a market that doesn't exist at scale.",
+  },
+  build: {
+    PIVOT: "Your tech stack depends on what exactly you're building. Lock the direction first.",
+    KILL:  "No point planning architecture for something that won't be built.",
+  },
+  competitors: {
+    PIVOT: "",
+    KILL:  "",
+  },
+};
 
+function getAvailability(verdict: Verdict): { available: ToolKey[]; locked: Array<{ key: ToolKey; reason: string }> } {
   if (verdict === "GO") {
-    return {
-      available: [all.simulate, all.landing, all.customers, all.build, all.competitors],
-      locked: [],
-    };
+    return { available: ["simulate", "landing", "customers", "build", "competitors"], locked: [] };
   }
-
   if (verdict === "PIVOT") {
     return {
-      available: [all.customers, all.competitors],
+      available: ["customers", "competitors"],
       locked: [
-        { ...all.simulate, lockedReason: "Don't model revenue for a direction you're about to change. Run this after you confirm the new angle." },
-        { ...all.landing,  lockedReason: "You'd be writing copy for an idea that needs to change. Wasted time and effort." },
-        { ...all.build,    lockedReason: "Your tech stack depends on what exactly you're building. Lock the direction first." },
+        { key: "simulate", reason: LOCK_REASONS.simulate.PIVOT },
+        { key: "landing",  reason: LOCK_REASONS.landing.PIVOT },
+        { key: "build",    reason: LOCK_REASONS.build.PIVOT },
       ],
     };
   }
-
   return {
-    available: [all.competitors],
+    available: ["competitors"],
     locked: [
-      { ...all.simulate,   lockedReason: "No point projecting revenue for an idea you won't build." },
-      { ...all.landing,    lockedReason: "No point writing copy for an idea you won't launch." },
-      { ...all.customers,  lockedReason: "No point defining a customer profile for a market that doesn't exist at scale." },
-      { ...all.build,      lockedReason: "No point planning architecture for something that won't be built." },
+      { key: "simulate",  reason: LOCK_REASONS.simulate.KILL },
+      { key: "landing",   reason: LOCK_REASONS.landing.KILL },
+      { key: "customers", reason: LOCK_REASONS.customers.KILL },
+      { key: "build",     reason: LOCK_REASONS.build.KILL },
     ],
   };
+}
+
+interface ToolSectionProps {
+  toolKey: ToolKey;
+  done: boolean;
+  children: React.ReactNode;
+}
+
+function ToolSection({ toolKey, done, children }: ToolSectionProps) {
+  const meta = TOOL_META[toolKey];
+  return (
+    <div className="pt-6 border-t" style={{ borderColor: "var(--border)" }}>
+      <div className="flex items-center gap-3 mb-4">
+        <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{meta.num}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-semibold leading-snug" style={{ color: "var(--t1)" }}>{meta.label}</p>
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>{meta.desc}</p>
+        </div>
+        {done && (
+          <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
+            style={{ background: "rgba(125,214,107,0.12)", color: "var(--validated)", border: "1px solid rgba(125,214,107,0.3)" }}>
+            ✓ done
+          </span>
+        )}
+      </div>
+      {children}
+    </div>
+  );
 }
 
 interface OttoSectionProps {
   verdict: Verdict;
   score: number | undefined;
   ideaId: string;
-  toolStatus: ToolStatus;
+  initialSimulation: Simulation | null;
+  initialLanding: LandingPage | null;
+  initialCustomers: CustomerAnalysis | null;
+  initialBuild: BuildAnalysis | null;
+  initialCompetitors: CompetitorAnalysis | null;
 }
 
-function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
+function OttoSection({
+  verdict, score, ideaId,
+  initialSimulation, initialLanding, initialCustomers, initialBuild, initialCompetitors,
+}: OttoSectionProps) {
   const [overrideAll, setOverrideAll] = useState(false);
   const message = OTTO_MESSAGE[verdict](score);
-  const { available, locked } = getToolConfig(verdict, ideaId, toolStatus);
-  const showLocked = locked.length > 0 && !overrideAll;
+  const { available, locked } = getAvailability(verdict);
+
+  const isDone: Record<ToolKey, boolean> = {
+    simulate:    !!initialSimulation,
+    landing:     !!initialLanding,
+    customers:   !!initialCustomers,
+    build:       !!initialBuild,
+    competitors: !!initialCompetitors,
+  };
+
+  function renderToolContent(key: ToolKey) {
+    switch (key) {
+      case "simulate":    return <SimulateClient    ideaId={ideaId} initialSimulation={initialSimulation} />;
+      case "landing":     return <LandingClient     ideaId={ideaId} initialLanding={initialLanding} />;
+      case "customers":   return <CustomersClient   ideaId={ideaId} initialAnalysis={initialCustomers} />;
+      case "build":       return <BuildClient       ideaId={ideaId} initialAnalysis={initialBuild} />;
+      case "competitors": return <CompetitorsClient ideaId={ideaId} initialAnalysis={initialCompetitors} />;
+    }
+  }
+
+  const lockedToShow = locked.filter(({ key }) => key !== "customers" || verdict !== "PIVOT");
 
   return (
-    <div className="space-y-4">
-      <p className="text-[13px] leading-[1.65]" style={{ color: "var(--t2)" }}>
+    <div className="space-y-0">
+      <p className="text-[13px] leading-[1.65] mb-6" style={{ color: "var(--t2)" }}>
         {message}
       </p>
 
-      {/* Available tools */}
-      {available.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
-            {verdict === "GO" ? "Run now" : "Run these tools"}
-          </p>
-          {available.map((tool) => (
-            <ToolRow key={tool.num} tool={tool} />
-          ))}
-        </div>
-      )}
+      {/* Available tools — rendered inline */}
+      {available.map((key) => (
+        <ToolSection key={key} toolKey={key} done={isDone[key]}>
+          {renderToolContent(key)}
+        </ToolSection>
+      ))}
 
-      {/* Locked tools — collapsed */}
-      {showLocked && (
-        <div className="space-y-1.5">
-          <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
-            {verdict === "PIVOT" ? "Available after re-validation" : "Not available"}
-          </p>
-          {locked.map((tool) => (
-            <div key={tool.num} className="rounded border px-3 py-2.5"
-              style={{ borderColor: "var(--border)", background: "var(--surface)", opacity: 0.45 }}>
-              <div className="flex items-center gap-3 mb-1">
-                <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{tool.num}</span>
-                <p className="flex-1 text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{tool.label}</p>
-                <span className="mono text-[9px] px-1.5 py-0.5 rounded border flex-shrink-0"
-                  style={verdict === "PIVOT"
-                    ? { borderColor: "rgba(232,179,65,0.35)", color: "var(--caution)", background: "rgba(232,179,65,0.08)" }
-                    : { borderColor: "var(--border)", color: "var(--t3)" }}>
-                  {verdict === "PIVOT" ? "after pivot" : "unavailable"}
-                </span>
-              </div>
-              <p className="mono text-[10px] ml-8 leading-[1.55]" style={{ color: "var(--t3)" }}>
-                ↳ {tool.lockedReason}
-              </p>
+      {/* Override — all tools unlocked */}
+      {overrideAll && locked.map(({ key }) => (
+        <ToolSection key={key} toolKey={key} done={isDone[key]}>
+          {renderToolContent(key)}
+        </ToolSection>
+      ))}
+
+      {/* Locked tools — collapsed with reason */}
+      {!overrideAll && lockedToShow.map(({ key, reason }) => (
+        <div key={key} className="pt-6 border-t" style={{ borderColor: "var(--border)" }}>
+          <div className="rounded border px-3 py-2.5"
+            style={{ borderColor: "var(--border)", background: "var(--surface)", opacity: 0.45 }}>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{TOOL_META[key].num}</span>
+              <p className="flex-1 text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{TOOL_META[key].label}</p>
+              <span className="mono text-[9px] px-1.5 py-0.5 rounded border flex-shrink-0"
+                style={verdict === "PIVOT"
+                  ? { borderColor: "rgba(232,179,65,0.35)", color: "var(--caution)", background: "rgba(232,179,65,0.08)" }
+                  : { borderColor: "var(--border)", color: "var(--t3)" }}>
+                {verdict === "PIVOT" ? "after pivot" : "unavailable"}
+              </span>
             </div>
-          ))}
+            <p className="mono text-[10px] ml-8 leading-[1.55]" style={{ color: "var(--t3)" }}>
+              ↳ {reason}
+            </p>
+          </div>
         </div>
-      )}
+      ))}
 
-      {/* Override — unlocked all */}
-      {overrideAll && locked.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
-            All tools
-          </p>
-          {locked.map((tool) => (
-            <ToolRow key={tool.num} tool={tool} />
-          ))}
-        </div>
-      )}
-
-      {/* Override button — shown only for PIVOT/KILL */}
+      {/* Override button — PIVOT / KILL only */}
       {locked.length > 0 && (
-        <button
-          onClick={() => setOverrideAll((v) => !v)}
-          className="mono text-[10px] transition-colors pt-1"
-          style={{ color: overrideAll ? "var(--validated)" : "var(--kill)" }}
-        >
-          {overrideAll
-            ? "← Back to Otto's recommendations"
-            : "Ignore recommendations — run all tools →"}
-        </button>
+        <div className="pt-4">
+          <button
+            onClick={() => setOverrideAll((v) => !v)}
+            className="mono text-[10px] transition-colors"
+            style={{ color: overrideAll ? "var(--validated)" : "var(--kill)" }}
+          >
+            {overrideAll
+              ? "← Back to Otto's recommendations"
+              : "Ignore recommendations — run all tools →"}
+          </button>
+        </div>
       )}
-    </div>
-  );
-}
-
-function ToolRow({ tool }: { tool: ToolDef }) {
-  return (
-    <div className="rounded border px-3 py-2.5 flex items-center gap-3"
-      style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-      <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{tool.num}</span>
-      <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{tool.label}</p>
-        <p className="mono text-[10px] leading-snug" style={{ color: "var(--t3)" }}>{tool.desc}</p>
-      </div>
-      {tool.done && (
-        <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
-          style={{ background: "rgba(125,214,107,0.12)", color: "var(--validated)", border: "1px solid rgba(125,214,107,0.3)" }}>
-          ✓
-        </span>
-      )}
-      <Link href={tool.href}
-        className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 transition-opacity hover:opacity-80"
-        style={{ borderColor: "rgba(125,214,107,0.4)", color: "var(--validated)", background: "rgba(125,214,107,0.08)" }}>
-        {tool.done ? "View →" : "Run →"}
-      </Link>
     </div>
   );
 }
@@ -268,7 +291,11 @@ export function IdeaPageClient({
   idea,
   initialDecision,
   initialSignals,
-  toolStatus,
+  initialSimulation,
+  initialLanding,
+  initialCustomers,
+  initialBuild,
+  initialCompetitors,
 }: IdeaPageClientProps) {
   const [decision, setDecision] = useState<Decision | null>(initialDecision);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
@@ -278,9 +305,7 @@ export function IdeaPageClient({
 
   const fetchLatest = useCallback(async () => {
     const supabase = createClient();
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 
     const res = await fetch(`/api/v1/ideas/${idea.id}`, {
@@ -304,19 +329,13 @@ export function IdeaPageClient({
 
   const analysisS =
     decision
-      ? Math.max(
-          1,
-          Math.round(
-            (new Date(decision.createdAt).getTime() -
-              new Date(idea.createdAt).getTime()) /
-              1000
-          )
-        )
+      ? Math.max(1, Math.round(
+          (new Date(decision.createdAt).getTime() - new Date(idea.createdAt).getTime()) / 1000
+        ))
       : null;
 
   const valId = `val_${idea.id.slice(0, 8)}`;
 
-  // Group signals by source for the right panel
   const bySource = signals.reduce<Record<string, Signal[]>>((acc, s) => {
     (acc[s.source] ??= []).push(s);
     return acc;
@@ -357,7 +376,7 @@ export function IdeaPageClient({
       {/* ── 3-column grid ── */}
       <div className="grid xl:grid-cols-[420px_1fr_320px] gap-8 items-start">
 
-        {/* ── LEFT: Analysis (sticky) ── */}
+        {/* ── LEFT: Decision card (sticky) ── */}
         <div className="xl:sticky xl:top-6 xl:self-start">
           {decision ? (
             <>
@@ -371,10 +390,10 @@ export function IdeaPageClient({
           )}
         </div>
 
-        {/* ── MIDDLE: Otto + Intelligence Tools ── */}
+        {/* ── MIDDLE: Otto + Intelligence Tools inline ── */}
         {decision ? (
           <div className="min-w-0">
-            {/* Otto header — centered, large */}
+            {/* Otto header */}
             <div className="flex flex-col items-center text-center gap-4 mb-8 pb-7 border-b"
               style={{ borderColor: "var(--border)" }}>
               <div className="relative w-28 h-28 flex items-center justify-center">
@@ -402,7 +421,11 @@ export function IdeaPageClient({
               verdict={decision.verdict as Verdict}
               score={decision.score}
               ideaId={idea.id}
-              toolStatus={toolStatus}
+              initialSimulation={initialSimulation}
+              initialLanding={initialLanding}
+              initialCustomers={initialCustomers}
+              initialBuild={initialBuild}
+              initialCompetitors={initialCompetitors}
             />
           </div>
         ) : (

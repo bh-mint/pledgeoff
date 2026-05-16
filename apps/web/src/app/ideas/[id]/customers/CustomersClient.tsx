@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { CustomerAnalysis, CustomerSegment } from "@pledgeoff/core";
 import { createClient } from "@/lib/supabase/client";
 
@@ -31,7 +30,6 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
   const [analysis, setAnalysis] = useState<CustomerAnalysis | null>(initialAnalysis);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   async function runAnalysis() {
     setLoading(true);
@@ -51,7 +49,6 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
       }
       const body = await res.json() as { data: CustomerAnalysis };
       setAnalysis(body.data);
-      router.refresh();
     } catch {
       setError("Network error. Check connection and try again.");
     } finally {
