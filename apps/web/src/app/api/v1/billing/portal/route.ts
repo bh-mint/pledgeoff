@@ -54,6 +54,13 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
+  void container.auditLog.log({
+    userId: user.id,
+    action: 'billing_portal_accessed',
+    resourceType: 'subscription',
+    traceId,
+  });
+
   return Response.json(
     { data: { url: portalResult.value } },
     { status: 200, headers: { 'X-Trace-Id': traceId } },

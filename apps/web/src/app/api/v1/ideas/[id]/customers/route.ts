@@ -66,5 +66,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     );
   }
 
+  void container.auditLog.log({
+    userId,
+    action: 'tool_accessed',
+    resourceType: 'idea',
+    resourceId: ideaId,
+    metadata: { tool: 'customers' },
+    traceId,
+  });
+
   return Response.json({ data: result.value }, { status: 201, headers: { 'X-Trace-Id': traceId } });
 }

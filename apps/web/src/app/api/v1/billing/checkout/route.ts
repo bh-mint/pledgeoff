@@ -73,6 +73,14 @@ export async function POST(req: Request) {
     );
   }
 
+  void container.auditLog.log({
+    userId: user.id,
+    action: 'checkout_initiated',
+    resourceType: 'subscription',
+    metadata: { priceId: parsed.data.priceId },
+    traceId,
+  });
+
   return Response.json(
     { data: { url: sessionResult.value.url } },
     { status: 200, headers: { 'X-Trace-Id': traceId } },
