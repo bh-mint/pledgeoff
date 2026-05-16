@@ -96,11 +96,11 @@ type Verdict = "GO" | "KILL" | "PIVOT";
 
 const OTTO_MESSAGE: Record<Verdict, (score: number | undefined) => string> = {
   GO: (score) =>
-    `Ideea ta a primit GO${score !== undefined ? ` cu scor ${score}/100` : ""}. Datele confirmă că durerea există și piața nu e suprasaturată. Ai lumina verde — acum e momentul să construiești inteligent. Rulează tool-urile de mai jos pentru a înțelege cine cumpără, cât poți câștiga, cine te concurează și ce trebuie să construiești.`,
+    `Your idea scored GO${score !== undefined ? ` with a ${score}/100` : ""}. The data confirms the pain is real and the market isn't oversaturated. You have a green light — now build smart. Run the tools below to understand who buys, how much you can make, who you're up against, and what to build first.`,
   PIVOT: (score) =>
-    `Ideea ta a primit PIVOT${score !== undefined ? ` cu scor ${score}/100` : ""}. Baza e solidă — există o durere reală în piață. Problema e direcția: modul în care o abordezi acum nu funcționează pe piața actuală. Rulează cele 2 tool-uri de mai jos pentru a înțelege unde e oportunitatea reală, apoi ajustează direcția și re-validează. Dacă obții GO, toate tool-urile se deblochează automat.`,
+    `Your idea scored PIVOT${score !== undefined ? ` with a ${score}/100` : ""}. The foundation is solid — there's a real pain in the market. The problem is the direction: the way you're approaching it now doesn't fit the current market. Run the 2 tools below to find where the real opportunity is, then adjust your direction and re-validate. If you get GO, all tools unlock automatically.`,
   KILL: (score) =>
-    `Ideea ta a primit KILL${score !== undefined ? ` cu scor ${score}/100` : ""}. Datele arată că piața fie nu există la scară, fie e dominată de jucători consolidați pe care nu îi poți ataca acum. Înainte să treci mai departe, rulează Competitor Intelligence — înțelege exact de ce, ca să eviți aceeași capcană la ideea următoare.`,
+    `Your idea scored KILL${score !== undefined ? ` with a ${score}/100` : ""}. The data shows the market either doesn't exist at scale or is dominated by entrenched players you can't compete with right now. Before you move on, run Competitor Intelligence — understand exactly why, so you don't fall into the same trap with your next idea.`,
 };
 
 interface ToolDef {
@@ -136,9 +136,9 @@ function getToolConfig(
     return {
       available: [all.customers, all.competitors],
       locked: [
-        { ...all.simulate, lockedReason: "Nu estimezi venit pentru o direcție care urmează să se schimbe. Rulează după ce confirmi noul unghi." },
-        { ...all.landing,  lockedReason: "Ai scrie copy pentru o idee care se va schimba. Pierzi timp și bani." },
-        { ...all.build,    lockedReason: "Stack-ul tehnic depinde de ce construiești exact. Stabilește direcția mai întâi." },
+        { ...all.simulate, lockedReason: "Don't model revenue for a direction you're about to change. Run this after you confirm the new angle." },
+        { ...all.landing,  lockedReason: "You'd be writing copy for an idea that needs to change. Wasted time and effort." },
+        { ...all.build,    lockedReason: "Your tech stack depends on what exactly you're building. Lock the direction first." },
       ],
     };
   }
@@ -146,10 +146,10 @@ function getToolConfig(
   return {
     available: [all.competitors],
     locked: [
-      { ...all.simulate,   lockedReason: "Nu proiectezi venit pentru o idee pe care nu o vei construi." },
-      { ...all.landing,    lockedReason: "Nu scrii copy pentru o idee pe care nu o vei lansa." },
-      { ...all.customers,  lockedReason: "Nu definești profilul clientului pentru o piață care nu există la scară." },
-      { ...all.build,      lockedReason: "Nu planifici arhitectura pentru ceva ce nu se va construi." },
+      { ...all.simulate,   lockedReason: "No point projecting revenue for an idea you won't build." },
+      { ...all.landing,    lockedReason: "No point writing copy for an idea you won't launch." },
+      { ...all.customers,  lockedReason: "No point defining a customer profile for a market that doesn't exist at scale." },
+      { ...all.build,      lockedReason: "No point planning architecture for something that won't be built." },
     ],
   };
 }
@@ -177,7 +177,7 @@ function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
       {available.length > 0 && (
         <div className="space-y-1.5">
           <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
-            {verdict === "GO" ? "Rulează acum" : "Rulează aceste tool-uri"}
+            {verdict === "GO" ? "Run now" : "Run these tools"}
           </p>
           {available.map((tool) => (
             <ToolRow key={tool.num} tool={tool} />
@@ -189,7 +189,7 @@ function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
       {showLocked && (
         <div className="space-y-1.5">
           <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
-            {verdict === "PIVOT" ? "Disponibile după re-validare" : "Indisponibile"}
+            {verdict === "PIVOT" ? "Available after re-validation" : "Not available"}
           </p>
           {locked.map((tool) => (
             <div key={tool.num} className="rounded border px-3 py-2.5"
@@ -199,7 +199,7 @@ function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
                 <p className="flex-1 text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{tool.label}</p>
                 <span className="mono text-[9px] px-1.5 py-0.5 rounded border flex-shrink-0"
                   style={{ borderColor: "var(--border)", color: "var(--t3)" }}>
-                  {verdict === "PIVOT" ? "după pivot" : "indisponibil"}
+                  {verdict === "PIVOT" ? "after pivot" : "unavailable"}
                 </span>
               </div>
               <p className="mono text-[10px] ml-8 leading-[1.55]" style={{ color: "var(--t3)" }}>
@@ -214,7 +214,7 @@ function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
       {overrideAll && locked.length > 0 && (
         <div className="space-y-1.5">
           <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
-            Toate tool-urile
+            All tools
           </p>
           {locked.map((tool) => (
             <ToolRow key={tool.num} tool={tool} />
@@ -230,8 +230,8 @@ function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
           style={{ color: overrideAll ? "var(--t3)" : "var(--t3)" }}
         >
           {overrideAll
-            ? "← Înapoi la recomandările Otto"
-            : "Ignoră recomandările — rulează toate tool-urile →"}
+            ? "← Back to Otto's recommendations"
+            : "Ignore recommendations — run all tools →"}
         </button>
       )}
     </div>
@@ -373,7 +373,7 @@ export function IdeaPageClient({
                     style={{ background: "var(--accent)" }} />
                 </div>
                 <span className="display text-[13px] font-semibold" style={{ color: "var(--accent)" }}>Otto</span>
-                <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>· co-founder tău AI</span>
+                <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>· your AI co-founder</span>
               </div>
 
               <OttoSection
