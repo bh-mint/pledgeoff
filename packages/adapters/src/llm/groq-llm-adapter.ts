@@ -1,7 +1,7 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -11,6 +11,7 @@ import { buildCustomerPrompt, CUSTOMER_PROMPT_VERSION } from './customer-prompt.
 import { buildBuildPrompt, BUILD_PROMPT_VERSION } from './build-prompt.v1';
 import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './search-queries-prompt.v1';
 import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
+import { buildRelevancePrompt, RELEVANCE_PROMPT_VERSION } from './relevance-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
 const tracer = getTracer('groq-llm-adapter');
@@ -104,6 +105,13 @@ const LLMSearchQueriesResponseSchema = z.object({
   google: z.array(z.string().min(1)).min(1).max(5),
 });
 
+const LLMRelevanceResponseSchema = z.object({
+  scores: z.array(z.object({
+    id: z.string().min(1),
+    score: z.number().min(0).max(100),
+  })),
+});
+
 const CompetitorItemSchema = z.object({
   name: z.string().min(1).max(100),
   url: z.string().url().optional(),
@@ -142,6 +150,26 @@ export class GroqLLMAdapter implements ILLMClient {
         `You are a market research assistant using prompt version ${SEARCH_QUERIES_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMSearchQueriesResponseSchema,
         'generateSearchQueries',
+        request.traceId,
+      );
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  async scoreSignalRelevance(request: LLMRelevanceRequest): Promise<Result<LLMRelevanceResponse, LLMClientError>> {
+    return tracer.startActiveSpan('groq.score-signal-relevance', async (span) => {
+      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model, 'signal.count': request.signals.length });
+      const result = await this._callGroq(
+        buildRelevancePrompt(request.ideaText, request.signals),
+        `You are a relevance scoring assistant using prompt version ${RELEVANCE_PROMPT_VERSION}. Always respond with valid JSON only.`,
+        LLMRelevanceResponseSchema,
+        'scoreSignalRelevance',
         request.traceId,
       );
       if (result.isErr()) {

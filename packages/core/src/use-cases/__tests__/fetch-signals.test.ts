@@ -51,6 +51,7 @@ function makeAdapter(signals: Signal[], sourceName = 'reddit'): ISourceAdapter {
 function makeLLMClient(queries = { devto: ['code review pull request automation'], google: ['code review tool'] }): ILLMClient {
   return {
     generateSearchQueries: vi.fn().mockResolvedValue(ok(queries)),
+    scoreSignalRelevance: vi.fn().mockResolvedValue(ok({ scores: [] })),
     generateDecision: vi.fn(),
     generateSimulation: vi.fn(),
     generateLanding: vi.fn(),

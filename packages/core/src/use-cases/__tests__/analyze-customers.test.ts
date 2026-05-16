@@ -55,7 +55,7 @@ function makeSignalRepo(): ISignalRepository {
 
 function makeLLM(response = llmResponse): ILLMClient {
   return {
-    generateSearchQueries: vi.fn(), generateDecision: vi.fn(),
+    generateSearchQueries: vi.fn(), scoreSignalRelevance: vi.fn(), generateDecision: vi.fn(),
     generateSimulation: vi.fn(),
     generateLanding: vi.fn(),
     analyzeCustomers: vi.fn().mockResolvedValue(ok(response)),
@@ -105,7 +105,7 @@ describe('AnalyzeCustomersUseCase', () => {
   it('propagates LLM error', async () => {
     const llmError = new LLMClientError('timeout');
     const llm: ILLMClient = {
-      generateSearchQueries: vi.fn(), generateDecision: vi.fn(),
+      generateSearchQueries: vi.fn(), scoreSignalRelevance: vi.fn(), generateDecision: vi.fn(),
       generateSimulation: vi.fn(),
       generateLanding: vi.fn(),
       analyzeCustomers: vi.fn().mockResolvedValue(err(llmError)),
