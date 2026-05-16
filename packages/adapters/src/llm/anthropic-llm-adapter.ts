@@ -337,7 +337,8 @@ export class AnthropicLLMAdapter implements ILLMClient {
 
       let parsed: unknown;
       try {
-        parsed = JSON.parse(content.text);
+        const clean = content.text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+        parsed = JSON.parse(clean);
       } catch {
         log.error({ traceId, target: 'anthropic', operation, latencyMs: Date.now() - start, outcome: 'error', errorCode: 'INVALID_JSON' }, 'Anthropic returned invalid JSON');
         return err(new LLMClientError(`Invalid JSON from LLM: ${content.text.slice(0, 200)}`));
