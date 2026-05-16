@@ -18,15 +18,21 @@ function makeSupabase(overrides: {
   selectData?: unknown[];
   selectError?: { message: string } | null;
 } = {}) {
-  const updateMock = vi.fn().mockReturnValue({
-    eq: vi.fn().mockResolvedValue({ error: null }),
-  });
+  // claim update: .update().eq().eq().select() → { data: [{ event_id }], error: null }
+  const claimedSelectMock = vi.fn().mockResolvedValue({ data: [{ event_id: 'claimed' }], error: null });
+  const claimEq2Mock = vi.fn().mockReturnValue({ select: claimedSelectMock });
+  const claimEq1Mock = vi.fn().mockReturnValue({ eq: claimEq2Mock });
+  const updateMock = vi.fn().mockReturnValue({ eq: claimEq1Mock });
+
+  // select: .select().eq().lte().order().limit()
   const selectMock = vi.fn().mockReturnValue({
     eq: vi.fn().mockReturnValue({
-      order: vi.fn().mockReturnValue({
-        limit: vi.fn().mockResolvedValue({
-          data: overrides.selectData ?? [],
-          error: overrides.selectError ?? null,
+      lte: vi.fn().mockReturnValue({
+        order: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue({
+            data: overrides.selectData ?? [],
+            error: overrides.selectError ?? null,
+          }),
         }),
       }),
     }),
@@ -99,7 +105,13 @@ describe('PostgresEventBus', () => {
   it('processOutbox increments attempts on handler failure', async () => {
     const event = makeEvent();
     const row = { event_id: event.eventId, event_type: event.eventType, payload: event, attempts: 0 };
-    const updateEqMock = vi.fn().mockResolvedValue({ error: null });
+    // claim: .update().eq().eq().select() → { data: [{ event_id }] }
+    // restore: .update().eq() → { error: null }
+    const claimedSelectMock = vi.fn().mockResolvedValue({ data: [{ event_id: row.event_id }], error: null });
+    const claimEq2Mock = vi.fn().mockReturnValue({ select: claimedSelectMock });
+    const updateEqMock = vi.fn()
+      .mockReturnValueOnce({ eq: claimEq2Mock })         // first call: claim chain
+      .mockResolvedValueOnce({ error: null });            // second call: restore chain
     const updateMock = vi.fn().mockReturnValue({ eq: updateEqMock });
 
     const supabase = {
@@ -107,8 +119,10 @@ describe('PostgresEventBus', () => {
         insert: vi.fn().mockResolvedValue({ error: null }),
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            order: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue({ data: [row], error: null }),
+            lte: vi.fn().mockReturnValue({
+              order: vi.fn().mockReturnValue({
+                limit: vi.fn().mockResolvedValue({ data: [row], error: null }),
+              }),
             }),
           }),
         }),
