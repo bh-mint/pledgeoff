@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
@@ -116,10 +117,9 @@ function UpgradeButton({
   async function handleClick() {
     setLoading(true);
     try {
-      const token = document.cookie
-        .split("; ")
-        .find((c) => c.startsWith("sb-access-token="))
-        ?.split("=")[1];
+      const supabase = createClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
 
       const res = await fetch("/api/v1/billing/checkout", {
         method: "POST",
@@ -225,71 +225,132 @@ export function PricingClient() {
         <div className="grid grid-cols-1 sm:grid-cols-4 border rounded-md overflow-hidden" style={{ borderColor: "var(--border)" }}>
 
           {/* Free */}
-          <div className="p-6 border-b sm:border-b-0 sm:border-r" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <div className="p-6 border-b sm:border-b-0 sm:border-r flex flex-col" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
             <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Free</div>
-            <div className="text-[12px] mb-6" style={{ color: "var(--t3)" }}>kick the tires</div>
-            <div className="display text-[48px] tnum font-semibold mb-1 leading-none" style={{ color: "var(--t1)" }}>€0</div>
-            <div className="mono text-[11px] mb-6" style={{ color: "var(--t3)" }}>forever</div>
+            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>kick the tires</div>
+            <div className="display text-[42px] tnum font-semibold mb-0.5 leading-none" style={{ color: "var(--t1)" }}>€0</div>
+            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>forever</div>
             <Link
               href="/login"
-              className="block w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
+              className="block w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors mb-5"
               style={{ borderColor: "var(--border)", color: "var(--t1)" }}
             >
               Get started
             </Link>
-            <div className="mt-4 mono text-[10px] leading-[1.6]" style={{ color: "var(--t3)" }}>
-              1 validation / mo · Reddit + GitHub
-            </div>
+            <ul className="space-y-2 flex-1">
+              {[
+                "1 validation / month",
+                "Reddit + GitHub signals",
+                "7-day idea history",
+                "1 seat",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--t3)" }}>✓</span>
+                  <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
+                </li>
+              ))}
+              {["Competitor Intelligence", "PDF / JSON export"].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--border)" }}>—</span>
+                  <span className="text-[12px]" style={{ color: "var(--t3)" }}>{f}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Pro */}
-          <div className="p-6 border-b sm:border-b-0 sm:border-r relative" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
+          <div className="p-6 border-b sm:border-b-0 sm:border-r relative flex flex-col" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
             <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "var(--accent)" }} />
             <div className="flex items-baseline justify-between mb-1">
               <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Pro</div>
-              <span className="mono text-[10px]" style={{ color: "var(--accent)" }}>● recommended</span>
+              <span className="mono text-[10px]" style={{ color: "var(--accent)" }}>● best value</span>
             </div>
-            <div className="text-[12px] mb-6" style={{ color: "var(--t3)" }}>for serious founders</div>
+            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>for serious founders</div>
             <div className="flex items-baseline gap-1">
-              <span className="display text-[48px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{proPrice}</span>
+              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{proPrice}</span>
             </div>
-            <div className="mono text-[11px] mb-6" style={{ color: "var(--t3)" }}>{proSub}</div>
-            <UpgradeButton priceId={proPriceId} label="Upgrade to Pro" primary />
-            <div className="mt-4 mono text-[10px] leading-[1.6]" style={{ color: "var(--t3)" }}>
-              cancel anytime · 30-day refund
+            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{proSub}</div>
+            <div className="mb-5">
+              <UpgradeButton priceId={proPriceId} label="Upgrade to Pro" primary />
+              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
+            <ul className="space-y-2 flex-1">
+              {[
+                "20 validations / month",
+                "All 5 signal sources",
+                "Competitor Intelligence",
+                "PDF + JSON export",
+                "1-year idea history",
+                "24h support SLA",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--accent)" }}>✓</span>
+                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Pro+ */}
-          <div className="p-6 border-b sm:border-b-0 sm:border-r" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <div className="p-6 border-b sm:border-b-0 sm:border-r flex flex-col" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
             <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Pro+</div>
-            <div className="text-[12px] mb-6" style={{ color: "var(--t3)" }}>unlimited everything</div>
+            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>unlimited everything</div>
             <div className="flex items-baseline gap-1">
-              <span className="display text-[48px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{proPlusPrice}</span>
+              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{proPlusPrice}</span>
             </div>
-            <div className="mono text-[11px] mb-6" style={{ color: "var(--t3)" }}>{proPlusSub}</div>
-            <UpgradeButton priceId={proPlusPriceId} label="Upgrade to Pro+" />
-            <div className="mt-4 mono text-[10px] leading-[1.6]" style={{ color: "var(--t3)" }}>
-              3 seats · early access · cancel anytime
+            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{proPlusSub}</div>
+            <div className="mb-5">
+              <UpgradeButton priceId={proPlusPriceId} label="Upgrade to Pro+" />
+              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
+            <ul className="space-y-2 flex-1">
+              {[
+                "Unlimited validations",
+                "All 5 signal sources",
+                "Competitor Intelligence",
+                "PDF + JSON export",
+                "Unlimited idea history",
+                "3 team seats",
+                "Early access to features",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--validated)" }}>✓</span>
+                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Agency */}
-          <div className="p-6" style={{ background: "var(--canvas)" }}>
+          <div className="p-6 flex flex-col" style={{ background: "var(--canvas)" }}>
             <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Agency</div>
-            <div className="text-[12px] mb-6" style={{ color: "var(--t3)" }}>vet client briefs</div>
-            <div className="display text-[48px] tnum font-semibold mb-1 leading-none" style={{ color: "var(--t1)" }}>—</div>
-            <div className="mono text-[11px] mb-6" style={{ color: "var(--t3)" }}>custom pricing</div>
-            <a
-              href="mailto:hello@pledgeoff.com"
-              className="block w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
-              style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-            >
-              Contact us
-            </a>
-            <div className="mt-4 mono text-[10px] leading-[1.6]" style={{ color: "var(--t3)" }}>
-              white-label · custom seats · 4h SLA
+            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>vet client briefs</div>
+            <div className="display text-[42px] tnum font-semibold mb-0.5 leading-none" style={{ color: "var(--t1)" }}>—</div>
+            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>custom pricing</div>
+            <div className="mb-5">
+              <a
+                href="mailto:hello@pledgeoff.com"
+                className="block w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
+                style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+              >
+                Contact us
+              </a>
             </div>
+            <ul className="space-y-2 flex-1">
+              {[
+                "Unlimited validations",
+                "All sources + custom",
+                "Competitor Intelligence",
+                "White-label reports",
+                "Custom team seats",
+                "4h dedicated SLA",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2">
+                  <span className="mono text-[11px] mt-0.5 flex-shrink-0" style={{ color: "var(--t2)" }}>✓</span>
+                  <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
