@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { LandingPage } from "@pledgeoff/core";
 import { createClient } from "@/lib/supabase/client";
 
@@ -15,7 +14,6 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
-  const router = useRouter();
 
   async function generate() {
     setLoading(true);
@@ -35,7 +33,6 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
       }
       const body = await res.json() as { data: LandingPage };
       setLanding(body.data);
-      router.refresh();
     } catch {
       setError("Network error. Check connection and try again.");
     } finally {

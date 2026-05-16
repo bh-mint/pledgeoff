@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import type { Simulation } from "@pledgeoff/core";
 import { createClient } from "@/lib/supabase/client";
 
@@ -33,7 +32,6 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
   const [simulation, setSimulation] = useState<Simulation | null>(initialSimulation);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   async function runSimulation() {
     setLoading(true);
@@ -53,7 +51,6 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
       }
       const body = await res.json() as { data: Simulation };
       setSimulation(body.data);
-      router.refresh();
     } catch {
       setError("Network error. Check connection and try again.");
     } finally {
