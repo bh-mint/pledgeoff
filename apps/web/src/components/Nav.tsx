@@ -8,11 +8,10 @@ import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface NavProps {
-  onWaitlistOpen?: () => void;
   loggedIn?: boolean;
 }
 
-export function Nav({ onWaitlistOpen, loggedIn: loggedInProp }: NavProps) {
+export function Nav({ loggedIn: loggedInProp }: NavProps) {
   const [user, setUser] = useState<User | null>(null);
   const isLoggedIn = loggedInProp ?? !!user;
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -152,11 +151,11 @@ export function Nav({ onWaitlistOpen, loggedIn: loggedInProp }: NavProps) {
                 onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
                 Login
               </Link>
-              <button onClick={onWaitlistOpen}
+              <Link href="/ideas/new"
                 className="inline-flex items-center h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
                 style={{ background: "var(--accent)", color: "var(--accent-fg)" }}>
                 Start free →
-              </button>
+              </Link>
             </div>
           )}
         </div>

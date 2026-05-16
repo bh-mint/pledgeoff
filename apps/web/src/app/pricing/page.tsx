@@ -3,7 +3,7 @@ import { PricingClient } from "./PricingClient";
 import { PRICING } from "@/lib/pricing.config";
 
 export const metadata: Metadata = {
-  title: "Pricing — PledgeOFF",
+  title: { absolute: "Pricing — PledgeOFF" },
   description: `Free until you're sure. Then €${PRICING.pro.monthly.eur}/mo for Pro or €${PRICING.pro_plus.monthly.eur}/mo for Pro+. Validate ideas with real signals from Reddit, GitHub, HN, and more.`,
   alternates: { canonical: "https://pledgeoff.com/pricing" },
   openGraph: {

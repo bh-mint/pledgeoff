@@ -4,7 +4,7 @@ import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "About — PledgeOFF",
+  title: { absolute: "About — PledgeOFF" },
   description:
     "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in 15 seconds.",
   alternates: { canonical: "https://pledgeoff.com/about" },
@@ -140,7 +140,7 @@ export default function AboutPage() {
               Validate your idea now.
             </div>
             <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-              3 free validations. No card required.
+              1 free validation every month. No card required.
             </p>
             <Link
               href="/ideas/new"

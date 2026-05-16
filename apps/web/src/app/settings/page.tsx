@@ -8,7 +8,7 @@ import { Nav } from "@/components/Nav";
 import { SettingsClient } from "./SettingsClient";
 
 export const metadata: Metadata = {
-  title: "Settings — PledgeOFF",
+  title: { absolute: "Settings — PledgeOFF" },
   robots: { index: false, follow: false },
 };
 

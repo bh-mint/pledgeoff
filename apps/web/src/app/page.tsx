@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { HomeClient } from "./HomeClient";
 
 export const metadata: Metadata = {
-  title: "PledgeOFF — Kill bad ideas before they kill you",
+  title: { absolute: "PledgeOFF — Kill bad ideas before they kill you" },
   description:
     "GO / KILL / PIVOT — decided by 847 live signals from Reddit and GitHub. Validate your startup idea in 15 seconds. Not your gut.",
   alternates: { canonical: "https://pledgeoff.com" },

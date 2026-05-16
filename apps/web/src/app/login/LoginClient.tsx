@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -11,9 +12,10 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 type Mode = "signin" | "signup";
-type State = "idle" | "loading" | "error" | "check_email";
+type State = "idle" | "loading" | "error" | "check_email" | "reset_sent";
 
 export function LoginClient() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const errorKey = searchParams.get("error") ?? "";
   const urlError = ERROR_MESSAGES[errorKey] ?? "";
@@ -58,7 +60,8 @@ export function LoginClient() {
         setUiState("error");
       } else {
         const next = searchParams.get("next") ?? "/dashboard";
-        window.location.href = next;
+        router.push(next);
+        router.refresh();
       }
     }
   };
@@ -77,11 +80,60 @@ export function LoginClient() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setErrorMsg("Enter your email address above, then click Forgot.");
+      setUiState("error");
+      return;
+    }
+    setUiState("loading");
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/settings`,
+    });
+    if (error) {
+      setErrorMsg(error.message);
+      setUiState("error");
+    } else {
+      setUiState("reset_sent");
+    }
+  };
+
   const switchMode = (m: Mode) => {
     setMode(m);
     setErrorMsg("");
     setUiState("idle");
   };
+
+  if (uiState === "reset_sent") {
+    return (
+      <div
+        className="rounded-md border p-8 w-full max-w-sm reveal"
+        style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
+      >
+        <div className="display text-[14px] font-semibold mb-4">
+          Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+        </div>
+        <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
+          Check your email.
+        </h1>
+        <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
+          We sent a password reset link to{" "}
+          <span style={{ color: "var(--t1)" }}>{email}</span>. Click it to set a new password.
+        </p>
+        <button
+          onClick={() => switchMode("signin")}
+          className="mt-6 w-full h-10 rounded-md border display text-[13px] transition-colors hover:bg-white/5"
+          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+        >
+          Back to sign in
+        </button>
+        <p className="mono text-[10px] mt-4" style={{ color: "var(--t3)" }}>
+          Didn&apos;t get it? Check spam or try again.
+        </p>
+      </div>
+    );
+  }
 
   if (uiState === "check_email") {
     return (
@@ -162,7 +214,7 @@ export function LoginClient() {
             key={m}
             onClick={() => switchMode(m)}
             disabled={isLoading}
-            className="rounded-sm py-1.5 text-[12px] font-semibold display transition-colors"
+            className="py-1.5 rounded-md text-[12px] font-semibold display transition-colors"
             style={
               mode === m
                 ? { background: "var(--accent)", color: "#000" }
@@ -224,7 +276,14 @@ export function LoginClient() {
           <div className="flex items-center justify-between">
             <span className="mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>Password</span>
             {mode === "signin" && (
-              <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>Forgot</span>
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="mono text-[10px] underline transition-opacity hover:opacity-70"
+                style={{ color: "var(--t3)" }}
+              >
+                Forgot?
+              </button>
             )}
           </div>
           <div

@@ -12,7 +12,7 @@ import { FooterMicro } from "@/components/FooterMicro";
 import type { Decision } from "@pledgeoff/core";
 
 export const metadata: Metadata = {
-  title: "Dashboard — PledgeOFF",
+  title: { absolute: "Dashboard — PledgeOFF" },
   robots: { index: false, follow: false },
 };
 

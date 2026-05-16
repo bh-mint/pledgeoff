@@ -1,10 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { WaitlistModal } from "@/components/WaitlistModal";
 
 const TICKER_ITEMS = [
   'r/Entrepreneur  ·  "none of the meal apps know your training calendar exists"  ·  ↑312',
@@ -170,16 +168,9 @@ function PreviewCard() {
 }
 
 export function HomeClient() {
-  const [modalOpen, setModalOpen] = useState(false);
-
   return (
     <div className="min-h-screen bg-(--canvas)">
-      <Nav onWaitlistOpen={() => setModalOpen(true)} />
-      <WaitlistModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        source="landing"
-      />
+      <Nav />
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden border-b border-(--border)">
@@ -213,14 +204,14 @@ export function HomeClient() {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setModalOpen(true)}
+              <Link
+                href="/ideas/new"
                 className="display text-[13px] font-semibold px-5 h-10 rounded-md bg-(--accent) text-black flex items-center gap-2 hover:opacity-90 transition-opacity"
               >
                 Validate your idea →
-              </button>
+              </Link>
               <Link
-                href="/blog"
+                href="/blog/the-fastest-way-to-kill-a-bad-idea-before-you-waste-months"
                 className="text-[12px] px-5 h-10 rounded-md border border-(--border) text-(--t1) flex items-center gap-2 hover:border-(--t3) transition-colors"
               >
                 See a live validation
@@ -425,12 +416,12 @@ export function HomeClient() {
         <p className="text-[14px] text-(--t2) mb-8">
           Type it. Get the verdict. 15 seconds.
         </p>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="display h-10 px-8 rounded-md bg-(--accent) text-black text-[13px] font-semibold hover:opacity-90 transition-opacity"
+        <Link
+          href="/ideas/new"
+          className="display inline-flex items-center h-10 px-8 rounded-md bg-(--accent) text-black text-[13px] font-semibold hover:opacity-90 transition-opacity"
         >
           Validate it →
-        </button>
+        </Link>
         <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.08em] mt-4">
           No credit card · every number is sourced
         </p>
