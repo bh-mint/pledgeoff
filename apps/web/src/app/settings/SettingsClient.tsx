@@ -3,34 +3,58 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import type { Plan } from "@pledgeoff/core";
+import { PLAN_LIMITS } from "@pledgeoff/core";
 
 interface SettingsClientProps {
   email: string;
   fullName: string | null;
-  plan: "free" | "pro" | "agency";
+  plan: Plan;
   ideasThisMonth: number;
-  ideasLimit: number;
+  renewsAt?: string | null;
+  stripeCustomerId?: string | null;
 }
 
-const PLAN_LABELS: Record<string, string> = { free: "Free", pro: "Pro", agency: "Agency" };
-const PLAN_COLORS: Record<string, string> = {
+const PLAN_LABELS: Record<Plan, string> = {
+  free: "Free",
+  pro: "Pro",
+  pro_plus: "Pro+",
+};
+
+const PLAN_COLORS: Record<Plan, string> = {
   free: "var(--t3)",
   pro: "var(--accent)",
-  agency: "var(--validated)",
+  pro_plus: "var(--validated)",
 };
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export function SettingsClient({
   email,
   fullName,
   plan,
   ideasThisMonth,
-  ideasLimit,
+  renewsAt,
+  stripeCustomerId,
 }: SettingsClientProps) {
   const router = useRouter();
   const [name, setName] = useState(fullName ?? "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const ideasLimit = PLAN_LIMITS[plan].verificationsPerMonth;
+  const isUnlimited = ideasLimit === Infinity;
+  const usagePct = isUnlimited ? 0 : Math.min(1, ideasThisMonth / ideasLimit);
+  const isPaid = plan !== "free";
 
   const handleSave = async () => {
     if (!name.trim()) return;
@@ -50,7 +74,24 @@ export function SettingsClient({
     router.push("/");
   };
 
-  const usagePct = ideasLimit > 0 ? Math.min(1, ideasThisMonth / ideasLimit) : 0;
+  const handleManageBilling = async () => {
+    setPortalLoading(true);
+    try {
+      const supabase = createClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      const res = await fetch("/api/v1/billing/portal", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        const { data } = await res.json() as { data: { url: string } };
+        router.push(data.url);
+      }
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -143,18 +184,20 @@ export function SettingsClient({
                 Validations this month
               </span>
               <span className="mono text-[11px] tnum text-(--t1)">
-                {ideasThisMonth} / {ideasLimit === 999 ? "∞" : ideasLimit}
+                {ideasThisMonth} / {isUnlimited ? "∞" : ideasLimit}
               </span>
             </div>
-            <div className="h-[3px] rounded-full" style={{ background: "var(--border)" }}>
-              <div
-                className="h-[3px] rounded-full transition-all"
-                style={{
-                  width: `${usagePct * 100}%`,
-                  background: usagePct >= 0.9 ? "var(--kill)" : usagePct >= 0.6 ? "var(--caution)" : "var(--accent)",
-                }}
-              />
-            </div>
+            {!isUnlimited && (
+              <div className="h-[3px] rounded-full" style={{ background: "var(--border)" }}>
+                <div
+                  className="h-[3px] rounded-full transition-all"
+                  style={{
+                    width: `${usagePct * 100}%`,
+                    background: usagePct >= 0.9 ? "var(--kill)" : usagePct >= 0.6 ? "var(--caution)" : "var(--accent)",
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* Sources */}
@@ -172,7 +215,7 @@ export function SettingsClient({
             ))}
           </div>
 
-          {plan === "free" && (
+          {!isPaid && (
             <Link
               href="/pricing"
               className="flex items-center justify-between px-4 py-3 rounded-md border transition-colors hover:border-(--accent)"
@@ -197,7 +240,7 @@ export function SettingsClient({
           <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">Billing</h2>
         </div>
         <div className="px-6 py-5">
-          {plan === "free" ? (
+          {!isPaid ? (
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
               <div>
                 <div className="text-[13px] text-(--t1)">Free plan · <span className="text-(--validated)">$0 / month</span></div>
@@ -212,21 +255,27 @@ export function SettingsClient({
               </Link>
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-                <div>
-                  <div className="text-[13px] text-(--t1)">{PLAN_LABELS[plan]} plan</div>
-                  <div className="mono text-[10px] text-(--t3) mt-1">Renews automatically · cancel anytime</div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+              <div>
+                <div className="text-[13px] text-(--t1)">{PLAN_LABELS[plan]} plan</div>
+                <div className="mono text-[10px] text-(--t3) mt-1">
+                  {renewsAt ? `Renews on ${formatDate(renewsAt)}` : "Renews automatically"} · cancel anytime
                 </div>
-                <button
-                  disabled
-                  className="mono text-[11px] h-8 px-4 rounded-md border opacity-40 cursor-not-allowed self-start sm:self-auto"
-                  style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-                >
-                  Manage subscription
-                </button>
               </div>
-              <p className="mono text-[10px] text-(--t3)">Billing portal available soon — contact support@pledgeoff.com for changes.</p>
+              {stripeCustomerId && (
+                <button
+                  onClick={handleManageBilling}
+                  disabled={portalLoading}
+                  className="mono text-[11px] h-8 px-4 rounded-md border hover:border-(--t2) transition-colors self-start sm:self-auto"
+                  style={{
+                    borderColor: "var(--border)",
+                    color: "var(--t2)",
+                    opacity: portalLoading ? 0.5 : 1,
+                  }}
+                >
+                  {portalLoading ? "Loading…" : "Manage subscription →"}
+                </button>
+              )}
             </div>
           )}
         </div>
