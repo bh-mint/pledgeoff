@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { FooterMicro } from "@/components/FooterMicro";
 
 export const metadata: Metadata = {
-  title: "Sign in — PledgeOFF",
+  title: { absolute: "Sign in — PledgeOFF" },
   robots: { index: false, follow: false },
 };
 

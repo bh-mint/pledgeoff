@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth-server";
 import { Logo } from "@/components/brand/Logo";
 
 export const metadata: Metadata = {
-  title: "Welcome to PledgeOFF",
+  title: { absolute: "Welcome to PledgeOFF" },
   robots: { index: false, follow: false },
 };
 

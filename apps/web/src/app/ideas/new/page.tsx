@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth-server";
 import { NewIdeaClient } from "./NewIdeaClient";
 
 export const metadata: Metadata = {
-  title: "Validate a new idea — PledgeOFF",
+  title: { absolute: "Validate a new idea — PledgeOFF" },
   robots: { index: false, follow: false },
 };
 

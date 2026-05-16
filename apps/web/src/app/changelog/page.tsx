@@ -3,7 +3,7 @@ import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Changelog — PledgeOFF",
+  title: { absolute: "Changelog — PledgeOFF" },
   description: "What's new in PledgeOFF — every release, every fix, every improvement.",
   alternates: { canonical: "https://pledgeoff.com/changelog" },
   robots: { index: true, follow: true },

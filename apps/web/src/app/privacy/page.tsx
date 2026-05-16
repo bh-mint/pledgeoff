@@ -5,7 +5,7 @@ import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — PledgeOFF",
+  title: { absolute: "Privacy Policy — PledgeOFF" },
   description: "How PledgeOFF collects, uses, and protects your personal data. GDPR-compliant.",
   alternates: { canonical: "https://pledgeoff.com/privacy" },
   robots: { index: true, follow: true },
