@@ -7,6 +7,8 @@ import { effectivePlan } from "@pledgeoff/core";
 import { Nav } from "@/components/Nav";
 import { SettingsClient } from "./SettingsClient";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: { absolute: "Settings — PledgeOFF" },
   robots: { index: false, follow: false },
