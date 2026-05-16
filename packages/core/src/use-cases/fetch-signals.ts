@@ -62,7 +62,10 @@ export class FetchSignalsUseCase {
       }
     }
 
-    const upsertResult = await this.signalRepo.upsertMany(signals);
+    // LLM relevance filter: score all candidates, keep score >= 60; fallback to top-2 if all below threshold
+    const filteredSignals = await this._filterByRelevance(signals, input.ideaText, input.traceId);
+
+    const upsertResult = await this.signalRepo.upsertMany(filteredSignals);
     if (upsertResult.isErr()) return err(upsertResult.error);
 
     const markResult = await this.idempotencyStore.markAsProcessed(input.eventId);
@@ -83,5 +86,25 @@ export class FetchSignalsUseCase {
     if (publishResult.isErr()) return err(publishResult.error);
 
     return ok(upsertResult.value);
+  }
+
+  private async _filterByRelevance(signals: Signal[], ideaText: string, traceId: string): Promise<Signal[]> {
+    if (signals.length === 0) return signals;
+
+    const candidates = signals.map((s) => ({ id: s.id, title: s.title, summary: s.summary }));
+    const result = await this.llmClient.scoreSignalRelevance({ ideaText, signals: candidates, traceId });
+
+    if (result.isErr()) return signals; // on LLM failure, pass all through
+
+    const scoreMap = new Map(result.value.scores.map((s) => [s.id, s.score]));
+    const THRESHOLD = 60;
+    const passing = signals.filter((s) => (scoreMap.get(s.id) ?? 0) >= THRESHOLD);
+
+    if (passing.length >= 2) return passing;
+
+    // Fallback: return top-2 by score so pipeline never starves
+    return [...signals]
+      .sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0))
+      .slice(0, 2);
   }
 }

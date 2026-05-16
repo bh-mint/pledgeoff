@@ -93,12 +93,23 @@ export interface LLMSearchQueriesResponse {
   readonly google: string[];
 }
 
+export interface LLMRelevanceRequest {
+  readonly ideaText: string;
+  readonly signals: ReadonlyArray<{ readonly id: string; readonly title: string; readonly summary: string }>;
+  readonly traceId: string;
+}
+
+export interface LLMRelevanceResponse {
+  readonly scores: ReadonlyArray<{ readonly id: string; readonly score: number }>;
+}
+
 export class LLMClientError extends Error {
   readonly code = 'LLM_CLIENT_ERROR' as const;
 }
 
 export interface ILLMClient {
   generateSearchQueries(request: LLMSearchQueriesRequest): Promise<Result<LLMSearchQueriesResponse, LLMClientError>>;
+  scoreSignalRelevance(request: LLMRelevanceRequest): Promise<Result<LLMRelevanceResponse, LLMClientError>>;
   generateDecision(request: LLMDecisionRequest): Promise<Result<LLMDecisionResponse, LLMClientError>>;
   generateSimulation(request: LLMSimulationRequest): Promise<Result<LLMSimulationResponse, LLMClientError>>;
   generateLanding(request: LLMLandingRequest): Promise<Result<LLMLandingResponse, LLMClientError>>;
