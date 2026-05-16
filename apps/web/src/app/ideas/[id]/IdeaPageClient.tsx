@@ -162,8 +162,10 @@ interface OttoSectionProps {
 }
 
 function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
+  const [overrideAll, setOverrideAll] = useState(false);
   const message = OTTO_MESSAGE[verdict](score);
   const { available, locked } = getToolConfig(verdict, ideaId, toolStatus);
+  const showLocked = locked.length > 0 && !overrideAll;
 
   return (
     <div className="space-y-4">
@@ -171,36 +173,20 @@ function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
         {message}
       </p>
 
+      {/* Available tools */}
       {available.length > 0 && (
         <div className="space-y-1.5">
           <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
-            {verdict === "GO" ? "Rulează acum" : "Rulează aceste 2 tool-uri"}
+            {verdict === "GO" ? "Rulează acum" : "Rulează aceste tool-uri"}
           </p>
           {available.map((tool) => (
-            <div key={tool.num} className="rounded border px-3 py-2.5 flex items-center gap-3"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-              <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{tool.num}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{tool.label}</p>
-                <p className="mono text-[10px] truncate" style={{ color: "var(--t3)" }}>{tool.desc}</p>
-              </div>
-              {tool.done && (
-                <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
-                  style={{ background: "rgba(125,214,107,0.12)", color: "var(--validated)", border: "1px solid rgba(125,214,107,0.3)" }}>
-                  ✓
-                </span>
-              )}
-              <Link href={tool.href}
-                className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 transition-colors hover:border-(--accent) hover:text-(--accent)"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}>
-                {tool.done ? "View →" : "Run →"}
-              </Link>
-            </div>
+            <ToolRow key={tool.num} tool={tool} />
           ))}
         </div>
       )}
 
-      {locked.length > 0 && (
+      {/* Locked tools — collapsed */}
+      {showLocked && (
         <div className="space-y-1.5">
           <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
             {verdict === "PIVOT" ? "Disponibile după re-validare" : "Indisponibile"}
@@ -223,6 +209,55 @@ function OttoSection({ verdict, score, ideaId, toolStatus }: OttoSectionProps) {
           ))}
         </div>
       )}
+
+      {/* Override — unlocked all */}
+      {overrideAll && locked.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
+            Toate tool-urile
+          </p>
+          {locked.map((tool) => (
+            <ToolRow key={tool.num} tool={tool} />
+          ))}
+        </div>
+      )}
+
+      {/* Override button — shown only for PIVOT/KILL */}
+      {locked.length > 0 && (
+        <button
+          onClick={() => setOverrideAll((v) => !v)}
+          className="mono text-[10px] transition-colors"
+          style={{ color: overrideAll ? "var(--t3)" : "var(--t3)" }}
+        >
+          {overrideAll
+            ? "← Înapoi la recomandările Otto"
+            : "Ignoră recomandările — rulează toate tool-urile →"}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ToolRow({ tool }: { tool: ToolDef }) {
+  return (
+    <div className="rounded border px-3 py-2.5 flex items-center gap-3"
+      style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+      <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{tool.num}</span>
+      <div className="flex-1 min-w-0">
+        <p className="text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{tool.label}</p>
+        <p className="mono text-[10px] truncate" style={{ color: "var(--t3)" }}>{tool.desc}</p>
+      </div>
+      {tool.done && (
+        <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
+          style={{ background: "rgba(125,214,107,0.12)", color: "var(--validated)", border: "1px solid rgba(125,214,107,0.3)" }}>
+          ✓
+        </span>
+      )}
+      <Link href={tool.href}
+        className="mono text-[10px] px-2.5 py-1 rounded border flex-shrink-0 transition-colors hover:border-(--accent) hover:text-(--accent)"
+        style={{ borderColor: "var(--border)", color: "var(--t2)" }}>
+        {tool.done ? "View →" : "Run →"}
+      </Link>
     </div>
   );
 }
