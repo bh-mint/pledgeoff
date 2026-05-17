@@ -138,7 +138,7 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* Visual preview toggle */}
       <div className="flex items-center justify-between">
         <button
@@ -259,18 +259,23 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
         </div>
       ))}
 
-      <div className="flex items-center justify-between pt-2">
-        <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
-          Generated {new Date(landing.createdAt).toLocaleDateString()} · AI-written, human-reviewed
-        </p>
-        <button
-          onClick={generate}
-          disabled={loading}
-          className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
-          style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
-        >
-          {loading ? "Regenerating…" : "Regenerate"}
-        </button>
+      <div className="flex flex-col gap-2 pt-2">
+        {error && (
+          <p className="mono text-[11px] text-right" style={{ color: "var(--caution)" }}>{error}</p>
+        )}
+        <div className="flex items-center justify-between">
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            Generated {new Date(landing.createdAt).toLocaleDateString()} · AI-written, human-reviewed
+          </p>
+          <button
+            onClick={generate}
+            disabled={loading}
+            className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
+            style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
+          >
+            {loading ? "Regenerating…" : "Regenerate"}
+          </button>
+        </div>
       </div>
     </div>
   );
