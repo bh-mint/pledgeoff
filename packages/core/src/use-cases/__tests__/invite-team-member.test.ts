@@ -45,6 +45,7 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
     findByOwnerId: async () => ok(null),
     findByMemberId: async () => ok(null),
     saveTeam: async (team) => ok(team),
+    updateTeam: async (t) => ok(t),
     saveMembership: async (m) => ok(m),
     updateMembership: async (m) => ok(m),
     findMembershipByToken: async () => ok(null),

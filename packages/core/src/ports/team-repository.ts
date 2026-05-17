@@ -10,6 +10,7 @@ export interface ITeamRepository {
   updateMembership(membership: TeamMembership): Promise<Result<TeamMembership, TeamRepositoryError>>;
   findMembershipByToken(token: string): Promise<Result<TeamMembership | null, TeamRepositoryError>>;
   findMembershipsByTeamId(teamId: string): Promise<Result<TeamMembership[], TeamRepositoryError>>;
+  updateTeam(team: Team): Promise<Result<Team, TeamRepositoryError>>;
   deleteMembership(membershipId: string): Promise<Result<void, TeamRepositoryError>>;
   countActiveMembers(teamId: string): Promise<Result<number, TeamRepositoryError>>;
 }

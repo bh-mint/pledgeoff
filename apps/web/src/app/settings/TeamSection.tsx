@@ -23,6 +23,8 @@ export function TeamSection({ plan }: Props) {
   const [inviteError, setInviteError] = useState("");
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
+  const [teamName, setTeamName] = useState("");
+  const [teamNameState, setTeamNameState] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const seatsIncluded = PLAN_LIMITS[plan].seatsIncluded;
 
@@ -35,8 +37,9 @@ export function TeamSection({ plan }: Props) {
       headers: { Authorization: `Bearer ${session.session.access_token}` },
     });
     if (res.ok) {
-      const json = await res.json();
+      const json = await res.json() as { data: TeamData };
       setData(json.data);
+      if (json.data.team) setTeamName(json.data.team.name);
     }
     setLoading(false);
   }, []);
@@ -92,6 +95,32 @@ export function TeamSection({ plan }: Props) {
     fetchTeam();
   };
 
+  const handleUpdateTeamName = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setTeamNameState("loading");
+    const supabase = createSupabaseBrowserClient();
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) return;
+
+    const res = await fetch("/api/v1/teams", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.session.access_token}`,
+      },
+      body: JSON.stringify({ name: teamName }),
+    });
+
+    if (!res.ok) {
+      setTeamNameState("error");
+      return;
+    }
+
+    setTeamNameState("success");
+    fetchTeam();
+    setTimeout(() => setTeamNameState("idle"), 2000);
+  };
+
   const handleRemove = async (membershipId: string) => {
     setRemovingId(membershipId);
     const supabase = createSupabaseBrowserClient();
@@ -121,6 +150,40 @@ export function TeamSection({ plan }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* Team name — always visible for owner */}
+      {data?.isOwner && (
+        <form onSubmit={handleUpdateTeamName} className="flex gap-2 items-center">
+          <input
+            type="text"
+            required
+            value={teamName}
+            onChange={(e) => setTeamName(e.target.value)}
+            placeholder="My Team"
+            disabled={teamNameState === "loading"}
+            maxLength={100}
+            className="flex-1 h-9 px-3 rounded-md border text-[13px] transition-colors focus:outline-none focus:border-(--accent)"
+            style={{
+              background: "var(--canvas)",
+              borderColor: "var(--border)",
+              color: "var(--t1)",
+            }}
+          />
+          <button
+            type="submit"
+            disabled={teamNameState === "loading" || !teamName.trim()}
+            className="h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+          >
+            {teamNameState === "loading" ? "Saving…" : teamNameState === "success" ? "Saved ✓" : "Save name"}
+          </button>
+        </form>
+      )}
+      {!data?.isOwner && data?.team && (
+        <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+          Team: <span style={{ color: "var(--t1)" }}>{data.team.name}</span>
+        </div>
+      )}
+
       {/* Seat usage */}
       <div className="flex items-center justify-between">
         <div>
