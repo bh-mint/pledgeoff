@@ -130,7 +130,7 @@ const LLMCompetitorResponseSchemaA = z.object({
   gaps: z.array(CompetitorGapItemSchemaA).max(5),
 });
 
-const TIMEOUT_MS = 30_000;
+const TIMEOUT_MS = 60_000;
 
 const DECISION_SYSTEM_PROMPT = `You are a startup decision intelligence engine using prompt version ${PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const SIMULATION_SYSTEM_PROMPT = `You are a startup revenue simulation engine using prompt version ${SIMULATION_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
