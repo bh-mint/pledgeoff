@@ -147,7 +147,7 @@ export async function POST(req: Request) {
         const sub = event.data.object as {
           id: string;
           status: string;
-          items: { data: Array<{ price: { id: string }; current_period_end?: number }> };
+          items: { data: Array<{ id: string; price: { id: string }; quantity?: number; current_period_end?: number }> };
         };
 
         const subResult = await container.subscriptionRepo.findByStripeSubscriptionId(sub.id);
@@ -156,11 +156,21 @@ export async function POST(req: Request) {
           break;
         }
 
-        const item = sub.items?.data?.[0];
-        const priceId = item?.price?.id ?? '';
+        const extraSeatPriceId = process.env.STRIPE_EXTRA_SEAT_PRICE_ID;
+        const allItems = sub.items?.data ?? [];
+
+        // Separate plan item from extra-seat add-on item
+        const planItem = extraSeatPriceId
+          ? allItems.find(i => i.price.id !== extraSeatPriceId)
+          : allItems[0];
+        const extraSeatItem = extraSeatPriceId
+          ? allItems.find(i => i.price.id === extraSeatPriceId)
+          : undefined;
+
+        const priceId = planItem?.price?.id ?? '';
         const plan = priceIdToPlan(priceId);
         const status = stripeStatusToInternal(sub.status);
-        const rawPeriodEnd = item?.current_period_end;
+        const rawPeriodEnd = planItem?.current_period_end;
         const currentPeriodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : null;
 
         await container.subscriptionRepo.upsert({
@@ -169,6 +179,17 @@ export async function POST(req: Request) {
           status,
           currentPeriodEnd,
         });
+
+        // Sync extra seats from Stripe (0 if add-on removed)
+        if (extraSeatPriceId) {
+          const extraSeats = extraSeatItem?.quantity ?? 0;
+          await container.subscriptionRepo.updateExtraSeats({
+            userId: subResult.value.userId,
+            extraSeats,
+            stripeExtraSeatItemId: extraSeatItem?.id ?? null,
+          });
+          logger.info({ traceId, userId: subResult.value.userId, extraSeats }, 'webhook.stripe.extra_seats_synced');
+        }
 
         logger.info({ traceId, userId: subResult.value.userId, plan, status }, 'webhook.stripe.subscription_updated');
         break;

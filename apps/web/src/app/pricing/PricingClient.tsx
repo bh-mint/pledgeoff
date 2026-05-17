@@ -34,7 +34,8 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Team",
     rows: [
-      { k: "Seats included",            f: "1",               p: "1",               pp: "3",               a: "Custom" },
+      { k: "Seats included",            f: "1",               p: "3",               pp: "10",              a: "Custom" },
+      { k: "Extra seats",              f: "—",               p: "—",               pp: "€7/seat/mo",      a: "Negotiated" },
       { k: "Early access to features",  f: "—",               p: "—",               pp: "✓",               a: "✓" },
     ],
   },
