@@ -3,7 +3,6 @@ import { ok, err } from 'neverthrow';
 import { UpdateTeamNameUseCase } from '../update-team-name';
 import type { ITeamRepository } from '../../ports/team-repository';
 import {
-  TeamNotFoundError,
   TeamRepositoryError,
   type Team,
 } from '../../domain/team';
@@ -85,13 +84,19 @@ describe('UpdateTeamNameUseCase', () => {
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamRepositoryError);
   });
 
-  it('rejects when team does not exist (owner has no team yet)', async () => {
-    const repo = mockRepo({ findByOwnerId: async () => ok(null) });
+  it('creates team with given name when owner has no team yet', async () => {
+    const captured = { t: null as Team | null };
+    const repo = mockRepo({
+      findByOwnerId: async () => ok(null),
+      saveTeam: async (t) => { captured.t = t; return ok(t); },
+    });
+
     const useCase = new UpdateTeamNameUseCase(repo);
     const result = await useCase.execute(baseInput);
 
-    expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamNotFoundError);
+    expect(result.isOk()).toBe(true);
+    expect(captured.t?.name).toBe('New Name');
+    expect(captured.t?.ownerId).toBe('owner-1');
   });
 
   it('propagates repository error from findByOwnerId', async () => {
