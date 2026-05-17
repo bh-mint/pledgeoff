@@ -30,11 +30,13 @@ const llmResponse: LLMCompetitorResponse = {
       url: 'https://validate.io',
       positioning: 'Survey-based idea validation for indie hackers',
       signals: ['Mentioned 3x in HN thread', 'Positive reviews on ProductHunt'],
+      source: 'signal',
     },
     {
       name: 'IdeaCheck',
       positioning: 'Manual research assistant with templates',
       signals: ['Used by 2 commenters in thread'],
+      source: 'knowledge',
     },
   ],
   gaps: [

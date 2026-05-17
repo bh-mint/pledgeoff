@@ -105,18 +105,27 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
                 style={{ borderColor: "var(--border)", background: "var(--surface)" }}
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <div>
+                  <div className="flex items-center flex-wrap gap-2">
                     <span className="text-[14px] font-semibold" style={{ color: "var(--t1)" }}>{c.name}</span>
                     {c.url && (
                       <a
                         href={c.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="ml-2 mono text-[10px] hover:text-(--accent) transition-colors"
+                        className="mono text-[10px] hover:text-(--accent) transition-colors"
                         style={{ color: "var(--t3)" }}
                       >
                         {c.url.replace(/^https?:\/\//, '')} ↗
                       </a>
+                    )}
+                    {c.source === "knowledge" && (
+                      <span
+                        className="mono text-[9px] px-1.5 py-0.5 rounded uppercase tracking-[0.06em]"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)", color: "var(--t3)" }}
+                        title="Found via AI general knowledge, not from your idea's signals"
+                      >
+                        AI knowledge
+                      </span>
                     )}
                   </div>
                 </div>

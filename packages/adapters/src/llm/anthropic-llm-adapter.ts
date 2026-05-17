@@ -117,6 +117,7 @@ const CompetitorItemSchemaA = z.object({
   url: z.string().optional(),
   positioning: z.string().min(1),
   signals: z.array(z.string().min(1)),
+  source: z.enum(['signal', 'knowledge']).optional(),
 });
 
 const CompetitorGapItemSchemaA = z.object({
@@ -304,7 +305,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
         LLMCompetitorResponseSchemaA,
         'analyzeCompetitors',
         request.traceId,
-        2048,
+        3072,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });

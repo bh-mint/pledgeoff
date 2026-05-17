@@ -5,6 +5,8 @@ export const CompetitorSchema = z.object({
   url: z.string().url().optional(),
   positioning: z.string().min(1).max(300),
   signals: z.array(z.string().min(1).max(200)).min(1).max(5),
+  // 'signal' = found in fetched signals; 'knowledge' = LLM general knowledge supplement; undefined = legacy/signal
+  source: z.enum(['signal', 'knowledge']).optional(),
 });
 export type Competitor = z.infer<typeof CompetitorSchema>;
 
