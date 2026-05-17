@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { Plan } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
+import { TeamSection } from "./TeamSection";
 
 interface SettingsClientProps {
   email: string;
@@ -19,11 +20,12 @@ interface SettingsClientProps {
   stripeCustomerId?: string | null;
 }
 
-type SectionId = "account" | "billing" | "notifications" | "api" | "danger";
+type SectionId = "account" | "billing" | "team" | "notifications" | "api" | "danger";
 
 const SECTIONS: Array<{ id: SectionId; label: string }> = [
   { id: "account", label: "Account" },
   { id: "billing", label: "Billing" },
+  { id: "team", label: "Team" },
   { id: "notifications", label: "Notifications" },
   { id: "api", label: "API" },
   { id: "danger", label: "Danger zone" },
@@ -421,6 +423,18 @@ export function SettingsClient({
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* ── Team ── */}
+        {section === "team" && (
+          <div>
+            <h1 className="display text-[28px] font-semibold tracking-tight text-(--t1) mb-1">Team</h1>
+            <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
+              Invite colleagues to validate ideas together.
+              {plan === "free" && " Upgrade to Pro for 3 seats, Pro+ for 10."}
+            </p>
+            <TeamSection plan={plan} />
           </div>
         )}
 

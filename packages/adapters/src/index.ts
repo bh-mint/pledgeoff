@@ -12,6 +12,7 @@ export { SupabaseCustomerAnalysisRepository } from './storage/supabase-customer-
 export { SupabaseBuildAnalysisRepository } from './storage/supabase-build-analysis-repository';
 export { SupabaseCompetitorAnalysisRepository } from './storage/supabase-competitor-analysis-repository';
 export { SupabaseSubscriptionRepository } from './storage/supabase-subscription-repository';
+export { SupabaseTeamRepository } from './storage/supabase-team-repository';
 export { StripeAdapter } from './stripe/stripe-adapter';
 export type { StripeAdapterError, CreateCheckoutSessionInput, CheckoutSession, StripeSubscriptionData } from './stripe/stripe-adapter';
 export { InMemoryEventBus } from './in-memory-event-bus';
@@ -24,5 +25,5 @@ export { GitHubSourceAdapter } from './sources/github-source-adapter';
 export { BraveSearchSourceAdapter } from './sources/brave-search-source-adapter';
 export { GroqLLMAdapter } from './llm/groq-llm-adapter';
 export { AnthropicLLMAdapter } from './llm/anthropic-llm-adapter';
-export { sendVerdictEmail } from './email/resend-email-adapter';
-export type { VerdictEmailParams } from './email/resend-email-adapter';
+export { sendVerdictEmail, sendTeamInviteEmail } from './email/resend-email-adapter';
+export type { VerdictEmailParams, TeamInviteEmailParams } from './email/resend-email-adapter';

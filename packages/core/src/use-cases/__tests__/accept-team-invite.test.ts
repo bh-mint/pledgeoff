@@ -48,20 +48,20 @@ describe('AcceptTeamInviteUseCase', () => {
   it('activates a pending membership and returns team', async () => {
     const team = makeTeam();
     const pending = makePendingMembership();
-    let updatedMembership: TeamMembership | null = null;
+    const saved = { membership: null as TeamMembership | null };
 
     const repo = mockRepo({
       findMembershipByToken: async () => ok(pending),
       findById: async () => ok(team),
-      updateMembership: async (m) => { updatedMembership = m; return ok(m); },
+      updateMembership: async (m) => { saved.membership = m; return ok(m); },
     });
 
     const useCase = new AcceptTeamInviteUseCase(repo);
     const result = await useCase.execute(baseInput);
 
     expect(result.isOk()).toBe(true);
-    expect(updatedMembership?.status).toBe('active');
-    expect(updatedMembership?.userId).toBe('user-2');
+    expect(saved.membership?.status).toBe('active');
+    expect(saved.membership?.userId).toBe('user-2');
     expect(result._unsafeUnwrap().team.id).toBe('team-1');
   });
 
