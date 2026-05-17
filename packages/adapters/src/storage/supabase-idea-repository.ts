@@ -6,6 +6,7 @@ import { IdeaRepositoryError, type IIdeaRepository } from '@pledgeoff/core';
 type IdeaRow = {
   id: string;
   user_id: string;
+  team_id: string | null;
   text: string;
   created_at: string;
 };
@@ -14,6 +15,7 @@ function rowToIdea(row: IdeaRow): Idea {
   return {
     id: row.id,
     userId: row.user_id,
+    teamId: row.team_id ?? undefined,
     text: row.text,
     createdAt: row.created_at,
   };
@@ -54,6 +56,19 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
       .from('ideas')
       .select()
       .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .returns<IdeaRow[]>();
+
+    if (error) return err(new IdeaRepositoryError(error.message));
+    return ok((data ?? []).map(rowToIdea));
+  }
+
+  async findByUserIds(userIds: string[]): Promise<Result<Idea[], IdeaRepositoryError>> {
+    if (userIds.length === 0) return ok([]);
+    const { data, error } = await this.client
+      .from('ideas')
+      .select()
+      .in('user_id', userIds)
       .order('created_at', { ascending: false })
       .returns<IdeaRow[]>();
 
