@@ -22,6 +22,7 @@ export function TeamSection({ plan }: Props) {
   const [inviteState, setInviteState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [inviteError, setInviteError] = useState("");
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState(false);
 
   const seatsIncluded = PLAN_LIMITS[plan].seatsIncluded;
 
@@ -73,6 +74,22 @@ export function TeamSection({ plan }: Props) {
     setInviteEmail("");
     fetchTeam();
     setTimeout(() => setInviteState("idle"), 3000);
+  };
+
+  const handleLeave = async () => {
+    if (!confirm('Are you sure you want to leave this team?')) return;
+    setLeaving(true);
+    const supabase = createSupabaseBrowserClient();
+    const { data: session } = await supabase.auth.getSession();
+    if (!session.session) { setLeaving(false); return; }
+
+    await fetch('/api/v1/teams/leave', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${session.session.access_token}` },
+    });
+
+    setLeaving(false);
+    fetchTeam();
   };
 
   const handleRemove = async (membershipId: string) => {
@@ -198,6 +215,20 @@ export function TeamSection({ plan }: Props) {
         <p className="mono text-[11px]" style={{ color: "var(--t3)" }}>
           No team members yet.{data?.isOwner ? " Invite someone above." : ""}
         </p>
+      )}
+
+      {/* Leave team — only for members */}
+      {data?.team && !data.isOwner && (
+        <div className="pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+          <button
+            onClick={handleLeave}
+            disabled={leaving}
+            className="mono text-[11px] uppercase tracking-[0.08em] px-3 py-1.5 rounded-md border transition-opacity hover:opacity-70 disabled:opacity-40"
+            style={{ borderColor: "var(--kill)", color: "var(--kill)" }}
+          >
+            {leaving ? "Leaving…" : "Leave team"}
+          </button>
+        </div>
       )}
     </div>
   );

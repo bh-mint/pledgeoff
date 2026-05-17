@@ -25,6 +25,11 @@ type MembershipRow = {
   role: string;
   status: string;
   invite_token: string;
+  invited_at: string;
+  accepted_at: string | null;
+  left_at: string | null;
+  removed_by: string | null;
+  removal_reason: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -48,6 +53,11 @@ function rowToMembership(row: MembershipRow): TeamMembership {
     role: row.role as TeamRole,
     status: row.status as TeamMembershipStatus,
     inviteToken: row.invite_token,
+    invitedAt: row.invited_at,
+    acceptedAt: row.accepted_at,
+    leftAt: row.left_at,
+    removedBy: row.removed_by,
+    removalReason: row.removal_reason as TeamMembership['removalReason'],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -115,6 +125,7 @@ export class SupabaseTeamRepository implements ITeamRepository {
         role: membership.role,
         status: membership.status,
         invite_token: membership.inviteToken,
+        invited_at: membership.invitedAt,
         created_at: membership.createdAt,
         updated_at: membership.updatedAt,
       })
@@ -130,6 +141,10 @@ export class SupabaseTeamRepository implements ITeamRepository {
       .update({
         user_id: membership.userId,
         status: membership.status,
+        accepted_at: membership.acceptedAt,
+        left_at: membership.leftAt,
+        removed_by: membership.removedBy,
+        removal_reason: membership.removalReason,
         updated_at: membership.updatedAt,
       })
       .eq('id', membership.id)
@@ -154,6 +169,7 @@ export class SupabaseTeamRepository implements ITeamRepository {
       .from('team_memberships')
       .select()
       .eq('team_id', teamId)
+      .in('status', ['pending', 'active'])
       .order('created_at', { ascending: true });
     if (error) return err(new TeamRepositoryError(error.message));
     return ok((data as MembershipRow[]).map(rowToMembership));

@@ -44,3 +44,4 @@ export * from './use-cases/get-or-create-subscription';
 export * from './use-cases/invite-team-member';
 export * from './use-cases/accept-team-invite';
 export * from './use-cases/remove-team-member';
+export * from './use-cases/leave-team';

@@ -49,11 +49,13 @@ export class AcceptTeamInviteUseCase {
       return err(new TeamInviteNotFoundError('Invite not found or already used'));
     }
 
+    const now = new Date().toISOString();
     const updated: TeamMembership = {
       ...membership,
       userId,
       status: 'active',
-      updatedAt: new Date().toISOString(),
+      acceptedAt: now,
+      updatedAt: now,
     };
 
     const updateResult = await this.teamRepo.updateMembership(updated);
