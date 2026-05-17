@@ -11,6 +11,29 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "2.2",
+    date: "May 2026",
+    tag: "FEATURE",
+    items: [
+      "Team dashboard: Personal and Team tabs on the dashboard — switch between your own validations and your team's feed",
+      "Team pulse: stats bar showing total team validations, GO rate, pending count, and most active member",
+      "Verdict reactions: agree (↑) or disagree (↓) on any idea in the team feed — counts update live without a page reload",
+      "Team feed filters: filter by verdict (GO / KILL / PIVOT / Pending) and by individual member",
+      "Seat add-ons for Pro+: buy extra team seats at €7/seat/month directly from Settings → Billing",
+    ],
+  },
+  {
+    version: "2.1",
+    date: "May 2026",
+    tag: "FEATURE",
+    items: [
+      "Team collaboration: invite colleagues by email, accept invites via link, see team members in Settings → Team",
+      "Team name editable by the owner directly in Settings → Team",
+      "Accept-invite redirect fixed — clicking an email invite link after login now lands on the correct page",
+      "PDF and JSON export no longer marked as coming soon — available to Pro and Pro+ users",
+    ],
+  },
+  {
     version: "2.0",
     date: "May 2026",
     tag: "FIX",
