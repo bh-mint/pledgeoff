@@ -1,4 +1,4 @@
-import { createServiceClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { logger } from '@pledgeoff/observability';
 
 // Vercel Cron: daily at 3am UTC — removes old processed outbox rows and idempotency records.
@@ -10,7 +10,7 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   const traceId = crypto.randomUUID();
-  const supabase = createServiceClient();
+  const supabase = createServiceRoleClient();
 
   const [outboxResult, eventsResult] = await Promise.all([
     supabase

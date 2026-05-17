@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { effectivePlan } from "@pledgeoff/core";
 import { DashboardClient, type TableRow } from "./DashboardClient";
@@ -59,7 +59,7 @@ function Spark({
 
 export default async function DashboardPage() {
   const user = await requireUser();
-  const supabase = createServiceClient();
+  const supabase = createServiceRoleClient();
   const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single();
   const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || user.email?.split("@")[0] || "—";
 
