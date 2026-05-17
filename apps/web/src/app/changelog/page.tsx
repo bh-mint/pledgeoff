@@ -11,6 +11,20 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "1.8",
+    date: "May 2026",
+    tag: "FIX",
+    items: [
+      "Architecture hardened: 19 silent-failure and code-quality issues resolved in one session",
+      "getUserPlan() no longer silently defaults to free on DB error — returns 500 so billing issues are visible",
+      "All 13 API routes now use a shared resolveUserId() — no more per-route duplicates that could drift",
+      "Next.js middleware added for /dashboard, /ideas, /settings — private pages are protected at the edge",
+      "Stripe test-key guard at cold start — production builds now throw immediately if sk_test_ key is set",
+      "Cron cleanup route returns 500 on failure so Vercel retries instead of silently marking it as success",
+      "Report page: DB errors now throw (500) instead of masking as 404",
+    ],
+  },
+  {
     version: "1.7",
     date: "May 2026",
     tag: "FIX",
