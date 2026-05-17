@@ -1,11 +1,11 @@
 import { after } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { CreateIdeaRequestSchema } from '@pledgeoff/contracts';
 import { container } from '@/lib/container';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { logger } from '@pledgeoff/observability';
 import { getUserPlan } from '@/lib/getUserPlan';
 import { PLAN_LIMITS } from '@pledgeoff/core';
+import { resolveUserId } from '@/lib/api-auth';
 
 export const maxDuration = 60;
 
@@ -14,18 +14,6 @@ function unauthorizedResponse(traceId: string) {
     { error: { code: 'UNAUTHENTICATED', message: 'Valid authentication required' } },
     { status: 401, headers: { 'X-Trace-Id': traceId } },
   );
-}
-
-async function resolveUserId(authHeader: string | null): Promise<string | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-
-  const anonClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-  const { data } = await anonClient.auth.getUser(token);
-  return data.user?.id ?? null;
 }
 
 export async function GET(req: Request) {
