@@ -1,5 +1,8 @@
+"use client";
+
 import type React from "react";
 import Link from "next/link";
+import { trackEvent } from "@/components/GoogleAnalytics";
 
 const AFFILIATE_DOMAINS = [
   "ahrefs.com",
@@ -26,7 +29,13 @@ function MdxLink({ href, children, ...props }: React.AnchorHTMLAttributes<HTMLAn
   if (isInternal(href)) return <a href={href} {...props}>{children}</a>;
   if (isAffiliate(href)) {
     return (
-      <a href={href} rel="nofollow sponsored noopener noreferrer" target="_blank" {...props}>
+      <a
+        href={href}
+        rel="nofollow sponsored noopener noreferrer"
+        target="_blank"
+        onClick={() => trackEvent("affiliate_click", { href })}
+        {...props}
+      >
         {children}
       </a>
     );
@@ -59,6 +68,7 @@ function MidArticleCTA() {
       <div className="mt-4 flex flex-wrap items-center gap-4">
         <Link
           href="/ideas/new"
+          onClick={() => trackEvent("cta_click", { location: "mid_article" })}
           className="inline-flex items-center gap-2 h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
           style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
         >
