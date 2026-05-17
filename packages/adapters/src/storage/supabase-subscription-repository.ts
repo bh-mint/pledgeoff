@@ -6,6 +6,7 @@ import {
   type ISubscriptionRepository,
   type SubscriptionUpsertInput,
   type SubscriptionSeatUpdateInput,
+  type SubscriptionPlanUpdateInput,
 } from '@pledgeoff/core';
 
 type SubscriptionRow = {
@@ -88,6 +89,23 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
         },
         { onConflict: 'user_id' },
       )
+      .select()
+      .single<SubscriptionRow>();
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(rowToSubscription(data));
+  }
+
+  async updatePlan(input: SubscriptionPlanUpdateInput): Promise<Result<Subscription, SubscriptionRepositoryError>> {
+    const { data, error } = await this.client
+      .from('subscriptions')
+      .update({
+        plan: input.plan,
+        status: input.status,
+        current_period_end: input.currentPeriodEnd,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', input.userId)
       .select()
       .single<SubscriptionRow>();
 

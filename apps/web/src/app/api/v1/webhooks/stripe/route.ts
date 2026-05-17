@@ -173,7 +173,7 @@ export async function POST(req: Request) {
         const rawPeriodEnd = planItem?.current_period_end;
         const currentPeriodEnd = rawPeriodEnd ? new Date(rawPeriodEnd * 1000).toISOString() : null;
 
-        await container.subscriptionRepo.upsert({
+        await container.subscriptionRepo.updatePlan({
           userId: subResult.value.userId,
           plan,
           status,
