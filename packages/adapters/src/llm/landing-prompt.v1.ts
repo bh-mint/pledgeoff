@@ -27,7 +27,7 @@ Rules:
 - subheadline: must mention the primary mechanism (how it works), not just what it does
 - features: exactly 3, each starts with a verb or benefit noun, no generic phrases like "easy to use"
 - ctaText: must create urgency or imply immediate value (e.g. "Validate free →", "Get verdict now")
-- waitlistHeadline: aimed at people who aren't ready to sign up yet — gives them a reason to join the list
+- waitlistHeadline: aimed at people who aren't ready to sign up yet — gives them a reason to join the list. Do NOT invent user/customer counts (e.g. "400+", "1,000+ founders", "10k users") — no made-up social proof numbers
 - Write in English regardless of the idea language
 - Do NOT include any text outside the JSON object`;
 }
