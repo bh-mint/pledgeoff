@@ -1,23 +1,11 @@
-import { createClient } from '@supabase/supabase-js';
 import { container } from '@/lib/container';
-
-async function resolveUser(authHeader: string | null): Promise<{ id: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-  const anonClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-  const { data } = await anonClient.auth.getUser(token);
-  if (!data.user) return null;
-  return { id: data.user.id };
-}
+import { resolveUserId } from '@/lib/api-auth';
 
 export async function POST(req: Request): Promise<Response> {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 
-  const user = await resolveUser(req.headers.get('authorization'));
-  if (!user) {
+  const userId = await resolveUserId(req.headers.get('authorization'));
+  if (!userId) {
     return Response.json(
       { error: { code: 'UNAUTHENTICATED', message: 'Valid authentication required' } },
       { status: 401, headers: { 'X-Trace-Id': traceId } },
@@ -31,7 +19,7 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const subResult = await container._repos.subscriptionRepo.findByUserId(user.id);
+  const subResult = await container._repos.subscriptionRepo.findByUserId(userId);
   const stripeCustomerId = subResult.isOk() ? subResult.value?.stripeCustomerId : null;
 
   if (!stripeCustomerId) {
@@ -55,7 +43,7 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   void container.auditLog.log({
-    userId: user.id,
+    userId,
     action: 'billing_portal_accessed',
     resourceType: 'subscription',
     traceId,
