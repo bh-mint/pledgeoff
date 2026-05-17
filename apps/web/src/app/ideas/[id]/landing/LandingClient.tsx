@@ -55,6 +55,7 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showBreakdown, setShowBreakdown] = useState(false);
 
   async function generate() {
     setLoading(true);
@@ -209,55 +210,70 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
         </div>
       )}
 
-      {/* Copy sections */}
-      {sections.map(({ key, label, value }) => (
-        <div
-          key={key}
-          className="rounded-md border p-5"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      {/* Copy breakdown (collapsible) */}
+      <div className="rounded-md border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+        <button
+          onClick={() => setShowBreakdown((v) => !v)}
+          className="w-full flex items-center justify-between px-5 py-3 transition-colors hover:bg-white/5"
+          style={{ background: "var(--surface)" }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <div className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
-              {label}
-            </div>
-            <button
-              onClick={() => {
-                const text = Array.isArray(value) ? value.join("\n") : value;
-                void copyToClipboard(text, key);
-              }}
-              className="mono text-[10px] px-2 py-1 rounded transition-colors"
-              style={{
-                color: copied === key ? "var(--validated)" : "var(--t3)",
-                border: "1px solid var(--border)",
-              }}
-            >
-              {copied === key ? "Copied!" : "Copy"}
-            </button>
-          </div>
+          <span className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+            Copy breakdown
+          </span>
+          <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            {showBreakdown ? "↑ hide" : "↓ show"}
+          </span>
+        </button>
 
-          {Array.isArray(value) ? (
-            <ul className="space-y-2">
-              {value.map((feature, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="mono text-[10px] mt-1 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
-                  <span className="text-[15px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p
-              className={key === "headline" ? "display font-bold leading-tight" : "text-[15px] leading-relaxed"}
-              style={{
-                color: "var(--t1)",
-                fontSize: key === "headline" ? "24px" : undefined,
-                letterSpacing: key === "headline" ? "-0.02em" : undefined,
-              }}
-            >
-              {value}
-            </p>
-          )}
-        </div>
-      ))}
+        {showBreakdown && (
+          <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+            {sections.map(({ key, label, value }) => (
+              <div key={key} className="px-5 py-4" style={{ background: "var(--canvas)" }}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+                    {label}
+                  </div>
+                  <button
+                    onClick={() => {
+                      const text = Array.isArray(value) ? value.join("\n") : value;
+                      void copyToClipboard(text, key);
+                    }}
+                    className="mono text-[10px] px-2 py-1 rounded transition-colors"
+                    style={{
+                      color: copied === key ? "var(--validated)" : "var(--t3)",
+                      border: "1px solid var(--border)",
+                    }}
+                  >
+                    {copied === key ? "Copied!" : "Copy"}
+                  </button>
+                </div>
+
+                {Array.isArray(value) ? (
+                  <ul className="space-y-1.5">
+                    {value.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="mono text-[10px] mt-1 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
+                        <span className="text-[14px] leading-snug" style={{ color: "var(--t1)" }}>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p
+                    className={key === "headline" ? "display font-bold leading-tight" : "text-[14px] leading-relaxed"}
+                    style={{
+                      color: "var(--t1)",
+                      fontSize: key === "headline" ? "20px" : undefined,
+                      letterSpacing: key === "headline" ? "-0.02em" : undefined,
+                    }}
+                  >
+                    {value}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-col gap-2 pt-2">
         {error && (
