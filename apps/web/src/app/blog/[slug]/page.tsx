@@ -227,7 +227,7 @@ export default async function ArticlePage({ params }: Props) {
             style={{ borderTop: "1px solid var(--border)" }}
           >
             <div
-              className="w-10 h-10 rounded-full border flex-shrink-0"
+              className="w-10 h-10 rounded-full border shrink-0"
               style={{ borderColor: "var(--border)", background: "var(--surface)" }}
             />
             <div className="flex-1">

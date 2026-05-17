@@ -28,7 +28,7 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
         className="border-b sticky top-0 z-50"
         style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
       >
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-10 h-14 flex items-center justify-between">
+        <div className="max-w-360 mx-auto px-4 sm:px-10 h-14 flex items-center justify-between">
           {/* Left — logo + nav links */}
           <div className="flex items-center gap-8 sm:gap-10">
             <Link
