@@ -89,7 +89,7 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
         )}
         <button
           onClick={runAnalysis}
-          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
           style={{ background: "var(--accent)", color: "#000" }}
         >
           Analyze customers →
@@ -101,8 +101,14 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
   const totalSentiment = analysis.sentiment.positive + analysis.sentiment.negative + analysis.sentiment.neutral;
   const safeTotal = totalSentiment > 0 ? totalSentiment : 100;
 
+  const rankColor = (rank: number) => {
+    if (rank === 1) return "var(--accent)";
+    if (rank === 2) return "var(--caution)";
+    return "var(--t3)";
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* Segments */}
       <div>
         <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
@@ -120,7 +126,7 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
                   {segment.name}
                 </div>
                 <span
-                  className="mono text-[10px] px-2 py-0.5 rounded flex-shrink-0"
+                  className="mono text-[10px] px-2 py-0.5 rounded shrink-0"
                   style={{
                     color: SIZE_COLOR[segment.size],
                     border: `1px solid ${SIZE_COLOR[segment.size]}40`,
@@ -150,12 +156,12 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
               style={{ borderColor: "var(--border)", background: "var(--surface)" }}
             >
               <span
-                className="mono text-[11px] font-bold flex-shrink-0 w-5 text-center mt-0.5"
-                style={{ color: i === 0 ? "var(--caution)" : "var(--t3)" }}
+                className="mono text-[11px] font-bold shrink-0 w-5 text-center mt-0.5"
+                style={{ color: rankColor(point.rank) }}
               >
                 #{point.rank}
               </span>
-              <p className="text-[14px] leading-snug" style={{ color: "var(--t1)" }}>
+              <p className="text-[14px] leading-snug" style={{ color: point.rank === 1 ? "var(--t1)" : "var(--t2)" }}>
                 {point.text}
               </p>
             </div>
@@ -184,9 +190,9 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
                   {Math.round((value / safeTotal) * 100)}%
                 </span>
               </div>
-              <div className="h-[4px] rounded-full" style={{ background: "var(--border)" }}>
+              <div className="h-1 rounded-full" style={{ background: "var(--border)" }}>
                 <div
-                  className="h-[4px] rounded-full transition-all duration-700"
+                  className="h-1 rounded-full transition-all duration-700"
                   style={{ width: `${(value / safeTotal) * 100}%`, background: color }}
                 />
               </div>
@@ -226,18 +232,23 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-2">
-        <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
-          Analyzed {new Date(analysis.createdAt).toLocaleDateString()} · Based on {analysis.quotes.length} real signals
-        </p>
-        <button
-          onClick={runAnalysis}
-          disabled={loading}
-          className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
-          style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
-        >
-          {loading ? "Re-analyzing…" : "Re-analyze"}
-        </button>
+      <div className="flex flex-col gap-2 pt-2">
+        {error && (
+          <p className="mono text-[11px] text-right" style={{ color: "var(--caution)" }}>{error}</p>
+        )}
+        <div className="flex items-center justify-between">
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            Analyzed {new Date(analysis.createdAt).toLocaleDateString()} · Based on {analysis.quotes.length} real signals
+          </p>
+          <button
+            onClick={runAnalysis}
+            disabled={loading}
+            className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
+            style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
+          >
+            {loading ? "Re-analyzing…" : "Re-analyze"}
+          </button>
+        </div>
       </div>
     </div>
   );

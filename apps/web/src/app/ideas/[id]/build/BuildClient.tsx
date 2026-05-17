@@ -85,7 +85,7 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
         )}
         <button
           onClick={runAnalysis}
-          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
           style={{ background: "var(--accent)", color: "#000" }}
         >
           Analyze engineering signals →
@@ -97,7 +97,7 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
   const hasEnoughGithubSignals = analysis.signalCount >= MIN_GITHUB_SIGNALS;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* Signal count warning */}
       {!hasEnoughGithubSignals && (
         <div
@@ -191,14 +191,14 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
             className="mono text-[10px] uppercase tracking-[0.12em] mb-4"
             style={{ color: "var(--t3)" }}
           >
-            Technical gaps — opportunities
+            → Technical gaps — opportunities
           </h2>
           <div className="space-y-3">
             {analysis.gaps.map((gap, i) => (
               <div
                 key={i}
-                className="border-l-2 pl-4 py-2"
-                style={{ borderColor: "var(--accent)" }}
+                className="rounded-md border border-l-2 px-4 py-3"
+                style={{ borderLeftColor: "var(--accent)", borderColor: "var(--border)", background: "var(--surface)" }}
               >
                 <p className="text-[14px] font-medium mb-1" style={{ color: "var(--t1)" }}>
                   {gap.title}
@@ -215,24 +215,26 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
         </section>
       )}
 
-      {/* Regenerate */}
-      <div className="pt-4 border-t border-(--border) flex items-center justify-between">
-        <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
-          {analysis.signalCount === 0
-            ? "Based on idea description · no GitHub signals"
-            : `Based on ${analysis.signalCount} GitHub signal${analysis.signalCount !== 1 ? "s" : ""}`}
-        </span>
+      {/* Footer */}
+      <div className="flex flex-col gap-2 pt-4 border-t border-(--border)">
         {error && (
-          <p className="text-[12px]" style={{ color: "var(--caution)" }}>{error}</p>
+          <p className="mono text-[11px] text-right" style={{ color: "var(--caution)" }}>{error}</p>
         )}
-        <button
-          onClick={runAnalysis}
-          disabled={loading}
-          className="mono text-[10px] uppercase tracking-[0.08em] px-3 py-1.5 rounded transition-opacity"
-          style={{ background: "rgba(255,255,255,0.06)", color: "var(--t2)", border: "1px solid var(--border)", opacity: loading ? 0.6 : 1 }}
-        >
-          {loading ? "Regenerating…" : "Regenerate"}
-        </button>
+        <div className="flex items-center justify-between">
+          <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            {analysis.signalCount === 0
+              ? "Based on idea description · no GitHub signals"
+              : `Based on ${analysis.signalCount} GitHub signal${analysis.signalCount !== 1 ? "s" : ""}`}
+          </span>
+          <button
+            onClick={runAnalysis}
+            disabled={loading}
+            className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
+            style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
+          >
+            {loading ? "Regenerating…" : "Regenerate"}
+          </button>
+        </div>
       </div>
     </div>
   );
