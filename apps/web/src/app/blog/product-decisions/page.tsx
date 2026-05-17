@@ -28,17 +28,30 @@ export default function ProductDecisionsPage() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Product Decisions — PledgeOFF",
-    description: cluster.description,
-    url: "https://pledgeoff.com/blog/product-decisions",
-    breadcrumb: {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Blog", item: "https://pledgeoff.com/blog" },
-        { "@type": "ListItem", position: 2, name: "Product Decisions", item: "https://pledgeoff.com/blog/product-decisions" },
-      ],
-    },
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": "https://pledgeoff.com/blog/product-decisions#webpage",
+        name: "Product Decisions — PledgeOFF",
+        description: cluster.description,
+        url: "https://pledgeoff.com/blog/product-decisions",
+        inLanguage: "en",
+        publisher: { "@type": "Organization", name: "PledgeOFF", url: "https://pledgeoff.com" },
+        hasPart: articles.map((a) => ({
+          "@type": "BlogPosting",
+          headline: a.title,
+          url: `https://pledgeoff.com/blog/${a.slug}`,
+          datePublished: a.publishedAt,
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Blog", item: "https://pledgeoff.com/blog" },
+          { "@type": "ListItem", position: 2, name: "Product Decisions", item: "https://pledgeoff.com/blog/product-decisions" },
+        ],
+      },
+    ],
   };
 
   return (
