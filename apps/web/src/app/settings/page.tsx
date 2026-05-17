@@ -19,7 +19,7 @@ export default async function SettingsPage() {
   const supabase = createServiceClient();
 
   const [profileResult, ideasResult, subResult] = await Promise.all([
-    supabase.from("profiles").select("full_name, company_name").eq("id", user.id).single(),
+    supabase.from("profiles").select("first_name, last_name, username, company_name").eq("id", user.id).single(),
     container._repos.ideaRepo.findByUserId(user.id),
     container._repos.subscriptionRepo.findByUserId(user.id),
   ]);
@@ -50,7 +50,9 @@ export default async function SettingsPage() {
 
         <SettingsClient
           email={user.email ?? ""}
-          fullName={profileResult.data?.full_name ?? null}
+          firstName={(profileResult.data as { first_name?: string | null } | null)?.first_name ?? null}
+          lastName={(profileResult.data as { last_name?: string | null } | null)?.last_name ?? null}
+          username={(profileResult.data as { username?: string | null } | null)?.username ?? null}
           companyName={(profileResult.data as { company_name?: string | null } | null)?.company_name ?? null}
           plan={plan}
           ideasThisMonth={ideasThisMonth}

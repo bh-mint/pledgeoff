@@ -60,8 +60,8 @@ function Spark({
 export default async function DashboardPage() {
   const user = await requireUser();
   const supabase = createServiceClient();
-  const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).single();
-  const displayName = profile?.full_name || user.email?.split("@")[0] || "—";
+  const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single();
+  const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || user.email?.split("@")[0] || "—";
 
   const [ideasResult, subResult] = await Promise.all([
     container._repos.ideaRepo.findByUserId(user.id),

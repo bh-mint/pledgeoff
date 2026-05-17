@@ -8,14 +8,28 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const fullName = typeof body.full_name === "string" ? body.full_name.trim() : null;
+  const firstName = typeof body.first_name === "string" ? body.first_name.trim() : null;
+  const lastName = typeof body.last_name === "string" ? body.last_name.trim() : null;
+  const username = typeof body.username === "string" ? body.username.trim().toLowerCase() : undefined;
   const companyName = typeof body.company_name === "string" ? body.company_name.trim() : undefined;
 
-  if (!fullName) {
-    return NextResponse.json({ error: "full_name is required" }, { status: 400 });
+  if (!firstName) {
+    return NextResponse.json({ error: "first_name is required" }, { status: 400 });
   }
 
-  const updatePayload: Record<string, string | null> = { full_name: fullName, updated_at: new Date().toISOString() };
+  if (username !== undefined && username !== "" && !/^[a-z0-9_-]{3,30}$/.test(username)) {
+    return NextResponse.json(
+      { error: "Username must be 3–30 characters: letters, numbers, _ or -" },
+      { status: 400 },
+    );
+  }
+
+  const updatePayload: Record<string, string | null> = {
+    first_name: firstName,
+    last_name: lastName || null,
+    updated_at: new Date().toISOString(),
+  };
+  if (username !== undefined) updatePayload.username = username || null;
   if (companyName !== undefined) updatePayload.company_name = companyName || null;
 
   const { error } = await supabase
@@ -23,7 +37,12 @@ export async function PATCH(req: NextRequest) {
     .update(updatePayload)
     .eq("id", user.id);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    const msg = error.code === "23505"
+      ? "Username is already taken."
+      : error.message;
+    return NextResponse.json({ error: msg }, { status: error.code === "23505" ? 409 : 500 });
+  }
 
   return NextResponse.json({ ok: true });
 }

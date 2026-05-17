@@ -7,7 +7,8 @@ interface NewUserPayload {
   record: {
     id: string;
     email: string;
-    full_name?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
     avatar_url?: string | null;
     created_at: string;
   };
@@ -91,8 +92,8 @@ export async function POST(req: Request) {
     return Response.json({ ok: true, skipped: true });
   }
 
-  const { id, email, full_name } = payload.record;
-  const name = full_name ?? undefined;
+  const { id, email, first_name, last_name } = payload.record;
+  const name = [first_name, last_name].filter(Boolean).join(" ") || undefined;
 
   const traceId = id;
 
