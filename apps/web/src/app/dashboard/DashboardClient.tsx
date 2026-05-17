@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { VerdictMark } from "@/components/brand/VerdictMark";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Plan } from "@pledgeoff/core";
 
 export type ToolStatus = {
@@ -32,6 +33,7 @@ export type TeamFeedRow = {
   score: number | null;
   verdict: string | null;
   isOwn: boolean;
+  reactions: { agree: number; disagree: number; myReaction: "agree" | "disagree" | null };
 };
 
 const VERDICT_COLOR: Record<string, string> = {
@@ -66,9 +68,16 @@ export function DashboardClient({
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date");
   const [tab, setTab] = useState<"personal" | "team">("personal");
+  const [verdictFilter, setVerdictFilter] = useState<string>("all");
+  const [memberFilter, setMemberFilter] = useState<string>("all");
   const searchParams = useSearchParams();
   const billingSuccess = searchParams.get("billing") === "success";
   const [showBillingBanner, setShowBillingBanner] = useState(billingSuccess);
+
+  // reactions state: map ideaId → { agree, disagree, myReaction }
+  const [reactionState, setReactionState] = useState<Record<string, TeamFeedRow["reactions"]>>(
+    () => Object.fromEntries(teamFeedRows.map((r) => [r.id, r.reactions]))
+  );
 
   const hasTeam = !!teamId;
   const isPaid = plan !== "free";
@@ -80,6 +89,23 @@ export function DashboardClient({
     return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleReact = useCallback(async (ideaId: string, reaction: "agree" | "disagree") => {
+    const current = reactionState[ideaId];
+    const newReaction = current?.myReaction === reaction ? null : reaction;
+    const supabase = createSupabaseBrowserClient();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    const res = await fetch(`/api/v1/ideas/${ideaId}/reactions`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ reaction: newReaction }),
+    });
+    if (res.ok) {
+      const { data } = await res.json() as { data: { agree: number; disagree: number; myReaction: "agree" | "disagree" | null } };
+      setReactionState((prev) => ({ ...prev, [ideaId]: data }));
+    }
+  }, [reactionState]);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -332,27 +358,14 @@ export function DashboardClient({
 
       {/* ── Team tab ── */}
       {tab === "team" && showTeamTab && (
-        <div
-          className="rounded-md border"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-        >
-          {/* Header */}
-          <div
-            className="px-4 sm:px-6 py-4 border-b flex items-center gap-3"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">
-              {teamName ?? "Team"} feed
-            </h2>
-            <span className="mono text-[10px] text-(--t3)">{teamFeedRows.length}</span>
-          </div>
-
+        <>
           {/* No team yet */}
           {!hasTeam && (
-            <div className="px-6 py-16 text-center">
-              <div className="display text-[18px] font-semibold tracking-tight text-(--t1) mb-2">
-                No team yet.
-              </div>
+            <div
+              className="rounded-md border px-6 py-16 text-center"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            >
+              <div className="display text-[18px] font-semibold tracking-tight text-(--t1) mb-2">No team yet.</div>
               <p className="text-[13px] mb-5" style={{ color: "var(--t2)" }}>
                 Create a team and invite colleagues in Settings → Team.
               </p>
@@ -366,73 +379,192 @@ export function DashboardClient({
             </div>
           )}
 
-          {/* Feed rows */}
-          {hasTeam && teamFeedRows.length === 0 && (
-            <div className="px-6 py-16 text-center">
-              <div className="display text-[18px] font-semibold tracking-tight text-(--t1) mb-2">
-                No team validations yet.
-              </div>
-              <p className="text-[13px]" style={{ color: "var(--t2)" }}>
-                Invite colleagues and validate together.
-              </p>
-            </div>
-          )}
+          {hasTeam && (() => {
+            // Team pulse stats
+            const withVerdict = teamFeedRows.filter((r) => r.verdict);
+            const goCount = teamFeedRows.filter((r) => r.verdict === "GO").length;
+            const goRate = withVerdict.length > 0 ? Math.round((goCount / withVerdict.length) * 100) : null;
+            const memberCounts = teamFeedRows.reduce<Record<string, { initials: string; count: number }>>((acc, r) => {
+              if (!acc[r.userId]) acc[r.userId] = { initials: r.memberInitials, count: 0 };
+              acc[r.userId].count++;
+              return acc;
+            }, {});
+            const mostActive = Object.values(memberCounts).sort((a, b) => b.count - a.count)[0] ?? null;
 
-          {hasTeam && teamFeedRows.map((row) => {
-            const color = row.verdict ? (VERDICT_COLOR[row.verdict] ?? "var(--t3)") : "var(--t3)";
+            // Unique members for filter
+            const members = Object.entries(memberCounts).map(([uid, v]) => ({ uid, ...v }));
+
+            // Filtered feed
+            const filteredFeed = teamFeedRows.filter((r) => {
+              if (verdictFilter !== "all" && r.verdict !== verdictFilter) return false;
+              if (memberFilter !== "all" && r.userId !== memberFilter) return false;
+              return true;
+            });
+
             return (
-              <Link
-                key={row.id}
-                href={`/ideas/${row.id}`}
-                className="px-4 sm:px-6 py-3.5 border-b flex items-center gap-4 cursor-pointer transition-colors"
-                style={{ borderColor: "var(--border)" }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(255,255,255,0.015)")
-                }
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-              >
-                {/* Member avatar */}
+              <>
+                {/* Team pulse */}
                 <div
-                  className="w-7 h-7 rounded-full border flex items-center justify-center mono text-[10px] font-semibold shrink-0"
-                  style={{
-                    borderColor: row.isOwn ? "var(--accent)" : "var(--border)",
-                    background: row.isOwn ? "color-mix(in srgb, var(--accent) 12%, transparent)" : "var(--canvas)",
-                    color: row.isOwn ? "var(--accent)" : "var(--t2)",
-                  }}
+                  className="rounded-md border p-4 mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)" }}
                 >
-                  {row.memberInitials}
-                </div>
-
-                {/* Idea text */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
-                  <div className="mono text-[10px] mt-0.5 text-(--t3)">
-                    {shortDate(row.createdAt)}{row.isOwn ? " · you" : ""}
+                  <div className="border-l pl-3" style={{ borderColor: "var(--border)" }}>
+                    <div className="mono text-[9px] uppercase tracking-[0.14em] text-(--t3)">Total validations</div>
+                    <div className="display text-[24px] tnum font-semibold text-(--t1) mt-1">{teamFeedRows.length}</div>
+                  </div>
+                  <div className="border-l pl-3" style={{ borderColor: "var(--border)" }}>
+                    <div className="mono text-[9px] uppercase tracking-[0.14em] text-(--t3)">GO rate</div>
+                    <div className="display text-[24px] tnum font-semibold mt-1" style={{ color: "var(--validated)" }}>
+                      {goRate !== null ? `${goRate}%` : "—"}
+                    </div>
+                  </div>
+                  <div className="border-l pl-3" style={{ borderColor: "var(--border)" }}>
+                    <div className="mono text-[9px] uppercase tracking-[0.14em] text-(--t3)">Pending</div>
+                    <div className="display text-[24px] tnum font-semibold text-(--t1) mt-1">
+                      {teamFeedRows.filter((r) => !r.verdict).length}
+                    </div>
+                  </div>
+                  <div className="border-l pl-3" style={{ borderColor: "var(--border)" }}>
+                    <div className="mono text-[9px] uppercase tracking-[0.14em] text-(--t3)">Most active</div>
+                    {mostActive ? (
+                      <div className="flex items-center gap-2 mt-1">
+                        <div
+                          className="w-6 h-6 rounded-full border flex items-center justify-center mono text-[9px] font-semibold shrink-0"
+                          style={{ borderColor: "var(--border)", background: "var(--canvas)", color: "var(--t2)" }}
+                        >
+                          {mostActive.initials}
+                        </div>
+                        <span className="mono text-[11px] text-(--t1)">{mostActive.count}</span>
+                      </div>
+                    ) : (
+                      <div className="display text-[24px] tnum font-semibold text-(--t1) mt-1">—</div>
+                    )}
                   </div>
                 </div>
 
-                {/* Score */}
-                {row.score !== null && (
-                  <span
-                    className="display tnum text-[15px] font-semibold shrink-0"
-                    style={{ color }}
-                  >
-                    {row.score}
-                  </span>
-                )}
+                {/* Feed */}
+                <div className="rounded-md border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                  {/* Filters header */}
+                  <div className="px-4 sm:px-6 py-3 border-b flex flex-wrap items-center gap-3" style={{ borderColor: "var(--border)" }}>
+                    <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">
+                      {teamName ?? "Team"} feed
+                    </h2>
+                    <span className="mono text-[10px] text-(--t3)">{filteredFeed.length}</span>
+                    <div className="ml-auto flex items-center gap-2">
+                      {/* Verdict filter */}
+                      <select
+                        value={verdictFilter}
+                        onChange={(e) => setVerdictFilter(e.target.value)}
+                        className="mono text-[10px] h-7 px-2 rounded-md border bg-transparent outline-none"
+                        style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                      >
+                        <option value="all">All verdicts</option>
+                        <option value="GO">GO</option>
+                        <option value="KILL">KILL</option>
+                        <option value="PIVOT">PIVOT</option>
+                        <option value="">Pending</option>
+                      </select>
+                      {/* Member filter */}
+                      {members.length > 1 && (
+                        <select
+                          value={memberFilter}
+                          onChange={(e) => setMemberFilter(e.target.value)}
+                          className="mono text-[10px] h-7 px-2 rounded-md border bg-transparent outline-none"
+                          style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                        >
+                          <option value="all">All members</option>
+                          {members.map((m) => (
+                            <option key={m.uid} value={m.uid}>{m.initials} ({m.count})</option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  </div>
 
-                {/* Verdict badge */}
-                <div className="shrink-0 w-16 text-right">
-                  {row.verdict && (row.verdict === "GO" || row.verdict === "PIVOT" || row.verdict === "KILL") ? (
-                    <VerdictMark verdict={row.verdict} size={22} />
-                  ) : (
-                    <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>pending</span>
+                  {/* Empty filtered */}
+                  {filteredFeed.length === 0 && (
+                    <div className="px-6 py-12 text-center">
+                      <div className="mono text-[12px] text-(--t3)">No validations match the current filters.</div>
+                    </div>
                   )}
+
+                  {/* Feed rows */}
+                  {filteredFeed.map((row) => {
+                    const color = row.verdict ? (VERDICT_COLOR[row.verdict] ?? "var(--t3)") : "var(--t3)";
+                    const rxn = reactionState[row.id] ?? row.reactions;
+                    return (
+                      <div
+                        key={row.id}
+                        className="px-4 sm:px-6 py-3.5 border-b"
+                        style={{ borderColor: "var(--border)" }}
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Avatar */}
+                          <div
+                            className="w-7 h-7 rounded-full border flex items-center justify-center mono text-[10px] font-semibold shrink-0 mt-0.5"
+                            style={{
+                              borderColor: row.isOwn ? "var(--accent)" : "var(--border)",
+                              background: row.isOwn ? "color-mix(in srgb, var(--accent) 12%, transparent)" : "var(--canvas)",
+                              color: row.isOwn ? "var(--accent)" : "var(--t2)",
+                            }}
+                          >
+                            {row.memberInitials}
+                          </div>
+
+                          {/* Main content */}
+                          <div className="flex-1 min-w-0">
+                            <Link href={`/ideas/${row.id}`} className="block hover:underline underline-offset-2">
+                              <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
+                            </Link>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="mono text-[10px] text-(--t3)">
+                                {shortDate(row.createdAt)}{row.isOwn ? " · you" : ""}
+                              </span>
+                              {row.score !== null && (
+                                <span className="display tnum text-[12px] font-semibold" style={{ color }}>
+                                  {row.score}
+                                </span>
+                              )}
+                              {row.verdict && (row.verdict === "GO" || row.verdict === "PIVOT" || row.verdict === "KILL") && (
+                                <VerdictMark verdict={row.verdict} size={18} />
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Reactions */}
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              onClick={() => handleReact(row.id, "agree")}
+                              className="flex items-center gap-1 mono text-[10px] px-2 py-1 rounded-md border transition-colors"
+                              style={{
+                                borderColor: rxn.myReaction === "agree" ? "var(--validated)" : "var(--border)",
+                                color: rxn.myReaction === "agree" ? "var(--validated)" : "var(--t3)",
+                                background: rxn.myReaction === "agree" ? "color-mix(in srgb, var(--validated) 8%, transparent)" : "transparent",
+                              }}
+                            >
+                              ↑ {rxn.agree > 0 ? rxn.agree : ""}
+                            </button>
+                            <button
+                              onClick={() => handleReact(row.id, "disagree")}
+                              className="flex items-center gap-1 mono text-[10px] px-2 py-1 rounded-md border transition-colors"
+                              style={{
+                                borderColor: rxn.myReaction === "disagree" ? "var(--kill)" : "var(--border)",
+                                color: rxn.myReaction === "disagree" ? "var(--kill)" : "var(--t3)",
+                                background: rxn.myReaction === "disagree" ? "color-mix(in srgb, var(--kill) 8%, transparent)" : "transparent",
+                              }}
+                            >
+                              ↓ {rxn.disagree > 0 ? rxn.disagree : ""}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </Link>
+              </>
             );
-          })}
-        </div>
+          })()}
+        </>
       )}
     </>
   );

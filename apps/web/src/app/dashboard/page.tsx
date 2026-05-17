@@ -208,9 +208,14 @@ export default async function DashboardPage() {
     const teamIdeasResult = await container._repos.ideaRepo.findByUserIds(allMemberIds);
     if (teamIdeasResult.isOk()) {
       const teamIdeas = teamIdeasResult.value;
-      const teamDecisions = await Promise.all(
-        teamIdeas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))
-      );
+      const teamIdeaIds = teamIdeas.map((idea) => idea.id);
+
+      const [teamDecisions, reactionsResult] = await Promise.all([
+        Promise.all(teamIdeas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))),
+        container._repos.ideaReactionRepo.findByIdeaIds(teamIdeaIds),
+      ]);
+
+      const allReactions = reactionsResult.isOk() ? reactionsResult.value : [];
 
       teamFeedRows = teamIdeas.map((idea, i) => {
         const p = profileMap.get(idea.userId);
@@ -222,6 +227,7 @@ export default async function DashboardPage() {
               .join("")
           : (idea.userId.slice(0, 2).toUpperCase());
         const decision = teamDecisions[i].isOk() ? teamDecisions[i].value : null;
+        const ideaReactions = allReactions.filter((r) => r.ideaId === idea.id);
         return {
           id: idea.id,
           text: idea.text,
@@ -231,6 +237,11 @@ export default async function DashboardPage() {
           score: computeScore(decision),
           verdict: decision?.verdict ?? null,
           isOwn: idea.userId === user.id,
+          reactions: {
+            agree: ideaReactions.filter((r) => r.reaction === "agree").length,
+            disagree: ideaReactions.filter((r) => r.reaction === "disagree").length,
+            myReaction: (ideaReactions.find((r) => r.userId === user.id)?.reaction ?? null) as "agree" | "disagree" | null,
+          },
         };
       });
     }

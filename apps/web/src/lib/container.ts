@@ -12,6 +12,7 @@ import {
   SupabaseCompetitorAnalysisRepository,
   SupabaseSubscriptionRepository,
   SupabaseTeamRepository,
+  SupabaseIdeaReactionRepository,
   StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
@@ -41,6 +42,7 @@ import {
   LeaveTeamUseCase,
   UpdateTeamNameUseCase,
   UpdateTeamSeatsUseCase,
+  ReactToIdeaUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -78,6 +80,7 @@ function buildContainer() {
   const competitorAnalysisRepo = new SupabaseCompetitorAnalysisRepository(supabase);
   const subscriptionRepo = new SupabaseSubscriptionRepository(supabase);
   const teamRepo = new SupabaseTeamRepository(supabase);
+  const ideaReactionRepo = new SupabaseIdeaReactionRepository(supabase);
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   if (process.env.NODE_ENV === 'production' && stripeSecretKey?.startsWith('sk_test_')) {
@@ -148,6 +151,7 @@ function buildContainer() {
   const leaveTeamUseCase = new LeaveTeamUseCase(teamRepo);
   const updateTeamNameUseCase = new UpdateTeamNameUseCase(teamRepo);
   const updateTeamSeatsUseCase = new UpdateTeamSeatsUseCase(subscriptionRepo);
+  const reactToIdeaUseCase = new ReactToIdeaUseCase(ideaReactionRepo);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -230,10 +234,11 @@ function buildContainer() {
     leaveTeamUseCase,
     updateTeamNameUseCase,
     updateTeamSeatsUseCase,
+    reactToIdeaUseCase,
     ideaRepo,
     eventBus,
     auditLog,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, subscriptionRepo, teamRepo },
+    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, subscriptionRepo, teamRepo, ideaReactionRepo },
   };
 }
 

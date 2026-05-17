@@ -10,6 +10,7 @@ export * from './domain/landing-page';
 export * from './domain/customer-analysis';
 export * from './domain/build-analysis';
 export * from './domain/competitor-analysis';
+export * from './domain/idea-reaction';
 
 // Ports
 export * from './ports/idea-repository';
@@ -47,3 +48,5 @@ export * from './use-cases/remove-team-member';
 export * from './use-cases/leave-team';
 export * from './use-cases/update-team-name';
 export * from './use-cases/update-team-seats';
+export * from './use-cases/react-to-idea';
+export * from './ports/idea-reaction-repository';

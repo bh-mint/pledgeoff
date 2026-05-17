@@ -13,6 +13,7 @@ export { SupabaseBuildAnalysisRepository } from './storage/supabase-build-analys
 export { SupabaseCompetitorAnalysisRepository } from './storage/supabase-competitor-analysis-repository';
 export { SupabaseSubscriptionRepository } from './storage/supabase-subscription-repository';
 export { SupabaseTeamRepository } from './storage/supabase-team-repository';
+export { SupabaseIdeaReactionRepository } from './storage/supabase-idea-reaction-repository';
 export { StripeAdapter } from './stripe/stripe-adapter';
 export type { StripeAdapterError, CreateCheckoutSessionInput, CheckoutSession, StripeSubscriptionData } from './stripe/stripe-adapter';
 export { InMemoryEventBus } from './in-memory-event-bus';
