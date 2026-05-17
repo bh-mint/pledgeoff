@@ -27,10 +27,10 @@ export const SubscriptionSchema = z.object({
 export type Subscription = z.infer<typeof SubscriptionSchema>;
 
 export const PLAN_LIMITS = {
-  free:     { verificationsPerMonth: 1 },
-  pro:      { verificationsPerMonth: 20 },
-  pro_plus: { verificationsPerMonth: Infinity },
-} satisfies Record<Plan, { verificationsPerMonth: number }>;
+  free:     { verificationsPerMonth: 1,        seatsIncluded: 1  },
+  pro:      { verificationsPerMonth: 20,       seatsIncluded: 3  },
+  pro_plus: { verificationsPerMonth: Infinity, seatsIncluded: 10 },
+} satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number }>;
 
 export function isActivePlan(sub: Subscription): boolean {
   return sub.status === 'active' || sub.status === 'trialing';
