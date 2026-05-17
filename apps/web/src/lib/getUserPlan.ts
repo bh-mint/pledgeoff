@@ -10,9 +10,9 @@ export async function getUserPlan(userId: string): Promise<Plan> {
   if (result.isErr()) {
     logger.error(
       { traceId: "getUserPlan", userId, error: String(result.error), outcome: "error" as const },
-      "getUserPlan: subscriptionRepo failed — defaulting to free"
+      "getUserPlan: subscriptionRepo failed"
     );
-    return "free";
+    throw new Error(`Plan resolution failed for user ${userId}`);
   }
 
   return (result.value ? effectivePlan(result.value) : "free") as Plan;
