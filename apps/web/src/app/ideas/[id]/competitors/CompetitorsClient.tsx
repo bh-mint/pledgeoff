@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { CompetitorAnalysis } from "@pledgeoff/core";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface CompetitorsClientProps {
   ideaId: string;
@@ -88,9 +89,14 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
     <div className="space-y-10" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* Competitors list */}
       <section>
-        <p className="mono text-[10px] uppercase tracking-[0.12em] mb-4" style={{ color: "var(--t3)" }}>
+        <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
           Competitors · {analysis.competitors.length}
         </p>
+        {analysis.competitors.some((c) => c.source === "knowledge") && (
+          <p className="mono text-[10px] sm:hidden mb-4" style={{ color: "var(--t3)" }}>
+            AI knowledge = not from live signals, from general AI knowledge
+          </p>
+        )}
 
         {analysis.competitors.length === 0 ? (
           <div
@@ -122,13 +128,14 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
                       </a>
                     )}
                     {c.source === "knowledge" && (
-                      <span
-                        className="mono text-[9px] px-1.5 py-0.5 rounded uppercase tracking-[0.06em]"
-                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)", color: "var(--t3)" }}
-                        title="Found via AI general knowledge, not from your idea's signals"
-                      >
-                        AI knowledge
-                      </span>
+                      <InfoTooltip content="Found via AI general knowledge, not from your idea's live signals" align="left">
+                        <span
+                          className="mono text-[9px] px-1.5 py-0.5 rounded uppercase tracking-[0.06em] cursor-default"
+                          style={{ background: "rgba(255,255,255,0.04)", border: "1px solid var(--border)", color: "var(--t3)" }}
+                        >
+                          AI knowledge
+                        </span>
+                      </InfoTooltip>
                     )}
                   </div>
                 </div>
