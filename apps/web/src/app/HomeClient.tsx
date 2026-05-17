@@ -402,6 +402,54 @@ export function HomeClient() {
         </div>
       </section>
 
+      {/* ── FREE TOOLS ── */}
+      <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
+        <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
+          Free tools
+        </p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-10">
+          <h2 className="display text-[40px] font-black leading-none text-(--t1)">
+            Not ready to validate?
+            <br />
+            Start here.
+          </h2>
+          <p className="text-[14px] text-(--t2) leading-relaxed self-end">
+            Free tools to sharpen your thinking before you commit. No account required.
+          </p>
+        </div>
+
+        <Link
+          href="/tools/decision-clarity"
+          className="group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-(--surface) border border-(--border) rounded-md p-6 hover:border-(--t3) transition-colors"
+        >
+          <div className="flex items-start gap-5">
+            <div
+              className="shrink-0 w-10 h-10 rounded-md border flex items-center justify-center mono text-[16px]"
+              style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+            >
+              🎯
+            </div>
+            <div>
+              <p className="display text-[15px] font-semibold text-(--t1) mb-1">
+                Decision Clarity Tool
+              </p>
+              <p className="text-[12px] text-(--t2) leading-relaxed max-w-120">
+                5 questions. 60 seconds. Find out if your idea is ready to build — or needs more thinking first.
+              </p>
+              <p className="mono text-[10px] text-(--t3) mt-2 uppercase tracking-widest">
+                Free · No account · 5 questions
+              </p>
+            </div>
+          </div>
+          <span
+            className="shrink-0 mono text-[12px] px-4 h-9 rounded-md border flex items-center gap-2 transition-colors"
+            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+          >
+            Try it free →
+          </span>
+        </Link>
+      </section>
+
       {/* ── FINAL CTA ── */}
       <section className="max-w-330 mx-auto px-8 py-24 text-center">
         <h2 className="display text-[40px] md:text-[56px] font-black leading-none text-(--t1) mb-4">
