@@ -221,6 +221,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
         LLMSimulationResponseSchema,
         'generateSimulation',
         request.traceId,
+        2048,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
@@ -261,6 +262,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
         LLMCustomerResponseSchema,
         'analyzeCustomers',
         request.traceId,
+        2048,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
@@ -281,6 +283,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
         LLMBuildResponseSchemaA,
         'analyzeBuild',
         request.traceId,
+        2048,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
