@@ -6,6 +6,7 @@ import { mdxComponents } from "@/lib/mdx-components";
 import { getAllArticles, getArticleBySlug, getRelatedArticles, getSeeAlsoArticles, CLUSTER_META } from "@/lib/mdx";
 import { formatDate } from "@/lib/mdx-utils";
 import { ReadingProgress } from "@/components/blog/ReadingProgress";
+import { TableOfContents } from "@/components/blog/TableOfContents";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
@@ -162,8 +163,13 @@ export default async function ArticlePage({ params }: Props) {
             </span>
           </div>
 
+          {/* Table of Contents */}
+          <div className="mt-8">
+            <TableOfContents />
+          </div>
+
           {/* Body */}
-          <div className="prose-pledgeoff mt-8">
+          <div className="prose-pledgeoff mt-6">
             <MDXRemote source={article.content} components={mdxComponents} />
           </div>
 
@@ -201,12 +207,12 @@ export default async function ArticlePage({ params }: Props) {
               <Link
                 href="/ideas/new"
                 className="inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-                style={{ background: "var(--accent)", color: "#000" }}
+                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
               >
                 Validate your idea →
               </Link>
               <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>
-                Free to start · 3 validations/month · No credit card
+                Free to start · 1 validation/month · No credit card
               </span>
             </div>
           </div>

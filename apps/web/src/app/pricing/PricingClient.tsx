@@ -151,7 +151,7 @@ function UpgradeButton({
         onClick={handleClick}
         disabled={loading}
         className="display w-full h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
-        style={{ background: "var(--accent)", color: "#000" }}
+        style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
       >
         {loading ? "Redirecting…" : label}
       </button>

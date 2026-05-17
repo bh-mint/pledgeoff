@@ -285,7 +285,7 @@ export default async function DashboardPage() {
           {rows.length === 0 && (
             <div
               className="rounded-md border p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4"
-              style={{ borderColor: "rgba(214,255,61,0.3)", background: "rgba(214,255,61,0.04)" }}
+              style={{ borderColor: "color-mix(in srgb, var(--accent) 30%, transparent)", background: "color-mix(in srgb, var(--accent) 4%, transparent)" }}
             >
               <div className="flex-1 min-w-0">
                 <div className="mono text-[10px] uppercase tracking-widest mb-1" style={{ color: "var(--accent)" }}>
@@ -302,7 +302,7 @@ export default async function DashboardPage() {
                 <Link
                   href="/ideas/new"
                   className="display text-[13px] font-semibold px-5 h-10 rounded-md flex items-center justify-center transition-opacity hover:opacity-90"
-                  style={{ background: "var(--accent)", color: "#000" }}
+                  style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
                 >
                   Start →
                 </Link>
@@ -446,7 +446,7 @@ export default async function DashboardPage() {
               </div>
               <span
                 className="mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
-                style={{ background: "rgba(214,255,61,0.08)", color: "var(--accent)", border: "1px solid rgba(214,255,61,0.2)" }}
+                style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)", color: "var(--accent)", border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)" }}
               >
                 Soon
               </span>

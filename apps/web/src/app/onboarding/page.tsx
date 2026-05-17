@@ -115,7 +115,7 @@ export default async function OnboardingPage() {
             <Link
               href="/ideas/new"
               className="display text-[15px] font-semibold px-6 h-12 rounded-md flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
-              style={{ background: "var(--accent)", color: "#000" }}
+              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
             >
               Validate your first idea →
             </Link>

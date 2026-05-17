@@ -192,7 +192,7 @@ export default async function SharePage({ params }: Props) {
           <Link
             href="/login"
             className="display text-[14px] font-semibold px-6 h-11 rounded-md inline-flex items-center gap-2 transition-opacity hover:opacity-90"
-            style={{ background: "var(--accent)", color: "#000" }}
+            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
           >
             Start free →
           </Link>

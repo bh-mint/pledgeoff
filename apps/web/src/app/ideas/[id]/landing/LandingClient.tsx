@@ -121,7 +121,7 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
         <button
           onClick={generate}
           className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-          style={{ background: "var(--accent)", color: "#000" }}
+          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
         >
           Generate landing page →
         </button>
@@ -144,7 +144,7 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
         <button
           onClick={() => void copyToClipboard(generateHtml(landing), "html")}
           className="inline-flex items-center gap-2 h-8 px-4 rounded-md mono text-[11px] font-semibold transition-opacity hover:opacity-90"
-          style={{ background: "var(--accent)", color: "#000" }}
+          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
         >
           {copied === "html" ? "Copied!" : "Copy HTML"}
         </button>

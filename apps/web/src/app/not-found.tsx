@@ -14,7 +14,7 @@ export default function NotFound() {
       {/* Secondary ambient */}
       <div
         className="fixed inset-0 pointer-events-none"
-        style={{ background: "radial-gradient(ellipse at 50% 90%, rgba(214,255,61,0.04) 0%, transparent 50%)" }}
+        style={{ background: "radial-gradient(ellipse at 50% 90%, color-mix(in srgb, var(--accent) 4%, transparent) 0%, transparent 50%)" }}
       />
 
       {/* Wordmark only */}
@@ -94,7 +94,7 @@ export default function NotFound() {
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-2 h-11 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-              style={{ background: "var(--accent)", color: "#000" }}
+              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
             >
               <span aria-hidden="true">←</span> Back to dashboard
             </Link>

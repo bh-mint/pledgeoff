@@ -80,7 +80,7 @@ export function FeedbackButtons({ ideaId, decisionId }: FeedbackButtonsProps) {
           </span>
           <button
             className="h-8 w-8 rounded border text-[16px] transition-colors"
-            style={{ borderColor: "var(--accent)", background: "rgba(214,255,61,0.08)" }}
+            style={{ borderColor: "var(--accent)", background: "color-mix(in srgb, var(--accent) 8%, transparent)" }}
             disabled
           >
             {vote === "thumbs_up" ? "👍" : "👎"}
