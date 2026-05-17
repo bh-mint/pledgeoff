@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
+import { logger } from "@pledgeoff/observability";
 import { PrintTrigger } from "./PrintTrigger";
 import { ReportActions } from "./ReportActions";
 
@@ -43,7 +44,11 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const user = await requireUser();
 
   const ideaResult = await container._repos.ideaRepo.findById(id);
-  if (ideaResult.isErr() || !ideaResult.value) notFound();
+  if (ideaResult.isErr()) {
+    logger.error({ traceId: "report", ideaId: id, error: String(ideaResult.error), outcome: "error" as const }, "report: ideaRepo.findById failed");
+    throw new Error("Failed to load idea");
+  }
+  if (!ideaResult.value) notFound();
   const idea = ideaResult.value;
   if (idea.userId !== user.id) notFound();
 

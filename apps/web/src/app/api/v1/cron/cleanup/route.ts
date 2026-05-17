@@ -28,27 +28,33 @@ export async function GET(req: Request): Promise<Response> {
   const eventsDeleted = eventsResult.count ?? 0;
   const hasError = !!outboxResult.error || !!eventsResult.error;
 
+  if (hasError) {
+    logger.error(
+      {
+        traceId,
+        outboxError: outboxResult.error?.message ?? null,
+        eventsError: eventsResult.error?.message ?? null,
+        outcome: 'error' as const,
+      },
+      'cron.cleanup.failed',
+    );
+    return Response.json(
+      {
+        ok: false,
+        traceId,
+        errors: {
+          outbox: outboxResult.error?.message ?? null,
+          events: eventsResult.error?.message ?? null,
+        },
+      },
+      { status: 500 },
+    );
+  }
+
   logger.info(
-    {
-      traceId,
-      outboxDeleted,
-      eventsDeleted,
-      outboxError: outboxResult.error?.message ?? null,
-      eventsError: eventsResult.error?.message ?? null,
-    },
+    { traceId, outboxDeleted, eventsDeleted },
     'cron.cleanup.completed',
   );
 
-  return Response.json({
-    ok: !hasError,
-    traceId,
-    outboxDeleted,
-    eventsDeleted,
-    errors: hasError
-      ? {
-          outbox: outboxResult.error?.message ?? null,
-          events: eventsResult.error?.message ?? null,
-        }
-      : null,
-  });
+  return Response.json({ ok: true, traceId, outboxDeleted, eventsDeleted });
 }

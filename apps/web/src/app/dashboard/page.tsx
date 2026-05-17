@@ -10,6 +10,7 @@ import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FooterMicro } from "@/components/FooterMicro";
 import type { Decision } from "@pledgeoff/core";
+import { logger } from "@pledgeoff/observability";
 
 export const metadata: Metadata = {
   title: { absolute: "Dashboard — PledgeOFF" },
@@ -68,6 +69,9 @@ export default async function DashboardPage() {
     getUserPlan(user.id),
   ]);
   const isPaidPlan = plan !== "free";
+  if (ideasResult.isErr()) {
+    logger.error({ traceId: "dashboard", userId: user.id, error: String(ideasResult.error), outcome: "error" as const }, "dashboard: ideaRepo.findByUserId failed");
+  }
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
 
 
@@ -78,6 +82,11 @@ export default async function DashboardPage() {
     Promise.all(ideas.map((idea) => container._repos.customerAnalysisRepo.findByIdeaId(idea.id))),
     Promise.all(ideas.map((idea) => container._repos.buildAnalysisRepo.findByIdeaId(idea.id))),
   ]);
+
+  const failedDecisions = decisionResults.filter((r) => r.isErr()).length;
+  if (failedDecisions > 0) {
+    logger.error({ traceId: "dashboard", userId: user.id, failedDecisions, outcome: "error" as const }, "dashboard: decisionRepo failures");
+  }
 
   const rows = ideas
     .map((idea, i) => ({
