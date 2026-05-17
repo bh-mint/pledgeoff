@@ -11,6 +11,18 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "1.9",
+    date: "May 2026",
+    tag: "FIX",
+    items: [
+      "Build restored — stale proxy.ts file removed after conflicting with middleware.ts in Next.js",
+      "Rules system overhauled: 10 contradictions and missing rules identified and documented",
+      "Billing rules codified: canonical plan resolution path, priceId error handling, getOrCreate scope",
+      "Auth layers documented: middleware (edge) vs requireUser (Server Components) vs resolveUserId (API routes)",
+      "5 new anti-patterns added to engineering rules: priceId fallback, secret guard bypass, email retry, Plan type duplication, console.* in routes",
+    ],
+  },
+  {
     version: "1.8",
     date: "May 2026",
     tag: "FIX",
