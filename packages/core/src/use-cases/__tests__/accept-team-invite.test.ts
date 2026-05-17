@@ -6,6 +6,7 @@ import {
   TeamInviteNotFoundError,
   TeamNotFoundError,
   TeamRepositoryError,
+  UserAlreadyInTeamError,
   type Team,
   type TeamMembership,
 } from '../../domain/team';
@@ -63,6 +64,18 @@ describe('AcceptTeamInviteUseCase', () => {
     expect(saved.membership?.status).toBe('active');
     expect(saved.membership?.userId).toBe('user-2');
     expect(result._unsafeUnwrap().team.id).toBe('team-1');
+  });
+
+  it('rejects when user is already a member of another team', async () => {
+    const existingTeam = makeTeam();
+    const repo = mockRepo({
+      findByMemberId: async () => ok(existingTeam),
+    });
+    const useCase = new AcceptTeamInviteUseCase(repo);
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(UserAlreadyInTeamError);
   });
 
   it('rejects when token does not exist', async () => {

@@ -54,6 +54,13 @@ export class TeamForbiddenError extends Error {
   readonly code = 'TEAM_FORBIDDEN';
 }
 
+export class UserAlreadyInTeamError extends Error {
+  readonly code = 'USER_ALREADY_IN_TEAM';
+  constructor() {
+    super('User is already a member of another team');
+  }
+}
+
 export class TeamRepositoryError extends Error {
   readonly code = 'TEAM_REPOSITORY_ERROR';
 }
