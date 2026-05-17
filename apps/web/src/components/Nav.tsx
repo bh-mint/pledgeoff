@@ -79,6 +79,11 @@ export function Nav({ loggedIn: loggedInProp }: NavProps) {
                   onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
                   Pricing
                 </Link>
+                <Link href="/tools/decision-clarity" className="text-[13px] transition-colors" style={{ color: "var(--t2)" }}
+                  onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
+                  onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
+                  Tools
+                </Link>
                 <Link href="/blog" className="text-[13px] transition-colors" style={{ color: "var(--t2)" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
                   onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
