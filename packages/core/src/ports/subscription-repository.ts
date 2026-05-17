@@ -18,9 +18,16 @@ export type SubscriptionUpsertInput = {
   currentPeriodEnd?: string | null;
 };
 
+export type SubscriptionSeatUpdateInput = {
+  userId: string;
+  extraSeats: number;
+  stripeExtraSeatItemId: string | null;
+};
+
 export interface ISubscriptionRepository {
   findByUserId(userId: string): Promise<Result<Subscription | null, SubscriptionRepositoryError>>;
   findByStripeCustomerId(customerId: string): Promise<Result<Subscription | null, SubscriptionRepositoryError>>;
   findByStripeSubscriptionId(subscriptionId: string): Promise<Result<Subscription | null, SubscriptionRepositoryError>>;
   upsert(input: SubscriptionUpsertInput): Promise<Result<Subscription, SubscriptionRepositoryError>>;
+  updateExtraSeats(input: SubscriptionSeatUpdateInput): Promise<Result<Subscription, SubscriptionRepositoryError>>;
 }

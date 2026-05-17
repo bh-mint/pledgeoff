@@ -40,6 +40,7 @@ import {
   RemoveTeamMemberUseCase,
   LeaveTeamUseCase,
   UpdateTeamNameUseCase,
+  UpdateTeamSeatsUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -146,6 +147,7 @@ function buildContainer() {
   const removeTeamMemberUseCase = new RemoveTeamMemberUseCase(teamRepo);
   const leaveTeamUseCase = new LeaveTeamUseCase(teamRepo);
   const updateTeamNameUseCase = new UpdateTeamNameUseCase(teamRepo);
+  const updateTeamSeatsUseCase = new UpdateTeamSeatsUseCase(subscriptionRepo);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -227,6 +229,7 @@ function buildContainer() {
     removeTeamMemberUseCase,
     leaveTeamUseCase,
     updateTeamNameUseCase,
+    updateTeamSeatsUseCase,
     ideaRepo,
     eventBus,
     auditLog,

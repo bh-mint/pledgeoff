@@ -5,6 +5,7 @@ import {
   SubscriptionRepositoryError,
   type ISubscriptionRepository,
   type SubscriptionUpsertInput,
+  type SubscriptionSeatUpdateInput,
 } from '@pledgeoff/core';
 
 type SubscriptionRow = {
@@ -15,6 +16,8 @@ type SubscriptionRow = {
   plan: string;
   status: string;
   current_period_end: string | null;
+  extra_seats: number;
+  stripe_extra_seat_item_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -28,6 +31,8 @@ function rowToSubscription(row: SubscriptionRow): Subscription {
     plan: row.plan as Subscription['plan'],
     status: row.status as Subscription['status'],
     currentPeriodEnd: row.current_period_end,
+    extraSeats: row.extra_seats ?? 0,
+    stripeExtraSeatItemId: row.stripe_extra_seat_item_id ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -83,6 +88,22 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
         },
         { onConflict: 'user_id' },
       )
+      .select()
+      .single<SubscriptionRow>();
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(rowToSubscription(data));
+  }
+
+  async updateExtraSeats(input: SubscriptionSeatUpdateInput): Promise<Result<Subscription, SubscriptionRepositoryError>> {
+    const { data, error } = await this.client
+      .from('subscriptions')
+      .update({
+        extra_seats: input.extraSeats,
+        stripe_extra_seat_item_id: input.stripeExtraSeatItemId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', input.userId)
       .select()
       .single<SubscriptionRow>();
 

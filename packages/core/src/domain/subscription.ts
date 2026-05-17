@@ -20,6 +20,8 @@ export const SubscriptionSchema = z.object({
   plan: PlanSchema,
   status: SubscriptionStatusSchema,
   currentPeriodEnd: z.string().datetime().nullable(),
+  extraSeats: z.number().int().min(0).default(0),
+  stripeExtraSeatItemId: z.string().nullable().default(null),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -38,4 +40,8 @@ export function isActivePlan(sub: Subscription): boolean {
 
 export function effectivePlan(sub: Subscription): Plan {
   return isActivePlan(sub) ? sub.plan : 'free';
+}
+
+export function effectiveSeats(sub: Subscription): number {
+  return PLAN_LIMITS[effectivePlan(sub)].seatsIncluded + (isActivePlan(sub) ? sub.extraSeats : 0);
 }

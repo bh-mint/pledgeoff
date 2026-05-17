@@ -59,7 +59,7 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
 describe('InviteTeamMemberUseCase', () => {
   const baseInput = {
     ownerId: 'owner-1',
-    ownerPlan: 'pro' as const,
+    maxSeats: 3,
     invitedEmail: 'new@example.com',
     traceId: 'trace-1',
   };
@@ -100,7 +100,7 @@ describe('InviteTeamMemberUseCase', () => {
     const team = makeTeam();
     const repo = mockRepo({
       findByOwnerId: async () => ok(team),
-      // pro plan has 3 seats: owner(1) + 2 members → countActiveMembers=2 → 2+1=3 >= 3
+      // maxSeats=3: owner(1) + 2 members → countActiveMembers=2 → 2+1=3 >= 3
       countActiveMembers: async () => ok(2),
     });
 

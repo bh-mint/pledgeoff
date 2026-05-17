@@ -18,6 +18,7 @@ interface SettingsClientProps {
   ideasThisMonth: number;
   renewsAt?: string | null;
   stripeCustomerId?: string | null;
+  extraSeats?: number;
 }
 
 type SectionId = "account" | "billing" | "team" | "notifications" | "api" | "danger";
@@ -79,6 +80,7 @@ export function SettingsClient({
   ideasThisMonth,
   renewsAt,
   stripeCustomerId,
+  extraSeats: initialExtraSeats = 0,
 }: SettingsClientProps) {
   const router = useRouter();
   const [section, setSection] = useState<SectionId>("account");
@@ -91,6 +93,8 @@ export function SettingsClient({
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
   const [portalLoading, setPortalLoading] = useState(false);
+  const [seatExtra, setSeatExtra] = useState(initialExtraSeats);
+  const [seatState, setSeatState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [notifState, setNotifState] = useState<Record<string, boolean>>({
     goldmine: false,
     weekly: false,
@@ -150,6 +154,24 @@ export function SettingsClient({
       }
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const handleUpdateSeats = async () => {
+    setSeatState("loading");
+    const supabase = createSupabaseBrowserClient();
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    const res = await fetch("/api/v1/billing/seats", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ extraSeats: seatExtra }),
+    });
+    if (res.ok) {
+      setSeatState("success");
+      setTimeout(() => setSeatState("idle"), 2500);
+    } else {
+      setSeatState("error");
     }
   };
 
@@ -403,7 +425,7 @@ export function SettingsClient({
             </div>
 
             {/* Usage */}
-            <div className="border rounded-md p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+            <div className="border rounded-md p-5 mb-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
               <div className="mono text-[10px] uppercase tracking-[0.12em] mb-4" style={{ color: "var(--t3)" }}>Usage this month</div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[13px] text-(--t2)">Validations</span>
@@ -423,6 +445,83 @@ export function SettingsClient({
                 </div>
               )}
             </div>
+
+            {/* Seat add-ons — Pro+ only */}
+            {plan === "pro_plus" && (
+              <div className="border rounded-md p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>Team seats</div>
+                <p className="text-[12px] mb-5" style={{ color: "var(--t2)" }}>
+                  Pro+ includes 10 seats. Add extra seats at €7/seat/month, billed to your subscription.
+                </p>
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-5">
+                  {/* Seat breakdown */}
+                  <div className="flex-1 flex items-center gap-3">
+                    <div className="text-center">
+                      <div className="mono text-[22px] font-semibold text-(--t1)">{10 + seatExtra}</div>
+                      <div className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5" style={{ color: "var(--t3)" }}>total seats</div>
+                    </div>
+                    <div className="text-(--t3) text-[18px]">=</div>
+                    <div className="text-center">
+                      <div className="mono text-[16px] text-(--t2)">10</div>
+                      <div className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5" style={{ color: "var(--t3)" }}>included</div>
+                    </div>
+                    <div className="text-(--t3)">+</div>
+                    <div className="text-center">
+                      <div className="mono text-[16px]" style={{ color: "var(--accent)" }}>{seatExtra}</div>
+                      <div className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5" style={{ color: "var(--t3)" }}>extra</div>
+                    </div>
+                  </div>
+
+                  {/* Stepper */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setSeatExtra((n) => Math.max(0, n - 1))}
+                      disabled={seatExtra === 0}
+                      className="w-8 h-8 rounded-md border mono text-[16px] flex items-center justify-center transition-colors disabled:opacity-30"
+                      style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                    >
+                      −
+                    </button>
+                    <span className="mono text-[15px] w-8 text-center tnum text-(--t1)">{seatExtra}</span>
+                    <button
+                      onClick={() => setSeatExtra((n) => Math.min(97, n + 1))}
+                      disabled={seatExtra >= 97}
+                      className="w-8 h-8 rounded-md border mono text-[16px] flex items-center justify-center transition-colors disabled:opacity-30"
+                      style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Price preview + action */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+                  <div>
+                    {seatExtra > 0 ? (
+                      <span className="mono text-[12px] text-(--t2)">
+                        {seatExtra} × €7 ={" "}
+                        <span className="text-(--t1) font-semibold">€{seatExtra * 7}/month</span>
+                        {" "}added to your subscription
+                      </span>
+                    ) : (
+                      <span className="mono text-[12px]" style={{ color: "var(--t3)" }}>No extra seats — only the 10 included ones.</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleUpdateSeats}
+                    disabled={seatState === "loading" || seatExtra === initialExtraSeats}
+                    className="mono text-[11px] h-9 px-5 rounded-md border transition-colors disabled:opacity-40 shrink-0"
+                    style={{
+                      borderColor: seatState === "success" ? "var(--validated)" : "var(--border)",
+                      color: seatState === "success" ? "var(--validated)" : seatState === "error" ? "var(--kill)" : "var(--t2)",
+                    }}
+                  >
+                    {seatState === "loading" ? "Updating…" : seatState === "success" ? "Updated ✓" : seatState === "error" ? "Error — retry" : "Update seats"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

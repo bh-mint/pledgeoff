@@ -122,6 +122,48 @@ export class StripeAdapter {
     }
   }
 
+  /**
+   * Create, update, or remove the extra-seat add-on subscription item.
+   * quantity=0 deletes the item. Returns the new item ID (or null if deleted).
+   */
+  async manageSeatAddon(input: {
+    stripeSubscriptionId: string;
+    extraSeatPriceId: string;
+    quantity: number;
+    existingItemId: string | null;
+  }): Promise<Result<{ itemId: string | null }, StripeAdapterError>> {
+    try {
+      const { stripeSubscriptionId, extraSeatPriceId, quantity, existingItemId } = input;
+
+      if (quantity === 0 && existingItemId) {
+        await this.stripe.subscriptionItems.del(existingItemId, { proration_behavior: 'create_prorations' });
+        return ok({ itemId: null });
+      }
+
+      if (quantity === 0) {
+        return ok({ itemId: null });
+      }
+
+      if (existingItemId) {
+        const item = await this.stripe.subscriptionItems.update(existingItemId, {
+          quantity,
+          proration_behavior: 'create_prorations',
+        });
+        return ok({ itemId: item.id });
+      }
+
+      const item = await this.stripe.subscriptionItems.create({
+        subscription: stripeSubscriptionId,
+        price: extraSeatPriceId,
+        quantity,
+        proration_behavior: 'create_prorations',
+      });
+      return ok({ itemId: item.id });
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to manage seat add-on', e));
+    }
+  }
+
   async createCustomerPortalSession(
     customerId: string,
     returnUrl: string,
