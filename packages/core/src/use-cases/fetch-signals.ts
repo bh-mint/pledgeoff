@@ -92,15 +92,30 @@ export class FetchSignalsUseCase {
     if (signals.length === 0) return signals;
 
     const candidates = signals.map((s) => ({ id: s.id, title: s.title, summary: s.summary }));
-    const result = await this.llmClient.scoreSignalRelevance({ ideaText, signals: candidates, traceId });
+    const scored = await this.llmClient.scoreSignalRelevance({ ideaText, signals: candidates, traceId });
 
-    if (result.isErr()) return signals; // on LLM failure, pass all through
+    if (scored.isErr()) return signals; // on LLM failure, pass all through
 
-    const scoreMap = new Map(result.value.scores.map((s) => [s.id, s.score]));
+    const scoreMap = new Map(scored.value.scores.map((s) => [s.id, s.score]));
     const THRESHOLD = 60;
     const passing = signals.filter((s) => (scoreMap.get(s.id) ?? 0) >= THRESHOLD);
 
-    if (passing.length >= 2) return passing;
+    // Rescue top-1 per source that was completely filtered out — prevents source starvation
+    // (e.g. brave signals dominating and dropping all GitHub signals)
+    const passingIds = new Set(passing.map((s) => s.id));
+    const coveredSources = new Set(passing.map((s) => s.source));
+    const rescued: Signal[] = [];
+    for (const source of new Set(signals.map((s) => s.source))) {
+      if (!coveredSources.has(source)) {
+        const top = signals
+          .filter((s) => s.source === source && !passingIds.has(s.id))
+          .sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0))[0];
+        if (top) rescued.push(top);
+      }
+    }
+
+    const merged = [...passing, ...rescued];
+    if (merged.length >= 2) return merged;
 
     // Fallback: return top-2 by score so pipeline never starves
     return [...signals]

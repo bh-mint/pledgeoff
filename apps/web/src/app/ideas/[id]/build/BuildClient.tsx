@@ -86,10 +86,15 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
       {/* Signal count warning */}
       {!hasEnoughGithubSignals && (
         <div
-          className="rounded-md border px-4 py-3 text-[13px]"
+          className="rounded-md border px-4 py-3 text-[13px] space-y-1"
           style={{ borderColor: "var(--caution)", background: "rgba(255,165,0,0.05)", color: "var(--caution)" }}
         >
-          Not enough engineering signals — only {analysis.signalCount} GitHub signal{analysis.signalCount !== 1 ? "s" : ""} found (min {MIN_GITHUB_SIGNALS} recommended). Stack recommendations may be less precise.
+          <p className="font-medium">Limited GitHub engineering signals</p>
+          <p style={{ color: "var(--t2)" }}>
+            {analysis.signalCount === 0
+              ? "No GitHub issues were found for this idea. The stack recommendations are based on your idea description and general engineering patterns — they are still useful, but may be less specific to your niche."
+              : `Only ${analysis.signalCount} GitHub signal${analysis.signalCount !== 1 ? "s" : ""} found (${MIN_GITHUB_SIGNALS} recommended). Recommendations may be less precise for your specific context.`}
+          </p>
         </div>
       )}
 
@@ -198,7 +203,9 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
       {/* Regenerate */}
       <div className="pt-4 border-t border-(--border) flex items-center justify-between">
         <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
-          Based on {analysis.signalCount} GitHub signal{analysis.signalCount !== 1 ? "s" : ""}
+          {analysis.signalCount === 0
+            ? "Based on idea description · no GitHub signals"
+            : `Based on ${analysis.signalCount} GitHub signal${analysis.signalCount !== 1 ? "s" : ""}`}
         </span>
         {error && (
           <p className="text-[12px]" style={{ color: "var(--caution)" }}>{error}</p>
