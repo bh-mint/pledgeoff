@@ -7,6 +7,8 @@ import { getAllArticles, getArticleBySlug, getRelatedArticles, getSeeAlsoArticle
 import { formatDate } from "@/lib/mdx-utils";
 import { ReadingProgress } from "@/components/blog/ReadingProgress";
 import { TableOfContents } from "@/components/blog/TableOfContents";
+import { ArticleViewTracker } from "@/components/blog/ArticleViewTracker";
+import { ArticleCTAButton } from "@/components/blog/ArticleCTAButton";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
@@ -116,6 +118,7 @@ export default async function ArticlePage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <ReadingProgress />
+      <ArticleViewTracker slug={slug} tag={article.tag} />
 
       <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
         <PreLoginNav extraLink={{ href: "/blog", label: "← All articles" }} />
@@ -204,13 +207,14 @@ export default async function ArticlePage({ params }: Props) {
               No surveys. No guesswork. Just evidence.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-4">
-              <Link
+              <ArticleCTAButton
                 href="/ideas/new"
+                location="article_end"
                 className="inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
                 style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
               >
                 Validate your idea →
-              </Link>
+              </ArticleCTAButton>
               <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>
                 Free to start · 1 validation/month · No credit card
               </span>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllArticles, CLUSTER_META } from "@/lib/mdx";
 import { formatDate } from "@/lib/mdx-utils";
+import { ArticleCTAButton } from "@/components/blog/ArticleCTAButton";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
@@ -107,13 +108,14 @@ export default function ProductDecisionsPage() {
             <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
               Run a validation on any feature idea — real signals, traceable sources, under 60 seconds.
             </p>
-            <Link
+            <ArticleCTAButton
               href="/ideas/new"
+              location="hub_product_decisions"
               className="inline-flex items-center h-9 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
               style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
             >
               Run a validation →
-            </Link>
+            </ArticleCTAButton>
           </div>
 
           {/* Also explore */}
