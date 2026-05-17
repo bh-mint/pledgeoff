@@ -1,25 +1,15 @@
 import { z } from 'zod';
-import { createClient } from '@supabase/supabase-js';
 import { container } from '@/lib/container';
 import { createServiceRoleClient } from '@/lib/supabase-server';
 import { sendTeamInviteEmail } from '@pledgeoff/adapters';
 import { TeamSeatLimitError, TeamMemberAlreadyExistsError } from '@pledgeoff/core';
 import { getUserPlan, type Plan } from '@/lib/getUserPlan';
 import { logger } from '@pledgeoff/observability';
+import { resolveUserId } from '@/lib/api-auth';
 
 const InviteSchema = z.object({
   email: z.string().email(),
 });
-
-async function resolveUserId(authHeader: string | null): Promise<string | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const anonClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-  const { data } = await anonClient.auth.getUser(authHeader.slice(7));
-  return data.user?.id ?? null;
-}
 
 // POST /api/v1/teams/invite
 export async function POST(req: Request) {

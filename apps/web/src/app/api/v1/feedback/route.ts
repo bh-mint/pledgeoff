@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { container } from "@/lib/container";
 import { logger } from "@pledgeoff/observability";
+import { resolveUserId } from '@/lib/api-auth';
 
 const FeedbackSchema = z.object({
   ideaId: z.string().uuid(),
@@ -10,17 +11,6 @@ const FeedbackSchema = z.object({
   vote: z.enum(["thumbs_up", "thumbs_down"]),
   comment: z.string().max(500).optional(),
 });
-
-async function resolveUserId(authHeader: string | null): Promise<string | null> {
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  const token = authHeader.slice(7);
-  const anonClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-  const { data } = await anonClient.auth.getUser(token);
-  return data.user?.id ?? null;
-}
 
 export async function POST(req: NextRequest) {
   const traceId = req.headers.get("x-trace-id") ?? crypto.randomUUID();

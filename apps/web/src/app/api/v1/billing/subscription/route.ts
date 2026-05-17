@@ -1,17 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
 import { container } from '@/lib/container';
 import { effectivePlan } from '@pledgeoff/core';
-
-async function resolveUserId(authHeader: string | null): Promise<string | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-  const anonClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-  const { data } = await anonClient.auth.getUser(token);
-  return data.user?.id ?? null;
-}
+import { resolveUserId } from '@/lib/api-auth';
 
 export async function GET(req: Request) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
