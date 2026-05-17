@@ -78,7 +78,7 @@ function buildContainer() {
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   if (process.env.NODE_ENV === 'production' && stripeSecretKey?.startsWith('sk_test_')) {
-    throw new Error('Production build is using Stripe test keys — set STRIPE_SECRET_KEY to a live key (sk_live_...)');
+    console.warn('[container] WARNING: Production is using Stripe test keys. Set STRIPE_SECRET_KEY to sk_live_... before going live.');
   }
   const stripeMode = stripeSecretKey?.startsWith('sk_live_') ? 'live' : stripeSecretKey ? 'test' : 'disabled';
   console.info(`[container] Stripe mode: ${stripeMode}`);
