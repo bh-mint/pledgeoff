@@ -28,17 +28,30 @@ export default function IdeaValidationPage() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Idea Validation — PledgeOFF",
-    description: cluster.description,
-    url: "https://pledgeoff.com/blog/idea-validation",
-    breadcrumb: {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Blog", item: "https://pledgeoff.com/blog" },
-        { "@type": "ListItem", position: 2, name: "Idea Validation", item: "https://pledgeoff.com/blog/idea-validation" },
-      ],
-    },
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": "https://pledgeoff.com/blog/idea-validation#webpage",
+        name: "Idea Validation — PledgeOFF",
+        description: cluster.description,
+        url: "https://pledgeoff.com/blog/idea-validation",
+        inLanguage: "en",
+        publisher: { "@type": "Organization", name: "PledgeOFF", url: "https://pledgeoff.com" },
+        hasPart: articles.map((a) => ({
+          "@type": "BlogPosting",
+          headline: a.title,
+          url: `https://pledgeoff.com/blog/${a.slug}`,
+          datePublished: a.publishedAt,
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Blog", item: "https://pledgeoff.com/blog" },
+          { "@type": "ListItem", position: 2, name: "Idea Validation", item: "https://pledgeoff.com/blog/idea-validation" },
+        ],
+      },
+    ],
   };
 
   return (

@@ -28,17 +28,30 @@ export default function FounderPage() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: "Founder Mindset — PledgeOFF",
-    description: cluster.description,
-    url: "https://pledgeoff.com/blog/founder",
-    breadcrumb: {
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Blog", item: "https://pledgeoff.com/blog" },
-        { "@type": "ListItem", position: 2, name: "Founder Mindset", item: "https://pledgeoff.com/blog/founder" },
-      ],
-    },
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": "https://pledgeoff.com/blog/founder#webpage",
+        name: "Founder Mindset — PledgeOFF",
+        description: cluster.description,
+        url: "https://pledgeoff.com/blog/founder",
+        inLanguage: "en",
+        publisher: { "@type": "Organization", name: "PledgeOFF", url: "https://pledgeoff.com" },
+        hasPart: articles.map((a) => ({
+          "@type": "BlogPosting",
+          headline: a.title,
+          url: `https://pledgeoff.com/blog/${a.slug}`,
+          datePublished: a.publishedAt,
+        })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Blog", item: "https://pledgeoff.com/blog" },
+          { "@type": "ListItem", position: 2, name: "Founder Mindset", item: "https://pledgeoff.com/blog/founder" },
+        ],
+      },
+    ],
   };
 
   return (
