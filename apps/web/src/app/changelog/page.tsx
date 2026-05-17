@@ -11,6 +11,16 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "1.7",
+    date: "May 2026",
+    tag: "FIX",
+    items: [
+      "Pro plan now shows correctly in Settings — Account, Billing, and Team tabs all reflect the active subscription",
+      "Team seats now display 1/3 for Pro (was showing 1/1 due to a billing read failure)",
+      "Billing architecture hardened: single service client, centralized plan resolver, all errors logged instead of silently defaulting to free",
+    ],
+  },
+  {
     version: "1.6",
     date: "May 2026",
     tag: "UI",
