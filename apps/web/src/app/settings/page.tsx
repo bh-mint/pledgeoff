@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { effectivePlan } from "@pledgeoff/core";
 import { requireUser } from "@/lib/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
-import { getUserPlan } from "@/lib/getUserPlan";
 import { Nav } from "@/components/Nav";
 import { SettingsClient } from "./SettingsClient";
 
@@ -18,15 +18,15 @@ export default async function SettingsPage() {
   const user = await requireUser();
   const supabase = createServiceRoleClient();
 
-  const [profileResult, ideasResult, subResult, plan] = await Promise.all([
+  const [profileResult, ideasResult, subResult] = await Promise.all([
     supabase.from("profiles").select("first_name, last_name, username, company_name").eq("id", user.id).single(),
     container._repos.ideaRepo.findByUserId(user.id),
     container._repos.subscriptionRepo.findByUserId(user.id),
-    getUserPlan(user.id),
   ]);
 
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
   const sub = subResult.isOk() ? subResult.value : null;
+  const plan = sub ? effectivePlan(sub) : "free";
   const renewsAt = sub?.currentPeriodEnd ?? null;
   const stripeCustomerId = sub?.stripeCustomerId ?? null;
 
