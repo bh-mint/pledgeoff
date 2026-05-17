@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { CustomerAnalysis, CustomerSegment } from "@pledgeoff/core";
 import { createClient } from "@/lib/supabase/client";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface Props {
   ideaId: string;
@@ -19,6 +20,12 @@ const SIZE_COLOR: Record<CustomerSegment["size"], string> = {
   small: "var(--t3)",
   medium: "var(--accent)",
   large: "var(--validated)",
+};
+
+const SIZE_TOOLTIP: Record<CustomerSegment["size"], string> = {
+  small: "Niche — small, specialized audience with high fit",
+  medium: "Mid-size — balanced reach and specificity",
+  large: "Large — broad market, high volume, more competition",
 };
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -111,9 +118,12 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
     <div className="space-y-8" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* Segments */}
       <div>
-        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-2 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
           Customer Segments
         </div>
+        <p className="mono text-[10px] sm:hidden mb-4" style={{ color: "var(--t3)" }}>
+          Niche = small segment · Mid-size = medium · Large = broad market
+        </p>
         <div className="space-y-3">
           {analysis.segments.map((segment, i) => (
             <div
@@ -125,15 +135,17 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
                 <div className="display text-[16px] font-semibold" style={{ color: "var(--t1)" }}>
                   {segment.name}
                 </div>
-                <span
-                  className="mono text-[10px] px-2 py-0.5 rounded shrink-0"
-                  style={{
-                    color: SIZE_COLOR[segment.size],
-                    border: `1px solid ${SIZE_COLOR[segment.size]}40`,
-                  }}
-                >
-                  {SIZE_LABEL[segment.size]}
-                </span>
+                <InfoTooltip content={SIZE_TOOLTIP[segment.size]} align="right">
+                  <span
+                    className="mono text-[10px] px-2 py-0.5 rounded shrink-0 cursor-default"
+                    style={{
+                      color: SIZE_COLOR[segment.size],
+                      border: `1px solid ${SIZE_COLOR[segment.size]}40`,
+                    }}
+                  >
+                    {SIZE_LABEL[segment.size]}
+                  </span>
+                </InfoTooltip>
               </div>
               <p className="text-[13px] leading-relaxed" style={{ color: "var(--t2)" }}>
                 {segment.description}

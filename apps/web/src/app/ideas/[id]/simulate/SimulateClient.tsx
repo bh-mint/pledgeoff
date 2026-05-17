@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Simulation } from "@pledgeoff/core";
 import { createClient } from "@/lib/supabase/client";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface Props {
   ideaId: string;
@@ -127,7 +128,11 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
       {/* Scenarios */}
       <div>
         <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
-          Revenue Scenarios (MRR)
+          Revenue Scenarios{" "}
+          <span className="sm:hidden">(Monthly Recurring Revenue)</span>
+          <InfoTooltip content="Monthly Recurring Revenue — total subscription income earned per month" align="center">
+            <span className="hidden sm:inline cursor-default">(MRR)</span>
+          </InfoTooltip>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {simulation.scenarios.map((scenario) => (

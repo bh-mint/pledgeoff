@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { BuildAnalysis, TechComponent } from "@pledgeoff/core";
 import { MIN_GITHUB_SIGNALS } from "@pledgeoff/core";
 import { createClient } from "@/lib/supabase/client";
+import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface Props {
   ideaId: string;
@@ -20,6 +21,12 @@ const DECISION_COLOR: Record<TechComponent["decision"], string> = {
   build: "var(--accent)",
   buy: "var(--caution)",
   oss: "var(--validated)",
+};
+
+const DECISION_TOOLTIP: Record<TechComponent["decision"], string> = {
+  build: "Custom code — built in-house from scratch",
+  oss: "Open-source library or framework — free, community-maintained",
+  buy: "Third-party paid SaaS — you pay a subscription, they run it",
 };
 
 export function BuildClient({ ideaId, initialAnalysis }: Props) {
@@ -116,11 +123,14 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
       {/* Tech stack */}
       <section>
         <h2
-          className="mono text-[10px] uppercase tracking-[0.12em] mb-4"
+          className="mono text-[10px] uppercase tracking-[0.12em] mb-2"
           style={{ color: "var(--t3)" }}
         >
           Recommended stack
         </h2>
+        <p className="mono text-[10px] sm:hidden mb-4" style={{ color: "var(--t3)" }}>
+          Build = custom code · OSS = open-source · Buy = paid SaaS
+        </p>
         <div className="space-y-4">
           {analysis.stack.map((component) => (
             <div
@@ -137,16 +147,18 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
                     {component.description}
                   </p>
                 </div>
-                <span
-                  className="mono text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded shrink-0"
-                  style={{
-                    color: DECISION_COLOR[component.decision],
-                    background: "rgba(255,255,255,0.04)",
-                    border: `1px solid ${DECISION_COLOR[component.decision]}`,
-                  }}
-                >
-                  {DECISION_LABEL[component.decision]}
-                </span>
+                <InfoTooltip content={DECISION_TOOLTIP[component.decision]} align="right">
+                  <span
+                    className="mono text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded shrink-0 cursor-default"
+                    style={{
+                      color: DECISION_COLOR[component.decision],
+                      background: "rgba(255,255,255,0.04)",
+                      border: `1px solid ${DECISION_COLOR[component.decision]}`,
+                    }}
+                  >
+                    {DECISION_LABEL[component.decision]}
+                  </span>
+                </InfoTooltip>
               </div>
               <p className="text-[12px] mb-3" style={{ color: "var(--t3)" }}>
                 {component.rationale}
