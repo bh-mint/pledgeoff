@@ -7,6 +7,7 @@ import { Nav } from "@/components/Nav";
 import { IdeaPageClient } from "./IdeaPageClient";
 import { FooterMicro } from "@/components/FooterMicro";
 import { formatDate } from "@/lib/mdx-utils";
+import { ExportButtons } from "./ExportButtons";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -86,7 +87,8 @@ export default async function IdeaPage({ params }: Props) {
           </Link>
 
           <div className="mb-10 pb-10 border-b border-(--border)">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3">
               <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
                 Idea · {formatDate(idea.createdAt)}
               </p>
@@ -102,6 +104,8 @@ export default async function IdeaPage({ params }: Props) {
                   {category}
                 </span>
               )}
+            </div>
+              <ExportButtons ideaId={id} />
             </div>
             <h1 className="display text-[22px] font-semibold tracking-tight text-(--t1) leading-snug mb-3">
               {title}
