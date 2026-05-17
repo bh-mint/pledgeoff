@@ -32,7 +32,7 @@ export async function GET(req: Request) {
   }
 
   if (!team) {
-    return Response.json({ data: { team: null, memberships: [] } }, { status: 200, headers: { 'X-Trace-Id': traceId } });
+    return Response.json({ data: { team: null, memberships: [], isOwner: true } }, { status: 200, headers: { 'X-Trace-Id': traceId } });
   }
 
   const membershipsResult = await container.teamRepo.findMembershipsByTeamId(team.id);
