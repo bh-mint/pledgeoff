@@ -9,7 +9,9 @@ import { PLAN_LIMITS } from "@pledgeoff/core";
 
 interface SettingsClientProps {
   email: string;
-  fullName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  username: string | null;
   companyName: string | null;
   plan: Plan;
   ideasThisMonth: number;
@@ -67,7 +69,9 @@ const NOTIFICATION_ITEMS = [
 
 export function SettingsClient({
   email,
-  fullName,
+  firstName,
+  lastName,
+  username,
   companyName,
   plan,
   ideasThisMonth,
@@ -76,9 +80,12 @@ export function SettingsClient({
 }: SettingsClientProps) {
   const router = useRouter();
   const [section, setSection] = useState<SectionId>("account");
-  const [name, setName] = useState(fullName ?? "");
+  const [first, setFirst] = useState(firstName ?? "");
+  const [last, setLast] = useState(lastName ?? "");
+  const [uname, setUname] = useState(username ?? "");
   const [company, setCompany] = useState(companyName ?? "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
   const [portalLoading, setPortalLoading] = useState(false);
@@ -93,6 +100,7 @@ export function SettingsClient({
   const usagePct = isUnlimited ? 0 : Math.min(1, ideasThisMonth / ideasLimit);
   const isPaid = plan !== "free";
 
+  const fullName = [first, last].filter(Boolean).join(" ") || null;
   const initials = (fullName ?? email)
     .split(/[\s@]/)
     .slice(0, 2)
@@ -100,15 +108,22 @@ export function SettingsClient({
     .join("");
 
   const handleSave = async () => {
-    if (!name.trim()) return;
+    if (!first.trim()) return;
     setSaveStatus("saving");
+    setSaveError(null);
     const res = await fetch("/api/v1/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ full_name: name, company_name: company }),
+      body: JSON.stringify({ first_name: first, last_name: last, username: uname, company_name: company }),
     });
-    setSaveStatus(res.ok ? "saved" : "error");
-    if (res.ok) setTimeout(() => setSaveStatus("idle"), 2000);
+    if (res.ok) {
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    } else {
+      const body = await res.json().catch(() => ({})) as { error?: string };
+      setSaveError(body.error ?? "Error saving. Try again.");
+      setSaveStatus("error");
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -208,36 +223,74 @@ export function SettingsClient({
               </div>
               <div>
                 <div className="text-[13px] text-(--t1)">{fullName ?? email}</div>
+                {uname && <div className="mono text-[10px] mt-0.5" style={{ color: "var(--accent)" }}>@{uname}</div>}
                 <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>{email}</div>
               </div>
             </div>
 
             <div className="border rounded-md overflow-hidden" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-              {/* Name row */}
+              {/* First name row */}
               <div className="grid grid-cols-12 gap-4 px-5 py-4 border-b items-center" style={{ borderColor: "var(--border)" }}>
-                <div className="col-span-3 mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>Name</div>
-                <div className="col-span-6">
+                <div className="col-span-3 mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>First name</div>
+                <div className="col-span-9">
                   <input
-                    value={name}
-                    onChange={(e) => { setName(e.target.value); setSaveStatus("idle"); }}
-                    placeholder="Your name"
+                    value={first}
+                    onChange={(e) => { setFirst(e.target.value); setSaveStatus("idle"); }}
+                    placeholder="First name"
                     className="w-full bg-(--canvas) border rounded-md px-3 h-9 text-[13px] text-(--t1) outline-none focus:border-(--accent) transition-colors"
                     style={{ borderColor: "var(--border)" }}
                   />
                 </div>
-                <div className="col-span-3 flex justify-end">
-                  <button
-                    onClick={handleSave}
-                    disabled={saveStatus === "saving" || !name.trim()}
-                    className="mono text-[11px] h-8 px-4 rounded-md border transition-colors disabled:opacity-50"
-                    style={{
-                      borderColor: saveStatus === "saved" ? "var(--validated)" : "var(--border)",
-                      color: saveStatus === "saved" ? "var(--validated)" : "var(--t2)",
-                    }}
-                  >
-                    {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved ✓" : saveStatus === "error" ? "Error" : "Save"}
-                  </button>
+              </div>
+
+              {/* Last name row */}
+              <div className="grid grid-cols-12 gap-4 px-5 py-4 border-b items-center" style={{ borderColor: "var(--border)" }}>
+                <div className="col-span-3 mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>Last name</div>
+                <div className="col-span-9">
+                  <input
+                    value={last}
+                    onChange={(e) => { setLast(e.target.value); setSaveStatus("idle"); }}
+                    placeholder="Last name"
+                    className="w-full bg-(--canvas) border rounded-md px-3 h-9 text-[13px] text-(--t1) outline-none focus:border-(--accent) transition-colors"
+                    style={{ borderColor: "var(--border)" }}
+                  />
                 </div>
+              </div>
+
+              {/* Username row */}
+              <div className="grid grid-cols-12 gap-4 px-5 py-4 border-b items-center" style={{ borderColor: "var(--border)" }}>
+                <div className="col-span-3 mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>Username</div>
+                <div className="col-span-9">
+                  <div className="flex items-center gap-0">
+                    <span className="mono text-[13px] px-3 h-9 flex items-center rounded-l-md border border-r-0" style={{ borderColor: "var(--border)", color: "var(--t3)", background: "var(--surface)" }}>@</span>
+                    <input
+                      value={uname}
+                      onChange={(e) => { setUname(e.target.value.toLowerCase()); setSaveStatus("idle"); }}
+                      placeholder="your_handle"
+                      className="flex-1 bg-(--canvas) border rounded-r-md px-3 h-9 text-[13px] text-(--t1) outline-none focus:border-(--accent) transition-colors"
+                      style={{ borderColor: "var(--border)" }}
+                    />
+                  </div>
+                  <p className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>3–30 chars · letters, numbers, _ or -</p>
+                </div>
+              </div>
+
+              {/* Save row */}
+              <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "var(--border)" }}>
+                <div>
+                  {saveError && <p className="mono text-[11px]" style={{ color: "var(--caution)" }}>{saveError}</p>}
+                </div>
+                <button
+                  onClick={handleSave}
+                  disabled={saveStatus === "saving" || !first.trim()}
+                  className="mono text-[11px] h-8 px-4 rounded-md border transition-colors disabled:opacity-50"
+                  style={{
+                    borderColor: saveStatus === "saved" ? "var(--validated)" : "var(--border)",
+                    color: saveStatus === "saved" ? "var(--validated)" : "var(--t2)",
+                  }}
+                >
+                  {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved ✓" : "Save changes"}
+                </button>
               </div>
 
               {/* Company name row */}

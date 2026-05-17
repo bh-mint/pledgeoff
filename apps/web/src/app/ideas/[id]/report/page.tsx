@@ -63,7 +63,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
     container._repos.customerAnalysisRepo.findByIdeaId(id),
     container._repos.buildAnalysisRepo.findByIdeaId(id),
     container._repos.competitorAnalysisRepo.findByIdeaId(id),
-    supabase.from("profiles").select("full_name, company_name").eq("id", user.id).single(),
+    supabase.from("profiles").select("first_name, last_name, company_name").eq("id", user.id).single(),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -72,7 +72,8 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const customers = customersResult.isOk() ? customersResult.value : null;
   const build = buildResult.isOk() ? buildResult.value : null;
   const competitors = competitorsResult.isOk() ? competitorsResult.value : null;
-  const companyName = (profileResult.data as { company_name?: string | null } | null)?.company_name ?? null;
+  const profileData = profileResult.data as { first_name?: string | null; last_name?: string | null; company_name?: string | null } | null;
+  const companyName = profileData?.company_name ?? null;
 
   const { title, description } = parseIdeaText(idea.text);
   const verdictColor = decision ? (VERDICT_COLOR[decision.verdict] ?? "#000") : "#000";
