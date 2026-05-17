@@ -28,7 +28,9 @@ export default async function SettingsPage() {
   const sub = subResult.isOk() ? subResult.value : null;
   const plan = sub ? effectivePlan(sub) : "free";
   // TEMP DEBUG — remove after diagnosis
-  console.error("[settings/debug] userId:", user.id, "subOk:", subResult.isOk(), "subErr:", subResult.isErr() ? String(subResult.error) : "none", "plan:", sub?.plan, "status:", sub?.status, "effectivePlan:", plan);
+  console.error("[DBG1] uid=" + user.id);
+  console.error("[DBG2] subOk=" + String(subResult.isOk()) + " subErr=" + (subResult.isErr() ? String(subResult.error) : "none"));
+  console.error("[DBG3] plan=" + String(sub?.plan) + " status=" + String(sub?.status) + " effective=" + plan);
   const renewsAt = sub?.currentPeriodEnd ?? null;
   const stripeCustomerId = sub?.stripeCustomerId ?? null;
 
