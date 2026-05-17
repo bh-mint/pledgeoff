@@ -11,6 +11,15 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "1.6",
+    date: "May 2026",
+    tag: "UI",
+    items: [
+      "Badge tooltips on desktop — hover over BUILD / OSS / BUY, Niche / Mid-size / Large, AI knowledge, and MRR to see a plain-English explanation",
+      "Mobile legend on all four tools — the same explanations appear as a static line below the section title, no hover needed",
+    ],
+  },
+  {
     version: "1.5",
     date: "May 2026",
     tag: "UI",
