@@ -13,14 +13,16 @@ const PRO_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID ?
 const PRO_PLUS_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PLUS_MONTHLY_PRICE_ID ?? "";
 const PRO_PLUS_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PLUS_ANNUAL_PRICE_ID ?? "";
 
-const FEATURES = [
+type FeatureRow = { k: string; f: string; p: string; pp: string; a: string; soon?: boolean };
+
+const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Validation",
     rows: [
       { k: "Validations / month",       f: "1",               p: "20",              pp: "Unlimited",       a: "Unlimited" },
       { k: "Signal sources",            f: "Reddit + GitHub", p: "All 5 sources",   pp: "All 5 sources",   a: "All + custom" },
       { k: "Competitor Intelligence",   f: "—",               p: "✓",               pp: "✓",               a: "✓" },
-      { k: "PDF / JSON export",         f: "—",               p: "✓",               pp: "✓",               a: "✓ · white-label" },
+      { k: "PDF / JSON export",         f: "—",               p: "✓",               pp: "✓",               a: "✓ · white-label", soon: true },
     ],
   },
   {
@@ -32,7 +34,7 @@ const FEATURES = [
   {
     group: "Team",
     rows: [
-      { k: "Seats included",            f: "1",               p: "1",               pp: "3",               a: "Custom" },
+      { k: "Seats included",            f: "1",               p: "1",               pp: "3",               a: "Custom", soon: true },
       { k: "Early access to features",  f: "—",               p: "—",               pp: "✓",               a: "✓" },
     ],
   },
@@ -40,7 +42,7 @@ const FEATURES = [
     group: "Support",
     rows: [
       { k: "Response SLA",              f: "Best effort",     p: "24h",             pp: "24h",             a: "4h dedicated" },
-      { k: "White-label reports",       f: "—",               p: "—",               pp: "—",               a: "✓" },
+      { k: "White-label reports",       f: "—",               p: "—",               pp: "—",               a: "✓", soon: true },
     ],
   },
 ];
@@ -68,15 +70,26 @@ const FAQ = [
   },
 ];
 
-function renderCell(val: string, emphasize = false) {
+function SoonBadge() {
+  return (
+    <span
+      className="mono text-[9px] px-1.5 py-0.5 rounded uppercase tracking-[0.06em] ml-1.5 align-middle"
+      style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)", color: "var(--accent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)" }}
+    >
+      soon
+    </span>
+  );
+}
+
+function renderCell(val: string, emphasize = false, soon = false) {
   if (val === "—") return <span style={{ color: "var(--t3)" }}>—</span>;
-  if (val === "✓") return <span style={{ color: "var(--validated)" }}>✓</span>;
+  if (val === "✓") return <><span style={{ color: "var(--validated)" }}>✓</span>{soon && <SoonBadge />}</>;
   return (
     <span
       className={emphasize ? "display tnum text-[13px] font-semibold" : "text-[13px]"}
       style={{ color: emphasize ? "var(--t1)" : "var(--t2)" }}
     >
-      {val}
+      {val}{soon && <SoonBadge />}
     </span>
   );
 }
@@ -276,17 +289,17 @@ export function PricingClient() {
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
-              {[
-                "20 validations / month",
-                "All 5 signal sources",
-                "Competitor Intelligence",
-                "PDF + JSON export",
-                "1-year idea history",
-                "24h support SLA",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2">
+              {([
+                { label: "20 validations / month" },
+                { label: "All 5 signal sources" },
+                { label: "Competitor Intelligence" },
+                { label: "PDF + JSON export", soon: true },
+                { label: "1-year idea history" },
+                { label: "24h support SLA" },
+              ] as { label: string; soon?: boolean }[]).map((f) => (
+                <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f}</span>
+                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f.label}{f.soon && <SoonBadge />}</span>
                 </li>
               ))}
             </ul>
@@ -305,18 +318,18 @@ export function PricingClient() {
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
-              {[
-                "Unlimited validations",
-                "All 5 signal sources",
-                "Competitor Intelligence",
-                "PDF + JSON export",
-                "Unlimited idea history",
-                "3 team seats",
-                "Early access to features",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2">
+              {([
+                { label: "Unlimited validations" },
+                { label: "All 5 signal sources" },
+                { label: "Competitor Intelligence" },
+                { label: "PDF + JSON export", soon: true },
+                { label: "Unlimited idea history" },
+                { label: "3 team seats", soon: true },
+                { label: "Early access to features" },
+              ] as { label: string; soon?: boolean }[]).map((f) => (
+                <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f}</span>
+                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f.label}{f.soon && <SoonBadge />}</span>
                 </li>
               ))}
             </ul>
@@ -338,17 +351,17 @@ export function PricingClient() {
               </a>
             </div>
             <ul className="space-y-2 flex-1">
-              {[
-                "Unlimited validations",
-                "All sources + custom",
-                "Competitor Intelligence",
-                "White-label reports",
-                "Custom team seats",
-                "4h dedicated SLA",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2">
+              {([
+                { label: "Unlimited validations" },
+                { label: "All sources + custom" },
+                { label: "Competitor Intelligence" },
+                { label: "White-label reports", soon: true },
+                { label: "Custom team seats", soon: true },
+                { label: "4h dedicated SLA" },
+              ] as { label: string; soon?: boolean }[]).map((f) => (
+                <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--t2)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
+                  <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f.label}{f.soon && <SoonBadge />}</span>
                 </li>
               ))}
             </ul>
@@ -386,7 +399,9 @@ export function PricingClient() {
                   </div>
                   {g.rows.map((r) => (
                     <div key={r.k} className="grid grid-cols-12 gap-3 px-6 py-3 border-b items-center" style={{ borderColor: "var(--border)" }}>
-                      <div className="col-span-4 text-[13px]" style={{ color: "var(--t1)" }}>{r.k}</div>
+                      <div className="col-span-4 text-[13px]" style={{ color: "var(--t1)" }}>
+                        {r.k}{r.soon && <SoonBadge />}
+                      </div>
                       <div className="col-span-2">{renderCell(r.f)}</div>
                       <div className="col-span-2">{renderCell(r.p, true)}</div>
                       <div className="col-span-2">{renderCell(r.pp)}</div>
