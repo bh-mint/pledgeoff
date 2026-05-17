@@ -90,7 +90,7 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
     <div className="space-y-8">
       {/* Segments */}
       <div>
-        <div className="mono text-[10px] mb-4 uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
           Customer Segments
         </div>
         <div className="space-y-3">
@@ -124,7 +124,7 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
 
       {/* Pain Points */}
       <div>
-        <div className="mono text-[10px] mb-4 uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
           Pain Points
         </div>
         <div className="space-y-2">
@@ -153,7 +153,7 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
         className="rounded-md border p-5"
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
-        <div className="mono text-[10px] mb-4 uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
           Market Sentiment
         </div>
         <div className="space-y-3">
@@ -183,7 +183,7 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
       {/* Quotes */}
       {analysis.quotes.length > 0 && (
         <div>
-          <div className="mono text-[10px] mb-4 uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
             From the community
           </div>
           <div className="space-y-3">

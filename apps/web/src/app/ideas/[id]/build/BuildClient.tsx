@@ -116,7 +116,7 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
       {/* Tech stack */}
       <section>
         <h2
-          className="mono text-[10px] uppercase tracking-[0.1em] mb-4"
+          className="mono text-[10px] uppercase tracking-[0.12em] mb-4"
           style={{ color: "var(--t3)" }}
         >
           Recommended stack
@@ -130,7 +130,7 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
             >
               <div className="flex items-start justify-between gap-4 mb-2">
                 <div>
-                  <span className="text-[15px] font-semibold" style={{ color: "var(--t1)" }}>
+                  <span className="text-[14px] font-semibold" style={{ color: "var(--t1)" }}>
                     {component.name}
                   </span>
                   <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
@@ -188,7 +188,7 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
       {analysis.gaps.length > 0 && (
         <section>
           <h2
-            className="mono text-[10px] uppercase tracking-[0.1em] mb-4"
+            className="mono text-[10px] uppercase tracking-[0.12em] mb-4"
             style={{ color: "var(--t3)" }}
           >
             Technical gaps — opportunities
