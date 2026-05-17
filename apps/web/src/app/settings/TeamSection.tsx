@@ -178,6 +178,11 @@ export function TeamSection({ plan }: Props) {
           </button>
         </form>
       )}
+      {teamNameState === "error" && (
+        <p className="mono text-[11px]" style={{ color: "var(--kill)" }}>
+          Failed to save team name. Try again.
+        </p>
+      )}
       {!data?.isOwner && data?.team && (
         <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
           Team: <span style={{ color: "var(--t1)" }}>{data.team.name}</span>

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { container } from '@/lib/container';
 import { resolveUserId } from '@/lib/api-auth';
-import { TeamNotFoundError, TeamForbiddenError } from '@pledgeoff/core';
+import { TeamForbiddenError } from '@pledgeoff/core';
 
 function unauth(traceId: string) {
   return Response.json(
@@ -75,9 +75,6 @@ export async function PATCH(req: Request) {
 
   if (result.isErr()) {
     const e = result.error;
-    if (e instanceof TeamNotFoundError) {
-      return Response.json({ error: { code: 'TEAM_NOT_FOUND' } }, { status: 404, headers: { 'X-Trace-Id': traceId } });
-    }
     if (e instanceof TeamForbiddenError) {
       return Response.json({ error: { code: 'FORBIDDEN' } }, { status: 403, headers: { 'X-Trace-Id': traceId } });
     }
