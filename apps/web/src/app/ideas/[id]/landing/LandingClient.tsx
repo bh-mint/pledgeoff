@@ -54,7 +54,6 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
   const [showBreakdown, setShowBreakdown] = useState(false);
 
   async function generate() {
@@ -140,18 +139,8 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
 
   return (
     <div className="space-y-6" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
-      {/* Visual preview toggle */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => setShowPreview((v) => !v)}
-          className="mono text-[11px] px-3 py-1.5 rounded transition-colors"
-          style={{
-            border: `1px solid ${showPreview ? "var(--accent)" : "var(--border)"}`,
-            color: showPreview ? "var(--accent)" : "var(--t2)",
-          }}
-        >
-          {showPreview ? "← Hide preview" : "Preview page →"}
-        </button>
+      {/* Copy HTML button */}
+      <div className="flex justify-end">
         <button
           onClick={() => void copyToClipboard(generateHtml(landing), "html")}
           className="inline-flex items-center gap-2 h-8 px-4 rounded-md mono text-[11px] font-semibold transition-opacity hover:opacity-90"
@@ -161,9 +150,8 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
         </button>
       </div>
 
-      {/* Inline visual preview */}
-      {showPreview && (
-        <div
+      {/* Visual preview — always visible */}
+      <div
           className="rounded-md border overflow-hidden"
           style={{ borderColor: "var(--border)" }}
         >
@@ -208,7 +196,6 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
             <p style={{ color: "#555", fontSize: "12px" }}>{landing.waitlistHeadline}</p>
           </div>
         </div>
-      )}
 
       {/* Copy breakdown (collapsible) */}
       <div className="rounded-md border overflow-hidden" style={{ borderColor: "var(--border)" }}>
