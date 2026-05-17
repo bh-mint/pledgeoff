@@ -3,23 +3,27 @@ import { getAllArticles } from "@/lib/mdx";
 
 const SITE_URL = "https://pledgeoff.com";
 
-// lastmod on static pages: use a real date, not new Date() — Google ignores inaccurate values
-const SITE_LAST_UPDATED = "2026-05-05";
+function latestInCluster(articles: ReturnType<typeof getAllArticles>, tag: string): string {
+  const dates = articles.filter((a) => a.tag === tag).map((a) => a.updatedAt);
+  return dates.sort().at(-1) ?? "2026-01-01";
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const articles = getAllArticles();
 
+  const latestArticle = articles.map((a) => a.updatedAt).sort().at(-1) ?? "2026-01-01";
+
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: SITE_LAST_UPDATED },
-    { url: `${SITE_URL}/blog`, lastModified: SITE_LAST_UPDATED },
-    { url: `${SITE_URL}/blog/idea-validation`, lastModified: SITE_LAST_UPDATED },
-    { url: `${SITE_URL}/blog/product-decisions`, lastModified: SITE_LAST_UPDATED },
-    { url: `${SITE_URL}/blog/founder`, lastModified: SITE_LAST_UPDATED },
+    { url: SITE_URL, lastModified: "2026-05-17" },
+    { url: `${SITE_URL}/blog`, lastModified: latestArticle },
+    { url: `${SITE_URL}/blog/idea-validation`, lastModified: latestInCluster(articles, "idea-validation") },
+    { url: `${SITE_URL}/blog/product-decisions`, lastModified: latestInCluster(articles, "product-decisions") },
+    { url: `${SITE_URL}/blog/founder`, lastModified: latestInCluster(articles, "founder") },
     { url: `${SITE_URL}/about`, lastModified: "2026-05-11" },
-    { url: `${SITE_URL}/pricing`, lastModified: SITE_LAST_UPDATED },
-    { url: `${SITE_URL}/changelog`, lastModified: SITE_LAST_UPDATED },
-    { url: `${SITE_URL}/terms`, lastModified: SITE_LAST_UPDATED },
-    { url: `${SITE_URL}/privacy`, lastModified: SITE_LAST_UPDATED },
+    { url: `${SITE_URL}/pricing`, lastModified: "2026-05-17" },
+    { url: `${SITE_URL}/changelog`, lastModified: "2026-05-17" },
+    { url: `${SITE_URL}/terms`, lastModified: "2026-05-16" },
+    { url: `${SITE_URL}/privacy`, lastModified: "2026-05-16" },
   ];
 
   const articleRoutes: MetadataRoute.Sitemap = articles.map((a) => ({
