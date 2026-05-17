@@ -117,6 +117,7 @@ const CompetitorItemSchema = z.object({
   url: z.string().optional(),
   positioning: z.string().min(1),
   signals: z.array(z.string().min(1)),
+  source: z.enum(['signal', 'knowledge']).optional(),
 });
 
 const CompetitorGapItemSchema = z.object({
@@ -291,11 +292,11 @@ export class GroqLLMAdapter implements ILLMClient {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
         buildCompetitorPrompt(request.ideaText, request.signals),
-        `You are a competitive intelligence analyst using prompt version ${COMPETITOR_PROMPT_VERSION}. Always respond with valid JSON only.`,
+        `You are a competitive intelligence analyst using prompt version ${COMPETITOR_PROMPT_VERSION}. Always respond with valid JSON only. No markdown, no explanation, no code fences — raw JSON object only.`,
         LLMCompetitorResponseSchema,
         'analyzeCompetitors',
         request.traceId,
-        2048,
+        3072,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
