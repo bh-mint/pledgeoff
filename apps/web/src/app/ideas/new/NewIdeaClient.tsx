@@ -25,7 +25,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
   // Ambient warmth grows as the user fills in the title
   const warmth = Math.min(1, title.length / 40);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!valid) return;
 
@@ -123,7 +123,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
         onSubmit={handleSubmit}
         className="relative flex-1 flex items-start"
       >
-        <div className="max-w-[760px] w-full mx-auto px-4 sm:px-10 py-8 sm:py-12">
+        <div className="max-w-190 w-full mx-auto px-4 sm:px-10 py-8 sm:py-12">
           <div
             className="mono text-[10px] uppercase tracking-[0.14em] mb-4"
             style={{ color: "var(--t3)" }}
@@ -235,7 +235,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
           >
             <div className="flex items-center gap-4">
               <span
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0 pulse-dot"
+                className="w-1.5 h-1.5 rounded-full shrink-0 pulse-dot"
                 style={{ background: "var(--accent)" }}
               />
               <span className="text-[12px]" style={{ color: "var(--t2)" }}>
@@ -247,7 +247,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
               </span>
             </div>
             <span
-              className="mono text-[11px] tnum flex-shrink-0"
+              className="mono text-[11px] tnum shrink-0"
               style={{ color: "var(--t3)" }}
             >
               &lt;60s
