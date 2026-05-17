@@ -11,6 +11,32 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "1.5",
+    date: "May 2026",
+    tag: "UI",
+    items: [
+      "Settings page redesigned with sidebar navigation — Account, Billing, Notifications, API, Danger zone as separate panels",
+      "Landing Page tool now shows a live page preview (dark background, headline, features, CTA) without leaving the app",
+      "Landing Page tool adds a Copy HTML button — generates a standalone dark-mode page ready to publish on Carrd, Webflow, or any browser",
+      "Copy fields collapsed into an expandable 'Copy breakdown' section, keeping the interface clean by default",
+      "All six Intelligence tools now show a consistent loading animation and fade the content during re-runs",
+      "Market Simulation gains a Re-run button — no more page refresh needed to regenerate",
+      "Competitor and Build analysis now show gaps as full cards, consistent with the rest of the UI",
+      "Re-run errors are now shown inline near the action button instead of silently failing",
+    ],
+  },
+  {
+    version: "1.4",
+    date: "May 2026",
+    tag: "UI",
+    items: [
+      "Otto co-founder flow on idea page — verdict-aware recommendations guide you to the most relevant tools",
+      "GO verdict unlocks all tools; PIVOT and KILL show focused suggestions with explanations per blocked tool",
+      "Override button lets you run all tools regardless of Otto's recommendation",
+      "Intelligence tools list now starts with '01 Validate' as completed — clear sense of progress",
+    ],
+  },
+  {
     version: "1.3",
     date: "May 2026",
     tag: "INTELLIGENCE",
