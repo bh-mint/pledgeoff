@@ -22,6 +22,7 @@ function mockRepo(overrides?: Partial<ISubscriptionRepository>): ISubscriptionRe
     findByStripeCustomerId: async () => ok(null),
     findByStripeSubscriptionId: async () => ok(null),
     upsert: async (input) => ok(makeSub({ userId: input.userId })),
+    updatePlan: async (input) => ok(makeSub({ userId: input.userId })),
     updateExtraSeats: async (input: SubscriptionSeatUpdateInput) => ok(makeSub({ userId: input.userId, extraSeats: input.extraSeats })),
     ...overrides,
   };
