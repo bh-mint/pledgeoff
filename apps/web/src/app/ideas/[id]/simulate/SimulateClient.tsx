@@ -59,6 +59,22 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
   }
 
   if (!simulation) {
+    if (loading) {
+      return (
+        <div
+          className="rounded-md border p-8 text-center"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <p className="mono text-[11px] animate-pulse mb-2" style={{ color: "var(--t3)" }}>
+            Running revenue simulation…
+          </p>
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            This may take 15–30 seconds
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div
         className="rounded-md border p-8 text-center"
@@ -75,18 +91,17 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
         )}
         <button
           onClick={runSimulation}
-          disabled={loading}
-          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
           style={{ background: "var(--accent)", color: "#000" }}
         >
-          {loading ? "Simulating…" : "Run simulation →"}
+          Run simulation →
         </button>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* TAM */}
       <div
         className="rounded-md border p-6"
@@ -96,11 +111,11 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
           Total Addressable Market
         </div>
         <div className="flex items-end gap-3">
-          <span className="display font-bold" style={{ fontSize: "36px", color: "var(--t1)", letterSpacing: "-0.03em" }}>
+          <span className="display text-4xl font-bold" style={{ color: "var(--t1)", letterSpacing: "-0.03em" }}>
             {formatCurrency(simulation.tamLow)}
           </span>
           <span className="mono text-[14px] pb-2" style={{ color: "var(--t3)" }}>–</span>
-          <span className="display font-bold" style={{ fontSize: "36px", color: "var(--accent)", letterSpacing: "-0.03em" }}>
+          <span className="display text-4xl font-bold" style={{ color: "var(--accent)", letterSpacing: "-0.03em" }}>
             {formatCurrency(simulation.tamHigh)}
           </span>
         </div>
@@ -122,7 +137,7 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
               style={{ borderColor: "var(--border)", background: "var(--surface)" }}
             >
               <div
-                className="mono text-[10px] uppercase tracking-[0.1em] mb-4 font-semibold"
+                className="mono text-[10px] uppercase tracking-widest mb-4 font-semibold"
                 style={{ color: SCENARIO_COLORS[scenario.name] ?? "var(--t3)" }}
               >
                 {SCENARIO_LABELS[scenario.name] ?? scenario.name}
@@ -163,7 +178,7 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
             Months until MRR covers base operating costs (~$2-5K/mo)
           </p>
         </div>
-        <div className="display font-bold text-right ml-6 flex-shrink-0" style={{ fontSize: "32px", color: "var(--t1)", letterSpacing: "-0.03em" }}>
+        <div className="display font-bold text-right ml-6 shrink-0" style={{ fontSize: "32px", color: "var(--t1)", letterSpacing: "-0.03em" }}>
           {simulation.breakEvenMonths}
           <span className="mono text-[12px] font-normal ml-1" style={{ color: "var(--t3)" }}>mo</span>
         </div>
@@ -186,9 +201,24 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
         </div>
       )}
 
-      <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
-        Simulation generated {new Date(simulation.createdAt).toLocaleDateString()} · Based on market signals + AI analysis · Not financial advice
-      </p>
+      <div className="flex flex-col gap-2">
+        {error && (
+          <p className="mono text-[11px] text-right" style={{ color: "var(--caution)" }}>{error}</p>
+        )}
+        <div className="flex items-center justify-between">
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            Simulation generated {new Date(simulation.createdAt).toLocaleDateString()} · Not financial advice
+          </p>
+          <button
+            onClick={runSimulation}
+            disabled={loading}
+            className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
+            style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
+          >
+            {loading ? "Simulating…" : "Re-run"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

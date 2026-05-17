@@ -57,7 +57,7 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
         {error && <p className="mb-4 text-[12px]" style={{ color: "var(--caution)" }}>{error}</p>}
         <button
           onClick={() => run()}
-          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
           style={{ background: "var(--accent)", color: "#000" }}
         >
           Run analysis →
@@ -85,21 +85,12 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
   if (!analysis) return null;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* Competitors list */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <p className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
-            Competitors · {analysis.competitors.length}
-          </p>
-          <button
-            onClick={() => run(true)}
-            className="mono text-[10px] px-2.5 py-1 rounded border transition-colors hover:border-(--accent) hover:text-(--accent)"
-            style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-          >
-            Regenerate
-          </button>
-        </div>
+        <p className="mono text-[10px] uppercase tracking-[0.12em] mb-4" style={{ color: "var(--t3)" }}>
+          Competitors · {analysis.competitors.length}
+        </p>
 
         {analysis.competitors.length === 0 ? (
           <div
@@ -163,13 +154,13 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
       {analysis.gaps.length > 0 && (
         <section>
           <p className="mono text-[10px] uppercase tracking-[0.12em] mb-4" style={{ color: "var(--t3)" }}>
-            Gaps · {analysis.gaps.length} opportunities
+            → Gaps · {analysis.gaps.length} opportunities
           </p>
           <div className="space-y-3">
             {analysis.gaps.map((g, i) => (
               <div
                 key={i}
-                className="rounded border-l-2 border px-4 py-3"
+                className="rounded border border-l-2 px-4 py-3"
                 style={{ borderLeftColor: "var(--accent)", borderColor: "var(--border)", background: "var(--surface)" }}
               >
                 <p className="text-[13px] font-medium mb-1" style={{ color: "var(--t1)" }}>{g.title}</p>
@@ -181,10 +172,25 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
         </section>
       )}
 
-      {/* Footer meta */}
-      <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
-        Based on {analysis.signalCount} signal{analysis.signalCount !== 1 ? "s" : ""} · Generated {new Date(analysis.createdAt).toLocaleDateString()}
-      </p>
+      {/* Footer */}
+      <div className="flex flex-col gap-2">
+        {error && (
+          <p className="mono text-[11px] text-right" style={{ color: "var(--caution)" }}>{error}</p>
+        )}
+        <div className="flex items-center justify-between">
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            Based on {analysis.signalCount} signal{analysis.signalCount !== 1 ? "s" : ""} · Generated {new Date(analysis.createdAt).toLocaleDateString()}
+          </p>
+          <button
+            onClick={() => run(true)}
+            disabled={loading}
+            className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
+            style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
+          >
+            {loading ? "Regenerating…" : "Regenerate"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
