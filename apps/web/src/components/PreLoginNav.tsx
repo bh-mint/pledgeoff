@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { WaitlistModal } from "./WaitlistModal";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -12,7 +11,6 @@ interface PreLoginNavProps {
 }
 
 export function PreLoginNav({ extraLink }: PreLoginNavProps) {
-  const [modalOpen, setModalOpen] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -97,20 +95,19 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
                 >
                   Login
                 </Link>
-                <button
-                  onClick={() => setModalOpen(true)}
+                <Link
+                  href="/login"
                   className="inline-flex items-center h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
                   style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
                 >
                   Start free →
-                </button>
+                </Link>
               </div>
             )}
           </div>
         </div>
       </header>
 
-      <WaitlistModal isOpen={modalOpen} onClose={() => setModalOpen(false)} source="nav" />
     </>
   );
 }
