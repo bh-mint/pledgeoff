@@ -24,3 +24,4 @@ CREATE POLICY "Users can insert own simulations"
   WITH CHECK (auth.uid() = user_id);
 
 GRANT SELECT, INSERT ON simulations TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON simulations TO service_role;
