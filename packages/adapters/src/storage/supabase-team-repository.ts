@@ -98,6 +98,17 @@ export class SupabaseTeamRepository implements ITeamRepository {
     return this.findById(data.team_id);
   }
 
+  async updateTeam(team: Team): Promise<Result<Team, TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('teams')
+      .update({ name: team.name, updated_at: team.updatedAt })
+      .eq('id', team.id)
+      .select()
+      .single<TeamRow>();
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok(rowToTeam(data));
+  }
+
   async saveTeam(team: Team): Promise<Result<Team, TeamRepositoryError>> {
     const { data, error } = await this.client
       .from('teams')
