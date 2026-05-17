@@ -8,11 +8,11 @@ import {
   TeamRepositoryError,
   type TeamMembership,
 } from '../domain/team';
-import { PLAN_LIMITS, type Plan } from '../domain/subscription';
 
 export type InviteTeamMemberInput = {
   ownerId: string;
-  ownerPlan: Plan;
+  /** Total seats allowed = plan included + extra purchased. Computed by caller via effectiveSeats(). */
+  maxSeats: number;
   invitedEmail: string;
   traceId: string;
 };
@@ -28,9 +28,9 @@ export class InviteTeamMemberUseCase {
   async execute(
     input: InviteTeamMemberInput,
   ): Promise<Result<TeamMembership, InviteTeamMemberError>> {
-    const { ownerId, ownerPlan, invitedEmail } = input;
+    const { ownerId, maxSeats, invitedEmail } = input;
     const normalizedEmail = invitedEmail.toLowerCase().trim();
-    const limit = PLAN_LIMITS[ownerPlan].seatsIncluded;
+    const limit = maxSeats;
 
     // Get or create the owner's team
     const teamResult = await this.teamRepo.findByOwnerId(ownerId);

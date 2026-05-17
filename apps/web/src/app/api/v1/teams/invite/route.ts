@@ -3,7 +3,7 @@ import { container } from '@/lib/container';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { sendTeamInviteEmail } from '@pledgeoff/adapters';
 import { TeamSeatLimitError, TeamMemberAlreadyExistsError } from '@pledgeoff/core';
-import { getUserPlan, type Plan } from '@/server/billing/getUserPlan';
+import { effectiveSeats } from '@pledgeoff/core';
 import { logger } from '@pledgeoff/observability';
 import { resolveUserId } from '@/lib/api-auth';
 
@@ -30,14 +30,14 @@ export async function POST(req: Request) {
     return Response.json({ error: { code: 'VALIDATION_FAILED', details: parsed.error.flatten() } }, { status: 400, headers: { 'X-Trace-Id': traceId } });
   }
 
-  // Get owner's plan
-  let ownerPlan: Plan;
-  try {
-    ownerPlan = await getUserPlan(userId);
-  } catch {
-    logger.error({ traceId, userId, outcome: 'error' as const }, 'teams/invite: plan resolution failed');
+  // Get owner's plan + effective seats (base included + extra purchased)
+  const subResult = await container.subscriptionRepo.findByUserId(userId);
+  if (subResult.isErr()) {
+    logger.error({ traceId, userId, outcome: 'error' as const }, 'teams/invite: subscription lookup failed');
     return Response.json({ error: { code: 'INTERNAL_ERROR' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }
+  const sub = subResult.value;
+  const maxSeats = sub ? effectiveSeats(sub) : 1;
 
   // Get inviter email for the invite email
   const { data: userData } = await createSupabaseServiceClient().auth.admin.getUserById(userId);
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
   const result = await container.inviteTeamMemberUseCase.execute({
     ownerId: userId,
-    ownerPlan,
+    maxSeats,
     invitedEmail: parsed.data.email,
     traceId,
   });

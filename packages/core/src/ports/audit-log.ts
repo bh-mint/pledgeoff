@@ -4,6 +4,7 @@ export type AuditAction =
   | 'account_delete_requested'
   | 'checkout_initiated'
   | 'billing_portal_accessed'
+  | 'seat_addon_updated'
   | 'tool_accessed';
 
 export type AuditEntry = {

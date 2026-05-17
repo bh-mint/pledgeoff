@@ -29,6 +29,7 @@ export default async function SettingsPage() {
   const plan = sub ? effectivePlan(sub) : "free";
   const renewsAt = sub?.currentPeriodEnd ?? null;
   const stripeCustomerId = sub?.stripeCustomerId ?? null;
+  const extraSeats = sub?.extraSeats ?? 0;
 
   const now = new Date();
   const ideasThisMonth = ideas.filter((idea) => {
@@ -58,6 +59,7 @@ export default async function SettingsPage() {
           ideasThisMonth={ideasThisMonth}
           renewsAt={renewsAt}
           stripeCustomerId={stripeCustomerId}
+          extraSeats={extraSeats}
         />
       </div>
     </div>
