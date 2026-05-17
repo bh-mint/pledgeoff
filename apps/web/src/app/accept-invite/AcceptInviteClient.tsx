@@ -82,7 +82,7 @@ export function AcceptInviteClient({ token }: { token: string }) {
               You need to be signed in to accept this invite.
             </p>
             <a
-              href={`/login?next=/accept-invite?token=${token}`}
+              href={`/login?next=${encodeURIComponent(`/accept-invite?token=${token}`)}`}
               className="inline-flex items-center h-9 px-5 rounded-md display text-[13px] font-semibold"
               style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
             >

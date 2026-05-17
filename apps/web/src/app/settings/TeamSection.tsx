@@ -25,6 +25,7 @@ export function TeamSection({ plan }: Props) {
   const [leaving, setLeaving] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [teamNameState, setTeamNameState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [renamingTeam, setRenamingTeam] = useState(false);
 
   const seatsIncluded = PLAN_LIMITS[plan].seatsIncluded;
 
@@ -117,6 +118,7 @@ export function TeamSection({ plan }: Props) {
     }
 
     setTeamNameState("success");
+    setRenamingTeam(false);
     fetchTeam();
     setTimeout(() => setTeamNameState("idle"), 2000);
   };
@@ -150,38 +152,62 @@ export function TeamSection({ plan }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Team name — always visible for owner */}
-      {data?.isOwner && (
-        <form onSubmit={handleUpdateTeamName} className="flex gap-2 items-center">
-          <input
-            type="text"
-            required
-            value={teamName}
-            onChange={(e) => setTeamName(e.target.value)}
-            placeholder="My Team"
-            disabled={teamNameState === "loading"}
-            maxLength={100}
-            className="flex-1 h-9 px-3 rounded-md border text-[13px] transition-colors focus:outline-none focus:border-(--accent)"
-            style={{
-              background: "var(--canvas)",
-              borderColor: "var(--border)",
-              color: "var(--t1)",
-            }}
-          />
+      {/* Team name */}
+      {data?.isOwner && !renamingTeam && (
+        <div className="flex items-center justify-between">
+          <div className="display font-semibold text-[15px]" style={{ color: "var(--t1)" }}>
+            {data.team?.name ?? "My Team"}
+            {teamNameState === "success" && (
+              <span className="mono text-[11px] ml-2 font-normal" style={{ color: "var(--validated)" }}>Saved ✓</span>
+            )}
+          </div>
           <button
-            type="submit"
-            disabled={teamNameState === "loading" || !teamName.trim()}
-            className="h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+            onClick={() => { setTeamName(data.team?.name ?? "My Team"); setRenamingTeam(true); setTeamNameState("idle"); }}
+            className="mono text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded transition-opacity hover:opacity-70"
+            style={{ color: "var(--t3)" }}
           >
-            {teamNameState === "loading" ? "Saving…" : teamNameState === "success" ? "Saved ✓" : "Save name"}
+            Rename
           </button>
-        </form>
+        </div>
       )}
-      {teamNameState === "error" && (
-        <p className="mono text-[11px]" style={{ color: "var(--kill)" }}>
-          Failed to save team name. Try again.
-        </p>
+      {data?.isOwner && renamingTeam && (
+        <>
+          <form onSubmit={handleUpdateTeamName} className="flex gap-2 items-center">
+            <input
+              type="text"
+              required
+              autoFocus
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              placeholder="My Team"
+              disabled={teamNameState === "loading"}
+              maxLength={100}
+              className="flex-1 h-9 px-3 rounded-md border text-[13px] transition-colors focus:outline-none focus:border-(--accent)"
+              style={{ background: "var(--canvas)", borderColor: "var(--border)", color: "var(--t1)" }}
+            />
+            <button
+              type="submit"
+              disabled={teamNameState === "loading" || !teamName.trim()}
+              className="h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+            >
+              {teamNameState === "loading" ? "Saving…" : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setRenamingTeam(false); setTeamNameState("idle"); }}
+              className="h-9 px-3 rounded-md display text-[13px] transition-opacity hover:opacity-70"
+              style={{ borderColor: "var(--border)", color: "var(--t3)", border: "1px solid" }}
+            >
+              Cancel
+            </button>
+          </form>
+          {teamNameState === "error" && (
+            <p className="mono text-[11px]" style={{ color: "var(--kill)" }}>
+              Failed to save team name. Try again.
+            </p>
+          )}
+        </>
       )}
       {!data?.isOwner && data?.team && (
         <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
