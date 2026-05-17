@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-server";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { PrintTrigger } from "./PrintTrigger";
 import { ReportActions } from "./ReportActions";
@@ -47,7 +47,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const idea = ideaResult.value;
   if (idea.userId !== user.id) notFound();
 
-  const supabase = createServiceClient();
+  const supabase = createServiceRoleClient();
   const [
     decisionResult,
     signalsResult,

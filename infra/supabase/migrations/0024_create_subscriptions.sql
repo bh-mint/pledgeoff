@@ -49,3 +49,9 @@ CREATE POLICY "users_read_own_subscription"
 
 -- Service role bypasses RLS for webhook updates (no INSERT/UPDATE policy for anon/authenticated)
 -- Application uses service role client for all writes to this table
+
+-- Grants: service_role needs SELECT/INSERT/UPDATE/DELETE (bypasses RLS but still needs table privilege)
+-- Without this, PostgREST returns 403 even with a valid service_role JWT
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.subscriptions TO service_role;
+GRANT SELECT ON public.subscriptions TO authenticated;
+-- anon gets no access (RLS policy handles authenticated reads via auth.uid() = user_id)
