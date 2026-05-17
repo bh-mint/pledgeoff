@@ -60,13 +60,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     );
   }
 
-  if (decisionResult.value.verdict !== 'GO') {
-    return Response.json(
-      { error: { code: 'PRECONDITION_FAILED', message: 'Landing page generation is only available for GO verdicts' } },
-      { status: 422, headers: { 'X-Trace-Id': traceId } },
-    );
-  }
-
   const result = await container.generateLandingUseCase.execute({
     ideaId,
     ideaText: ideaResult.value.text,
