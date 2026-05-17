@@ -11,6 +11,7 @@ import {
   SupabaseBuildAnalysisRepository,
   SupabaseCompetitorAnalysisRepository,
   SupabaseSubscriptionRepository,
+  SupabaseTeamRepository,
   StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
@@ -34,6 +35,9 @@ import {
   AnalyzeBuildUseCase,
   AnalyzeCompetitorsUseCase,
   GetOrCreateSubscriptionUseCase,
+  InviteTeamMemberUseCase,
+  AcceptTeamInviteUseCase,
+  RemoveTeamMemberUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -61,6 +65,7 @@ function buildContainer() {
   const buildAnalysisRepo = new SupabaseBuildAnalysisRepository(supabase);
   const competitorAnalysisRepo = new SupabaseCompetitorAnalysisRepository(supabase);
   const subscriptionRepo = new SupabaseSubscriptionRepository(supabase);
+  const teamRepo = new SupabaseTeamRepository(supabase);
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   const stripeAdapter = stripeSecretKey ? new StripeAdapter(stripeSecretKey) : null;
@@ -120,6 +125,9 @@ function buildContainer() {
   const analyzeBuildUseCase = new AnalyzeBuildUseCase(buildAnalysisRepo, signalRepo, llmClient);
   const analyzeCompetitorsUseCase = new AnalyzeCompetitorsUseCase(competitorAnalysisRepo, signalRepo, llmClient);
   const getOrCreateSubscriptionUseCase = new GetOrCreateSubscriptionUseCase(subscriptionRepo);
+  const inviteTeamMemberUseCase = new InviteTeamMemberUseCase(teamRepo);
+  const acceptTeamInviteUseCase = new AcceptTeamInviteUseCase(teamRepo);
+  const removeTeamMemberUseCase = new RemoveTeamMemberUseCase(teamRepo);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -195,10 +203,14 @@ function buildContainer() {
     getOrCreateSubscriptionUseCase,
     stripeAdapter,
     subscriptionRepo,
+    teamRepo,
+    inviteTeamMemberUseCase,
+    acceptTeamInviteUseCase,
+    removeTeamMemberUseCase,
     ideaRepo,
     eventBus,
     auditLog,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, subscriptionRepo },
+    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, subscriptionRepo, teamRepo },
   };
 }
 

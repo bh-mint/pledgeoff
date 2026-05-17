@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { ok, err } from 'neverthrow';
 import { InviteTeamMemberUseCase } from '../invite-team-member';
 import type { ITeamRepository } from '../../ports/team-repository';
@@ -61,21 +61,20 @@ describe('InviteTeamMemberUseCase', () => {
   };
 
   it('creates a team if owner has none and saves pending membership', async () => {
-    let savedTeam: Team | null = null;
-    let savedMembership: TeamMembership | null = null;
+    const saved = { team: null as Team | null, membership: null as TeamMembership | null };
 
     const repo = mockRepo({
-      saveTeam: async (t) => { savedTeam = t; return ok(t); },
-      saveMembership: async (m) => { savedMembership = m; return ok(m); },
+      saveTeam: async (t) => { saved.team = t; return ok(t); },
+      saveMembership: async (m) => { saved.membership = m; return ok(m); },
     });
 
     const useCase = new InviteTeamMemberUseCase(repo);
     const result = await useCase.execute(baseInput);
 
     expect(result.isOk()).toBe(true);
-    expect(savedTeam).not.toBeNull();
-    expect(savedMembership?.status).toBe('pending');
-    expect(savedMembership?.invitedEmail).toBe('new@example.com');
+    expect(saved.team).not.toBeNull();
+    expect(saved.membership?.status).toBe('pending');
+    expect(saved.membership?.invitedEmail).toBe('new@example.com');
   });
 
   it('uses existing team when owner already has one', async () => {
