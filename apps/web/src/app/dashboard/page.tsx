@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/auth-server";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { getUserPlan } from "@/server/billing/getUserPlan";
-import { DashboardClient, type TableRow } from "./DashboardClient";
+import { DashboardClient, type TableRow, type TeamFeedRow } from "./DashboardClient";
 import { ProfileButton } from "@/components/ProfileButton";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -64,11 +64,13 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single();
   const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || user.email?.split("@")[0] || "—";
 
-  const [ideasResult, plan] = await Promise.all([
+  const [ideasResult, plan, teamResult] = await Promise.all([
     container._repos.ideaRepo.findByUserId(user.id),
     getUserPlan(user.id),
+    container._repos.teamRepo.findByMemberId(user.id),
   ]);
   const isPaidPlan = plan !== "free";
+  const team = teamResult.isOk() ? teamResult.value : null;
   if (ideasResult.isErr()) {
     logger.error({ traceId: "dashboard", userId: user.id, error: String(ideasResult.error), outcome: "error" as const }, "dashboard: ideaRepo.findByUserId failed");
   }
@@ -173,6 +175,66 @@ export default async function DashboardPage() {
       : "pivoting",
     tools,
   }));
+
+  // ── Team feed ──
+  let teamFeedRows: TeamFeedRow[] = [];
+  let teamName: string | null = null;
+  let teamId: string | null = null;
+
+  if (team && isPaidPlan) {
+    teamName = team.name;
+    teamId = team.id;
+
+    const membershipsResult = await container._repos.teamRepo.findMembershipsByTeamId(team.id);
+    const memberships = membershipsResult.isOk() ? membershipsResult.value : [];
+    const activeMemberships = memberships.filter((m) => m.status === "active");
+
+    // Fetch profiles for all active members
+    const memberUserIds = activeMemberships.map((m) => m.userId).filter((id): id is string => id !== null);
+    const { data: memberProfiles } = await supabase
+      .from("profiles")
+      .select("id, first_name, last_name")
+      .in("id", memberUserIds);
+
+    const profileMap = new Map(
+      (memberProfiles ?? []).map((p) => [
+        p.id as string,
+        { firstName: (p.first_name as string | null) ?? null, lastName: (p.last_name as string | null) ?? null },
+      ])
+    );
+
+    const allMemberIds = [...new Set([team.ownerId, ...memberUserIds.filter((id): id is string => id !== null)])];
+
+    const teamIdeasResult = await container._repos.ideaRepo.findByUserIds(allMemberIds);
+    if (teamIdeasResult.isOk()) {
+      const teamIdeas = teamIdeasResult.value;
+      const teamDecisions = await Promise.all(
+        teamIdeas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))
+      );
+
+      teamFeedRows = teamIdeas.map((idea, i) => {
+        const p = profileMap.get(idea.userId);
+        const initials = p
+          ? ([p.firstName, p.lastName].filter(Boolean).join(" ") || "?")
+              .split(" ")
+              .slice(0, 2)
+              .map((s) => s[0]?.toUpperCase() ?? "")
+              .join("")
+          : (idea.userId.slice(0, 2).toUpperCase());
+        const decision = teamDecisions[i].isOk() ? teamDecisions[i].value : null;
+        return {
+          id: idea.id,
+          text: idea.text,
+          createdAt: idea.createdAt,
+          userId: idea.userId,
+          memberInitials: initials,
+          score: computeScore(decision),
+          verdict: decision?.verdict ?? null,
+          isOwn: idea.userId === user.id,
+        };
+      });
+    }
+  }
 
   const userInitials = (user.email ?? "?")
     .split("@")[0]
@@ -391,7 +453,14 @@ export default async function DashboardPage() {
           )}
 
           {/* Validations table */}
-          <DashboardClient rows={tableRows} totalCount={rows.length} />
+          <DashboardClient
+            rows={tableRows}
+            totalCount={rows.length}
+            teamFeedRows={teamFeedRows}
+            teamName={teamName}
+            teamId={teamId}
+            plan={plan}
+          />
         </div>
 
         {/* RIGHT */}

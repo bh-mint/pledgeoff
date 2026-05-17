@@ -9,5 +9,6 @@ export interface IIdeaRepository {
   save(idea: Idea): Promise<Result<Idea, IdeaRepositoryError>>;
   findById(id: string): Promise<Result<Idea | null, IdeaRepositoryError>>;
   findByUserId(userId: string): Promise<Result<Idea[], IdeaRepositoryError>>;
+  findByUserIds(userIds: string[]): Promise<Result<Idea[], IdeaRepositoryError>>;
   countThisMonth(userId: string): Promise<Result<number, IdeaRepositoryError>>;
 }

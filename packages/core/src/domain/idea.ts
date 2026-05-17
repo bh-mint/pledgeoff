@@ -4,6 +4,7 @@ import { Result, ok, err } from 'neverthrow';
 export const IdeaSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
+  teamId: z.string().uuid().nullable().optional(),
   text: z.string().min(10).max(2000),
   createdAt: z.string().datetime(),
 });
