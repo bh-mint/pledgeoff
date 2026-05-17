@@ -3,8 +3,11 @@ import { z } from 'zod';
 export const TeamRoleSchema = z.enum(['owner', 'member']);
 export type TeamRole = z.infer<typeof TeamRoleSchema>;
 
-export const TeamMembershipStatusSchema = z.enum(['pending', 'active']);
+export const TeamMembershipStatusSchema = z.enum(['pending', 'active', 'removed', 'left']);
 export type TeamMembershipStatus = z.infer<typeof TeamMembershipStatusSchema>;
+
+export const RemovalReasonSchema = z.enum(['left', 'removed_by_owner']);
+export type RemovalReason = z.infer<typeof RemovalReasonSchema>;
 
 export const TeamSchema = z.object({
   id: z.string().uuid(),
@@ -23,6 +26,11 @@ export const TeamMembershipSchema = z.object({
   role: TeamRoleSchema,
   status: TeamMembershipStatusSchema,
   inviteToken: z.string().uuid(),
+  invitedAt: z.string().datetime(),
+  acceptedAt: z.string().datetime().nullable(),
+  leftAt: z.string().datetime().nullable(),
+  removedBy: z.string().uuid().nullable(),
+  removalReason: RemovalReasonSchema.nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -61,6 +69,13 @@ export class UserAlreadyInTeamError extends Error {
   }
 }
 
+export class LeaveTeamNotMemberError extends Error {
+  readonly code = 'LEAVE_TEAM_NOT_MEMBER';
+  constructor() {
+    super('User is not an active member of any team');
+  }
+}
+
 export class TeamRepositoryError extends Error {
   readonly code = 'TEAM_REPOSITORY_ERROR';
 }
@@ -89,6 +104,11 @@ export function createPendingMembership(input: {
     role: 'member',
     status: 'pending',
     inviteToken: crypto.randomUUID(),
+    invitedAt: now,
+    acceptedAt: null,
+    leftAt: null,
+    removedBy: null,
+    removalReason: null,
     createdAt: now,
     updatedAt: now,
   };

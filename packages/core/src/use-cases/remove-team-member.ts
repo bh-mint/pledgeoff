@@ -37,8 +37,16 @@ export class RemoveTeamMemberUseCase {
     if (!membership) return err(new TeamForbiddenError('Membership not found in your team'));
     if (membership.role === 'owner') return err(new TeamForbiddenError('Cannot remove team owner'));
 
-    const deleteResult = await this.teamRepo.deleteMembership(membershipId);
-    if (deleteResult.isErr()) return err(deleteResult.error);
+    const now = new Date().toISOString();
+    const updateResult = await this.teamRepo.updateMembership({
+      ...membership,
+      status: 'removed',
+      leftAt: now,
+      removedBy: ownerId,
+      removalReason: 'removed_by_owner',
+      updatedAt: now,
+    });
+    if (updateResult.isErr()) return err(updateResult.error);
 
     return ok(undefined);
   }

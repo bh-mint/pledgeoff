@@ -23,6 +23,8 @@ function makePendingMembership(): TeamMembership {
     id: 'mem-1', teamId: 'team-1', userId: null,
     invitedEmail: 'new@example.com', role: 'member', status: 'pending',
     inviteToken: 'token-abc',
+    invitedAt: '2026-01-01T00:00:00.000Z',
+    acceptedAt: null, leftAt: null, removedBy: null, removalReason: null,
     createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
   };
 }
