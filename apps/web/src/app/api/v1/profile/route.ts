@@ -9,14 +9,18 @@ export async function PATCH(req: NextRequest) {
 
   const body = await req.json();
   const fullName = typeof body.full_name === "string" ? body.full_name.trim() : null;
+  const companyName = typeof body.company_name === "string" ? body.company_name.trim() : undefined;
 
   if (!fullName) {
     return NextResponse.json({ error: "full_name is required" }, { status: 400 });
   }
 
+  const updatePayload: Record<string, string | null> = { full_name: fullName, updated_at: new Date().toISOString() };
+  if (companyName !== undefined) updatePayload.company_name = companyName || null;
+
   const { error } = await supabase
     .from("profiles")
-    .update({ full_name: fullName, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq("id", user.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

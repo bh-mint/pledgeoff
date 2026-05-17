@@ -10,6 +10,7 @@ import { PLAN_LIMITS } from "@pledgeoff/core";
 interface SettingsClientProps {
   email: string;
   fullName: string | null;
+  companyName: string | null;
   plan: Plan;
   ideasThisMonth: number;
   renewsAt?: string | null;
@@ -67,6 +68,7 @@ const NOTIFICATION_ITEMS = [
 export function SettingsClient({
   email,
   fullName,
+  companyName,
   plan,
   ideasThisMonth,
   renewsAt,
@@ -75,6 +77,7 @@ export function SettingsClient({
   const router = useRouter();
   const [section, setSection] = useState<SectionId>("account");
   const [name, setName] = useState(fullName ?? "");
+  const [company, setCompany] = useState(companyName ?? "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
@@ -102,7 +105,7 @@ export function SettingsClient({
     const res = await fetch("/api/v1/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ full_name: name }),
+      body: JSON.stringify({ full_name: name, company_name: company }),
     });
     setSaveStatus(res.ok ? "saved" : "error");
     if (res.ok) setTimeout(() => setSaveStatus("idle"), 2000);
@@ -234,6 +237,23 @@ export function SettingsClient({
                   >
                     {saveStatus === "saving" ? "Saving…" : saveStatus === "saved" ? "Saved ✓" : saveStatus === "error" ? "Error" : "Save"}
                   </button>
+                </div>
+              </div>
+
+              {/* Company name row */}
+              <div className="grid grid-cols-12 gap-4 px-5 py-4 border-b items-center" style={{ borderColor: "var(--border)" }}>
+                <div className="col-span-3 mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>Company</div>
+                <div className="col-span-9">
+                  <input
+                    value={company}
+                    onChange={(e) => { setCompany(e.target.value); setSaveStatus("idle"); }}
+                    placeholder="Your company name (used in PDF reports)"
+                    className="w-full bg-(--canvas) border rounded-md px-3 h-9 text-[13px] text-(--t1) outline-none focus:border-(--accent) transition-colors"
+                    style={{ borderColor: "var(--border)" }}
+                  />
+                  <p className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+                    Appears as the brand in exported PDF reports. Leave blank to show PledgeOFF.
+                  </p>
                 </div>
               </div>
 
