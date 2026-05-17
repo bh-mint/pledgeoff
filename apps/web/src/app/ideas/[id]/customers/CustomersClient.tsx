@@ -57,6 +57,22 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
   }
 
   if (!analysis) {
+    if (loading) {
+      return (
+        <div
+          className="rounded-md border p-8 text-center"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <p className="mono text-[11px] animate-pulse mb-2" style={{ color: "var(--t3)" }}>
+            Analyzing customer segments…
+          </p>
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            This may take 15–30 seconds
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div
         className="rounded-md border p-8 text-center"
@@ -73,11 +89,10 @@ export function CustomersClient({ ideaId, initialAnalysis }: Props) {
         )}
         <button
           onClick={runAnalysis}
-          disabled={loading}
           className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{ background: "var(--accent)", color: "#000" }}
         >
-          {loading ? "Analyzing…" : "Analyze customers →"}
+          Analyze customers →
         </button>
       </div>
     );
