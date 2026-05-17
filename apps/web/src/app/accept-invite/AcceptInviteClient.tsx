@@ -36,6 +36,12 @@ export function AcceptInviteClient({ token }: { token: string }) {
           return;
         }
 
+        if (res.status === 409) {
+          setErrorMsg("You are already a member of another team. Leave that team first before accepting a new invite.");
+          setStatus("error");
+          return;
+        }
+
         if (!res.ok) {
           setErrorMsg("Something went wrong. Please try again.");
           setStatus("error");

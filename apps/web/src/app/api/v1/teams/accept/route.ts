@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { container } from '@/lib/container';
-import { TeamInviteNotFoundError } from '@pledgeoff/core';
+import { TeamInviteNotFoundError, UserAlreadyInTeamError } from '@pledgeoff/core';
 import { resolveUserId } from '@/lib/api-auth';
 
 const AcceptSchema = z.object({
@@ -36,6 +36,9 @@ export async function POST(req: Request) {
     const error = result.error;
     if (error instanceof TeamInviteNotFoundError) {
       return Response.json({ error: { code: 'INVITE_NOT_FOUND' } }, { status: 404, headers: { 'X-Trace-Id': traceId } });
+    }
+    if (error instanceof UserAlreadyInTeamError) {
+      return Response.json({ error: { code: 'ALREADY_IN_TEAM', message: 'You are already a member of another team.' } }, { status: 409, headers: { 'X-Trace-Id': traceId } });
     }
     return Response.json({ error: { code: 'INTERNAL_ERROR' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }
