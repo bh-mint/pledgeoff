@@ -11,6 +11,15 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "2.3",
+    date: "May 2026",
+    tag: "FIX",
+    items: [
+      "Seat add-ons fully live: STRIPE_EXTRA_SEAT_PRICE_ID wired in production — extra seats at €7/seat/month now purchasable from Settings → Billing",
+      "Webhook fix: customer.subscription.updated no longer nullifies stripe_subscription_id — targeted updatePlan() replaces full upsert for plan/status updates",
+    ],
+  },
+  {
     version: "2.2",
     date: "May 2026",
     tag: "FEATURE",
