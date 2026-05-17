@@ -275,7 +275,7 @@ export class GroqLLMAdapter implements ILLMClient {
         LLMBuildResponseSchema,
         'analyzeBuild',
         request.traceId,
-        2048,
+        4096,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });

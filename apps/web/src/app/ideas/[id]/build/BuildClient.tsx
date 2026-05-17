@@ -53,14 +53,30 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
   }
 
   if (!analysis) {
+    if (loading) {
+      return (
+        <div
+          className="rounded-md border p-8 text-center"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <p className="mono text-[11px] animate-pulse mb-2" style={{ color: "var(--t3)" }}>
+            Analyzing engineering signals…
+          </p>
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+            This may take 15–30 seconds
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div
         className="rounded-md border p-8 text-center"
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
-        <p className="mono text-[11px] uppercase tracking-[0.08em] mb-2" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[11px] mb-3" style={{ color: "var(--t3)" }}>
           No engineering analysis yet
-        </p>
+        </div>
         <p className="text-[13px] mb-6" style={{ color: "var(--t2)" }}>
           Analyze GitHub signals to generate a recommended tech stack and identify technical gaps.
         </p>
@@ -69,11 +85,10 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
         )}
         <button
           onClick={runAnalysis}
-          disabled={loading}
-          className="mono text-[11px] uppercase tracking-[0.08em] px-4 py-2 rounded transition-opacity"
-          style={{ background: "var(--accent)", color: "#fff", opacity: loading ? 0.6 : 1 }}
+          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ background: "var(--accent)", color: "#000" }}
         >
-          {loading ? "Analyzing…" : "Analyze engineering signals →"}
+          Analyze engineering signals →
         </button>
       </div>
     );
