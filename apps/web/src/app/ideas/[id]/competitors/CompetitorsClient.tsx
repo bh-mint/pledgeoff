@@ -44,27 +44,39 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
 
   if (!analysis && !loading) {
     return (
-      <div className="text-center py-16">
+      <div
+        className="rounded-md border p-8 text-center"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        <div className="mono text-[11px] mb-3" style={{ color: "var(--t3)" }}>
+          No competitor analysis yet
+        </div>
         <p className="text-[14px] mb-6" style={{ color: "var(--t2)" }}>
           Run competitor intelligence to discover who exists in this space and where the gaps are.
         </p>
+        {error && <p className="mb-4 text-[12px]" style={{ color: "var(--caution)" }}>{error}</p>}
         <button
           onClick={() => run()}
-          className="mono text-[12px] px-5 py-2.5 rounded border transition-colors hover:border-(--accent) hover:text-(--accent)"
-          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+          className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ background: "var(--accent)", color: "#000" }}
         >
           Run analysis →
         </button>
-        {error && <p className="mt-4 text-[12px]" style={{ color: "var(--caution)" }}>{error}</p>}
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="text-center py-16">
-        <p className="mono text-[11px] animate-pulse" style={{ color: "var(--t3)" }}>
+      <div
+        className="rounded-md border p-8 text-center"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        <p className="mono text-[11px] animate-pulse mb-2" style={{ color: "var(--t3)" }}>
           Analyzing competitors…
+        </p>
+        <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+          This may take 15–30 seconds
         </p>
       </div>
     );
