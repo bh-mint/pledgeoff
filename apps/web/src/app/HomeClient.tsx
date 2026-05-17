@@ -106,7 +106,7 @@ function PreviewCard() {
       style={{
         borderColor: "var(--border)",
         background: "var(--surface)",
-        boxShadow: "0 60px 120px -40px rgba(214,255,61,0.12), 0 30px 60px -20px rgba(0,0,0,0.6)",
+        boxShadow: "0 60px 120px -40px color-mix(in srgb, var(--accent) 12%, transparent), 0 30px 60px -20px rgba(0,0,0,0.6)",
       }}
     >
       <div className="border-b px-4 h-9 flex items-center justify-between" style={{ borderColor: "var(--border)" }}>
@@ -178,7 +178,7 @@ export function HomeClient() {
         <div className="absolute inset-0 pointer-events-none flex items-center justify-end">
           <div style={{
             width: 1100, height: 1100, borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(214,255,61,0.10) 0%, transparent 60%)",
+            background: "radial-gradient(circle, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 60%)",
             filter: "blur(40px)", transform: "translateX(20%)"
           }} />
         </div>

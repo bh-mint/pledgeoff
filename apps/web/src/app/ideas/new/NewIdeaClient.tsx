@@ -216,7 +216,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
                     style={{
                       borderColor: active ? "var(--accent)" : "var(--border)",
                       background: active
-                        ? "rgba(214,255,61,0.08)"
+                        ? "color-mix(in srgb, var(--accent) 8%, transparent)"
                         : "transparent",
                       color: active ? "var(--accent)" : "var(--t2)",
                     }}

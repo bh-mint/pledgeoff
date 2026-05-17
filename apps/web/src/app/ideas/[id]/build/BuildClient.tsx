@@ -93,7 +93,7 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
         <button
           onClick={runAnalysis}
           className="inline-flex items-center gap-2 h-10 px-6 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-          style={{ background: "var(--accent)", color: "#000" }}
+          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
         >
           Analyze engineering signals →
         </button>

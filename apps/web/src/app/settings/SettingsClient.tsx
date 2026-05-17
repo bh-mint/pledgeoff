@@ -307,7 +307,7 @@ export function SettingsClient({
                     <Link
                       href="/pricing"
                       className="display text-[13px] font-semibold px-5 h-9 rounded-md inline-flex items-center transition-opacity hover:opacity-90"
-                      style={{ background: "var(--accent)", color: "#000" }}
+                      style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
                     >
                       Upgrade to Pro →
                     </Link>
@@ -375,7 +375,7 @@ export function SettingsClient({
                     className="relative w-9 h-5 rounded-full border shrink-0 mt-0.5"
                     style={{
                       borderColor: "var(--border)",
-                      background: notifState[item.key] ? "rgba(214,255,61,0.15)" : "var(--surface)",
+                      background: notifState[item.key] ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "var(--surface)",
                     }}
                   >
                     <span

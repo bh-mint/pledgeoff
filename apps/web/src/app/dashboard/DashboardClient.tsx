@@ -65,7 +65,7 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
       {showBillingBanner && (
         <div
           className="rounded-md border px-5 py-3.5 flex items-center justify-between mb-4"
-          style={{ background: "rgba(214,255,61,0.06)", borderColor: "rgba(214,255,61,0.25)" }}
+          style={{ background: "color-mix(in srgb, var(--accent) 6%, transparent)", borderColor: "color-mix(in srgb, var(--accent) 25%, transparent)" }}
         >
           <span className="text-[13px]" style={{ color: "var(--accent)" }}>
             Welcome to Pro! Your plan is now active.
@@ -246,7 +246,7 @@ export function DashboardClient({ rows, totalCount }: { rows: TableRow[]; totalC
               <Link
                 href="/ideas/new"
                 className="inline-block mt-5 display text-[13px] font-semibold px-5 h-10 leading-[40px] rounded-md"
-                style={{ background: "var(--accent)", color: "#000" }}
+                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
               >
                 Validate your first idea →
               </Link>

@@ -95,8 +95,8 @@ export default async function IdeaPage({ params }: Props) {
                   className="mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded"
                   style={{
                     color: "var(--accent)",
-                    background: "rgba(214,255,61,0.08)",
-                    border: "1px solid rgba(214,255,61,0.2)",
+                    background: "color-mix(in srgb, var(--accent) 8%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)",
                   }}
                 >
                   {category}
