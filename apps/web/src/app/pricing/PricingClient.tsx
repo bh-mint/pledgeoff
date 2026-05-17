@@ -22,7 +22,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
       { k: "Validations / month",       f: "1",               p: "20",              pp: "Unlimited",       a: "Unlimited" },
       { k: "Signal sources",            f: "Reddit + GitHub", p: "All 5 sources",   pp: "All 5 sources",   a: "All + custom" },
       { k: "Competitor Intelligence",   f: "—",               p: "✓",               pp: "✓",               a: "✓" },
-      { k: "PDF / JSON export",         f: "—",               p: "✓",               pp: "✓",               a: "✓ · white-label", soon: true },
+      { k: "PDF / JSON export",         f: "—",               p: "✓",               pp: "✓",               a: "✓ · white-label" },
     ],
   },
   {
@@ -34,7 +34,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Team",
     rows: [
-      { k: "Seats included",            f: "1",               p: "1",               pp: "3",               a: "Custom", soon: true },
+      { k: "Seats included",            f: "1",               p: "1",               pp: "3",               a: "Custom" },
       { k: "Early access to features",  f: "—",               p: "—",               pp: "✓",               a: "✓" },
     ],
   },
@@ -293,7 +293,7 @@ export function PricingClient() {
                 { label: "20 validations / month" },
                 { label: "All 5 signal sources" },
                 { label: "Competitor Intelligence" },
-                { label: "PDF + JSON export", soon: true },
+                { label: "PDF + JSON export" },
                 { label: "1-year idea history" },
                 { label: "24h support SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
@@ -322,9 +322,9 @@ export function PricingClient() {
                 { label: "Unlimited validations" },
                 { label: "All 5 signal sources" },
                 { label: "Competitor Intelligence" },
-                { label: "PDF + JSON export", soon: true },
+                { label: "PDF + JSON export" },
                 { label: "Unlimited idea history" },
-                { label: "3 team seats", soon: true },
+                { label: "3 team seats" },
                 { label: "Early access to features" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
