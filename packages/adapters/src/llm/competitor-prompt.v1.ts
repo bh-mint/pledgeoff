@@ -1,6 +1,6 @@
 import type { Signal } from '@pledgeoff/core';
 
-export const COMPETITOR_PROMPT_VERSION = 'competitor-v2';
+export const COMPETITOR_PROMPT_VERSION = 'competitor-v3';
 
 export function buildCompetitorPrompt(ideaText: string, signals: Signal[]): string {
   const signalBlock = signals.length === 0
@@ -9,7 +9,7 @@ export function buildCompetitorPrompt(ideaText: string, signals: Signal[]): stri
         `[${i + 1}] ${s.source.toUpperCase()} | ${s.title}\n${s.summary ?? ''}`
       ).join('\n\n');
 
-  return `You are a competitive intelligence analyst. Your task has two phases.
+  return `You are a competitive intelligence analyst. Your task has three phases.
 
 <idea>
 ${ideaText}
@@ -19,19 +19,28 @@ ${ideaText}
 ${signalBlock}
 </signals>
 
+<phase0_instructions>
+FIRST: scan the <idea> text above for any competitor names mentioned explicitly (e.g. "Unlike X", "compared to Y", "similar to Z", product names cited by the founder).
+For each explicitly named competitor found in the idea text:
+- Include them with "source": "knowledge"
+- "signals" must contain 1-3 factual strings from your training knowledge about that product
+- Do NOT fabricate facts — only include what you are confident is true
+These are MANDATORY — do not skip competitors the founder explicitly named.
+</phase0_instructions>
+
 <phase1_instructions>
-Identify up to 5 real competitors EXPLICITLY MENTIONED OR STRONGLY IMPLIED by the signals above.
+Next: identify up to 3 real competitors EXPLICITLY MENTIONED OR STRONGLY IMPLIED by the signals above that are NOT already included from phase 0.
 For each, extract 1-4 evidence strings directly from the signal text.
 Set "source": "signal" on every entry in this phase.
 </phase1_instructions>
 
 <phase2_instructions>
-After phase 1, add up to 3 ADDITIONAL well-known direct competitors that were NOT found in the signals above.
-Rules for phase 2:
+Finally: add up to 2 ADDITIONAL well-known direct competitors NOT already included from phase 0 or phase 1.
+Rules:
 - Only include products you are highly confident exist and compete directly with this idea.
 - Do NOT invent products. If uncertain, omit.
-- "signals" must contain 1-3 factual strings about the product from your training knowledge (e.g. "Used by 50k+ teams", "Raised $10M Series A"). Do not fabricate metrics — use only what you are confident is true.
-- Set "source": "knowledge" on every entry in this phase.
+- "signals" must contain 1-3 factual strings from your training knowledge. Do not fabricate metrics.
+- Set "source": "knowledge" on every entry.
 - Prefer established, well-known tools over niche ones.
 </phase2_instructions>
 
