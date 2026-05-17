@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface Props {
   ideaId: string;
@@ -13,7 +13,7 @@ export function ExportButtons({ ideaId }: Props) {
   async function downloadJson() {
     setJsonLoading(true);
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 

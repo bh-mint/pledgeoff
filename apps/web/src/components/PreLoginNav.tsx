@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -14,7 +14,7 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
   const [loggedIn, setLoggedIn] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     supabase.auth.getSession().then(({ data }) => setLoggedIn(!!data.session));
     const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
       setLoggedIn(!!session);

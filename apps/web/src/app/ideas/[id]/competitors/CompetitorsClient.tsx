@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { CompetitorAnalysis } from "@pledgeoff/core";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
@@ -21,7 +21,7 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) { setError("Not authenticated"); setLoading(false); return; }
 

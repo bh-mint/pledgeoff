@@ -41,7 +41,7 @@ import {
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
-import { createServiceRoleClient } from './supabase-server';
+import { createSupabaseServiceClient } from './supabase-server';
 import { sendVerdictEmail } from '@pledgeoff/adapters';
 
 function requireEnv(name: string): string {
@@ -50,8 +50,17 @@ function requireEnv(name: string): string {
   return value;
 }
 
+const PROD_SUPABASE_REF = 'gphupxlfmeokquvyxqfw';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+if (process.env.NODE_ENV !== 'production' && supabaseUrl.includes(PROD_SUPABASE_REF)) {
+  throw new Error(
+    `[ENV GUARD] Dev environment is pointing to PRODUCTION Supabase (${supabaseUrl}). ` +
+    'Set NEXT_PUBLIC_SUPABASE_URL to dev project in .env.local.',
+  );
+}
+
 function buildContainer() {
-  const supabase = createServiceRoleClient();
+  const supabase = createSupabaseServiceClient();
 
   const auditLog = new SupabaseAuditLogAdapter(supabase);
   const ideaRepo = new SupabaseIdeaRepository(supabase);

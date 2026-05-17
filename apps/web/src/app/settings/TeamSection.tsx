@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import type { Team, TeamMembership } from "@pledgeoff/core";
 
@@ -26,7 +26,7 @@ export function TeamSection({ plan }: Props) {
   const seatsIncluded = PLAN_LIMITS[plan].seatsIncluded;
 
   const fetchTeam = useCallback(async () => {
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) return;
 
@@ -48,7 +48,7 @@ export function TeamSection({ plan }: Props) {
     setInviteState("loading");
     setInviteError("");
 
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) return;
 
@@ -77,7 +77,7 @@ export function TeamSection({ plan }: Props) {
 
   const handleRemove = async (membershipId: string) => {
     setRemovingId(membershipId);
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: session } = await supabase.auth.getSession();
     if (!session.session) { setRemovingId(null); return; }
 

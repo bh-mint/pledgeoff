@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export function AcceptInviteClient({ token }: { token: string }) {
   const router = useRouter();
@@ -11,7 +11,7 @@ export function AcceptInviteClient({ token }: { token: string }) {
 
   useEffect(() => {
     async function run() {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
       const { data } = await supabase.auth.getSession();
 
       if (!data.session) {

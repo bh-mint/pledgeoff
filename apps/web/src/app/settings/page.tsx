@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { effectivePlan } from "@pledgeoff/core";
 import { requireUser } from "@/lib/auth-server";
-import { createServiceRoleClient } from "@/lib/supabase-server";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { Nav } from "@/components/Nav";
 import { SettingsClient } from "./SettingsClient";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 export default async function SettingsPage() {
   const user = await requireUser();
-  const supabase = createServiceRoleClient();
+  const supabase = createSupabaseServiceClient();
 
   const [profileResult, ideasResult, subResult] = await Promise.all([
     supabase.from("profiles").select("first_name, last_name, username, company_name").eq("id", user.id).single(),

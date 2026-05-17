@@ -1,9 +1,9 @@
 import { z } from 'zod';
 import { container } from '@/lib/container';
-import { createServiceRoleClient } from '@/lib/supabase-server';
+import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { sendTeamInviteEmail } from '@pledgeoff/adapters';
 import { TeamSeatLimitError, TeamMemberAlreadyExistsError } from '@pledgeoff/core';
-import { getUserPlan, type Plan } from '@/lib/getUserPlan';
+import { getUserPlan, type Plan } from '@/server/billing/getUserPlan';
 import { logger } from '@pledgeoff/observability';
 import { resolveUserId } from '@/lib/api-auth';
 
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   }
 
   // Get inviter email for the invite email
-  const { data: userData } = await createServiceRoleClient().auth.admin.getUserById(userId);
+  const { data: userData } = await createSupabaseServiceClient().auth.admin.getUserById(userId);
   const inviterEmail = userData?.user?.email ?? 'Your teammate';
 
   const result = await container.inviteTeamMemberUseCase.execute({

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -17,7 +17,7 @@ export function Nav({ loggedIn: loggedInProp }: NavProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -26,7 +26,7 @@ export function Nav({ loggedIn: loggedInProp }: NavProps) {
   }, []);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
     setDropdownOpen(false);
   };

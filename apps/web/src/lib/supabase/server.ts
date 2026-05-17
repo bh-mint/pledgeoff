@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-// SSR auth client — uses anon key + user session cookies for RLS-aware queries
-export async function createClient() {
+// Auth/session only — Server Components, middleware, auth callbacks. Never for business data.
+export async function createSupabaseAuthClient() {
   const cookieStore = await cookies();
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,5 +25,3 @@ export async function createClient() {
     }
   );
 }
-
-// Service role client lives in lib/supabase-server.ts — import from there

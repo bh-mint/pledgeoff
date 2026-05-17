@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -32,7 +32,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
     setStatus("loading");
     setErrorMsg("");
 
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       router.push("/login");

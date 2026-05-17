@@ -3,7 +3,7 @@ import { CreateIdeaRequestSchema } from '@pledgeoff/contracts';
 import { container } from '@/lib/container';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { logger } from '@pledgeoff/observability';
-import { getUserPlan } from '@/lib/getUserPlan';
+import { getUserPlan } from '@/server/billing/getUserPlan';
 import { PLAN_LIMITS } from '@pledgeoff/core';
 import { resolveUserId } from '@/lib/api-auth';
 

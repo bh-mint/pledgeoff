@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
 import { PLAN_LIMITS } from "@pledgeoff/core";
-import { getUserPlan } from "@/lib/getUserPlan";
+import { getUserPlan } from "@/server/billing/getUserPlan";
 import { NewIdeaClient } from "./NewIdeaClient";
 
 export const metadata: Metadata = {

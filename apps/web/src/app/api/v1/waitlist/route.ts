@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { logger } from "@pledgeoff/observability";
-import { createServiceRoleClient } from "@/lib/supabase-server";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
 
 const WaitlistSchema = z.object({
   email: z.string().email(),
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { email, source } = parsed.data;
-  const supabase = createServiceRoleClient();
+  const supabase = createSupabaseServiceClient();
 
   const { error } = await supabase
     .from("waitlist")

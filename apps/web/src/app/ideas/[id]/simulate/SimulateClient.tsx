@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Simulation } from "@pledgeoff/core";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface Props {
@@ -38,7 +38,7 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { setError("Not authenticated."); setLoading(false); return; }
       const res = await fetch(`/api/v1/ideas/${ideaId}/simulate`, {
