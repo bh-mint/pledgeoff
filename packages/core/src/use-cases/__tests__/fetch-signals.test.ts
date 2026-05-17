@@ -161,6 +161,34 @@ describe('FetchSignalsUseCase', () => {
     if (result.isErr()) expect(result.error).toBeInstanceOf(SignalRepositoryError);
   });
 
+  it('rescues at least one signal per source when relevance filter would starve a source', async () => {
+    const braveSignal1 = { ...makeSignal(ideaId), source: 'brave' as const, url: 'https://brave.com/1' };
+    const braveSignal2 = { ...makeSignal(ideaId), source: 'brave' as const, url: 'https://brave.com/2' };
+    const githubSignal = { ...makeSignal(ideaId), source: 'github' as const, url: 'https://github.com/issues/1' };
+
+    const braveAdapter: ISourceAdapter = { sourceName: 'brave', fetch: vi.fn().mockResolvedValue(ok([braveSignal1, braveSignal2])) };
+    const githubAdapter: ISourceAdapter = { sourceName: 'github', fetch: vi.fn().mockResolvedValue(ok([githubSignal])) };
+
+    const allSignals = [braveSignal1, braveSignal2, githubSignal];
+    const repo = makeRepo(allSignals);
+    const llm = makeLLMClient({ devto: ['query'], google: ['query'] });
+    // Brave scores above threshold, GitHub below — old code would drop github entirely
+    (llm.scoreSignalRelevance as ReturnType<typeof vi.fn>).mockResolvedValue(ok({
+      scores: [
+        { id: braveSignal1.id, score: 80 },
+        { id: braveSignal2.id, score: 75 },
+        { id: githubSignal.id, score: 40 },
+      ],
+    }));
+
+    const useCase = new FetchSignalsUseCase(repo, makeEventBus(), makeIdempotencyStore(), [braveAdapter, githubAdapter], llm);
+    await useCase.execute(baseInput);
+
+    const upsertCall = ((repo.upsertMany as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] ?? []) as Signal[];
+    const sources = new Set(upsertCall.map((s) => s.source));
+    expect(sources.has('github')).toBe(true);
+  });
+
   it('returns error when idempotency check fails', async () => {
     const storeError = new IdempotencyStoreError('Store error');
     const store: IIdempotencyStore = {
