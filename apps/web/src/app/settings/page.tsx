@@ -18,10 +18,11 @@ export default async function SettingsPage() {
   const user = await requireUser();
   const supabase = createServiceClient();
 
-  const [profileResult, ideasResult, subResult] = await Promise.all([
+  const [profileResult, ideasResult, subResult, directSubResult] = await Promise.all([
     supabase.from("profiles").select("first_name, last_name, username, company_name").eq("id", user.id).single(),
     container._repos.ideaRepo.findByUserId(user.id),
     container._repos.subscriptionRepo.findByUserId(user.id),
+    supabase.from("subscriptions").select().eq("user_id", user.id).maybeSingle(),
   ]);
 
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
@@ -31,6 +32,7 @@ export default async function SettingsPage() {
   console.error("[DBG1] uid=" + user.id);
   console.error("[DBG2] subOk=" + String(subResult.isOk()) + " subErr=" + (subResult.isErr() ? String(subResult.error) : "none"));
   console.error("[DBG3] plan=" + String(sub?.plan) + " status=" + String(sub?.status) + " effective=" + plan);
+  console.error("[DBG4-direct] plan=" + String((directSubResult.data as {plan?: string} | null)?.plan) + " err=" + String(directSubResult.error?.message));
   const renewsAt = sub?.currentPeriodEnd ?? null;
   const stripeCustomerId = sub?.stripeCustomerId ?? null;
 
