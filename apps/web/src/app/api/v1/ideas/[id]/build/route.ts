@@ -1,3 +1,5 @@
+export const maxDuration = 60;
+
 import { createClient } from '@supabase/supabase-js';
 import { container } from '@/lib/container';
 
