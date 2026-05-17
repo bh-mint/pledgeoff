@@ -11,6 +11,27 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "1.3",
+    date: "May 2026",
+    tag: "INTELLIGENCE",
+    items: [
+      "Competitor analysis now supplements signal-based results with AI general knowledge — finds well-known players (e.g. CodeRabbit, Bito) even when absent from fetched signals",
+      "Competitors from general knowledge are clearly labelled with an 'AI knowledge' badge — full transparency on data source",
+      "GitHub signal quality improved: reactions filter tuned to remove bot/noise issues while keeping more real discussions",
+      "Engineering Stack no longer silently drops GitHub signals when other sources dominate — every source is guaranteed at least one rescued signal",
+      "Engineering Stack warning rewritten — explains what the analysis is based on instead of showing a bare count",
+    ],
+  },
+  {
+    version: "1.2",
+    date: "May 2026",
+    tag: "UI",
+    items: [
+      "Idea description limit raised from 300 to 1000 characters — more room to describe the problem, pricing, and target audience",
+      "Description character counter shows colour-coded progress bar (green → amber → red)",
+    ],
+  },
+  {
     version: "1.1",
     date: "May 2026",
     tag: "UI",
