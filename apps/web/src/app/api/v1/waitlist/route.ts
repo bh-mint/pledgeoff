@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { logger } from "@pledgeoff/observability";
 import { createServiceRoleClient } from "@/lib/supabase-server";
 
 const WaitlistSchema = z.object({
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
     .upsert({ email, source }, { onConflict: "email", ignoreDuplicates: true });
 
   if (error) {
-    console.error({ traceId, msg: "waitlist_insert_error", error: error.message });
+    logger.error({ traceId, error: error.message }, "waitlist.insert_error");
     return NextResponse.json(
       { error: "Failed to save. Please try again." },
       { status: 500, headers: { "X-Trace-Id": traceId } }
@@ -87,9 +88,9 @@ async function sendConfirmationEmail(email: string, traceId: string) {
 
     if (!res.ok) {
       const err = await res.text();
-      console.error({ traceId, msg: "resend_error", status: res.status, err });
+      logger.error({ traceId, target: "resend", status: res.status, err }, "waitlist.confirmation_email_failed");
     }
   } catch (e) {
-    console.error({ traceId, msg: "resend_timeout", error: String(e) });
+    logger.error({ traceId, target: "resend", error: String(e) }, "waitlist.confirmation_email_timeout");
   }
 }

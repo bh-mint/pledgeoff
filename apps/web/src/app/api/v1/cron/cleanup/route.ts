@@ -4,8 +4,14 @@ import { logger } from '@pledgeoff/observability';
 // Vercel Cron: daily at 3am UTC — removes old processed outbox rows and idempotency records.
 // Protected by CRON_SECRET to prevent unauthorized calls.
 export async function GET(req: Request): Promise<Response> {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    logger.error({ traceId: crypto.randomUUID() }, 'CRON_SECRET not set — refusing to execute cron');
+    return Response.json({ error: 'Server misconfiguration' }, { status: 503 });
+  }
+
   const authHeader = req.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

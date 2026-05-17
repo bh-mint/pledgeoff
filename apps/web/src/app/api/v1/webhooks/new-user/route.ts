@@ -108,31 +108,34 @@ export async function POST(req: Request) {
     return Response.json({ error: "Email service not configured" }, { status: 500 });
   }
 
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: "PledgeOFF <no-reply@pledgeoff.com>",
-        to: [email],
-        subject: "Welcome to PledgeOFF — validate your first idea",
-        html: buildWelcomeEmail(email, name),
-      }),
-    });
+  // Fire-and-forget — Supabase retries on 500, causing duplicate emails
+  sendWelcomeEmail(resendKey, email, name, traceId).catch((err) => {
+    logger.error({ traceId, target: "resend", err }, "welcome email failed (fire-and-forget)");
+  });
 
-    if (!res.ok) {
-      const err = await res.text();
-      logger.error({ traceId, target: "resend", outcome: "error", errorCode: String(res.status), err }, "welcome email failed");
-      return Response.json({ error: "Email send failed" }, { status: 500 });
-    }
+  return Response.json({ ok: true });
+}
 
-    logger.info({ traceId, target: "resend", outcome: "success" }, "welcome email sent");
-    return Response.json({ ok: true });
-  } catch (err) {
-    logger.error({ traceId, target: "resend", outcome: "error", err }, "welcome email exception");
-    return Response.json({ error: "Internal error" }, { status: 500 });
+async function sendWelcomeEmail(resendKey: string, email: string, name: string | undefined, traceId: string): Promise<void> {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "PledgeOFF <no-reply@pledgeoff.com>",
+      to: [email],
+      subject: "Welcome to PledgeOFF — validate your first idea",
+      html: buildWelcomeEmail(email, name),
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    logger.error({ traceId, target: "resend", outcome: "error", errorCode: String(res.status), err }, "welcome email failed");
+    return;
   }
+
+  logger.info({ traceId, target: "resend", outcome: "success" }, "welcome email sent");
 }
