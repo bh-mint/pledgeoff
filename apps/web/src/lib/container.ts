@@ -68,6 +68,11 @@ function buildContainer() {
   const teamRepo = new SupabaseTeamRepository(supabase);
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  if (process.env.NODE_ENV === 'production' && stripeSecretKey?.startsWith('sk_test_')) {
+    throw new Error('Production build is using Stripe test keys — set STRIPE_SECRET_KEY to a live key (sk_live_...)');
+  }
+  const stripeMode = stripeSecretKey?.startsWith('sk_live_') ? 'live' : stripeSecretKey ? 'test' : 'disabled';
+  console.info(`[container] Stripe mode: ${stripeMode}`);
   const stripeAdapter = stripeSecretKey ? new StripeAdapter(stripeSecretKey) : null;
 
   const eventBusProvider = process.env.EVENT_BUS_PROVIDER ?? 'postgres';
