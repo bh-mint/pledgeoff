@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const MIN = 10;
 const MAX = 2000;
@@ -23,7 +23,7 @@ export function IdeaInput() {
     setStatus("loading");
     setErrorMsg("");
 
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       router.push("/login");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { DecisionCard } from "@/components/DecisionCard";
 import { ValidatingLoader } from "@/components/ValidatingLoader";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
@@ -304,7 +304,7 @@ export function IdeaPageClient({
   const polling = !decision && polls < MAX_POLLS;
 
   const fetchLatest = useCallback(async () => {
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 

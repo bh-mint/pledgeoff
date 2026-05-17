@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Plan } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import { TeamSection } from "./TeamSection";
@@ -137,7 +137,7 @@ export function SettingsClient({
   const handleManageBilling = async () => {
     setPortalLoading(true);
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       const res = await fetch("/api/v1/billing/portal", {

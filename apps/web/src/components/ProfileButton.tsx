@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface ProfileButtonProps {
   email: string;
@@ -26,7 +26,7 @@ export function ProfileButton({ email, initials }: ProfileButtonProps) {
   }, []);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     await supabase.auth.signOut();
     router.push("/login");
   };

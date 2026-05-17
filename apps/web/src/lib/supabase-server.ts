@@ -6,7 +6,8 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export function createServiceRoleClient() {
+// Server-only — uses service_role key. All business data (billing, profiles, admin).
+export function createSupabaseServiceClient() {
   return createClient(
     requireEnv('NEXT_PUBLIC_SUPABASE_URL'),
     requireEnv('SUPABASE_SERVICE_ROLE_KEY'),

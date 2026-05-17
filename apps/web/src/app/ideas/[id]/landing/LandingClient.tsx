@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { LandingPage } from "@pledgeoff/core";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface Props {
   ideaId: string;
@@ -60,7 +60,7 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { setError("Not authenticated."); setLoading(false); return; }
       const res = await fetch(`/api/v1/ideas/${ideaId}/landing`, {

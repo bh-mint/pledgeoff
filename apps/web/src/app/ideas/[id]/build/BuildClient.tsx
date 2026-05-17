@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { BuildAnalysis, TechComponent } from "@pledgeoff/core";
 import { MIN_GITHUB_SIGNALS } from "@pledgeoff/core";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface Props {
@@ -38,7 +38,7 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const supabase = createClient();
+      const supabase = createSupabaseBrowserClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { setError("Not authenticated."); setLoading(false); return; }
       const res = await fetch(`/api/v1/ideas/${ideaId}/build`, {

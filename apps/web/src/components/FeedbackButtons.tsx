@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface FeedbackButtonsProps {
   ideaId: string;
@@ -18,7 +18,7 @@ export function FeedbackButtons({ ideaId, decisionId }: FeedbackButtonsProps) {
   const [loading, setLoading] = useState(false);
 
   async function submitFeedback(v: Vote, c?: string) {
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
 

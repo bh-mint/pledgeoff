@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const ERROR_MESSAGES: Record<string, string> = {
   missing_code: "Authentication failed. Please try again.",
@@ -31,7 +31,7 @@ export function LoginClient() {
     setErrorMsg("");
     setUiState("loading");
 
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
 
     if (mode === "signup") {
       const { error } = await supabase.auth.signUp({
@@ -68,7 +68,7 @@ export function LoginClient() {
 
   const handleGoogleLogin = async () => {
     setUiState("loading");
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const next = searchParams.get("next") ?? "/onboarding";
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -87,7 +87,7 @@ export function LoginClient() {
       return;
     }
     setUiState("loading");
-    const supabase = createClient();
+    const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback?next=/settings`,
     });

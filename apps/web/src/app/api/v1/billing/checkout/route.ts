@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { resolveUserId } from '@/lib/api-auth';
-import { createServiceRoleClient } from '@/lib/supabase-server';
+import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { container } from '@/lib/container';
 
 const CheckoutRequestSchema = z.object({
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const { data: userData } = await createServiceRoleClient().auth.admin.getUserById(userId);
+  const { data: userData } = await createSupabaseServiceClient().auth.admin.getUserById(userId);
   const userEmail = userData?.user?.email ?? '';
 
   if (!container.stripeAdapter) {
