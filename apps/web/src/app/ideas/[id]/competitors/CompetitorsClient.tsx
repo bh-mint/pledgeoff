@@ -174,7 +174,7 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
               >
                 <p className="text-[13px] font-medium mb-1" style={{ color: "var(--t1)" }}>{g.title}</p>
                 <p className="text-[12px] mb-2 leading-relaxed" style={{ color: "var(--t2)" }}>{g.description}</p>
-                <p className="mono text-[11px]" style={{ color: "var(--accent)" }}>→ {g.opportunity}</p>
+                <p className="text-[12px]" style={{ color: "var(--validated)" }}>→ {g.opportunity}</p>
               </div>
             ))}
           </div>

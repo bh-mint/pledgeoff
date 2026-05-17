@@ -92,7 +92,7 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
         className="rounded-md border p-6"
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
-        <div className="mono text-[10px] mb-4 uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
           Total Addressable Market
         </div>
         <div className="flex items-end gap-3">
@@ -111,7 +111,7 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
 
       {/* Scenarios */}
       <div>
-        <div className="mono text-[10px] mb-4 uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
           Revenue Scenarios (MRR)
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -156,7 +156,7 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
         <div>
-          <div className="mono text-[10px] uppercase tracking-[0.08em] mb-1" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>
             Break-even estimate
           </div>
           <p className="text-[13px]" style={{ color: "var(--t2)" }}>
@@ -172,7 +172,7 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
       {/* Assumptions */}
       {simulation.assumptions.length > 0 && (
         <div>
-          <div className="mono text-[10px] mb-3 uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[10px] mb-3 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
             Key assumptions
           </div>
           <ul className="space-y-1.5">
