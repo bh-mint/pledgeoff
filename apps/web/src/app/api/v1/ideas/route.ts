@@ -4,6 +4,8 @@ import { CreateIdeaRequestSchema } from '@pledgeoff/contracts';
 import { container } from '@/lib/container';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { logger } from '@pledgeoff/observability';
+import { getUserPlan } from '@/lib/getUserPlan';
+import { PLAN_LIMITS } from '@pledgeoff/core';
 
 export const maxDuration = 60;
 
@@ -59,20 +61,25 @@ export async function POST(req: Request) {
   const userId = await resolveUserId(req.headers.get('authorization'));
   if (!userId) return unauthorizedResponse(traceId);
 
-  // Plan gate: Free tier = 1 verification/month
-  const subResult = await container.getOrCreateSubscriptionUseCase.execute({ userId });
-  if (subResult.isOk()) {
-    const { effectivePlan, PLAN_LIMITS } = await import('@pledgeoff/core');
-    const plan = effectivePlan(subResult.value);
-    const limit = PLAN_LIMITS[plan].verificationsPerMonth;
-    if (isFinite(limit)) {
-      const countResult = await container.ideaRepo.countThisMonth(userId);
-      if (countResult.isOk() && countResult.value >= limit) {
-        return Response.json(
-          { error: { code: 'PLAN_LIMIT_REACHED', message: `Your ${plan} plan allows ${limit} verification${limit === 1 ? '' : 's'} per month. Upgrade to continue.`, plan } },
-          { status: 403, headers: { 'X-Trace-Id': traceId } },
-        );
-      }
+  // Plan gate
+  let plan: Awaited<ReturnType<typeof getUserPlan>>;
+  try {
+    plan = await getUserPlan(userId);
+  } catch {
+    logger.error({ traceId, userId, outcome: 'error' as const }, 'ideas POST: plan resolution failed');
+    return Response.json(
+      { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
+      { status: 500, headers: { 'X-Trace-Id': traceId } },
+    );
+  }
+  const limit = PLAN_LIMITS[plan].verificationsPerMonth;
+  if (isFinite(limit)) {
+    const countResult = await container.ideaRepo.countThisMonth(userId);
+    if (countResult.isOk() && countResult.value >= limit) {
+      return Response.json(
+        { error: { code: 'PLAN_LIMIT_REACHED', message: `Your ${plan} plan allows ${limit} verification${limit === 1 ? '' : 's'} per month. Upgrade to continue.`, plan } },
+        { status: 403, headers: { 'X-Trace-Id': traceId } },
+      );
     }
   }
 

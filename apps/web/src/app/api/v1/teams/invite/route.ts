@@ -1,12 +1,11 @@
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { container } from '@/lib/container';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { sendTeamInviteEmail } from '@pledgeoff/adapters';
-import {
-  TeamSeatLimitError,
-  TeamMemberAlreadyExistsError,
-  effectivePlan,
-} from '@pledgeoff/core';
+import { TeamSeatLimitError, TeamMemberAlreadyExistsError } from '@pledgeoff/core';
+import { getUserPlan, type Plan } from '@/lib/getUserPlan';
+import { logger } from '@pledgeoff/observability';
 
 const InviteSchema = z.object({
   email: z.string().email(),
@@ -42,15 +41,16 @@ export async function POST(req: Request) {
   }
 
   // Get owner's plan
-  const subResult = await container.subscriptionRepo.findByUserId(userId);
-  const sub = subResult.isOk() ? subResult.value : null;
-  const ownerPlan = sub ? effectivePlan(sub) : 'free';
+  let ownerPlan: Plan;
+  try {
+    ownerPlan = await getUserPlan(userId);
+  } catch {
+    logger.error({ traceId, userId, outcome: 'error' as const }, 'teams/invite: plan resolution failed');
+    return Response.json({ error: { code: 'INTERNAL_ERROR' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
+  }
 
   // Get inviter email for the invite email
-  const { data: userData } = await createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  ).auth.admin.getUserById(userId);
+  const { data: userData } = await createServiceRoleClient().auth.admin.getUserById(userId);
   const inviterEmail = userData?.user?.email ?? 'Your teammate';
 
   const result = await container.inviteTeamMemberUseCase.execute({

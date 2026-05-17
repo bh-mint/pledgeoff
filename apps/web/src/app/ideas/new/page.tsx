@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
-import { effectivePlan, PLAN_LIMITS } from "@pledgeoff/core";
+import { PLAN_LIMITS } from "@pledgeoff/core";
+import { getUserPlan } from "@/lib/getUserPlan";
 import { NewIdeaClient } from "./NewIdeaClient";
 
 export const metadata: Metadata = {
@@ -12,13 +13,11 @@ export const metadata: Metadata = {
 export default async function NewIdeaPage() {
   const user = await requireUser();
 
-  const [ideasResult, subResult] = await Promise.all([
+  const [ideasResult, plan] = await Promise.all([
     container._repos.ideaRepo.findByUserId(user.id),
-    container._repos.subscriptionRepo.findByUserId(user.id),
+    getUserPlan(user.id),
   ]);
 
-  const sub = subResult.isOk() ? subResult.value : null;
-  const plan = sub ? effectivePlan(sub) : "free";
   const limit = PLAN_LIMITS[plan].verificationsPerMonth;
 
   const ideas = ideasResult.isOk() ? ideasResult.value : [];

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { createServiceRoleClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
-import { effectivePlan } from "@pledgeoff/core";
+import { getUserPlan } from "@/lib/getUserPlan";
 import { DashboardClient, type TableRow } from "./DashboardClient";
 import { ProfileButton } from "@/components/ProfileButton";
 import { Logo } from "@/components/brand/Logo";
@@ -63,12 +63,10 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single();
   const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || user.email?.split("@")[0] || "—";
 
-  const [ideasResult, subResult] = await Promise.all([
+  const [ideasResult, plan] = await Promise.all([
     container._repos.ideaRepo.findByUserId(user.id),
-    container._repos.subscriptionRepo.findByUserId(user.id),
+    getUserPlan(user.id),
   ]);
-  const sub = subResult.isOk() ? subResult.value : null;
-  const plan = sub ? effectivePlan(sub) : "free";
   const isPaidPlan = plan !== "free";
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
 
