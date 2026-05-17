@@ -11,6 +11,21 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "2.0",
+    date: "May 2026",
+    tag: "FIX",
+    items: [
+      "Billing safety: unknown Stripe price IDs now throw instead of silently downgrading paying users to free",
+      "Cron security: missing CRON_SECRET now returns 503 (server misconfiguration) — bearer-undefined bypass no longer possible",
+      "Checkout route migrated to shared resolveUserId — auth pattern consistent across all API routes",
+      "Plan type has a single source of truth in @pledgeoff/core — duplicate definition removed from getUserPlan",
+      "Stripe webhook and waitlist route now log through Pino — all billing events visible in Axiom",
+      "Outbox cron returns 500 on processing failures — Vercel retries instead of marking failed runs as success",
+      "Welcome email is now fire-and-forget — Resend failures no longer cause Supabase to retry and send duplicate emails",
+      "Settings page now reads the subscription once — plan, renewsAt, and stripeCustomerId come from the same DB snapshot",
+    ],
+  },
+  {
     version: "1.9",
     date: "May 2026",
     tag: "FIX",
