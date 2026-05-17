@@ -1,4 +1,5 @@
 import type { Plan, SubscriptionStatus } from '@pledgeoff/core';
+import { logger } from '@pledgeoff/observability';
 import { container } from '@/lib/container';
 
 // Map Stripe price IDs → plan names
@@ -10,7 +11,8 @@ function priceIdToPlan(priceId: string): Plan {
 
   if (priceId === plusMonthly || priceId === plusAnnual) return 'pro_plus';
   if (priceId === monthly || priceId === annual) return 'pro';
-  return 'free';
+
+  throw new Error(`Unknown Stripe priceId: ${priceId}. Update STRIPE_*_PRICE_ID env vars.`);
 }
 
 function stripeStatusToInternal(status: string): SubscriptionStatus {
@@ -40,12 +42,12 @@ export async function POST(req: Request) {
   const rawBody = await req.text();
   const eventResult = container.stripeAdapter.constructWebhookEvent(rawBody, signature, webhookSecret);
   if (eventResult.isErr()) {
-    console.error('[webhook/stripe] Invalid signature', { traceId, error: eventResult.error.message });
+    logger.error({ traceId, error: eventResult.error.message }, 'webhook.stripe.invalid_signature');
     return new Response('Invalid signature', { status: 400 });
   }
 
   const event = eventResult.value;
-  console.info('[webhook/stripe] received', { traceId, type: event.type, id: event.id });
+  logger.info({ traceId, type: event.type, id: event.id }, 'webhook.stripe.received');
 
   try {
     switch (event.type) {
@@ -58,7 +60,7 @@ export async function POST(req: Request) {
 
         const userId = session.client_reference_id;
         if (!userId) {
-          console.warn('[webhook/stripe] checkout.session.completed missing client_reference_id', { traceId });
+          logger.warn({ traceId }, 'webhook.stripe.checkout_missing_client_reference_id');
           break;
         }
 
@@ -66,19 +68,17 @@ export async function POST(req: Request) {
         const stripeSubscriptionId = typeof session.subscription === 'string' ? session.subscription : null;
 
         if (!stripeSubscriptionId) {
-          console.warn('[webhook/stripe] checkout.session.completed missing subscription', { traceId });
+          logger.warn({ traceId }, 'webhook.stripe.checkout_missing_subscription');
           break;
         }
 
         // Fetch full subscription from Stripe to get price + status
         const subDataResult = await container.stripeAdapter.getSubscription(stripeSubscriptionId);
         if (subDataResult.isErr()) {
-          console.error('[webhook/stripe] Failed to retrieve subscription — returning 500 for Stripe retry', {
-            traceId,
-            subscriptionId: stripeSubscriptionId,
-            error: subDataResult.error.message,
-            cause: String(subDataResult.error.cause),
-          });
+          logger.error(
+            { traceId, subscriptionId: stripeSubscriptionId, error: subDataResult.error.message, cause: String(subDataResult.error.cause) },
+            'webhook.stripe.subscription_fetch_failed',
+          );
           return new Response('Failed to retrieve subscription', { status: 500 });
         }
 
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
           currentPeriodEnd: subData.currentPeriodEnd,
         });
 
-        console.info('[webhook/stripe] subscription activated', { traceId, userId, plan, status });
+        logger.info({ traceId, userId, plan, status }, 'webhook.stripe.subscription_activated');
         break;
       }
 
@@ -118,7 +118,7 @@ export async function POST(req: Request) {
         }
 
         if (!userId) {
-          console.warn('[webhook/stripe] subscription.created could not resolve userId', { traceId, id: sub.id });
+          logger.warn({ traceId, id: sub.id }, 'webhook.stripe.subscription_created_missing_userId');
           break;
         }
 
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
           currentPeriodEnd,
         });
 
-        console.info('[webhook/stripe] subscription created → activated', { traceId, userId, plan, status });
+        logger.info({ traceId, userId, plan, status }, 'webhook.stripe.subscription_created');
         break;
       }
 
@@ -152,7 +152,7 @@ export async function POST(req: Request) {
 
         const subResult = await container.subscriptionRepo.findByStripeSubscriptionId(sub.id);
         if (subResult.isErr() || !subResult.value) {
-          console.warn('[webhook/stripe] subscription.updated — subscription not found', { traceId, id: sub.id });
+          logger.warn({ traceId, id: sub.id }, 'webhook.stripe.subscription_updated_not_found');
           break;
         }
 
@@ -170,7 +170,7 @@ export async function POST(req: Request) {
           currentPeriodEnd,
         });
 
-        console.info('[webhook/stripe] subscription updated', { traceId, userId: subResult.value.userId, plan, status });
+        logger.info({ traceId, userId: subResult.value.userId, plan, status }, 'webhook.stripe.subscription_updated');
         break;
       }
 
@@ -179,7 +179,7 @@ export async function POST(req: Request) {
 
         const subResult = await container.subscriptionRepo.findByStripeSubscriptionId(sub.id);
         if (subResult.isErr() || !subResult.value) {
-          console.warn('[webhook/stripe] subscription.deleted — subscription not found', { traceId, id: sub.id });
+          logger.warn({ traceId, id: sub.id }, 'webhook.stripe.subscription_deleted_not_found');
           break;
         }
 
@@ -189,15 +189,15 @@ export async function POST(req: Request) {
           status: 'canceled',
         });
 
-        console.info('[webhook/stripe] subscription canceled → downgraded to free', { traceId, userId: subResult.value.userId });
+        logger.info({ traceId, userId: subResult.value.userId }, 'webhook.stripe.subscription_canceled');
         break;
       }
 
       default:
-        console.info('[webhook/stripe] unhandled event type', { traceId, type: event.type });
+        logger.info({ traceId, type: event.type }, 'webhook.stripe.unhandled_event');
     }
   } catch (e) {
-    console.error('[webhook/stripe] handler threw', { traceId, type: event.type, error: String(e) });
+    logger.error({ traceId, type: event.type, error: String(e) }, 'webhook.stripe.handler_error');
     return new Response('Handler error', { status: 500 });
   }
 

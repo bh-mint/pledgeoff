@@ -1,8 +1,8 @@
-import { effectivePlan } from "@pledgeoff/core";
+import { effectivePlan, type Plan } from "@pledgeoff/core";
 import { logger } from "@pledgeoff/observability";
 import { container } from "./container";
 
-export type Plan = "free" | "pro" | "pro_plus";
+export type { Plan } from "@pledgeoff/core";
 
 export async function getUserPlan(userId: string): Promise<Plan> {
   const result = await container._repos.subscriptionRepo.findByUserId(userId);
@@ -15,5 +15,5 @@ export async function getUserPlan(userId: string): Promise<Plan> {
     throw new Error(`Plan resolution failed for user ${userId}`);
   }
 
-  return (result.value ? effectivePlan(result.value) : "free") as Plan;
+  return result.value ? effectivePlan(result.value) : "free";
 }

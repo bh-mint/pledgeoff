@@ -1,33 +1,25 @@
 import { z } from 'zod';
-import { createClient } from '@supabase/supabase-js';
+import { resolveUserId } from '@/lib/api-auth';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { container } from '@/lib/container';
 
 const CheckoutRequestSchema = z.object({
   priceId: z.string().min(1),
 });
 
-async function resolveUser(authHeader: string | null): Promise<{ id: string; email: string } | null> {
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.slice(7);
-  const anonClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-  const { data } = await anonClient.auth.getUser(token);
-  if (!data.user) return null;
-  return { id: data.user.id, email: data.user.email ?? '' };
-}
-
 export async function POST(req: Request) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 
-  const user = await resolveUser(req.headers.get('authorization'));
-  if (!user) {
+  const userId = await resolveUserId(req.headers.get('authorization'));
+  if (!userId) {
     return Response.json(
       { error: { code: 'UNAUTHENTICATED', message: 'Valid authentication required' } },
       { status: 401, headers: { 'X-Trace-Id': traceId } },
     );
   }
+
+  const { data: userData } = await createServiceRoleClient().auth.admin.getUserById(userId);
+  const userEmail = userData?.user?.email ?? '';
 
   if (!container.stripeAdapter) {
     return Response.json(
@@ -53,13 +45,13 @@ export async function POST(req: Request) {
   }
 
   // Get existing stripe customer ID if any
-  const subResult = await container.subscriptionRepo.findByUserId(user.id);
+  const subResult = await container.subscriptionRepo.findByUserId(userId);
   const stripeCustomerId = subResult.isOk() ? subResult.value?.stripeCustomerId : null;
 
   const origin = req.headers.get('origin') ?? 'https://pledgeoff.com';
   const sessionResult = await container.stripeAdapter.createCheckoutSession({
-    userId: user.id,
-    userEmail: user.email,
+    userId,
+    userEmail: userEmail,
     priceId: parsed.data.priceId,
     successUrl: `${origin}/dashboard?billing=success`,
     cancelUrl: `${origin}/pricing`,
@@ -74,7 +66,7 @@ export async function POST(req: Request) {
   }
 
   void container.auditLog.log({
-    userId: user.id,
+    userId,
     action: 'checkout_initiated',
     resourceType: 'subscription',
     metadata: { priceId: parsed.data.priceId },
