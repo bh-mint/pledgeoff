@@ -63,7 +63,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
     router.push(`/ideas/${json.data.id}`);
   };
 
-  const charPct = Math.min(1, desc.length / 300);
+  const charPct = Math.min(1, desc.length / 500);
 
   return (
     <div
@@ -173,7 +173,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
             <textarea
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
-              maxLength={300}
+              maxLength={500}
               rows={3}
               placeholder="Who it's for, what it does, why it's different. Be specific — vague briefs validate poorly."
               className="w-full bg-transparent outline-none border rounded-md p-4 text-[14px] leading-[1.6] resize-none"
@@ -191,7 +191,7 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
                   color: charPct > 0.9 ? "var(--caution)" : "var(--t3)",
                 }}
               >
-                {desc.length} / 300
+                {desc.length} / 500
               </span>
             </div>
           </label>
