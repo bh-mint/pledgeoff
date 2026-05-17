@@ -1,5 +1,7 @@
 import { container } from '@/lib/container';
 
+export const maxDuration = 30;
+
 // Called by Vercel Cron every minute to retry unprocessed outbox events.
 // Protected by CRON_SECRET to prevent unauthorized calls.
 export async function GET(req: Request): Promise<Response> {
