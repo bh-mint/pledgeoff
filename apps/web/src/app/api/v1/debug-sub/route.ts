@@ -4,71 +4,74 @@ import { requireUser } from "@/lib/auth-server";
 
 export const dynamic = "force-dynamic";
 
-function decodeJwtPayload(jwt: string): Record<string, unknown> | string {
-  try {
-    const parts = jwt.split(".");
-    if (parts.length !== 3) return "INVALID_JWT_FORMAT";
-    const payload = parts[1];
-    const padded = payload + "=".repeat((4 - (payload.length % 4)) % 4);
-    return JSON.parse(Buffer.from(padded, "base64").toString("utf8"));
-  } catch {
-    return "DECODE_FAILED";
-  }
-}
-
 export async function GET() {
   const user = await requireUser();
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "MISSING";
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "MISSING";
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "MISSING";
+  const srKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "MISSING";
 
-  // Decode both keys to see their role claims
-  const serviceRoleDecoded = serviceRoleKey !== "MISSING" ? decodeJwtPayload(serviceRoleKey) : "MISSING";
-  const anonDecoded = anonKey !== "MISSING" ? decodeJwtPayload(anonKey) : "MISSING";
+  // ── 1. Raw HTTP request to PostgREST — zero abstraction layer ──────────
+  const postgrestUrl = `${url}/rest/v1/subscriptions?user_id=eq.${user.id}&select=*`;
+  const authHeaderSent = `Bearer ${srKey.slice(0, 30)}[...${srKey.length - 30} chars omitted]`;
 
-  // Client 1: explicit service_role key, no session, no cookies
-  const srClient = createClient(url, serviceRoleKey, {
+  const rawResp = await fetch(postgrestUrl, {
+    headers: {
+      "Authorization": `Bearer ${srKey}`,
+      "apikey": srKey,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const rawBody = await rawResp.json().catch(() => rawResp.text());
+  const responseHeaders: Record<string, string> = {};
+  rawResp.headers.forEach((v, k) => { responseHeaders[k] = v; });
+
+  // ── 2. Supabase client — getSession() before query ──────────────────────
+  const srClient = createClient(url, srKey, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
 
-  // Client 2: explicit anon key (for comparison)
-  const anonClient = createClient(url, anonKey, {
-    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  const { data: sessionData } = await srClient.auth.getSession();
+  const clientSession = sessionData?.session;
+
+  const clientResult = await srClient
+    .from("subscriptions")
+    .select()
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  // ── 3. Probe: what role does PostgREST assign to this key? ──────────────
+  // PostgREST exposes current_role via a direct SQL probe through the /rpc route
+  // We test by querying auth schema (only accessible to service_role via PostgREST)
+  const authSchemaProbe = await fetch(`${url}/rest/v1/rpc/version`, {
+    headers: { "Authorization": `Bearer ${srKey}`, "apikey": srKey },
   });
-
-  // Query 1: subscriptions with service_role client
-  const srSubResult = await srClient.from("subscriptions").select().eq("user_id", user.id).maybeSingle();
-
-  // Query 2: auth.users — only accessible to service_role (not anon/authenticated)
-  // If this works → client IS using service_role. If "permission denied" → client is NOT service_role.
-  const srAuthResult = await srClient.from("users").select("id, email").eq("id", user.id).maybeSingle();
-
-  // Query 3: same subscriptions query with anon client (expected: permission denied)
-  const anonSubResult = await anonClient.from("subscriptions").select().eq("user_id", user.id).maybeSingle();
+  const authProbeStatus = authSchemaProbe.status;
 
   return NextResponse.json({
-    "1_DB_URL": url,
-    "2_SR_KEY_JWT_CLAIMS": serviceRoleDecoded,
-    "3_ANON_KEY_JWT_CLAIMS": anonDecoded,
-    "4_USER_ID": user.id,
-    "5_USER_EMAIL": user.email,
-    "6_SR_CLIENT_subscriptions": {
-      found: srSubResult.data !== null,
-      row: srSubResult.data,
-      error: srSubResult.error?.message ?? null,
-      note: "service_role bypasses RLS — if permission_denied here, JWT is NOT service_role",
+    "A_REQUEST_TYPE": "PostgREST REST API (not direct SQL)",
+    "B_EXACT_URL": postgrestUrl,
+    "C_AUTHORIZATION_HEADER_SENT": authHeaderSent,
+    "D_APIKEY_HEADER_SENT": `${srKey.slice(0, 30)}[...omitted]`,
+    "E_HTTP_STATUS": rawResp.status,
+    "F_RESPONSE_BODY": rawBody,
+    "G_RESPONSE_HEADERS": {
+      "content-type": responseHeaders["content-type"] ?? null,
+      "x-request-id": responseHeaders["x-request-id"] ?? null,
     },
-    "7_SR_CLIENT_auth_users": {
-      found: srAuthResult.data !== null,
-      row: srAuthResult.data,
-      error: srAuthResult.error?.message ?? null,
-      note: "auth.users accessible ONLY to service_role — if works, confirms SR is active",
+    "H_SESSION_BEFORE_QUERY": clientSession
+      ? { role: "authenticated user session active", userId: clientSession.user?.id }
+      : "NO SESSION (correct for service_role client)",
+    "I_SUPABASE_CLIENT_RESULT": {
+      error: clientResult.error?.message ?? null,
+      found: clientResult.data !== null,
     },
-    "8_ANON_CLIENT_subscriptions": {
-      found: anonSubResult.data !== null,
-      error: anonSubResult.error?.message ?? null,
-      note: "anon client — expected to fail with permission_denied",
-    },
+    "J_REQUEST_ROLE_AS_SEEN_BY_SUPABASE_EDGE":
+      rawResp.status === 200
+        ? "service_role (SELECT worked)"
+        : rawResp.status === 401
+        ? "UNAUTHORIZED — JWT rejected"
+        : `DENIED (HTTP ${rawResp.status}) — role resolved to anon or authenticated, not service_role`,
+    "K_VERSION_RPC_STATUS": authProbeStatus,
   });
 }
