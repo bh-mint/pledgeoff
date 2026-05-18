@@ -1,0 +1,158 @@
+---
+title: "How to validate a mobile app idea before you build it"
+slug: "how-to-validate-a-mobile-app-idea"
+excerpt: "Mobile app validation has specific challenges: App Store discovery, platform constraints, and a user base that abandons quickly. Here's how to test demand before you invest months in development."
+publishedAt: "2026-04-06"
+updatedAt: "2026-05-18"
+tag: "idea-validation"
+readingTime: 8
+affiliateDisclosure: true
+---
+
+Mobile app validation is not the same as SaaS validation.
+
+The App Store is a black box. Discovery is dominated by reviews and ratings.
+User expectations are higher — people expect polished, not MVP.
+Churn happens in the first session, not the first month.
+
+And the build cost is higher. A mobile app that works well on both iOS and Android,
+handles offline states, manages push notifications, and passes App Store review
+takes longer than a web app with the same feature set.
+
+This means the cost of building the wrong thing is higher — and the need to validate first is more urgent.
+
+## What mobile app validation must answer
+
+Before you build, you need signal on three questions specific to mobile:
+
+**1. Is this a mobile-native problem?**
+
+Some problems are better solved on mobile (navigation, camera, real-time location, offline use).
+Some are better solved on web (complex data entry, multi-tab workflows, B2B dashboards).
+
+If your app is essentially a web app wrapped in a mobile shell, the market
+will tell you through low retention. People default to web for complex tasks.
+Mobile wins when the use case is ambient, contextual, or physical.
+
+**2. Is the App Store the right distribution channel?**
+
+Most mobile apps die in discovery. App Store Optimization (ASO) is its own discipline,
+and ranking for competitive keywords takes months and reviews.
+
+If your app depends entirely on App Store discovery to grow, that's a distribution risk
+you need to account for before you build — not after.
+
+Alternative distribution channels: communities, word of mouth, web-to-app funnels,
+QR codes at physical locations. The best mobile apps have a distribution mechanism
+that doesn't require ranking.
+
+**3. Will users pay for this on mobile?**
+
+Mobile has a payment culture problem. Users expect free apps with optional upgrades.
+A mobile app priced at €9.99/month faces higher resistance than the same product priced identically on web.
+
+Validate willingness to pay specifically for mobile before building.
+The question is not "would you pay for this?" — it's "would you pay for this on your phone?"
+
+## The validation process for mobile apps
+
+### Step 1: App Store competitor research
+
+Search the App Store for apps solving the same problem.
+Look at the top 5-10 results.
+
+**What to analyze:**
+- Review count and average rating (proxy for market size and customer satisfaction)
+- Most recent reviews — what are people complaining about?
+- "What's new" sections — what features are competitors prioritizing?
+- Pricing model (free, freemium, subscription, one-time purchase)
+
+The 2-star and 3-star reviews are your opportunity map.
+They tell you exactly what the current market wants that existing apps don't deliver.
+
+### Step 2: Reddit validation for mobile
+
+Search Reddit for your app category with these modifiers:
+- "[Category] app iOS/Android"
+- "best app for [problem]"
+- "[Existing app] alternative"
+- "[Category] app recommendations"
+
+[How to use Reddit for market research](/blog/how-to-use-reddit-for-market-research) covers the full process.
+For mobile specifically, look for threads where people ask for app recommendations.
+The pain in those threads — what they've tried, why it didn't work, what they wish existed — is your spec.
+
+### Step 3: Build a landing page, not an app
+
+Before writing a line of Swift or Kotlin, build a landing page that describes the app.
+
+Include:
+- What it does (one sentence)
+- Who it's for (specific)
+- Screenshots or mockups (Figma is sufficient)
+- A real call to action: "Join the waitlist" with an email signup, or "Pre-order at launch price"
+
+Drive traffic to this page from the communities where your target users exist.
+The conversion rate tells you whether the concept resonates.
+The emails tell you whether you can reach your audience.
+
+### Step 4: The TestFlight test
+
+Build the simplest possible version that demonstrates the core value — not a polished app.
+A prototype. A single-screen demo. Something a potential user can touch.
+
+Distribute it via TestFlight (iOS) or Google Play internal testing (Android).
+Recruit 20-50 users from your target community directly.
+
+Measure:
+- Do they open it more than once?
+- Do they complete the core action?
+- Do they tell anyone else about it without being asked?
+
+[How to validate demand in 24 hours](/blog/how-to-validate-demand-in-24-hours) covers the signal thresholds —
+what response rates and engagement numbers mean before you scale.
+
+### Step 5: Validate monetization separately
+
+Run a pricing test before you build the full app.
+
+Option A: Offer early access at a discounted price on your landing page.
+If people pre-pay at 50% off, they'll pay full price when the app ships.
+
+Option B: Ask directly in user interviews.
+"This app costs €4.99/month. On a scale of 1-10, how likely are you to pay for it?"
+Anyone below 8 is a no. Adjust your model based on where you land.
+
+Option C: Look at comparable apps in your category.
+If the top 3 apps are free with ads, your market may not support subscriptions.
+If they're all at €9.99+/month with thousands of reviews, you have pricing evidence.
+
+## The mobile-specific kill signals
+
+**Nobody completes the core action in testing.**
+If your TestFlight users open the app but don't do the one thing it's designed for,
+either the UX is broken or the value proposition doesn't land on mobile.
+
+**All the interest is from people who "might use it."**
+Mobile has a chronic "sounds cool, I'll download it" problem.
+Downloads are vanity. Daily active use is signal.
+
+**The closest competitor has under 500 reviews.**
+A category with very few reviews may not have enough users to build a sustainable business.
+Or it's an untapped market — but confirm which before you build.
+
+**Your app solves a problem people already solve well on desktop.**
+If the primary workflow is desktop-first, mobile will always be secondary.
+Secondary apps face brutal churn.
+
+## The question mobile validation can't answer
+
+Validation tells you whether people want what you're building.
+It cannot tell you whether you can build it fast enough, cheaply enough, and well enough
+to compete in a market where user expectations are set by apps with 10-year head starts.
+
+The build risk in mobile is real. Factor it into your decision.
+A validated idea that takes 18 months to build properly is a different bet
+than a validated idea that takes 6.
+
+[Check if your mobile idea has real demand →](https://pledgeoff.com/ideas/new)
