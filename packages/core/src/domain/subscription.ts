@@ -22,6 +22,7 @@ export const SubscriptionSchema = z.object({
   currentPeriodEnd: z.string().datetime().nullable(),
   extraSeats: z.number().int().min(0).default(0),
   stripeExtraSeatItemId: z.string().nullable().default(null),
+  pastDueSince: z.string().datetime().nullable().default(null),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });
@@ -35,7 +36,7 @@ export const PLAN_LIMITS = {
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number }>;
 
 export function isActivePlan(sub: Subscription): boolean {
-  return sub.status === 'active' || sub.status === 'trialing';
+  return sub.status === 'active' || sub.status === 'trialing' || sub.status === 'past_due';
 }
 
 export function effectivePlan(sub: Subscription): Plan {

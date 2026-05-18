@@ -11,6 +11,10 @@
     {
       "path": "/api/v1/cron/email-sequences",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/v1/cron/past-due-billing",
+      "schedule": "0 * * * *"
     }
   ]
 }

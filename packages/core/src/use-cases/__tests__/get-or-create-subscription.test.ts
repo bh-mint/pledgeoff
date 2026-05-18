@@ -17,6 +17,7 @@ const makeSubscription = (overrides: Partial<Subscription> = {}): Subscription =
   currentPeriodEnd: null,
   extraSeats: 0,
   stripeExtraSeatItemId: null,
+  pastDueSince: null,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   ...overrides,
@@ -27,12 +28,15 @@ function makeMockRepo(overrides: Partial<ISubscriptionRepository> = {}): ISubscr
     findByUserId: async () => ok(null),
     findByStripeCustomerId: async () => ok(null),
     findByStripeSubscriptionId: async () => ok(null),
+    findPastDueForRetry: async () => ok([]),
     upsert: async (input: SubscriptionUpsertInput) =>
       ok(makeSubscription({ userId: input.userId, plan: input.plan ?? 'free' })),
     updatePlan: async (input) =>
       ok(makeSubscription({ userId: input.userId, plan: input.plan })),
     updateExtraSeats: async (input) =>
       ok(makeSubscription({ userId: input.userId, extraSeats: input.extraSeats })),
+    setPastDueSince: async () => ok(undefined),
+    downgradeToFree: async () => ok(undefined),
     ...overrides,
   };
 }
