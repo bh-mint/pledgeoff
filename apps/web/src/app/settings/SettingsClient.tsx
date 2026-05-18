@@ -487,7 +487,6 @@ export function SettingsClient({
                 const isCurrentMonthly = isCurrent && billingInterval === 'monthly';
                 const isCurrentAnnual = isCurrent && billingInterval === 'annual';
                 const canUpgrade = ap.id === 'pro_plus' && plan === 'pro';
-                const canDowngrade = ap.id === 'pro' && plan === 'pro_plus';
 
                 return (
                   <div
@@ -583,19 +582,6 @@ export function SettingsClient({
                           </>
                         )}
 
-                        {/* Downgrade Pro+ → Pro */}
-                        {canDowngrade && (
-                          <>
-                            <button
-                              onClick={() => handleChangePlan(billingInterval === 'annual' ? ap.annualPriceId : ap.monthlyPriceId)}
-                              disabled={billingAction === "loading"}
-                              className="mono text-[11px] h-8 px-4 rounded-md border transition-colors disabled:opacity-50"
-                              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-                            >
-                              Downgrade to Pro
-                            </button>
-                          </>
-                        )}
                       </div>
                     </div>
                   </div>
