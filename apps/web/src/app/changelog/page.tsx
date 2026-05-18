@@ -11,6 +11,17 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "2.4",
+    date: "May 2026",
+    tag: "IMPROVEMENT",
+    items: [
+      "Team context on idea creation: Pro and Pro+ users with a team can now choose Personal or Team context when submitting a new idea — ideas tagged as Team appear in the team feed",
+      "Security hardening: SECURITY DEFINER functions no longer callable by unauthenticated users; trigger functions hardened against search_path injection",
+      "RLS performance: all row-level security policies updated to use the initplan optimization — auth evaluation now runs once per query instead of once per row",
+      "Env isolation: development builds now throw immediately if Stripe live keys are used accidentally; all Stripe price IDs validated at startup",
+    ],
+  },
+  {
     version: "2.3",
     date: "May 2026",
     tag: "FIX",
