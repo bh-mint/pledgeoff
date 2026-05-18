@@ -31,6 +31,8 @@ export type StripeSubscriptionData = {
   status: string;
   currentPeriodEnd: string | null;
   priceId: string;
+  cancelAtPeriodEnd: boolean;
+  interval: 'monthly' | 'annual';
 };
 
 export class StripeAdapter {
@@ -98,14 +100,16 @@ export class StripeAdapter {
 
       const item = sub.items.data[0];
       const priceId = item?.price?.id ?? '';
-      // In Stripe API v2026+, current_period_end lives on the subscription item
       const periodEnd = item?.current_period_end;
+      const recurringInterval = (item?.price as Stripe.Price & { recurring?: { interval?: string } })?.recurring?.interval;
       return ok({
         stripeCustomerId: typeof sub.customer === 'string' ? sub.customer : sub.customer.id,
         stripeSubscriptionId: sub.id,
         status: sub.status,
         currentPeriodEnd: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
         priceId,
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
+        interval: recurringInterval === 'year' ? 'annual' : 'monthly',
       });
     } catch (e) {
       return err(new StripeAdapterError('Failed to retrieve subscription', e));
@@ -176,6 +180,50 @@ export class StripeAdapter {
       return ok(session.url);
     } catch (e) {
       return err(new StripeAdapterError('Failed to create customer portal session', e));
+    }
+  }
+
+  async updateSubscription(
+    subscriptionId: string,
+    newPriceId: string,
+  ): Promise<Result<void, StripeAdapterError>> {
+    try {
+      const sub = await this.stripe.subscriptions.retrieve(subscriptionId);
+      const itemId = sub.items.data[0]?.id;
+      if (!itemId) return err(new StripeAdapterError('Subscription has no items'));
+      await this.stripe.subscriptions.update(subscriptionId, {
+        items: [{ id: itemId, price: newPriceId }],
+        proration_behavior: 'create_prorations',
+      });
+      return ok(undefined);
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to update subscription', e));
+    }
+  }
+
+  async cancelSubscription(
+    subscriptionId: string,
+  ): Promise<Result<void, StripeAdapterError>> {
+    try {
+      await this.stripe.subscriptions.update(subscriptionId, {
+        cancel_at_period_end: true,
+      });
+      return ok(undefined);
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to cancel subscription', e));
+    }
+  }
+
+  async reactivateSubscription(
+    subscriptionId: string,
+  ): Promise<Result<void, StripeAdapterError>> {
+    try {
+      await this.stripe.subscriptions.update(subscriptionId, {
+        cancel_at_period_end: false,
+      });
+      return ok(undefined);
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to reactivate subscription', e));
     }
   }
 

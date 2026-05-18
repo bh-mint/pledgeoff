@@ -32,6 +32,38 @@ export default async function SettingsPage() {
   const stripeCustomerId = sub?.stripeCustomerId ?? null;
   const extraSeats = sub?.extraSeats ?? 0;
 
+  // Fetch live Stripe state for billing section (cancel_at_period_end, interval)
+  let cancelAtPeriodEnd = false;
+  let billingInterval: 'monthly' | 'annual' = 'monthly';
+  if (sub?.stripeSubscriptionId && container.stripeAdapter) {
+    const liveResult = await container.stripeAdapter.getSubscription(sub.stripeSubscriptionId);
+    if (liveResult.isOk()) {
+      cancelAtPeriodEnd = liveResult.value.cancelAtPeriodEnd;
+      billingInterval = liveResult.value.interval;
+    }
+  }
+
+  const availablePlans = [
+    {
+      id: 'pro' as const,
+      label: 'Pro',
+      monthlyEur: 39,
+      annualEquivalentEur: 32,
+      annualTotalEur: 374,
+      monthlyPriceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID ?? '',
+      annualPriceId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID ?? '',
+    },
+    {
+      id: 'pro_plus' as const,
+      label: 'Pro+',
+      monthlyEur: 79,
+      annualEquivalentEur: 63,
+      annualTotalEur: 758,
+      monthlyPriceId: process.env.STRIPE_PRO_PLUS_MONTHLY_PRICE_ID ?? '',
+      annualPriceId: process.env.STRIPE_PRO_PLUS_ANNUAL_PRICE_ID ?? '',
+    },
+  ];
+
   const now = new Date();
   const ideasThisMonth = ideas.filter((idea) => {
     const d = new Date(idea.createdAt);
@@ -62,6 +94,9 @@ export default async function SettingsPage() {
           renewsAt={renewsAt}
           stripeCustomerId={stripeCustomerId}
           extraSeats={extraSeats}
+          cancelAtPeriodEnd={cancelAtPeriodEnd}
+          billingInterval={billingInterval}
+          availablePlans={availablePlans}
         />
       </div>
     </div>

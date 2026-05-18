@@ -5,7 +5,10 @@ export type AuditAction =
   | 'checkout_initiated'
   | 'billing_portal_accessed'
   | 'seat_addon_updated'
-  | 'tool_accessed';
+  | 'tool_accessed'
+  | 'plan_changed'
+  | 'subscription_cancelled'
+  | 'subscription_reactivated';
 
 export type AuditEntry = {
   readonly userId: string;
