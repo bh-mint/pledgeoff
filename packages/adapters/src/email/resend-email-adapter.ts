@@ -2,6 +2,166 @@ import { createLogger } from '@pledgeoff/observability';
 
 const log = createLogger({ adapter: 'resend' });
 
+export type SequenceDay = 3 | 7 | 14 | 21;
+
+export interface SequenceEmailParams {
+  to: string;
+  name?: string;
+  day: SequenceDay;
+  traceId: string;
+}
+
+const EMAIL_SHELL = (content: string) => `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+        <tr><td style="padding-bottom:32px;">
+          <span style="font-size:15px;font-weight:600;color:#f5f5f5;letter-spacing:-0.02em;">Pledge<span style="color:#b6f04c;">OFF</span></span>
+        </td></tr>
+        <tr><td style="background:#141414;border:1px solid #2a2a2a;border-radius:8px;padding:32px;">
+          ${content}
+        </td></tr>
+        <tr><td style="padding-top:24px;">
+          <p style="margin:0;font-size:11px;color:#555;font-family:monospace;">
+            © 2026 PledgeOFF &nbsp;·&nbsp;
+            <a href="https://pledgeoff.com" style="color:#555;text-decoration:none;">pledgeoff.com</a>
+            &nbsp;·&nbsp;
+            <a href="https://pledgeoff.com/privacy" style="color:#555;text-decoration:none;">Privacy</a>
+          </p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+const SEQUENCE_CONTENT: Record<SequenceDay, (name: string) => { subject: string; html: string }> = {
+  3: (name) => ({
+    subject: 'Did you validate your first idea?',
+    html: EMAIL_SHELL(`
+      <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">DAY 3 · PLEDGEOFF</p>
+      <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+        Hey ${name}, did you validate your first idea?
+      </h1>
+      <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+        Most founders sign up, then get pulled back into building. The idea validation gets postponed — and then forgotten.
+      </p>
+      <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
+        It takes 60 seconds. One sentence. You'll know if you're building something the market actually wants — or something you just think it wants.
+      </p>
+      <a href="https://pledgeoff.com/ideas/new" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+        Validate your idea now →
+      </a>
+      <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+      <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
+    `),
+  }),
+  7: (name) => ({
+    subject: 'Ideas don\'t get easier to kill',
+    html: EMAIL_SHELL(`
+      <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">DAY 7 · PLEDGEOFF</p>
+      <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+        ${name}, ideas don't get easier to kill.
+      </h1>
+      <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+        The longer you hold an idea without validating it, the harder it becomes to kill it. You start filling in the gaps with optimism.
+      </p>
+      <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+        The founders who move fast don't have better ideas. They just have fewer illusions. They let the market speak early — before they've invested months of their life.
+      </p>
+      <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
+        PledgeOFF pulls real signals from Reddit, GitHub, and Google Trends. Not opinions. Verbatim posts from people who actually have the problem — or don't.
+      </p>
+      <a href="https://pledgeoff.com/ideas/new" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+        Get your verdict in 60 seconds →
+      </a>
+      <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+      <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
+    `),
+  }),
+  14: (name) => ({
+    subject: 'Running low on validations?',
+    html: EMAIL_SHELL(`
+      <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">DAY 14 · PLEDGEOFF</p>
+      <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+        ${name}, don't stop at 3 ideas.
+      </h1>
+      <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+        The free plan gives you 3 validations — enough to test your sharpest ideas. But the founders who find product-market fit aren't working from a single idea. They're iterating fast across many.
+      </p>
+      <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
+        Pro gives you unlimited validations, team sharing, and priority signals. Starting at €39/month — less than a cancelled subscription you forgot about.
+      </p>
+      <a href="https://pledgeoff.com/pricing" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+        See Pro plans →
+      </a>
+      <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+      <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
+    `),
+  }),
+  21: (name) => ({
+    subject: 'Still building in the dark?',
+    html: EMAIL_SHELL(`
+      <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">DAY 21 · PLEDGEOFF</p>
+      <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+        ${name}, three weeks in.
+      </h1>
+      <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+        Three weeks ago you signed up to stop building things nobody asked for. How's that going?
+      </p>
+      <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+        The founders who use PledgeOFF consistently report the same thing: they kill bad ideas faster, they pivot with more conviction, and they stop second-guessing every decision.
+      </p>
+      <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
+        If you haven't run a validation yet — today's the day. Takes 60 seconds. The market has an answer. You just need to ask.
+      </p>
+      <a href="https://pledgeoff.com/ideas/new" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+        Run a validation →
+      </a>
+      <a href="https://pledgeoff.com/pricing" style="display:inline-block;margin-left:12px;background:transparent;color:#888;font-size:13px;font-weight:500;padding:10px 20px;border-radius:6px;text-decoration:none;border:1px solid #2a2a2a;">
+        See Pro plans
+      </a>
+      <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+      <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
+    `),
+  }),
+};
+
+export async function sendSequenceEmail(
+  apiKey: string,
+  params: SequenceEmailParams,
+): Promise<void> {
+  const { to, name, day, traceId } = params;
+  const displayName = name?.split(' ')[0] ?? 'there';
+  const { subject, html } = SEQUENCE_CONTENT[day](displayName);
+
+  const start = Date.now();
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'PledgeOFF <hello@pledgeoff.com>',
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      log.warn({ traceId, target: 'resend', operation: `sendSequenceEmail.day${day}`, latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${res.status}` }, `Resend error: ${body}`);
+      return;
+    }
+    log.info({ traceId, target: 'resend', operation: `sendSequenceEmail.day${day}`, latencyMs: Date.now() - start, outcome: 'success' }, `Sequence email day ${day} sent`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown';
+    log.error({ traceId, target: 'resend', operation: `sendSequenceEmail.day${day}`, latencyMs: Date.now() - start, outcome: 'error', errorCode: 'FETCH_ERROR' }, `Resend fetch failed: ${message}`);
+  }
+}
+
 export interface VerdictEmailParams {
   to: string;
   ideaId: string;
