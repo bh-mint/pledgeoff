@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { HomeTickerCounter } from "./HomeTickerCounter";
+import { PHBanner } from "@/components/PHBanner";
 
 const TICKER_ITEMS = [
   'r/SaaS          ·  "every B2B cold email tool does the same generic personalization"  ·  ↑418',
@@ -171,6 +172,7 @@ function PreviewCard() {
 export function HomeClient() {
   return (
     <div className="min-h-screen bg-(--canvas)">
+      <PHBanner />
       <Nav />
 
       {/* ── HERO ── */}
@@ -424,10 +426,10 @@ export function HomeClient() {
         >
           <div className="flex items-start gap-5">
             <div
-              className="shrink-0 w-10 h-10 rounded-md border flex items-center justify-center mono text-[16px]"
-              style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+              className="shrink-0 w-10 h-10 rounded-md border flex items-center justify-center mono text-[11px] font-semibold"
+              style={{ borderColor: "var(--border)", background: "var(--canvas)", color: "var(--accent)" }}
             >
-              🎯
+              DCT
             </div>
             <div>
               <p className="display text-[15px] font-semibold text-(--t1) mb-1">
