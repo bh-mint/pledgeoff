@@ -19,6 +19,7 @@ type SubscriptionRow = {
   current_period_end: string | null;
   extra_seats: number;
   stripe_extra_seat_item_id: string | null;
+  past_due_since: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -34,6 +35,7 @@ function rowToSubscription(row: SubscriptionRow): Subscription {
     currentPeriodEnd: row.current_period_end,
     extraSeats: row.extra_seats ?? 0,
     stripeExtraSeatItemId: row.stripe_extra_seat_item_id ?? null,
+    pastDueSince: row.past_due_since ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -127,5 +129,47 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
 
     if (error) return err(new SubscriptionRepositoryError(error.message));
     return ok(rowToSubscription(data));
+  }
+
+  async findPastDueForRetry(): Promise<Result<Subscription[], SubscriptionRepositoryError>> {
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await this.client
+      .from('subscriptions')
+      .select()
+      .eq('status', 'past_due')
+      .not('past_due_since', 'is', null)
+      .lte('past_due_since', cutoff)
+      .overrideTypes<SubscriptionRow[]>();
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok((data ?? []).map(rowToSubscription));
+  }
+
+  async setPastDueSince(userId: string, since: string): Promise<Result<void, SubscriptionRepositoryError>> {
+    const { error } = await this.client
+      .from('subscriptions')
+      .update({ past_due_since: since, updated_at: new Date().toISOString() })
+      .eq('user_id', userId)
+      .is('past_due_since', null);
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async downgradeToFree(userId: string): Promise<Result<void, SubscriptionRepositoryError>> {
+    const { error } = await this.client
+      .from('subscriptions')
+      .update({
+        plan: 'free',
+        status: 'canceled',
+        past_due_since: null,
+        extra_seats: 0,
+        stripe_extra_seat_item_id: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', userId);
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
   }
 }

@@ -1,5 +1,6 @@
 import type { Plan, SubscriptionStatus } from '@pledgeoff/core';
 import { logger } from '@pledgeoff/observability';
+import { sendPaymentFailedEmail } from '@pledgeoff/adapters';
 import { container } from '@/lib/container';
 
 // Map Stripe price IDs → plan names
@@ -211,6 +212,42 @@ export async function POST(req: Request) {
         });
 
         logger.info({ traceId, userId: subResult.value.userId }, 'webhook.stripe.subscription_canceled');
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as {
+          subscription?: string | null;
+          customer_email?: string | null;
+          customer_name?: string | null;
+        };
+
+        const stripeSubscriptionId = typeof invoice.subscription === 'string' ? invoice.subscription : null;
+        if (!stripeSubscriptionId) {
+          logger.warn({ traceId }, 'webhook.stripe.payment_failed_missing_subscription');
+          break;
+        }
+
+        const subResult = await container.subscriptionRepo.findByStripeSubscriptionId(stripeSubscriptionId);
+        if (subResult.isErr() || !subResult.value) {
+          logger.warn({ traceId, stripeSubscriptionId }, 'webhook.stripe.payment_failed_subscription_not_found');
+          break;
+        }
+
+        const sub = subResult.value;
+        const now = new Date().toISOString();
+        await container.subscriptionRepo.setPastDueSince(sub.userId, now);
+
+        const resendKey = process.env.RESEND_API_KEY;
+        if (resendKey && invoice.customer_email) {
+          await sendPaymentFailedEmail(resendKey, {
+            to: invoice.customer_email,
+            name: invoice.customer_name ?? undefined,
+            traceId,
+          });
+        }
+
+        logger.info({ traceId, userId: sub.userId }, 'webhook.stripe.payment_failed_handled');
         break;
       }
 

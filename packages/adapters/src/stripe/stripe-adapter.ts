@@ -178,4 +178,21 @@ export class StripeAdapter {
       return err(new StripeAdapterError('Failed to create customer portal session', e));
     }
   }
+
+  async payLatestInvoice(
+    stripeSubscriptionId: string,
+  ): Promise<Result<{ paid: boolean }, StripeAdapterError>> {
+    try {
+      const sub = await this.stripe.subscriptions.retrieve(stripeSubscriptionId, {
+        expand: ['latest_invoice'],
+      });
+      const invoice = sub.latest_invoice as Stripe.Invoice | null;
+      if (!invoice || invoice.status === 'paid') return ok({ paid: true });
+
+      const result = await this.stripe.invoices.pay(invoice.id);
+      return ok({ paid: result.status === 'paid' });
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to pay latest invoice', e));
+    }
+  }
 }

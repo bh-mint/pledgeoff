@@ -130,6 +130,62 @@ const SEQUENCE_CONTENT: Record<SequenceDay, (name: string) => { subject: string;
   }),
 };
 
+export interface PaymentFailedEmailParams {
+  to: string;
+  name?: string;
+  traceId: string;
+}
+
+export async function sendPaymentFailedEmail(
+  apiKey: string,
+  params: PaymentFailedEmailParams,
+): Promise<void> {
+  const { to, name, traceId } = params;
+  const displayName = name?.split(' ')[0] ?? 'there';
+  const portalUrl = 'https://pledgeoff.com/settings';
+
+  const html = EMAIL_SHELL(`
+    <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">BILLING · PLEDGEOFF</p>
+    <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+      Hey ${displayName}, we couldn't charge your card.
+    </h1>
+    <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+      Your Pro subscription payment failed. Your account is still active for now — but if the payment isn't resolved within <strong style="color:#f5f5f5;">24 hours</strong>, your account will be downgraded to the Free plan.
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
+      Update your payment method or retry the charge from your billing settings.
+    </p>
+    <a href="${portalUrl}" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+      Update payment method →
+    </a>
+    <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+    <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
+  `);
+
+  const start = Date.now();
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'PledgeOFF <billing@pledgeoff.com>',
+        to: [to],
+        subject: 'Action required: your payment failed',
+        html,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      log.warn({ traceId, target: 'resend', operation: 'sendPaymentFailedEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${res.status}` }, `Resend error: ${body}`);
+      return;
+    }
+    log.info({ traceId, target: 'resend', operation: 'sendPaymentFailedEmail', latencyMs: Date.now() - start, outcome: 'success' }, 'Payment failed email sent');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown';
+    log.error({ traceId, target: 'resend', operation: 'sendPaymentFailedEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'FETCH_ERROR' }, `Resend fetch failed: ${message}`);
+  }
+}
+
 export async function sendSequenceEmail(
   apiKey: string,
   params: SequenceEmailParams,

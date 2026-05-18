@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { Plan } from "@pledgeoff/core";
+import type { Plan, SubscriptionStatus } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import { TeamSection } from "./TeamSection";
 
@@ -15,6 +15,7 @@ interface SettingsClientProps {
   username: string | null;
   companyName: string | null;
   plan: Plan;
+  subscriptionStatus?: SubscriptionStatus | null;
   ideasThisMonth: number;
   renewsAt?: string | null;
   stripeCustomerId?: string | null;
@@ -77,6 +78,7 @@ export function SettingsClient({
   username,
   companyName,
   plan,
+  subscriptionStatus,
   ideasThisMonth,
   renewsAt,
   stripeCustomerId,
@@ -533,7 +535,7 @@ export function SettingsClient({
               Invite colleagues to validate ideas together.
               {plan === "free" && " Upgrade to Pro for 3 seats, Pro+ for 10."}
             </p>
-            <TeamSection plan={plan} />
+            <TeamSection plan={plan} subscriptionStatus={subscriptionStatus ?? null} />
           </div>
         )}
 

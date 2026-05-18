@@ -27,6 +27,7 @@ export default async function SettingsPage() {
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
   const sub = subResult.isOk() ? subResult.value : null;
   const plan = sub ? effectivePlan(sub) : "free";
+  const subscriptionStatus = sub?.status ?? null;
   const renewsAt = sub?.currentPeriodEnd ?? null;
   const stripeCustomerId = sub?.stripeCustomerId ?? null;
   const extraSeats = sub?.extraSeats ?? 0;
@@ -56,6 +57,7 @@ export default async function SettingsPage() {
           username={(profileResult.data as { username?: string | null } | null)?.username ?? null}
           companyName={(profileResult.data as { company_name?: string | null } | null)?.company_name ?? null}
           plan={plan}
+          subscriptionStatus={subscriptionStatus}
           ideasThisMonth={ideasThisMonth}
           renewsAt={renewsAt}
           stripeCustomerId={stripeCustomerId}
