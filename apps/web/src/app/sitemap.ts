@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const latestArticle = articles.map((a) => a.updatedAt).sort().at(-1) ?? "2026-01-01";
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: "2026-05-17" },
+    { url: SITE_URL, lastModified: "2026-05-18" },
     { url: `${SITE_URL}/blog`, lastModified: latestArticle },
     { url: `${SITE_URL}/blog/idea-validation`, lastModified: latestInCluster(articles, "idea-validation") },
     { url: `${SITE_URL}/blog/product-decisions`, lastModified: latestInCluster(articles, "product-decisions") },
