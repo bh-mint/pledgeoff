@@ -28,3 +28,4 @@ export { GroqLLMAdapter } from './llm/groq-llm-adapter';
 export { AnthropicLLMAdapter } from './llm/anthropic-llm-adapter';
 export { sendVerdictEmail, sendTeamInviteEmail, sendSequenceEmail, sendPaymentFailedEmail } from './email/resend-email-adapter';
 export type { VerdictEmailParams, TeamInviteEmailParams, SequenceEmailParams, SequenceDay, PaymentFailedEmailParams } from './email/resend-email-adapter';
+export { VoyageEmbeddingAdapter } from './embeddings/voyage-embedding-adapter';

@@ -22,6 +22,7 @@ import {
   AnthropicLLMAdapter,
   InMemoryCacheAdapter,
   UpstashRedisCacheAdapter,
+  VoyageEmbeddingAdapter,
 } from '@pledgeoff/adapters';
 import type { ICache } from '@pledgeoff/core';
 import { PostgresEventBus, RedisStreamsEventBus } from '@pledgeoff/eventbus';
@@ -157,12 +158,17 @@ function buildContainer() {
     sourceAdapters,
     llmClient,
   );
+  const embeddingClient = process.env.VOYAGE_API_KEY
+    ? new VoyageEmbeddingAdapter(process.env.VOYAGE_API_KEY)
+    : undefined;
+
   const decideUseCase = new DecideUseCase(
     signalRepo,
     decisionRepo,
     llmClient,
     eventBus,
     idempotencyStore,
+    embeddingClient,
   );
   const recordFeedbackUseCase = new RecordFeedbackUseCase(feedbackRepo);
   const simulateRevenueUseCase = new SimulateRevenueUseCase(simulationRepo, signalRepo, llmClient);
@@ -179,7 +185,7 @@ function buildContainer() {
   const updateTeamSeatsUseCase = new UpdateTeamSeatsUseCase(subscriptionRepo);
   const reactToIdeaUseCase = new ReactToIdeaUseCase(ideaReactionRepo);
 
-  // Wire: idea.created.v1 → FetchSignalsUseCase
+  // Wire: idea.created.v1 → FetchSignalsUseCase → generate embeddings for new signals (fire-and-forget)
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
     const result = await fetchSignalsUseCase.execute({
       ideaId: event.payload.ideaId,
@@ -189,6 +195,20 @@ function buildContainer() {
     });
     if (result.isErr()) {
       throw new Error(`FetchSignalsUseCase failed: ${result.error.message}`);
+    }
+
+    // Generate and save embeddings for newly fetched signals (non-blocking)
+    if (embeddingClient && result.value) {
+      void (async () => {
+        const signals = Array.isArray(result.value) ? result.value : [];
+        const entries: Array<{ id: string; embedding: number[] }> = [];
+        for (const signal of signals) {
+          const text = `${signal.title} ${signal.summary}`.trim();
+          const embResult = await embeddingClient.embed(text);
+          if (embResult.isOk()) entries.push({ id: signal.id, embedding: embResult.value });
+        }
+        if (entries.length > 0) await signalRepo.saveEmbeddings(entries);
+      })();
     }
   });
 

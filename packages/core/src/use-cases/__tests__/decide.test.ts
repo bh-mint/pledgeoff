@@ -33,6 +33,8 @@ function makeSignalRepo(signals: Signal[] = [makeSignal()]): ISignalRepository {
   return {
     upsertMany: vi.fn(),
     findByIdeaId: vi.fn().mockResolvedValue(ok(signals)),
+    findTopByEmbedding: vi.fn(),
+    saveEmbeddings: vi.fn().mockResolvedValue(ok(undefined)),
   };
 }
 
@@ -113,7 +115,7 @@ describe('DecideUseCase', () => {
   it('returns signal repository error when signals fetch fails', async () => {
     const signalError = new SignalRepositoryError('DB error');
     const useCase = new DecideUseCase(
-      { upsertMany: vi.fn(), findByIdeaId: vi.fn().mockResolvedValue(err(signalError)) },
+      { upsertMany: vi.fn(), findByIdeaId: vi.fn().mockResolvedValue(err(signalError)), findTopByEmbedding: vi.fn(), saveEmbeddings: vi.fn() },
       makeDecisionRepo(),
       makeLLMClient(),
       makeEventBus(),

@@ -26,6 +26,8 @@ function makeRepo(signals: Signal[], overrides: Partial<ISignalRepository> = {})
   return {
     upsertMany: vi.fn().mockResolvedValue(ok(signals)),
     findByIdeaId: vi.fn(),
+    findTopByEmbedding: vi.fn(),
+    saveEmbeddings: vi.fn().mockResolvedValue(ok(undefined)),
     ...overrides,
   };
 }

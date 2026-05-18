@@ -12,6 +12,7 @@ type SignalRow = {
   summary: string;
   sentiment: string;
   fetched_at: string;
+  embedding?: number[] | null;
 };
 
 function rowToSignal(row: SignalRow): Signal {
@@ -63,5 +64,30 @@ export class SupabaseSignalRepository implements ISignalRepository {
 
     if (error) return err(new SignalRepositoryError(error.message));
     return ok((data ?? []).map(rowToSignal));
+  }
+
+  async findTopByEmbedding(embedding: number[], ideaId: string, limit: number): Promise<Result<Signal[], SignalRepositoryError>> {
+    const { data, error } = await this.client.rpc('match_signals', {
+      query_embedding: embedding,
+      match_idea_id: ideaId,
+      match_count: limit,
+    });
+
+    if (error) return err(new SignalRepositoryError(error.message));
+    return ok(((data as SignalRow[]) ?? []).map(rowToSignal));
+  }
+
+  async saveEmbeddings(entries: Array<{ id: string; embedding: number[] }>): Promise<Result<void, SignalRepositoryError>> {
+    if (entries.length === 0) return ok(undefined);
+
+    const updates = entries.map(({ id, embedding }) =>
+      this.client.from('signals').update({ embedding }).eq('id', id),
+    );
+
+    const results = await Promise.all(updates);
+    const failed = results.find((r) => r.error);
+    if (failed?.error) return err(new SignalRepositoryError(failed.error.message));
+
+    return ok(undefined);
   }
 }

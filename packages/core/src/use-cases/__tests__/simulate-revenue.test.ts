@@ -46,6 +46,8 @@ function makeSignalRepo(): ISignalRepository {
   return {
     upsertMany: vi.fn(),
     findByIdeaId: vi.fn().mockResolvedValue(ok([makeSignal()])),
+    findTopByEmbedding: vi.fn(),
+    saveEmbeddings: vi.fn().mockResolvedValue(ok(undefined)),
   };
 }
 

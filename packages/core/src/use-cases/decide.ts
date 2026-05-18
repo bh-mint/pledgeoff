@@ -6,6 +6,9 @@ import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-r
 import type { ILLMClient, LLMClientError } from '../ports/llm-client';
 import type { IEventBus, EventBusError } from '../ports/event-bus';
 import type { IIdempotencyStore, IdempotencyStoreError } from '../ports/idempotency-store';
+import type { IEmbeddingClient } from '../ports/embedding-client';
+
+const TOP_SIGNALS_LIMIT = 15;
 
 export interface DecideInput {
   readonly ideaId: string;
@@ -28,6 +31,7 @@ export class DecideUseCase {
     private readonly llmClient: ILLMClient,
     private readonly eventBus: IEventBus,
     private readonly idempotencyStore: IIdempotencyStore,
+    private readonly embeddingClient?: IEmbeddingClient,
   ) {}
 
   async execute(input: DecideInput): Promise<Result<Decision, DecideError>> {
@@ -40,7 +44,21 @@ export class DecideUseCase {
       if (existing.value) return ok(existing.value);
     }
 
-    const signalsResult = await this.signalRepo.findByIdeaId(input.ideaId);
+    // Use cosine similarity ranking if embedding client is available; fallback to full scan
+    let signalsResult;
+    if (this.embeddingClient) {
+      const embeddingResult = await this.embeddingClient.embed(input.ideaText);
+      if (embeddingResult.isOk()) {
+        signalsResult = await this.signalRepo.findTopByEmbedding(
+          embeddingResult.value,
+          input.ideaId,
+          TOP_SIGNALS_LIMIT,
+        );
+      }
+    }
+    if (!signalsResult) {
+      signalsResult = await this.signalRepo.findByIdeaId(input.ideaId);
+    }
     if (signalsResult.isErr()) return err(signalsResult.error);
 
     const llmResult = await this.llmClient.generateDecision({
