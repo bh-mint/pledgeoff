@@ -11,6 +11,16 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "2.5",
+    date: "May 2026",
+    tag: "IMPROVEMENT",
+    items: [
+      "Payment recovery flow: when a Pro subscription payment fails, you now receive an email immediately with a link to update your card — your account stays active for 24 hours before any downgrade",
+      "Automatic retry: after 24 hours, the payment is retried automatically — if it succeeds, nothing changes; if it fails, the account is downgraded to Free",
+      "Team tab locked on payment failure: if your payment is unresolved, the Team section shows a clear notice with a direct link to the billing portal",
+    ],
+  },
+  {
     version: "2.4",
     date: "May 2026",
     tag: "IMPROVEMENT",
