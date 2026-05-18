@@ -8,6 +8,16 @@ import type { Plan, SubscriptionStatus } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import { TeamSection } from "./TeamSection";
 
+type AvailablePlan = {
+  id: 'pro' | 'pro_plus';
+  label: string;
+  monthlyEur: number;
+  annualEquivalentEur: number;
+  annualTotalEur: number;
+  monthlyPriceId: string;
+  annualPriceId: string;
+};
+
 interface SettingsClientProps {
   email: string;
   firstName: string | null;
@@ -20,6 +30,9 @@ interface SettingsClientProps {
   renewsAt?: string | null;
   stripeCustomerId?: string | null;
   extraSeats?: number;
+  cancelAtPeriodEnd?: boolean;
+  billingInterval?: 'monthly' | 'annual';
+  availablePlans?: AvailablePlan[];
 }
 
 type SectionId = "account" | "billing" | "team" | "notifications" | "api" | "danger";
@@ -83,6 +96,9 @@ export function SettingsClient({
   renewsAt,
   stripeCustomerId,
   extraSeats: initialExtraSeats = 0,
+  cancelAtPeriodEnd: initialCancelAtPeriodEnd = false,
+  billingInterval = 'monthly',
+  availablePlans = [],
 }: SettingsClientProps) {
   const router = useRouter();
   const [section, setSection] = useState<SectionId>("account");
@@ -94,9 +110,11 @@ export function SettingsClient({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
-  const [portalLoading, setPortalLoading] = useState(false);
   const [seatExtra, setSeatExtra] = useState(initialExtraSeats);
   const [seatState, setSeatState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [billingAction, setBillingAction] = useState<"idle" | "loading" | "error">("idle");
+  const [cancelConfirm, setCancelConfirm] = useState(false);
+  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(initialCancelAtPeriodEnd);
   const [notifState, setNotifState] = useState<Record<string, boolean>>({
     goldmine: false,
     weekly: false,
@@ -140,22 +158,72 @@ export function SettingsClient({
     router.push("/");
   };
 
-  const handleManageBilling = async () => {
-    setPortalLoading(true);
-    try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      const res = await fetch("/api/v1/billing/portal", {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (res.ok) {
-        const { data } = await res.json() as { data: { url: string } };
-        router.push(data.url);
-      }
-    } finally {
-      setPortalLoading(false);
+  const getToken = async () => {
+    const supabase = createSupabaseBrowserClient();
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token;
+  };
+
+  const handleChangePlan = async (priceId: string) => {
+    setBillingAction("loading");
+    const token = await getToken();
+    const res = await fetch("/api/v1/billing/change-plan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ priceId }),
+    });
+    if (res.ok) {
+      setBillingAction("idle");
+      router.refresh();
+    } else {
+      setBillingAction("error");
+    }
+  };
+
+  const handleCancel = async () => {
+    setBillingAction("loading");
+    setCancelConfirm(false);
+    const token = await getToken();
+    const res = await fetch("/api/v1/billing/cancel", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.ok) {
+      setCancelAtPeriodEnd(true);
+      setBillingAction("idle");
+    } else {
+      setBillingAction("error");
+    }
+  };
+
+  const handleReactivate = async () => {
+    setBillingAction("loading");
+    const token = await getToken();
+    const res = await fetch("/api/v1/billing/reactivate", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.ok) {
+      setCancelAtPeriodEnd(false);
+      setBillingAction("idle");
+    } else {
+      setBillingAction("error");
+    }
+  };
+
+  const handleCheckout = async (priceId: string) => {
+    setBillingAction("loading");
+    const token = await getToken();
+    const res = await fetch("/api/v1/billing/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ priceId }),
+    });
+    if (res.ok) {
+      const { data } = await res.json() as { data: { url: string } };
+      router.push(data.url);
+    } else {
+      setBillingAction("error");
     }
   };
 
@@ -381,49 +449,202 @@ export function SettingsClient({
           <div>
             <h1 className="display text-[28px] font-semibold tracking-tight text-(--t1) mb-1">Billing</h1>
             <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
-              {isPaid ? `${PLAN_LABELS[plan]} plan · billed monthly` : "Free plan · no credit card required"}
+              {isPaid
+                ? `${PLAN_LABELS[plan]} · billed ${billingInterval}`
+                : "Free plan · no credit card required"}
             </p>
 
-            {/* Plan summary card */}
-            <div className="border rounded-md p-5 mb-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>Current plan</div>
-                  <div className="display text-[22px] font-semibold text-(--t1)">{PLAN_LABELS[plan]}</div>
-                  {renewsAt && (
-                    <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
-                      Renews {formatDate(renewsAt)} · cancel anytime
-                    </div>
-                  )}
-                  {!isPaid && (
-                    <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
-                      1 validation / month · no credit card required
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {!isPaid ? (
-                    <Link
-                      href="/pricing"
-                      className="display text-[13px] font-semibold px-5 h-9 rounded-md inline-flex items-center transition-opacity hover:opacity-90"
-                      style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-                    >
-                      Upgrade to Pro →
-                    </Link>
-                  ) : (
-                    stripeCustomerId && (
-                      <button
-                        onClick={handleManageBilling}
-                        disabled={portalLoading}
-                        className="mono text-[11px] h-9 px-4 rounded-md border transition-colors disabled:opacity-50"
-                        style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-                      >
-                        {portalLoading ? "Loading…" : "Manage subscription →"}
-                      </button>
-                    )
-                  )}
-                </div>
+            {/* Cancel-at-period-end banner */}
+            {cancelAtPeriodEnd && renewsAt && (
+              <div className="border rounded-md p-4 mb-5 flex items-center justify-between gap-4"
+                style={{ borderColor: "var(--caution)", background: "color-mix(in srgb, var(--caution) 8%, transparent)" }}>
+                <span className="mono text-[11px]" style={{ color: "var(--caution)" }}>
+                  Cancels on {formatDate(renewsAt)} — you&apos;ll drop to Free.
+                </span>
+                <button
+                  onClick={handleReactivate}
+                  disabled={billingAction === "loading"}
+                  className="mono text-[11px] h-8 px-4 rounded-md transition-opacity hover:opacity-80 disabled:opacity-50 shrink-0"
+                  style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+                >
+                  Reactivate
+                </button>
               </div>
+            )}
+
+            {/* Error banner */}
+            {billingAction === "error" && (
+              <div className="border rounded-md p-3 mb-5 mono text-[11px]"
+                style={{ borderColor: "var(--kill)", color: "var(--kill)", background: "color-mix(in srgb, var(--kill) 8%, transparent)" }}>
+                Something went wrong. Please try again.
+              </div>
+            )}
+
+            {/* Plan cards */}
+            <div className="flex flex-col gap-3 mb-5">
+              {availablePlans.map((ap) => {
+                const isCurrent = plan === ap.id;
+                const isCurrentMonthly = isCurrent && billingInterval === 'monthly';
+                const isCurrentAnnual = isCurrent && billingInterval === 'annual';
+                const canUpgrade = ap.id === 'pro_plus' && plan === 'pro';
+                const canDowngrade = ap.id === 'pro' && plan === 'pro_plus';
+
+                return (
+                  <div
+                    key={ap.id}
+                    className="border rounded-md p-5"
+                    style={{
+                      borderColor: isCurrent ? "var(--accent)" : "var(--border)",
+                      background: "var(--surface)",
+                    }}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="display text-[17px] font-semibold text-(--t1)">{ap.label}</span>
+                          {isCurrent && (
+                            <span className="mono text-[9px] uppercase tracking-[0.12em] px-2 py-0.5 rounded"
+                              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}>
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <div className="mono text-[11px]" style={{ color: "var(--t2)" }}>
+                          €{ap.monthlyEur}/mo billed monthly
+                          {" · "}€{ap.annualEquivalentEur}/mo billed annually (€{ap.annualTotalEur}/yr)
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 shrink-0">
+                        {/* Free → paid: checkout */}
+                        {!isPaid && (
+                          <>
+                            <button
+                              onClick={() => handleCheckout(ap.monthlyPriceId)}
+                              disabled={billingAction === "loading" || !ap.monthlyPriceId}
+                              className="mono text-[11px] h-8 px-4 rounded-md transition-opacity hover:opacity-80 disabled:opacity-50"
+                              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+                            >
+                              Monthly →
+                            </button>
+                            <button
+                              onClick={() => handleCheckout(ap.annualPriceId)}
+                              disabled={billingAction === "loading" || !ap.annualPriceId}
+                              className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                              style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                            >
+                              Annual (save 18%) →
+                            </button>
+                          </>
+                        )}
+
+                        {/* Current plan: switch interval */}
+                        {isCurrent && (
+                          isCurrentMonthly ? (
+                            <button
+                              onClick={() => handleChangePlan(ap.annualPriceId)}
+                              disabled={billingAction === "loading" || !ap.annualPriceId}
+                              className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                              style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                            >
+                              Switch to Annual (save 18%)
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleChangePlan(ap.monthlyPriceId)}
+                              disabled={billingAction === "loading" || !ap.monthlyPriceId}
+                              className="mono text-[11px] h-8 px-4 rounded-md border transition-colors disabled:opacity-50"
+                              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                            >
+                              Switch to Monthly
+                            </button>
+                          )
+                        )}
+
+                        {/* Upgrade Pro → Pro+ */}
+                        {canUpgrade && (
+                          <>
+                            <button
+                              onClick={() => handleChangePlan(ap.monthlyPriceId)}
+                              disabled={billingAction === "loading" || !ap.monthlyPriceId}
+                              className="mono text-[11px] h-8 px-4 rounded-md transition-opacity hover:opacity-80 disabled:opacity-50"
+                              style={{ background: "var(--validated)", color: "#000" }}
+                            >
+                              Upgrade monthly →
+                            </button>
+                            <button
+                              onClick={() => handleChangePlan(ap.annualPriceId)}
+                              disabled={billingAction === "loading" || !ap.annualPriceId}
+                              className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--validated)] disabled:opacity-50"
+                              style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                            >
+                              Upgrade annual →
+                            </button>
+                          </>
+                        )}
+
+                        {/* Downgrade Pro+ → Pro */}
+                        {canDowngrade && (
+                          <>
+                            <button
+                              onClick={() => handleChangePlan(billingInterval === 'annual' ? ap.annualPriceId : ap.monthlyPriceId)}
+                              disabled={billingAction === "loading"}
+                              className="mono text-[11px] h-8 px-4 rounded-md border transition-colors disabled:opacity-50"
+                              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                            >
+                              Downgrade to Pro
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Free plan card — shown only for paid users (downgrade option) */}
+              {isPaid && (
+                <div className="border rounded-md p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <span className="display text-[17px] font-semibold text-(--t1)">Free</span>
+                      <div className="mono text-[11px] mt-1" style={{ color: "var(--t2)" }}>
+                        €0 · 1 validation/month · 1 seat
+                      </div>
+                    </div>
+                    {!cancelAtPeriodEnd && (
+                      cancelConfirm ? (
+                        <div className="flex items-center gap-2">
+                          <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>Are you sure?</span>
+                          <button
+                            onClick={handleCancel}
+                            disabled={billingAction === "loading"}
+                            className="mono text-[11px] h-8 px-4 rounded-md transition-opacity hover:opacity-80 disabled:opacity-50"
+                            style={{ background: "var(--kill)", color: "#fff" }}
+                          >
+                            Yes, cancel
+                          </button>
+                          <button
+                            onClick={() => setCancelConfirm(false)}
+                            className="mono text-[11px] h-8 px-3 rounded-md border"
+                            style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                          >
+                            Never mind
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setCancelConfirm(true)}
+                          className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--kill)] hover:text-[var(--kill)] disabled:opacity-50"
+                          style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                        >
+                          Cancel subscription
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Usage */}
