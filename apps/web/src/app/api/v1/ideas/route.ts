@@ -123,6 +123,7 @@ export async function POST(req: Request) {
   const result = await container.createIdeaUseCase.execute({
     userId,
     text: parsed.data.text,
+    teamId: parsed.data.teamId ?? null,
     traceId,
   });
 

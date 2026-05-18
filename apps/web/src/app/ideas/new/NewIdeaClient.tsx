@@ -9,12 +9,21 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 const CATEGORIES = ["SaaS", "Consumer", "Marketplace", "Hardware", "Service", "Other"] as const;
 
-export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) {
+export function NewIdeaClient({
+  validationsLeft,
+  teamId,
+  teamName,
+}: {
+  validationsLeft: number;
+  teamId?: string | null;
+  teamName?: string | null;
+}) {
   const router = useRouter();
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [cat, setCat] = useState<string | null>(null);
+  const [context, setContext] = useState<"personal" | "team">("personal");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -43,13 +52,16 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
       ? `${title.trim()}\n\n${desc.trim()}\n\nCategory: ${cat}`
       : `${title.trim()}\n\n${desc.trim()}`;
 
+    const body: { text: string; teamId?: string } = { text };
+    if (context === "team" && teamId) body.teamId = teamId;
+
     const res = await fetch("/api/v1/ideas", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${session.access_token}`,
       },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify(body),
     });
 
     const json = await res.json();
@@ -130,6 +142,35 @@ export function NewIdeaClient({ validationsLeft }: { validationsLeft: number }) 
           >
             step 01 · idea validator
           </div>
+
+          {/* Context toggle — only shown for paid users with a team */}
+          {teamId && teamName && (
+            <div className="flex items-center gap-2 mb-8">
+              <span className="mono text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>
+                Context
+              </span>
+              <div className="flex rounded-md border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+                {(["personal", "team"] as const).map((ctx) => {
+                  const active = context === ctx;
+                  return (
+                    <button
+                      key={ctx}
+                      type="button"
+                      onClick={() => setContext(ctx)}
+                      className="px-4 h-8 text-[12px] transition-all"
+                      style={{
+                        background: active ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "transparent",
+                        color: active ? "var(--accent)" : "var(--t3)",
+                        borderRight: ctx === "personal" ? "1px solid var(--border)" : "none",
+                      }}
+                    >
+                      {ctx === "team" ? teamName : "Personal"}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Q1 — idea */}
           <label className="block">

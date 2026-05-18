@@ -50,6 +50,33 @@ describe('CreateIdeaUseCase', () => {
     }));
   });
 
+  it('passes teamId to saved idea when provided', async () => {
+    const teamId = crypto.randomUUID();
+    const repo = makeRepo({
+      save: vi.fn().mockImplementation((idea) => Promise.resolve(ok(idea))),
+    });
+    const bus = makeEventBus();
+    const useCase = new CreateIdeaUseCase(repo, bus);
+
+    const result = await useCase.execute({ ...validInput, teamId });
+
+    expect(result.isOk()).toBe(true);
+    expect(repo.save).toHaveBeenCalledWith(expect.objectContaining({ teamId }));
+  });
+
+  it('saves idea without teamId when not provided', async () => {
+    const repo = makeRepo({
+      save: vi.fn().mockImplementation((idea) => Promise.resolve(ok(idea))),
+    });
+    const bus = makeEventBus();
+    const useCase = new CreateIdeaUseCase(repo, bus);
+
+    const result = await useCase.execute(validInput);
+
+    expect(result.isOk()).toBe(true);
+    expect(repo.save).toHaveBeenCalledWith(expect.objectContaining({ teamId: null }));
+  });
+
   it('returns domain error when idea text is too short', async () => {
     const repo = makeRepo();
     const bus = makeEventBus();
