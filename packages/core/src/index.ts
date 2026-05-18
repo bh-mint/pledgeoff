@@ -30,6 +30,7 @@ export * from './ports/llm-client';
 export * from './ports/source-adapter';
 export * from './ports/audit-log';
 export * from './ports/cache';
+export * from './ports/embedding-client';
 
 // Use cases
 export * from './use-cases/create-idea';
