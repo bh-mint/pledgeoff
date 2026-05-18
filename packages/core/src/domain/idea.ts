@@ -32,6 +32,7 @@ export type CreateIdeaError = IdeaTooShortError | IdeaTooLongError;
 export function createIdea(input: {
   userId: string;
   text: string;
+  teamId?: string | null;
 }): Result<Idea, CreateIdeaError> {
   const trimmed = input.text.trim();
   if (trimmed.length < 10) return err(new IdeaTooShortError());
@@ -40,6 +41,7 @@ export function createIdea(input: {
   return ok({
     id: crypto.randomUUID(),
     userId: input.userId,
+    teamId: input.teamId ?? null,
     text: trimmed,
     createdAt: new Date().toISOString(),
   });

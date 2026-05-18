@@ -7,6 +7,7 @@ export interface CreateIdeaInput {
   readonly userId: string;
   readonly text: string;
   readonly traceId: string;
+  readonly teamId?: string | null;
 }
 
 export type CreateIdeaUseCaseError = CreateIdeaError | IdeaRepositoryError | EventBusError;
@@ -18,7 +19,7 @@ export class CreateIdeaUseCase {
   ) {}
 
   async execute(input: CreateIdeaInput): Promise<Result<Idea, CreateIdeaUseCaseError>> {
-    const ideaResult = createIdea({ userId: input.userId, text: input.text });
+    const ideaResult = createIdea({ userId: input.userId, text: input.text, teamId: input.teamId });
     if (ideaResult.isErr()) return err(ideaResult.error);
 
     const idea = ideaResult.value;

@@ -30,6 +30,7 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
       .insert({
         id: idea.id,
         user_id: idea.userId,
+        team_id: idea.teamId ?? null,
         text: idea.text,
         created_at: idea.createdAt,
       })

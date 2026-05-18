@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const CreateIdeaRequestSchema = z.object({
   text: z.string().min(10).max(2000),
+  teamId: z.string().uuid().nullable().optional(),
 });
 
 export type CreateIdeaRequest = z.infer<typeof CreateIdeaRequestSchema>;
