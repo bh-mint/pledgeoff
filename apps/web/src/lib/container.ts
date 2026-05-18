@@ -83,9 +83,35 @@ function buildContainer() {
   const ideaReactionRepo = new SupabaseIdeaReactionRepository(supabase);
 
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+  // Guard: dev must never use live Stripe keys (would charge real money)
+  if (process.env.NODE_ENV !== 'production' && stripeSecretKey?.startsWith('sk_live_')) {
+    throw new Error(
+      '[ENV GUARD] Development environment is using Stripe LIVE keys. ' +
+      'Use sk_test_... in .env.local to avoid real charges.',
+    );
+  }
+  // Guard: prod should not use test keys (soft warn — allows testing period before go-live)
   if (process.env.NODE_ENV === 'production' && stripeSecretKey?.startsWith('sk_test_')) {
     console.warn('[container] WARNING: Production is using Stripe test keys. Set STRIPE_SECRET_KEY to sk_live_... before going live.');
   }
+
+  // Startup validation: all price IDs must be present when Stripe is configured (§17.5)
+  if (stripeSecretKey) {
+    const requiredStripeEnvs = [
+      'STRIPE_WEBHOOK_SECRET',
+      'STRIPE_PRO_MONTHLY_PRICE_ID',
+      'STRIPE_PRO_ANNUAL_PRICE_ID',
+      'STRIPE_PRO_PLUS_MONTHLY_PRICE_ID',
+      'STRIPE_PRO_PLUS_ANNUAL_PRICE_ID',
+    ] as const;
+    for (const name of requiredStripeEnvs) {
+      if (!process.env[name]) {
+        throw new Error(`[ENV GUARD] Stripe is configured but ${name} is missing. Add it to .env.local or Vercel env vars.`);
+      }
+    }
+  }
+
   const stripeMode = stripeSecretKey?.startsWith('sk_live_') ? 'live' : stripeSecretKey ? 'test' : 'disabled';
   console.info(`[container] Stripe mode: ${stripeMode}`);
   const stripeAdapter = stripeSecretKey ? new StripeAdapter(stripeSecretKey) : null;
