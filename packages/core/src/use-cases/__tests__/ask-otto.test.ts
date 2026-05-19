@@ -1,11 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { ok, err } from 'neverthrow';
 import { AskOttoUseCase, OttoInsufficientQuestionsError, OttoUnavailableError } from '../ask-otto';
 import type { IOttoConversationRepository } from '../../ports/otto-conversation-repository';
 import type { ISubscriptionRepository } from '../../ports/subscription-repository';
 import type { ILLMClient } from '../../ports/llm-client';
-import { OttoConversationRepositoryError } from '../../ports/otto-conversation-repository';
-import { SubscriptionRepositoryError } from '../../ports/subscription-repository';
 import { LLMClientError } from '../../ports/llm-client';
 import type { Subscription } from '../../domain/subscription';
 
@@ -41,14 +39,9 @@ const makeInput = () => ({
 
 function makeRepos(subOverride?: Partial<Subscription>) {
   const sub = makeProSub(subOverride);
-  let savedConv: ReturnType<typeof import('../../domain/otto-conversation').createOttoConversation> | null = null;
-
   const ottoRepo: IOttoConversationRepository = {
     findByUserAndIdea: vi.fn().mockResolvedValue(ok(null)),
-    save: vi.fn().mockImplementation((conv) => {
-      savedConv = conv;
-      return Promise.resolve(ok(conv));
-    }),
+    save: vi.fn().mockImplementation((conv) => Promise.resolve(ok(conv))),
   };
 
   const subRepo: ISubscriptionRepository = {

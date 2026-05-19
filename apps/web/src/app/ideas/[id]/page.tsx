@@ -8,6 +8,7 @@ import { IdeaPageClient } from "./IdeaPageClient";
 import { FooterMicro } from "@/components/FooterMicro";
 import { formatDate } from "@/lib/mdx-utils";
 import { ExportButtons } from "./ExportButtons";
+import OttoChat from "@/components/OttoChat";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -129,6 +130,17 @@ export default async function IdeaPage({ params }: Props) {
           initialBuild={initialBuild}
           initialCompetitors={initialCompetitors}
         />
+
+        {decision && (
+          <OttoChat
+            userId={user.id}
+            ideaId={idea.id}
+            ideaText={idea.text}
+            verdict={decision.verdict}
+            reasoning={decision.reasoning}
+            score={decision.score ?? 0}
+          />
+        )}
       </div>
       <FooterMicro />
     </div>
