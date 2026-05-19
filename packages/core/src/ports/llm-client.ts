@@ -103,6 +103,25 @@ export interface LLMRelevanceResponse {
   readonly scores: ReadonlyArray<{ readonly id: string; readonly score: number }>;
 }
 
+export interface LLMOttoMessage {
+  readonly role: 'user' | 'assistant';
+  readonly content: string;
+}
+
+export interface LLMOttoRequest {
+  readonly ideaText: string;
+  readonly verdict: string;
+  readonly reasoning: string;
+  readonly score: number;
+  readonly history: LLMOttoMessage[];
+  readonly userMessage: string;
+  readonly traceId: string;
+}
+
+export interface LLMOttoResponse {
+  readonly reply: string;
+}
+
 export class LLMClientError extends Error {
   readonly code = 'LLM_CLIENT_ERROR' as const;
 }
@@ -116,4 +135,5 @@ export interface ILLMClient {
   analyzeCustomers(request: LLMCustomerRequest): Promise<Result<LLMCustomerResponse, LLMClientError>>;
   analyzeBuild(request: LLMBuildRequest): Promise<Result<LLMBuildResponse, LLMClientError>>;
   analyzeCompetitors(request: LLMCompetitorRequest): Promise<Result<LLMCompetitorResponse, LLMClientError>>;
+  chatWithOtto(request: LLMOttoRequest): Promise<Result<LLMOttoResponse, LLMClientError>>;
 }
