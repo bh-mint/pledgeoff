@@ -72,14 +72,14 @@ describe('UpdateTeamSeatsUseCase', () => {
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamSeatsPlanError);
   });
 
-  it('rejects when subscription is not active (past_due)', async () => {
-    const sub = makeSub({ status: 'past_due' });
+  it('allows seat update when subscription is past_due (grace period active)', async () => {
+    const sub = makeSub({ status: 'past_due', plan: 'pro_plus' });
     const repo = mockRepo({ findByUserId: async () => ok(sub) });
     const useCase = new UpdateTeamSeatsUseCase(repo);
     const result = await useCase.execute(baseInput);
 
-    expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamSeatsPlanError);
+    // past_due is included in isActivePlan — grace period of 24h applies
+    expect(result.isOk()).toBe(true);
   });
 
   it('rejects when user has no subscription at all', async () => {

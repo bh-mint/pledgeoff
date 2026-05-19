@@ -41,4 +41,8 @@ export interface ISubscriptionRepository {
   updateExtraSeats(input: SubscriptionSeatUpdateInput): Promise<Result<Subscription, SubscriptionRepositoryError>>;
   setPastDueSince(userId: string, since: string): Promise<Result<void, SubscriptionRepositoryError>>;
   downgradeToFree(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
+  deductOttoQuestion(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
+  addOttoPurchasedQuestions(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>>;
+  resetOttoIncludedUsed(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
+  resetAllOttoIncludedUsed(): Promise<Result<void, SubscriptionRepositoryError>>;
 }
