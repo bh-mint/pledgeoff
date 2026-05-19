@@ -18,6 +18,7 @@ const makeSubscription = (overrides: Partial<Subscription> = {}): Subscription =
   extraSeats: 0,
   stripeExtraSeatItemId: null,
   pastDueSince: null,
+    ottoIncludedUsed: 0, ottoIncludedResetAt: null, ottoPurchased: 0,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   ...overrides,
@@ -37,6 +38,10 @@ function makeMockRepo(overrides: Partial<ISubscriptionRepository> = {}): ISubscr
       ok(makeSubscription({ userId: input.userId, extraSeats: input.extraSeats })),
     setPastDueSince: async () => ok(undefined),
     downgradeToFree: async () => ok(undefined),
+    deductOttoQuestion: async () => ok(undefined),
+    addOttoPurchasedQuestions: async () => ok(undefined),
+    resetOttoIncludedUsed: async () => ok(undefined),
+    resetAllOttoIncludedUsed: async () => ok(undefined),
     ...overrides,
   };
 }

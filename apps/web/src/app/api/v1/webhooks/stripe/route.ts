@@ -57,7 +57,26 @@ export async function POST(req: Request) {
           client_reference_id?: string;
           customer?: string;
           subscription?: string;
+          metadata?: Record<string, string>;
+          mode?: string;
         };
+
+        // Otto pack purchase (one-time payment mode)
+        if (session.metadata?.type === 'otto_pack') {
+          const userId = session.metadata?.userId;
+          const questionCount = parseInt(session.metadata?.ottoPackQuestions ?? '0', 10);
+          if (!userId || questionCount <= 0) {
+            logger.warn({ traceId, metadata: session.metadata }, 'webhook.stripe.otto_pack_missing_metadata');
+            break;
+          }
+          const addResult = await container.subscriptionRepo.addOttoPurchasedQuestions(userId, questionCount);
+          if (addResult.isErr()) {
+            logger.error({ traceId, userId, questionCount, error: String(addResult.error) }, 'webhook.stripe.otto_pack_add_failed');
+            return new Response('Failed to add Otto questions', { status: 500 });
+          }
+          logger.info({ traceId, userId, questionCount }, 'webhook.stripe.otto_pack_purchased');
+          break;
+        }
 
         const userId = session.client_reference_id;
         if (!userId) {

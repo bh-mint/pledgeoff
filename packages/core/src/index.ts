@@ -51,3 +51,7 @@ export * from './use-cases/update-team-name';
 export * from './use-cases/update-team-seats';
 export * from './use-cases/react-to-idea';
 export * from './ports/idea-reaction-repository';
+export * from './domain/otto-conversation';
+export * from './ports/otto-conversation-repository';
+export * from './use-cases/ask-otto';
+export * from './use-cases/get-otto-balance';

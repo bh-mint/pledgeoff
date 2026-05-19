@@ -31,6 +31,7 @@ function makeLLMClient(response = llmResponse): ILLMClient {
     generateSimulation: vi.fn(),
     generateLanding: vi.fn().mockResolvedValue(ok(response)),
     analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(),
+    chatWithOtto: vi.fn(),
   };
 }
 
@@ -78,6 +79,7 @@ describe('GenerateLandingUseCase', () => {
       generateSimulation: vi.fn(),
       generateLanding: vi.fn().mockResolvedValue(err(new LLMClientError('timeout'))),
       analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(),
+    chatWithOtto: vi.fn(),
     };
     const useCase = new GenerateLandingUseCase(makeLandingRepo(), llm);
 

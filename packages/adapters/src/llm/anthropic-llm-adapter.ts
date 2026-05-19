@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -12,6 +12,7 @@ import { buildBuildPrompt, BUILD_PROMPT_VERSION } from './build-prompt.v1';
 import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './search-queries-prompt.v1';
 import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
 import { buildRelevancePrompt, RELEVANCE_PROMPT_VERSION } from './relevance-prompt.v1';
+import { buildOttoSystemPrompt } from './otto-prompt.v1';
 
 const log = createLogger({ adapter: 'anthropic' });
 const tracer = getTracer('anthropic-llm-adapter');
@@ -293,6 +294,47 @@ export class AnthropicLLMAdapter implements ILLMClient {
       }
       span.end();
       return result;
+    });
+  }
+
+  async chatWithOtto(request: LLMOttoRequest): Promise<Result<LLMOttoResponse, LLMClientError>> {
+    return tracer.startActiveSpan('anthropic.chat-with-otto', async (span) => {
+      span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': 'claude-haiku-4-5-20251001', 'otto.history_length': request.history.length });
+      const start = Date.now();
+      try {
+        const systemPrompt = buildOttoSystemPrompt(request.ideaText, request.verdict, request.reasoning, request.score);
+        const messages: Anthropic.MessageParam[] = [
+          ...request.history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+          { role: 'user', content: request.userMessage },
+        ];
+
+        const message = await this.client.messages.create({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1024,
+          temperature: 0.7,
+          system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+          messages,
+        });
+
+        const content = message.content[0];
+        if (!content || content.type !== 'text') {
+          span.setStatus({ code: SpanStatusCode.ERROR, message: 'empty response' });
+          span.end();
+          return err(new LLMClientError('Empty response from Otto LLM'));
+        }
+
+        const cacheStats = message.usage as { cache_creation_input_tokens?: number; cache_read_input_tokens?: number };
+        log.info({ traceId: request.traceId, target: 'anthropic', operation: 'chatWithOtto', latencyMs: Date.now() - start, outcome: 'success', inputTokens: message.usage.input_tokens, outputTokens: message.usage.output_tokens, cacheRead: cacheStats.cache_read_input_tokens ?? 0 }, 'Otto chat succeeded');
+        span.setStatus({ code: SpanStatusCode.OK });
+        span.end();
+        return ok({ reply: content.text.trim() });
+      } catch (error) {
+        const msg = error instanceof Error ? error.message : 'unknown error';
+        log.error({ traceId: request.traceId, target: 'anthropic', operation: 'chatWithOtto', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'API_ERROR' }, `Otto API error: ${msg}`);
+        span.setStatus({ code: SpanStatusCode.ERROR, message: msg });
+        span.end();
+        return err(new LLMClientError(`Anthropic API error: ${msg}`));
+      }
     });
   }
 

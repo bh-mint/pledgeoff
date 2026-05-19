@@ -243,4 +243,36 @@ export class StripeAdapter {
       return err(new StripeAdapterError('Failed to pay latest invoice', e));
     }
   }
+
+  async createOttoPackCheckoutSession(input: {
+    userId: string;
+    userEmail: string;
+    priceId: string;
+    questionCount: number;
+    successUrl: string;
+    cancelUrl: string;
+    stripeCustomerId?: string | null;
+  }): Promise<Result<CheckoutSession, StripeAdapterError>> {
+    try {
+      const params: Stripe.Checkout.SessionCreateParams = {
+        mode: 'payment',
+        line_items: [{ price: input.priceId, quantity: 1 }],
+        success_url: input.successUrl,
+        cancel_url: input.cancelUrl,
+        customer_email: input.stripeCustomerId ? undefined : input.userEmail,
+        customer: input.stripeCustomerId ?? undefined,
+        metadata: {
+          userId: input.userId,
+          ottoPackQuestions: String(input.questionCount),
+          type: 'otto_pack',
+        },
+      };
+
+      const session = await this.stripe.checkout.sessions.create(params);
+      if (!session.url) return err(new StripeAdapterError('No checkout URL returned'));
+      return ok({ id: session.id, url: session.url });
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to create Otto pack checkout session', e));
+    }
+  }
 }

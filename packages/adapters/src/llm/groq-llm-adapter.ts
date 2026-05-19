@@ -358,4 +358,9 @@ export class GroqLLMAdapter implements ILLMClient {
       return err(new LLMClientError(`Groq API error: ${message}`));
     }
   }
+
+  // Otto uses Anthropic Haiku — Groq adapter does not support chat
+  async chatWithOtto(): Promise<Result<never, LLMClientError>> {
+    return err(new LLMClientError('chatWithOtto is not supported by GroqLLMAdapter — use AnthropicLLMAdapter'));
+  }
 }

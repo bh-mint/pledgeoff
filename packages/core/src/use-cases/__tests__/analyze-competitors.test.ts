@@ -70,6 +70,7 @@ function makeLLM(response = llmResponse): ILLMClient {
     generateSimulation: vi.fn(), generateLanding: vi.fn(),
     analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(),
     analyzeCompetitors: vi.fn().mockResolvedValue(ok(response)),
+    chatWithOtto: vi.fn(),
   };
 }
 
@@ -128,6 +129,7 @@ describe('AnalyzeCompetitorsUseCase', () => {
       generateSimulation: vi.fn(), generateLanding: vi.fn(),
       analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(),
       analyzeCompetitors: vi.fn().mockResolvedValue(err(llmError)),
+      chatWithOtto: vi.fn(),
     };
     const useCase = new AnalyzeCompetitorsUseCase(makeRepo(), makeSignalRepo(), llm);
 
