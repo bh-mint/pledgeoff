@@ -17,43 +17,6 @@ type Props = {
 };
 
 export function TeamSection({ plan, subscriptionStatus }: Props) {
-  if (subscriptionStatus === "past_due") {
-    return (
-      <div style={{ background: "#1a1008", border: "1px solid #7a4a00", borderRadius: 8, padding: "20px 24px" }}>
-        <p style={{ margin: "0 0 4px", fontSize: 11, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: "#a06020" }}>
-          PAYMENT FAILED
-        </p>
-        <p style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 600, color: "#f5f5f5" }}>
-          Team access suspended
-        </p>
-        <p style={{ margin: "0 0 16px", fontSize: 13, color: "#aaa", lineHeight: 1.6 }}>
-          Your Pro subscription payment failed. Team features are locked until the payment is resolved.
-          If not resolved within 24 hours, your account will be downgraded to the Free plan.
-        </p>
-        <a
-          href="/settings"
-          onClick={async (e) => {
-            e.preventDefault();
-            const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
-            const supabase = createSupabaseBrowserClient();
-            const { data: session } = await supabase.auth.getSession();
-            if (!session.session) return;
-            const res = await fetch("/api/v1/billing/portal", {
-              method: "POST",
-              headers: { Authorization: `Bearer ${session.session.access_token}` },
-            });
-            if (res.ok) {
-              const json = await res.json() as { data: { url: string } };
-              window.location.href = json.data.url;
-            }
-          }}
-          style={{ display: "inline-block", background: "#b6f04c", color: "#000", fontSize: 13, fontWeight: 600, padding: "10px 20px", borderRadius: 6, textDecoration: "none" }}
-        >
-          Update payment method →
-        </a>
-      </div>
-    );
-  }
   const [data, setData] = useState<TeamData | null>(null);
   const [loading, setLoading] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -85,6 +48,44 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void fetchTeam(); }, [fetchTeam]);
+
+  if (subscriptionStatus === "past_due") {
+    return (
+      <div style={{ background: "#1a1008", border: "1px solid #7a4a00", borderRadius: 8, padding: "20px 24px" }}>
+        <p style={{ margin: "0 0 4px", fontSize: 11, fontFamily: "monospace", textTransform: "uppercase", letterSpacing: "0.08em", color: "#a06020" }}>
+          PAYMENT FAILED
+        </p>
+        <p style={{ margin: "0 0 12px", fontSize: 15, fontWeight: 600, color: "#f5f5f5" }}>
+          Team access suspended
+        </p>
+        <p style={{ margin: "0 0 16px", fontSize: 13, color: "#aaa", lineHeight: 1.6 }}>
+          Your Pro subscription payment failed. Team features are locked until the payment is resolved.
+          If not resolved within 24 hours, your account will be downgraded to the Free plan.
+        </p>
+        <a
+          href="/settings"
+          onClick={async (e) => {
+            e.preventDefault();
+            const { createSupabaseBrowserClient: createClient } = await import("@/lib/supabase/client");
+            const supabase = createClient();
+            const { data: session } = await supabase.auth.getSession();
+            if (!session.session) return;
+            const res = await fetch("/api/v1/billing/portal", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${session.session.access_token}` },
+            });
+            if (res.ok) {
+              const json = await res.json() as { data: { url: string } };
+              window.location.assign(json.data.url);
+            }
+          }}
+          style={{ display: "inline-block", background: "#b6f04c", color: "#000", fontSize: 13, fontWeight: 600, padding: "10px 20px", borderRadius: 6, textDecoration: "none" }}
+        >
+          Update payment method →
+        </a>
+      </div>
+    );
+  }
 
   const handleInvite = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
