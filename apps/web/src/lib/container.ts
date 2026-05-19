@@ -13,6 +13,7 @@ import {
   SupabaseSubscriptionRepository,
   SupabaseTeamRepository,
   SupabaseIdeaReactionRepository,
+  SupabaseOttoConversationRepository,
   StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
@@ -44,6 +45,8 @@ import {
   UpdateTeamNameUseCase,
   UpdateTeamSeatsUseCase,
   ReactToIdeaUseCase,
+  AskOttoUseCase,
+  GetOttoBalanceUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -184,6 +187,13 @@ function buildContainer() {
   const updateTeamNameUseCase = new UpdateTeamNameUseCase(teamRepo);
   const updateTeamSeatsUseCase = new UpdateTeamSeatsUseCase(subscriptionRepo);
   const reactToIdeaUseCase = new ReactToIdeaUseCase(ideaReactionRepo);
+  const ottoConversationRepo = new SupabaseOttoConversationRepository(supabase);
+  // Otto always uses Anthropic Haiku regardless of LLM_PROVIDER
+  const ottoLLMClient = process.env.ANTHROPIC_API_KEY
+    ? new AnthropicLLMAdapter(process.env.ANTHROPIC_API_KEY, 'claude-haiku-4-5-20251001')
+    : llmClient;
+  const askOttoUseCase = new AskOttoUseCase(ottoConversationRepo, subscriptionRepo, ottoLLMClient);
+  const getOttoBalanceUseCase = new GetOttoBalanceUseCase(subscriptionRepo);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase → generate embeddings for new signals (fire-and-forget)
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -281,6 +291,8 @@ function buildContainer() {
     updateTeamNameUseCase,
     updateTeamSeatsUseCase,
     reactToIdeaUseCase,
+    askOttoUseCase,
+    getOttoBalanceUseCase,
     ideaRepo,
     eventBus,
     auditLog,

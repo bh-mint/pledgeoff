@@ -59,6 +59,7 @@ function makeLLMClient(queries = { devto: ['code review pull request automation'
     generateLanding: vi.fn(),
     analyzeCustomers: vi.fn(),
     analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(),
+    chatWithOtto: vi.fn(),
   };
 }
 

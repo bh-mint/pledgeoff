@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Subscription } from '@pledgeoff/core';
 import {
   SubscriptionRepositoryError,
+  PLAN_LIMITS,
   type ISubscriptionRepository,
   type SubscriptionUpsertInput,
   type SubscriptionSeatUpdateInput,
@@ -20,6 +21,9 @@ type SubscriptionRow = {
   extra_seats: number;
   stripe_extra_seat_item_id: string | null;
   past_due_since: string | null;
+  otto_included_used: number;
+  otto_included_reset_at: string | null;
+  otto_purchased: number;
   created_at: string;
   updated_at: string;
 };
@@ -36,6 +40,9 @@ function rowToSubscription(row: SubscriptionRow): Subscription {
     extraSeats: row.extra_seats ?? 0,
     stripeExtraSeatItemId: row.stripe_extra_seat_item_id ?? null,
     pastDueSince: row.past_due_since ?? null,
+    ottoIncludedUsed: row.otto_included_used ?? 0,
+    ottoIncludedResetAt: row.otto_included_reset_at ?? null,
+    ottoPurchased: row.otto_purchased ?? 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -168,6 +175,67 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
         updated_at: new Date().toISOString(),
       })
       .eq('user_id', userId);
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async deductOttoQuestion(userId: string): Promise<Result<void, SubscriptionRepositoryError>> {
+    const subResult = await this.findByUserId(userId);
+    if (subResult.isErr()) return err(subResult.error);
+    const sub = subResult.value;
+    if (!sub) return err(new SubscriptionRepositoryError('Subscription not found'));
+
+    // Deduct from included first, then purchased
+    const updatePayload: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const includedLimitForPlan = PLAN_LIMITS[sub.plan]?.ottoQuestionsPerMonth ?? 0;
+
+    if (sub.ottoIncludedUsed < includedLimitForPlan) {
+      updatePayload.otto_included_used = sub.ottoIncludedUsed + 1;
+    } else if (sub.ottoPurchased > 0) {
+      updatePayload.otto_purchased = sub.ottoPurchased - 1;
+    } else {
+      return err(new SubscriptionRepositoryError('No Otto questions remaining'));
+    }
+
+    const { error } = await this.client
+      .from('subscriptions')
+      .update(updatePayload)
+      .eq('user_id', userId);
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async addOttoPurchasedQuestions(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>> {
+    const subResult = await this.findByUserId(userId);
+    if (subResult.isErr()) return err(subResult.error);
+    const sub = subResult.value;
+
+    const current = sub?.ottoPurchased ?? 0;
+    const { error } = await this.client
+      .from('subscriptions')
+      .upsert({ user_id: userId, otto_purchased: current + count, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async resetOttoIncludedUsed(userId: string): Promise<Result<void, SubscriptionRepositoryError>> {
+    const { error } = await this.client
+      .from('subscriptions')
+      .update({ otto_included_used: 0, otto_included_reset_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .eq('user_id', userId);
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async resetAllOttoIncludedUsed(): Promise<Result<void, SubscriptionRepositoryError>> {
+    const { error } = await this.client
+      .from('subscriptions')
+      .update({ otto_included_used: 0, otto_included_reset_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+      .neq('plan', 'free');
 
     if (error) return err(new SubscriptionRepositoryError(error.message));
     return ok(undefined);

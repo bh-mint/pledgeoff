@@ -12,6 +12,7 @@ function makeSub(override?: Partial<Subscription>): Subscription {
     plan: 'pro_plus', status: 'active',
     currentPeriodEnd: null, extraSeats: 0, stripeExtraSeatItemId: null,
     pastDueSince: null,
+    ottoIncludedUsed: 0, ottoIncludedResetAt: null, ottoPurchased: 0,
     createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
     ...override,
   };
@@ -28,6 +29,10 @@ function mockRepo(overrides?: Partial<ISubscriptionRepository>): ISubscriptionRe
     updateExtraSeats: async (input: SubscriptionSeatUpdateInput) => ok(makeSub({ userId: input.userId, extraSeats: input.extraSeats })),
     setPastDueSince: async () => ok(undefined),
     downgradeToFree: async () => ok(undefined),
+    deductOttoQuestion: async () => ok(undefined),
+    addOttoPurchasedQuestions: async () => ok(undefined),
+    resetOttoIncludedUsed: async () => ok(undefined),
+    resetAllOttoIncludedUsed: async () => ok(undefined),
     ...overrides,
   };
 }

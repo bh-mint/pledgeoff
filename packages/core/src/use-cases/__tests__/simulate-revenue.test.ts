@@ -57,6 +57,7 @@ function makeLLMClient(response = llmResponse): ILLMClient {
     generateSimulation: vi.fn().mockResolvedValue(ok(response)),
     generateLanding: vi.fn(),
     analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(),
+    chatWithOtto: vi.fn(),
   };
 }
 
@@ -111,6 +112,7 @@ describe('SimulateRevenueUseCase', () => {
       generateSimulation: vi.fn().mockResolvedValue(err(llmError)),
       generateLanding: vi.fn(),
       analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(),
+    chatWithOtto: vi.fn(),
     };
     const useCase = new SimulateRevenueUseCase(makeSimulationRepo(), makeSignalRepo(), llm);
 
