@@ -94,7 +94,6 @@ export function SettingsClient({
   subscriptionStatus,
   ideasThisMonth,
   renewsAt,
-  stripeCustomerId,
   extraSeats: initialExtraSeats = 0,
   cancelAtPeriodEnd: initialCancelAtPeriodEnd = false,
   billingInterval = 'monthly',
