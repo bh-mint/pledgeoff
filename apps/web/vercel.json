@@ -15,6 +15,10 @@
     {
       "path": "/api/v1/cron/past-due-billing",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/v1/cron/reset-otto-balance",
+      "schedule": "1 0 1 * *"
     }
   ]
 }
