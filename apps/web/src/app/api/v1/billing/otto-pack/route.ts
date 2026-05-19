@@ -3,7 +3,6 @@ import { resolveUserId } from '@/lib/api-auth';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { container } from '@/lib/container';
 import { logger } from '@pledgeoff/observability';
-import { OTTO_PACK_SIZES, OTTO_PACK_PRICES_EUR } from '@pledgeoff/core';
 
 const OttoPackSchema = z.object({
   questionCount: z.union([z.literal(1), z.literal(3), z.literal(5), z.literal(10)]),
@@ -48,7 +47,6 @@ export async function POST(req: Request) {
   const { data: userData } = await createSupabaseServiceClient().auth.admin.getUserById(userId);
   const userEmail = userData?.user?.email ?? '';
 
-  const subResult = await container.getOttoBalanceUseCase.execute(userId);
   const stripeCustomerId = null; // Otto packs use payment mode, customer lookup via webhook metadata
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://pledgeoff.com';

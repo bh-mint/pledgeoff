@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { container } from '@/lib/container';
 import { logger } from '@pledgeoff/observability';
 import { resolveUserId } from '@/lib/api-auth';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
