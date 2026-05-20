@@ -107,16 +107,23 @@ export function DashboardClient({
     }
   }, [reactionState]);
 
+  const verdictCounts = useMemo(() => ({
+    GO:    rows.filter((r) => r.verdict === "GO").length,
+    KILL:  rows.filter((r) => r.verdict === "KILL").length,
+    PIVOT: rows.filter((r) => r.verdict === "PIVOT").length,
+  }), [rows]);
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return rows
       .filter((r) => !q || r.text.toLowerCase().includes(q))
+      .filter((r) => verdictFilter === "all" || r.verdict === verdictFilter)
       .sort((a, b) =>
         sort === "score"
           ? (b.score ?? -1) - (a.score ?? -1)
           : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
-  }, [rows, search, sort]);
+  }, [rows, search, sort, verdictFilter]);
 
   return (
     <>
@@ -218,6 +225,32 @@ export function DashboardClient({
               className="w-full sm:w-44 bg-transparent outline-none px-3 h-8 sm:h-7 text-[12px] rounded-md border"
               style={{ borderColor: "var(--border)", color: "var(--t1)" }}
             />
+            {/* Verdict filter chips */}
+            <div className="flex items-center gap-1 w-full sm:w-auto">
+              {([
+                { key: "all",   label: "All",  color: "var(--t2)" },
+                { key: "GO",    label: "GO",   color: "var(--validated)" },
+                { key: "KILL",  label: "KILL", color: "var(--kill)" },
+                { key: "PIVOT", label: "PIVOT",color: "var(--caution)" },
+              ] as const).map(({ key, label, color }) => {
+                const count = key === "all" ? rows.length : verdictCounts[key];
+                const active = verdictFilter === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setVerdictFilter(key)}
+                    className="mono text-[9px] px-2 h-6 rounded border transition-colors shrink-0"
+                    style={{
+                      borderColor: active ? color : "var(--border)",
+                      color: active ? color : "var(--t3)",
+                      background: active ? `color-mix(in srgb, ${color} 8%, transparent)` : "transparent",
+                    }}
+                  >
+                    {label} {count > 0 && <span style={{ opacity: 0.7 }}>{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Column headers — desktop only */}
