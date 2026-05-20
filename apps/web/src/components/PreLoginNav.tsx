@@ -59,6 +59,11 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
                 onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
                 About
               </Link>
+              <Link href="/enterprise" className="text-[13px] transition-colors" style={{ color: "var(--t2)" }}
+                onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
+                onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
+                Enterprise
+              </Link>
               {extraLink && (
                 <Link href={extraLink.href} className="text-[13px] transition-colors" style={{ color: "var(--t2)" }}
                   onMouseEnter={e => (e.currentTarget.style.color = "var(--t1)")}
