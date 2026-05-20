@@ -7,6 +7,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Plan, SubscriptionStatus } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import { TeamSection } from "./TeamSection";
+import { AuditLogSection } from "./AuditLogSection";
 
 type AvailablePlan = {
   id: 'pro' | 'pro_plus' | 'agency';
@@ -33,14 +34,23 @@ interface SettingsClientProps {
   cancelAtPeriodEnd?: boolean;
   billingInterval?: 'monthly' | 'annual';
   availablePlans?: AvailablePlan[];
+  auditEntries?: {
+    id: string;
+    action: string;
+    resource_type: string;
+    resource_id: string | null;
+    metadata: Record<string, unknown> | null;
+    created_at: string;
+  }[];
 }
 
-type SectionId = "account" | "billing" | "team" | "notifications" | "api" | "danger";
+type SectionId = "account" | "billing" | "team" | "activity" | "notifications" | "api" | "danger";
 
-const SECTIONS: Array<{ id: SectionId; label: string }> = [
+const SECTIONS: Array<{ id: SectionId; label: string; agencyOnly?: boolean }> = [
   { id: "account", label: "Account" },
   { id: "billing", label: "Billing" },
   { id: "team", label: "Team" },
+  { id: "activity", label: "Activity", agencyOnly: true },
   { id: "notifications", label: "Notifications" },
   { id: "api", label: "API" },
   { id: "danger", label: "Danger zone" },
@@ -100,6 +110,7 @@ export function SettingsClient({
   cancelAtPeriodEnd: initialCancelAtPeriodEnd = false,
   billingInterval = 'monthly',
   availablePlans = [],
+  auditEntries = [],
 }: SettingsClientProps) {
   const router = useRouter();
   const [section, setSection] = useState<SectionId>("account");
@@ -258,7 +269,7 @@ export function SettingsClient({
 
       {/* Mobile: horizontal tab row */}
       <div className="col-span-12 md:hidden flex gap-1 overflow-x-auto pb-2 border-b" style={{ borderColor: "var(--border)" }}>
-        {SECTIONS.map((s) => {
+        {SECTIONS.filter((s) => !s.agencyOnly || plan === 'agency').map((s) => {
           const active = section === s.id;
           return (
             <button
@@ -286,7 +297,7 @@ export function SettingsClient({
           settings
         </div>
         <nav className="flex flex-col">
-          {SECTIONS.map((s) => {
+          {SECTIONS.filter((s) => !s.agencyOnly || plan === 'agency').map((s) => {
             const active = section === s.id;
             return (
               <button
@@ -784,6 +795,13 @@ export function SettingsClient({
               {plan === "free" && " Upgrade to Pro for 3 seats, Pro+ for 10."}
             </p>
             <TeamSection plan={plan} subscriptionStatus={subscriptionStatus ?? null} />
+          </div>
+        )}
+
+        {/* ── Activity Log (Agency only) ── */}
+        {section === "activity" && plan === "agency" && (
+          <div>
+            <AuditLogSection entries={auditEntries} />
           </div>
         )}
 

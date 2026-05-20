@@ -73,6 +73,26 @@ export default async function SettingsPage() {
     },
   ];
 
+  // Fetch audit log for Agency plan (service role bypasses RLS)
+  type AuditRow = {
+    id: string;
+    action: string;
+    resource_type: string;
+    resource_id: string | null;
+    metadata: Record<string, unknown> | null;
+    created_at: string;
+  };
+  let auditEntries: AuditRow[] = [];
+  if (plan === 'agency') {
+    const { data } = await supabase
+      .from('audit_log')
+      .select('id, action, resource_type, resource_id, metadata, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    auditEntries = (data ?? []) as AuditRow[];
+  }
+
   const now = new Date();
   const ideasThisMonth = ideas.filter((idea) => {
     const d = new Date(idea.createdAt);
@@ -106,6 +126,7 @@ export default async function SettingsPage() {
           cancelAtPeriodEnd={cancelAtPeriodEnd}
           billingInterval={billingInterval}
           availablePlans={availablePlans}
+          auditEntries={auditEntries}
         />
       </div>
     </div>
