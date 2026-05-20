@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { VerdictMark } from "@/components/brand/VerdictMark";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { TeamAnalytics } from "@/components/TeamAnalytics";
 import type { Plan } from "@pledgeoff/core";
 
 export type ToolStatus = {
@@ -594,6 +595,9 @@ export function DashboardClient({
                     );
                   })}
                 </div>
+
+                {/* Team analytics */}
+                <TeamAnalytics rows={teamFeedRows} plan={plan} />
               </>
             );
           })()}
