@@ -116,6 +116,7 @@ export interface LLMOttoRequest {
   readonly history: LLMOttoMessage[];
   readonly userMessage: string;
   readonly traceId: string;
+  readonly userId?: string;
 }
 
 export interface LLMOttoResponse {

@@ -15,6 +15,7 @@ import {
   SupabaseIdeaReactionRepository,
   SupabaseOttoConversationRepository,
   SupabaseApiKeyRepository,
+  SupabaseUsageLogAdapter,
   StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
@@ -155,10 +156,12 @@ function buildContainer() {
       ? [new GoogleSearchSourceAdapter(process.env.GOOGLE_SEARCH_API_KEY, process.env.GOOGLE_SEARCH_ENGINE_ID, 10_000, 2, cache)]
       : []),
   ];
+  const usageLogger = new SupabaseUsageLogAdapter(supabase);
+
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
   const llmClient =
     llmProvider === 'anthropic'
-      ? new AnthropicLLMAdapter(requireEnv('ANTHROPIC_API_KEY'), process.env.ANTHROPIC_MODEL)
+      ? new AnthropicLLMAdapter(requireEnv('ANTHROPIC_API_KEY'), process.env.ANTHROPIC_MODEL, usageLogger)
       : new GroqLLMAdapter(requireEnv('GROQ_API_KEY'));
 
   const createIdeaUseCase = new CreateIdeaUseCase(ideaRepo, eventBus);
@@ -198,7 +201,7 @@ function buildContainer() {
   const ottoConversationRepo = new SupabaseOttoConversationRepository(supabase);
   // Otto always uses Anthropic Haiku regardless of LLM_PROVIDER
   const ottoLLMClient = process.env.ANTHROPIC_API_KEY
-    ? new AnthropicLLMAdapter(process.env.ANTHROPIC_API_KEY, 'claude-haiku-4-5-20251001')
+    ? new AnthropicLLMAdapter(process.env.ANTHROPIC_API_KEY, 'claude-haiku-4-5-20251001', usageLogger)
     : llmClient;
   const askOttoUseCase = new AskOttoUseCase(ottoConversationRepo, subscriptionRepo, ottoLLMClient);
   const getOttoBalanceUseCase = new GetOttoBalanceUseCase(subscriptionRepo);

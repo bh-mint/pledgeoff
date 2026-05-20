@@ -60,3 +60,4 @@ export * from './ports/IApiKeyRepository';
 export * from './use-cases/generate-api-key';
 export * from './use-cases/revoke-api-key';
 export * from './use-cases/list-api-keys';
+export * from './ports/IUsageLogger';

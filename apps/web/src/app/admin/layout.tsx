@@ -8,6 +8,7 @@ const NAV = [
   { href: '/admin/outbox',        label: 'Outbox' },
   { href: '/admin/otto',          label: 'Otto usage' },
   { href: '/admin/flags',         label: 'Feature flags' },
+  { href: '/admin/ai-cost',       label: 'AI cost' },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

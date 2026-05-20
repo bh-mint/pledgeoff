@@ -31,3 +31,4 @@ export { sendVerdictEmail, sendTeamInviteEmail, sendSequenceEmail, sendPaymentFa
 export type { VerdictEmailParams, TeamInviteEmailParams, SequenceEmailParams, SequenceDay, PaymentFailedEmailParams } from './email/resend-email-adapter';
 export { VoyageEmbeddingAdapter } from './embeddings/voyage-embedding-adapter';
 export { SupabaseApiKeyRepository } from './storage/supabase-api-key-repository';
+export { SupabaseUsageLogAdapter } from './storage/supabase-usage-log-adapter';

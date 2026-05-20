@@ -75,6 +75,7 @@ export class AskOttoUseCase {
       history: conversation.messages.map((m) => ({ role: m.role, content: m.content })),
       userMessage: input.userMessage,
       traceId: input.traceId,
+      userId: input.userId,
     });
 
     if (llmResult.isErr()) return err(new OttoUnavailableError('LLM call failed'));

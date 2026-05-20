@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, IUsageLogger } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -134,6 +134,17 @@ const LLMCompetitorResponseSchemaA = z.object({
 
 const TIMEOUT_MS = 60_000;
 
+const COST_PER_MILLION: Record<string, { input: number; output: number }> = {
+  'claude-haiku-4-5-20251001': { input: 0.80, output: 4.00 },
+  'claude-sonnet-4-6': { input: 3.00, output: 15.00 },
+  'claude-sonnet-4-6-20250514': { input: 3.00, output: 15.00 },
+};
+
+function computeCostUsd(model: string, inputTokens: number, outputTokens: number): number {
+  const rates = COST_PER_MILLION[model] ?? { input: 3.00, output: 15.00 };
+  return (inputTokens * rates.input + outputTokens * rates.output) / 1_000_000;
+}
+
 const DECISION_SYSTEM_PROMPT = `You are a startup decision intelligence engine using prompt version ${PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const SIMULATION_SYSTEM_PROMPT = `You are a startup revenue simulation engine using prompt version ${SIMULATION_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const LANDING_SYSTEM_PROMPT = `You are a conversion copywriter using prompt version ${LANDING_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
@@ -149,6 +160,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
   constructor(
     apiKey: string,
     private readonly model = 'claude-sonnet-4-6',
+    private readonly usageLogger?: IUsageLogger,
   ) {
     this.client = new Anthropic({ apiKey, timeout: TIMEOUT_MS });
   }
@@ -323,8 +335,29 @@ export class AnthropicLLMAdapter implements ILLMClient {
           return err(new LLMClientError('Empty response from Otto LLM'));
         }
 
+        const ottoModel = 'claude-haiku-4-5-20251001';
         const cacheStats = message.usage as { cache_creation_input_tokens?: number; cache_read_input_tokens?: number };
-        log.info({ traceId: request.traceId, target: 'anthropic', operation: 'chatWithOtto', latencyMs: Date.now() - start, outcome: 'success', inputTokens: message.usage.input_tokens, outputTokens: message.usage.output_tokens, cacheRead: cacheStats.cache_read_input_tokens ?? 0 }, 'Otto chat succeeded');
+        const inputTokens = message.usage.input_tokens;
+        const outputTokens = message.usage.output_tokens;
+        const cacheReadTokens = cacheStats.cache_read_input_tokens ?? 0;
+        const cacheWriteTokens = cacheStats.cache_creation_input_tokens ?? 0;
+        log.info({ traceId: request.traceId, target: 'anthropic', operation: 'chatWithOtto', latencyMs: Date.now() - start, outcome: 'success', inputTokens, outputTokens, cacheRead: cacheReadTokens }, 'Otto chat succeeded');
+
+        if (this.usageLogger) {
+          void this.usageLogger.log({
+            model: ottoModel,
+            provider: 'anthropic',
+            feature: 'otto',
+            inputTokens,
+            outputTokens,
+            cacheReadTokens,
+            cacheWriteTokens,
+            costUsd: computeCostUsd(ottoModel, inputTokens, outputTokens),
+            traceId: request.traceId,
+            userId: request.userId,
+          });
+        }
+
         span.setStatus({ code: SpanStatusCode.OK });
         span.end();
         return ok({ reply: content.text.trim() });
@@ -399,7 +432,25 @@ export class AnthropicLLMAdapter implements ILLMClient {
       }
 
       const cacheStats = message.usage as { cache_creation_input_tokens?: number; cache_read_input_tokens?: number };
-      log.info({ traceId, target: 'anthropic', operation, latencyMs: Date.now() - start, outcome: 'success', inputTokens: message.usage.input_tokens, outputTokens: message.usage.output_tokens, cacheCreated: cacheStats.cache_creation_input_tokens ?? 0, cacheRead: cacheStats.cache_read_input_tokens ?? 0 }, 'Anthropic call succeeded');
+      const inputTokens = message.usage.input_tokens;
+      const outputTokens = message.usage.output_tokens;
+      const cacheReadTokens = cacheStats.cache_read_input_tokens ?? 0;
+      const cacheWriteTokens = cacheStats.cache_creation_input_tokens ?? 0;
+      log.info({ traceId, target: 'anthropic', operation, latencyMs: Date.now() - start, outcome: 'success', inputTokens, outputTokens, cacheCreated: cacheWriteTokens, cacheRead: cacheReadTokens }, 'Anthropic call succeeded');
+
+      if (this.usageLogger) {
+        void this.usageLogger.log({
+          model: this.model,
+          provider: 'anthropic',
+          feature: operation,
+          inputTokens,
+          outputTokens,
+          cacheReadTokens,
+          cacheWriteTokens,
+          costUsd: computeCostUsd(this.model, inputTokens, outputTokens),
+          traceId,
+        });
+      }
 
       return ok(validated.data);
     } catch (error) {

@@ -18,7 +18,7 @@ const mockIdempotencyStore = {
 const mockAuditLog = { log: vi.fn() };
 const mockEventBus = { processOutbox: vi.fn() };
 
-vi.mock('@/lib/api-auth', () => ({ resolveUserId: mockResolveUserId }));
+vi.mock('@/lib/api-auth', () => ({ resolveUserId: mockResolveUserId, resolveUserIdFromRequest: mockResolveUserId }));
 vi.mock('@/server/billing/getUserPlan', () => ({ getUserPlan: mockGetUserPlan }));
 vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: mockCheckRateLimit }));
 vi.mock('next/server', async (importOriginal) => {
