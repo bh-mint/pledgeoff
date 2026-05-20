@@ -781,7 +781,7 @@ paths:
   /api/v1/teams:
     get:
       summary: Get team
-      description: Returns the team and memberships for the authenticated user, whether as owner or member. Returns `team: null` if not in a team.
+      description: "Returns the team and memberships for the authenticated user, whether as owner or member. Returns team: null if not in a team."
       tags: [Teams]
       responses:
         '200':
