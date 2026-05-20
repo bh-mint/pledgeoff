@@ -9,7 +9,10 @@ function priceIdToPlan(priceId: string): Plan {
   const annual = process.env.STRIPE_PRO_ANNUAL_PRICE_ID;
   const plusMonthly = process.env.STRIPE_PRO_PLUS_MONTHLY_PRICE_ID;
   const plusAnnual = process.env.STRIPE_PRO_PLUS_ANNUAL_PRICE_ID;
+  const agencyMonthly = process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID;
+  const agencyAnnual = process.env.STRIPE_AGENCY_ANNUAL_PRICE_ID;
 
+  if (priceId === agencyMonthly || priceId === agencyAnnual) return 'agency';
   if (priceId === plusMonthly || priceId === plusAnnual) return 'pro_plus';
   if (priceId === monthly || priceId === annual) return 'pro';
 

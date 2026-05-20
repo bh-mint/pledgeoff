@@ -34,9 +34,9 @@ export type Subscription = z.infer<typeof SubscriptionSchema>;
 
 export const PLAN_LIMITS = {
   free:     { verificationsPerMonth: 1,        seatsIncluded: 1,  ottoQuestionsPerMonth: 0  },
-  pro:      { verificationsPerMonth: 20,       seatsIncluded: 3,  ottoQuestionsPerMonth: 3  },
-  pro_plus: { verificationsPerMonth: Infinity, seatsIncluded: 10, ottoQuestionsPerMonth: 10 },
-  agency:   { verificationsPerMonth: Infinity, seatsIncluded: 5,  ottoQuestionsPerMonth: 20 },
+  pro:      { verificationsPerMonth: 50,       seatsIncluded: 1,  ottoQuestionsPerMonth: 5  },
+  pro_plus: { verificationsPerMonth: Infinity, seatsIncluded: 5,  ottoQuestionsPerMonth: 15 },
+  agency:   { verificationsPerMonth: Infinity, seatsIncluded: 10, ottoQuestionsPerMonth: 30 },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
 
 export const OTTO_PACK_SIZES = [1, 3, 5, 10] as const;

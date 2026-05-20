@@ -12,6 +12,8 @@ const PRO_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID
 const PRO_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID ?? "";
 const PRO_PLUS_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PLUS_MONTHLY_PRICE_ID ?? "";
 const PRO_PLUS_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PLUS_ANNUAL_PRICE_ID ?? "";
+const AGENCY_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_PRICE_ID ?? "";
+const AGENCY_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_AGENCY_ANNUAL_PRICE_ID ?? "";
 
 type FeatureRow = { k: string; f: string; p: string; pp: string; a: string; soon?: boolean };
 
@@ -19,7 +21,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Validation",
     rows: [
-      { k: "Validations / month",       f: "1",               p: "20",              pp: "Unlimited",       a: "Unlimited" },
+      { k: "Validations / month",       f: "1",               p: "50",              pp: "Unlimited",       a: "Unlimited" },
       { k: "Signal sources",            f: "Reddit + GitHub", p: "All 5 sources",   pp: "All 5 sources",   a: "All + custom" },
       { k: "Competitor Intelligence",   f: "—",               p: "✓",               pp: "✓",               a: "✓" },
       { k: "PDF / JSON export",         f: "—",               p: "✓",               pp: "✓",               a: "✓ · white-label" },
@@ -34,9 +36,15 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Team",
     rows: [
-      { k: "Seats included",            f: "1",               p: "3",               pp: "10",              a: "Custom" },
-      { k: "Extra seats",              f: "—",               p: "—",               pp: "€7/seat/mo",      a: "Negotiated" },
+      { k: "Seats included",            f: "1",               p: "1",               pp: "5",               a: "10" },
+      { k: "Extra seats",               f: "—",               p: "—",               pp: "€7/seat/mo",      a: "Negotiated" },
       { k: "Early access to features",  f: "—",               p: "—",               pp: "✓",               a: "✓" },
+    ],
+  },
+  {
+    group: "Otto AI",
+    rows: [
+      { k: "Otto questions / month",    f: "—",               p: "5",               pp: "15",              a: "30" },
     ],
   },
   {
@@ -195,6 +203,10 @@ export function PricingClient() {
   const proPlusSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.pro_plus.monthly.annual_total}/yr`;
   const proPlusPriceId = billing === "month" ? PRO_PLUS_MONTHLY_PRICE_ID : PRO_PLUS_ANNUAL_PRICE_ID;
 
+  const agencyPrice = billing === "month" ? String(PRICING.agency.monthly.eur) : String(PRICING.agency.monthly.annual_equivalent);
+  const agencySub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.agency.monthly.annual_total}/yr`;
+  const agencyPriceId = billing === "month" ? AGENCY_MONTHLY_PRICE_ID : AGENCY_ANNUAL_PRICE_ID;
+
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
       <PreLoginNav />
@@ -340,16 +352,13 @@ export function PricingClient() {
           <div className="p-6 flex flex-col" style={{ background: "var(--canvas)" }}>
             <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Agency</div>
             <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>vet client briefs</div>
-            <div className="display text-[42px] tnum font-semibold mb-0.5 leading-none" style={{ color: "var(--t1)" }}>—</div>
-            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>custom pricing</div>
+            <div className="flex items-baseline gap-1">
+              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{agencyPrice}</span>
+            </div>
+            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{agencySub}</div>
             <div className="mb-5">
-              <a
-                href="mailto:hello@pledgeoff.com"
-                className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
-                style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-              >
-                Contact us
-              </a>
+              <UpgradeButton priceId={agencyPriceId} label="Upgrade to Agency" />
+              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
               {([
@@ -357,7 +366,8 @@ export function PricingClient() {
                 { label: "All sources + custom" },
                 { label: "Competitor Intelligence" },
                 { label: "White-label reports", soon: true },
-                { label: "Custom team seats", soon: true },
+                { label: "10 team seats" },
+                { label: "30 Otto questions / mo" },
                 { label: "4h dedicated SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">

@@ -9,7 +9,7 @@ import { PLAN_LIMITS } from "@pledgeoff/core";
 import { TeamSection } from "./TeamSection";
 
 type AvailablePlan = {
-  id: 'pro' | 'pro_plus';
+  id: 'pro' | 'pro_plus' | 'agency';
   label: string;
   monthlyEur: number;
   annualEquivalentEur: number;

@@ -1,10 +1,14 @@
 export const PRICING = {
   pro: {
-    monthly: { eur: 39, annual_equivalent: 32, annual_total: 374 },
+    monthly: { eur: 149, annual_equivalent: 119, annual_total: 1428 },
     label: "Pro",
   },
   pro_plus: {
-    monthly: { eur: 79, annual_equivalent: 63, annual_total: 758 },
+    monthly: { eur: 249, annual_equivalent: 199, annual_total: 2388 },
     label: "Pro+",
+  },
+  agency: {
+    monthly: { eur: 499, annual_equivalent: 399, annual_total: 4788 },
+    label: "Agency",
   },
 } as const;
