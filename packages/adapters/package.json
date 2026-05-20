@@ -12,7 +12,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.93.0",
+    "@anthropic-ai/sdk": "^0.97.1",
     "@pledgeoff/core": "workspace:*",
     "@pledgeoff/observability": "workspace:*",
     "@supabase/supabase-js": "^2.49.4",
