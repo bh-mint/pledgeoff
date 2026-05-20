@@ -379,6 +379,24 @@ export function PricingClient() {
           </div>
         </div>
 
+        {/* Enterprise nudge */}
+        <div
+          className="mt-4 border rounded-md px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <div>
+            <span className="text-[13px] text-(--t1)">Need custom signal sources, SSO, DPA, or invoice billing?</span>
+            <span className="text-[12px] ml-2" style={{ color: "var(--t3)" }}>10+ seats · annual contract</span>
+          </div>
+          <a
+            href="/enterprise"
+            className="mono text-[11px] px-4 h-8 rounded-md border inline-flex items-center shrink-0 transition-colors"
+            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+          >
+            Enterprise →
+          </a>
+        </div>
+
         {/* Feature comparison table */}
         <div className="mt-12 sm:mt-16">
           <h2 className="display text-[24px] sm:text-[28px] font-semibold tracking-tight mb-2" style={{ color: "var(--t1)" }}>
