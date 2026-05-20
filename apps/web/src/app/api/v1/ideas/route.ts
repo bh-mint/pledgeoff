@@ -6,6 +6,7 @@ import { logger } from '@pledgeoff/observability';
 import { getUserPlan } from '@/server/billing/getUserPlan';
 import { PLAN_LIMITS } from '@pledgeoff/core';
 import { resolveUserId } from '@/lib/api-auth';
+import { classifyNiche } from '@/lib/niche-classifier';
 
 export const maxDuration = 60;
 
@@ -120,10 +121,13 @@ export async function POST(req: Request) {
     );
   }
 
+  const niche = classifyNiche(parsed.data.text);
+
   const result = await container.createIdeaUseCase.execute({
     userId,
     text: parsed.data.text,
     teamId: parsed.data.teamId ?? null,
+    niche,
     traceId,
   });
 
