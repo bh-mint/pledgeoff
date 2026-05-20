@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/v1/cron/process-outbox",
-      "schedule": "* * * * *"
+      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/v1/cron/cleanup",
@@ -14,7 +14,7 @@
     },
     {
       "path": "/api/v1/cron/past-due-billing",
-      "schedule": "0 * * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/v1/cron/reset-otto-balance",
