@@ -1,0 +1,1123 @@
+openapi: 3.1.0
+info:
+  title: PledgeOFF API
+  version: 1.0.0
+  description: Decision Intelligence Platform — internal API reference
+  contact:
+    url: https://pledgeoff.com
+
+servers:
+  - url: https://pledgeoff.com
+    description: Production
+  - url: https://staging.pledgeoff.com
+    description: Staging
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase JWT obtained from `supabase.auth.getSession()`
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid JWT
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHENTICATED
+              message: Valid authentication required
+
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+
+    Idea:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        text:
+          type: string
+        niche:
+          type: string
+        teamId:
+          type: string
+          format: uuid
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Decision:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+        ideaId:
+          type: string
+          format: uuid
+        verdict:
+          type: string
+          enum: [GO, KILL, PIVOT]
+        reasoning:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        confidence:
+          type: string
+          enum: [low, medium, high]
+        createdAt:
+          type: string
+          format: date-time
+
+    Signal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ideaId:
+          type: string
+          format: uuid
+        source:
+          type: string
+          enum: [reddit, github, hn, devto, brave, google]
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        sentiment:
+          type: string
+          enum: [positive, negative, neutral]
+        createdAt:
+          type: string
+          format: date-time
+
+    Subscription:
+      type: object
+      properties:
+        plan:
+          type: string
+          enum: [free, pro, pro_plus, agency]
+        status:
+          type: string
+          enum: [active, canceled, past_due, trialing]
+        currentPeriodEnd:
+          type: string
+          format: date-time
+          nullable: true
+
+    OttoBalance:
+      type: object
+      properties:
+        questionsRemaining:
+          type: integer
+        questionsUsed:
+          type: integer
+        plan:
+          type: string
+          enum: [free, pro, pro_plus, agency]
+
+    Team:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    TeamMembership:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        teamId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+        invitedEmail:
+          type: string
+          format: email
+        status:
+          type: string
+          enum: [pending, active]
+        inviteToken:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    GoldmineNiche:
+      type: object
+      properties:
+        niche:
+          type: string
+        label:
+          type: string
+        totalIdeas:
+          type: integer
+        goCount:
+          type: integer
+        pivotCount:
+          type: integer
+        heatScore:
+          type: number
+        sparkline:
+          type: array
+          items:
+            type: integer
+          minItems: 7
+          maxItems: 7
+          description: Daily GO count for the last 7 days, index 0 = oldest
+
+tags:
+  - name: System
+    description: Platform health
+  - name: Ideas
+    description: Idea submission and retrieval
+  - name: Billing
+    description: Subscriptions, checkout, and seat management
+  - name: Otto
+    description: Otto AI Co-Founder — conversational advisor
+  - name: Teams
+    description: Team invitations and membership management
+  - name: Intelligence
+    description: Niche Goldmine feed and verdict feedback
+  - name: Profile
+    description: User profile management
+  - name: Public
+    description: Unauthenticated endpoints
+
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      description: Returns platform status and database connectivity. No auth required.
+      security: []
+      tags: [System]
+      responses:
+        '200':
+          description: Platform healthy or degraded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [ok, degraded]
+                  db:
+                    type: string
+                    enum: [ok, error]
+                  latencyMs:
+                    type: integer
+                  ts:
+                    type: string
+                    format: date-time
+              examples:
+                healthy:
+                  value:
+                    status: ok
+                    db: ok
+                    latencyMs: 12
+                    ts: '2026-05-20T10:00:00.000Z'
+        '503':
+          description: Platform degraded
+
+  /api/v1/ideas:
+    get:
+      summary: List ideas
+      description: Returns all ideas belonging to the authenticated user, each with its decision attached.
+      tags: [Ideas]
+      responses:
+        '200':
+          description: List of ideas with decisions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Idea'
+                        - type: object
+                          properties:
+                            decision:
+                              $ref: '#/components/schemas/Decision'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      summary: Submit idea
+      description: >
+        Submits a new idea and triggers the GO/KILL/PIVOT pipeline asynchronously
+        (fetch signals → decide → email). Returns immediately with 201 — the decision
+        arrives via email and appears on refresh.
+      tags: [Ideas]
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          schema:
+            type: string
+            format: uuid
+          description: Optional UUID to prevent duplicate submissions on retry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  minLength: 10
+                  maxLength: 2000
+                  description: Idea description in free text
+                teamId:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Associate idea with a team (optional)
+            example:
+              text: A SaaS tool that helps solo founders validate ideas before building
+      responses:
+        '201':
+          description: Idea created; pipeline running in background
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Idea'
+        '400':
+          description: Invalid JSON or validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Monthly plan limit reached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: PLAN_LIMIT_REACHED
+                  message: Your free plan allows 3 verifications per month. Upgrade to continue.
+                  plan: free
+        '409':
+          description: Idempotency key already processed
+        '422':
+          description: Idea text too short or too long
+        '429':
+          description: Rate limit exceeded
+
+  /api/v1/ideas/{id}:
+    get:
+      summary: Get idea
+      description: >
+        Returns a single idea with its decision and signals.
+        Returns 404 for ideas not owned by the authenticated user
+        (ownership check is deliberate — resource existence is not revealed).
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Idea with decision and signals
+          headers:
+            X-Cache:
+              schema:
+                type: string
+                enum: [HIT, MISS]
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      idea:
+                        $ref: '#/components/schemas/Idea'
+                      decision:
+                        $ref: '#/components/schemas/Decision'
+                      signals:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Signal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found or not owned by authenticated user
+
+  /api/v1/billing/subscription:
+    get:
+      summary: Get subscription
+      description: >
+        Returns current plan, status, and period end.
+        Creates a free subscription record if none exists (idempotent).
+      tags: [Billing]
+      responses:
+        '200':
+          description: Current subscription
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Subscription'
+              example:
+                data:
+                  plan: pro
+                  status: active
+                  currentPeriodEnd: '2026-06-20T00:00:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/billing/checkout:
+    post:
+      summary: Create checkout session
+      description: Creates a Stripe Checkout session and returns the redirect URL.
+      tags: [Billing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [priceId]
+              properties:
+                priceId:
+                  type: string
+                  description: Stripe price ID (from NEXT_PUBLIC_STRIPE_*_PRICE_ID env vars)
+            example:
+              priceId: price_1TZ9ThFGL6RVOLhmPTFXhJc6
+      responses:
+        '200':
+          description: Stripe Checkout URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+        '400':
+          description: Validation error
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          description: Stripe not configured
+
+  /api/v1/billing/change-plan:
+    post:
+      summary: Change plan
+      description: Upgrades or downgrades an active Stripe subscription. Applies immediately via proration.
+      tags: [Billing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [priceId]
+              properties:
+                priceId:
+                  type: string
+                  description: Target Stripe price ID — Pro or Pro+ only (not Agency)
+      responses:
+        '200':
+          description: Plan changed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+        '400':
+          description: No active subscription or unknown price ID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '502':
+          description: Stripe error
+
+  /api/v1/billing/cancel:
+    post:
+      summary: Cancel subscription
+      description: Cancels the active Stripe subscription at the end of the current billing period.
+      tags: [Billing]
+      responses:
+        '200':
+          description: Subscription will cancel at period end
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+        '400':
+          description: No active subscription found
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '502':
+          description: Stripe error
+
+  /api/v1/billing/reactivate:
+    post:
+      summary: Reactivate subscription
+      description: Reactivates a cancelled subscription before the period ends.
+      tags: [Billing]
+      responses:
+        '200':
+          description: Subscription reactivated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+        '400':
+          description: No active subscription found
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '502':
+          description: Stripe error
+
+  /api/v1/billing/portal:
+    post:
+      summary: Open billing portal
+      description: Creates a Stripe Customer Portal session for managing payment methods and invoices.
+      tags: [Billing]
+      responses:
+        '200':
+          description: Stripe Customer Portal URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+        '400':
+          description: No Stripe customer found
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '502':
+          description: Stripe error
+
+  /api/v1/billing/seats:
+    post:
+      summary: Update extra seats
+      description: >
+        Purchases or updates the extra seat add-on for Pro+ and Agency plans (€7/seat/mo).
+        Set `extraSeats: 0` to remove the add-on.
+      tags: [Billing]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [extraSeats]
+              properties:
+                extraSeats:
+                  type: integer
+                  minimum: 0
+                  maximum: 97
+                  description: Number of additional seats beyond the plan base
+            example:
+              extraSeats: 2
+      responses:
+        '200':
+          description: Seat add-on updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      extraSeats:
+                        type: integer
+                      totalSeats:
+                        type: integer
+                      stripeItemId:
+                        type: string
+        '400':
+          description: Validation error or invalid quantity
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Plan does not support seat add-on
+        '502':
+          description: Stripe error
+
+  /api/v1/otto/balance:
+    get:
+      summary: Get Otto balance
+      description: Returns remaining and used question credits for Otto AI Co-Founder.
+      tags: [Otto]
+      responses:
+        '200':
+          description: Current Otto balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OttoBalance'
+              example:
+                data:
+                  questionsRemaining: 3
+                  questionsUsed: 2
+                  plan: pro
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/otto/chat:
+    post:
+      summary: Ask Otto
+      description: >
+        Sends a message to Otto AI Co-Founder in the context of a specific idea and its verdict.
+        Costs 1 question credit per call. Returns 402 when credits are exhausted.
+      tags: [Otto]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ideaId, ideaText, verdict, reasoning, score, message]
+              properties:
+                ideaId:
+                  type: string
+                  format: uuid
+                ideaText:
+                  type: string
+                  maxLength: 2000
+                verdict:
+                  type: string
+                  enum: [GO, KILL, PIVOT]
+                reasoning:
+                  type: string
+                  maxLength: 5000
+                  description: Decision reasoning from the verdict card
+                score:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                message:
+                  type: string
+                  maxLength: 2000
+                  description: User's question for Otto
+      responses:
+        '200':
+          description: Otto's response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      reply:
+                        type: string
+                      questionsRemaining:
+                        type: integer
+        '400':
+          description: Validation error
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '402':
+          description: No question credits remaining — purchase a pack to continue
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: OTTO_NO_QUESTIONS
+                  message: You have no questions remaining. Purchase a pack to continue.
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/otto/conversation/{ideaId}:
+    get:
+      summary: Get Otto conversation
+      description: Returns the saved Otto conversation history for a specific idea. Returns null if no conversation exists yet.
+      tags: [Otto]
+      parameters:
+        - name: ideaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Conversation or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      ideaId:
+                        type: string
+                        format: uuid
+                      messages:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            role:
+                              type: string
+                              enum: [user, assistant]
+                            content:
+                              type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/teams:
+    get:
+      summary: Get team
+      description: Returns the team and memberships for the authenticated user, whether as owner or member. Returns `team: null` if not in a team.
+      tags: [Teams]
+      responses:
+        '200':
+          description: Team data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      team:
+                        $ref: '#/components/schemas/Team'
+                      memberships:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TeamMembership'
+                      isOwner:
+                        type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    patch:
+      summary: Update team name
+      description: Updates the team name. Only the team owner can call this.
+      tags: [Teams]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+            example:
+              name: Acme Launch Team
+      responses:
+        '200':
+          description: Updated team
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      team:
+                        $ref: '#/components/schemas/Team'
+        '400':
+          description: Validation error
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Not the team owner
+
+  /api/v1/teams/invite:
+    post:
+      summary: Invite team member
+      description: Sends an email invitation to join the team. Requires an available seat on the owner's plan.
+      tags: [Teams]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+            example:
+              email: colleague@company.com
+      responses:
+        '201':
+          description: Invitation created and email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      membership:
+                        $ref: '#/components/schemas/TeamMembership'
+        '400':
+          description: Validation error
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Seat limit reached for current plan
+        '409':
+          description: Email is already a team member
+
+  /api/v1/teams/accept:
+    post:
+      summary: Accept team invite
+      description: Accepts a team invitation using the UUID token from the invite email.
+      tags: [Teams]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  format: uuid
+                  description: Invite token from the invitation email link
+      responses:
+        '200':
+          description: Invitation accepted, membership active
+        '400':
+          description: Validation error
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Invite token not found or expired
+        '409':
+          description: User is already a member of another team
+
+  /api/v1/teams/leave:
+    delete:
+      summary: Leave team
+      description: Removes the authenticated user from their current team. Members only — team owners cannot leave their own team.
+      tags: [Teams]
+      responses:
+        '204':
+          description: Successfully left the team
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User is not a team member
+
+  /api/v1/teams/members/{membershipId}:
+    delete:
+      summary: Remove team member
+      description: Removes a member from the team. Only the team owner can call this.
+      tags: [Teams]
+      parameters:
+        - name: membershipId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Membership ID (from GET /api/v1/teams)
+      responses:
+        '204':
+          description: Member removed
+        '400':
+          description: Invalid membership ID format
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Not the team owner
+        '404':
+          description: Membership not found
+
+  /api/v1/goldmine:
+    get:
+      summary: Niche Goldmine feed
+      description: >
+        Returns aggregated cross-user GO/KILL/PIVOT signals per niche with heat scores and 7-day sparklines.
+        Requires Pro+ or Agency plan. Free and Pro plans receive `locked: true` with an empty data array.
+      tags: [Intelligence]
+      responses:
+        '200':
+          description: Niche feed (locked=true for ineligible plans)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GoldmineNiche'
+                  locked:
+                    type: boolean
+                    description: true when the user's plan does not include Goldmine access
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/profile:
+    patch:
+      summary: Update profile
+      description: Updates the authenticated user's profile. `first_name` is required; all other fields are optional.
+      tags: [Profile]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [first_name]
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                  nullable: true
+                username:
+                  type: string
+                  pattern: '^[a-z0-9_-]{3,30}$'
+                  description: 3–30 chars — lowercase letters, numbers, _ or -
+                company_name:
+                  type: string
+                  nullable: true
+            example:
+              first_name: Alex
+              last_name: Founder
+              username: alexfounder
+              company_name: Acme Inc
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        '400':
+          description: Validation error (first_name missing or username format invalid)
+        '401':
+          description: Unauthorized
+        '409':
+          description: Username already taken
+
+    delete:
+      summary: Delete account
+      description: Logs an account deletion audit event and signs out the user. Actual data deletion is handled separately.
+      tags: [Profile]
+      responses:
+        '200':
+          description: Account deletion initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        '401':
+          description: Unauthorized
+
+  /api/v1/feedback:
+    post:
+      summary: Submit verdict feedback
+      description: Records thumbs up or thumbs down feedback on a GO/KILL/PIVOT decision. Feeds back into signal quality.
+      tags: [Intelligence]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ideaId, decisionId, vote]
+              properties:
+                ideaId:
+                  type: string
+                  format: uuid
+                decisionId:
+                  type: string
+                  format: uuid
+                vote:
+                  type: string
+                  enum: [thumbs_up, thumbs_down]
+                comment:
+                  type: string
+                  maxLength: 500
+            example:
+              ideaId: 123e4567-e89b-12d3-a456-426614174000
+              decisionId: 987fcdeb-51a2-43f7-b123-426614174000
+              vote: thumbs_up
+      responses:
+        '201':
+          description: Feedback recorded
+        '400':
+          description: Validation error
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/waitlist:
+    post:
+      summary: Join waitlist
+      description: Adds an email to the waitlist and sends a confirmation email. No authentication required.
+      security: []
+      tags: [Public]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                source:
+                  type: string
+                  maxLength: 100
+                  default: unknown
+                  description: Traffic source identifier (e.g. homepage, blog, ph)
+            example:
+              email: founder@startup.io
+              source: homepage
+      responses:
+        '200':
+          description: Added to waitlist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+        '400':
+          description: Invalid email or JSON
+        '500':
+          description: Failed to save
