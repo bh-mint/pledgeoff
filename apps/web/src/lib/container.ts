@@ -19,6 +19,7 @@ import {
   DevToSourceAdapter,
   GitHubSourceAdapter,
   BraveSearchSourceAdapter,
+  GoogleSearchSourceAdapter,
   GroqLLMAdapter,
   AnthropicLLMAdapter,
   InMemoryCacheAdapter,
@@ -145,6 +146,9 @@ function buildContainer() {
     new GitHubSourceAdapter(process.env.GITHUB_PAT ?? '', 8_000, 2, cache),
     ...(process.env.BRAVE_SEARCH_API_KEY
       ? [new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 8_000, 2, cache)]
+      : []),
+    ...(process.env.GOOGLE_SEARCH_API_KEY && process.env.GOOGLE_SEARCH_ENGINE_ID
+      ? [new GoogleSearchSourceAdapter(process.env.GOOGLE_SEARCH_API_KEY, process.env.GOOGLE_SEARCH_ENGINE_ID, 10_000, 2, cache)]
       : []),
   ];
   const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
