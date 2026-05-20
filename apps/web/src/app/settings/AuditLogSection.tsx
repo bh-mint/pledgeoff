@@ -9,6 +9,7 @@ const ACTION_LABELS: Record<string, string> = {
   plan_changed: 'Plan changed',
   subscription_cancelled: 'Subscription cancelled',
   subscription_reactivated: 'Subscription reactivated',
+  invoice_requested: 'Invoice requested',
 };
 
 const ACTION_COLORS: Record<string, string> = {

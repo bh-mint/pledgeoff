@@ -125,6 +125,7 @@ export function SettingsClient({
   const [seatExtra, setSeatExtra] = useState(initialExtraSeats);
   const [seatState, setSeatState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [billingAction, setBillingAction] = useState<"idle" | "loading" | "error">("idle");
+  const [invoiceState, setInvoiceState] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [cancelConfirm, setCancelConfirm] = useState(false);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(initialCancelAtPeriodEnd);
   const [modifyOpen, setModifyOpen] = useState(false);
@@ -706,6 +707,42 @@ export function SettingsClient({
                 </div>
               )}
             </div>
+
+            {/* Invoice billing — Agency only */}
+            {plan === "agency" && (
+              <div className="border rounded-md p-5 mb-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>Invoice billing</div>
+                <p className="text-[12px] mb-5" style={{ color: "var(--t2)" }}>
+                  Need to pay by invoice with NET30 terms? Send us a request and we&apos;ll set it up within 24h.
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+                    {invoiceState === "sent" && <span style={{ color: "var(--validated)" }}>Request received — we&apos;ll reach out within 24h.</span>}
+                    {invoiceState === "error" && <span style={{ color: "var(--kill)" }}>Something went wrong. Try again.</span>}
+                  </div>
+                  <button
+                    onClick={async () => {
+                      if (invoiceState === "sent") return;
+                      setInvoiceState("loading");
+                      const token = await getToken();
+                      const res = await fetch("/api/v1/billing/request-invoice", {
+                        method: "POST",
+                        headers: token ? { Authorization: `Bearer ${token}` } : {},
+                      });
+                      setInvoiceState(res.ok ? "sent" : "error");
+                    }}
+                    disabled={invoiceState === "loading" || invoiceState === "sent"}
+                    className="mono text-[11px] h-9 px-5 rounded-md border transition-colors disabled:opacity-50 shrink-0"
+                    style={{
+                      borderColor: invoiceState === "sent" ? "var(--validated)" : "var(--border)",
+                      color: invoiceState === "sent" ? "var(--validated)" : "var(--t2)",
+                    }}
+                  >
+                    {invoiceState === "loading" ? "Sending…" : invoiceState === "sent" ? "Request sent ✓" : "Request Invoice (NET30)"}
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Seat add-ons — Pro+ only */}
             {plan === "pro_plus" && (
