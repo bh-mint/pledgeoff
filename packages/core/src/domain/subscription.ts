@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const PlanSchema = z.enum(['free', 'pro', 'pro_plus']);
+export const PlanSchema = z.enum(['free', 'pro', 'pro_plus', 'agency']);
 export type Plan = z.infer<typeof PlanSchema>;
 
 export const SubscriptionStatusSchema = z.enum([
@@ -36,6 +36,7 @@ export const PLAN_LIMITS = {
   free:     { verificationsPerMonth: 1,        seatsIncluded: 1,  ottoQuestionsPerMonth: 0  },
   pro:      { verificationsPerMonth: 20,       seatsIncluded: 3,  ottoQuestionsPerMonth: 3  },
   pro_plus: { verificationsPerMonth: Infinity, seatsIncluded: 10, ottoQuestionsPerMonth: 10 },
+  agency:   { verificationsPerMonth: Infinity, seatsIncluded: 5,  ottoQuestionsPerMonth: 20 },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
 
 export const OTTO_PACK_SIZES = [1, 3, 5, 10] as const;

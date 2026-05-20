@@ -50,12 +50,14 @@ const PLAN_LABELS: Record<Plan, string> = {
   free: "Free",
   pro: "Pro",
   pro_plus: "Pro+",
+  agency: "Agency",
 };
 
 const PLAN_COLORS: Record<Plan, string> = {
   free: "var(--t3)",
   pro: "var(--accent)",
   pro_plus: "var(--validated)",
+  agency: "var(--validated)",
 };
 
 function formatDate(iso: string): string {

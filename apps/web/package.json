@@ -16,6 +16,7 @@
     "@pledgeoff/core": "workspace:*",
     "@pledgeoff/eventbus": "workspace:*",
     "@pledgeoff/observability": "workspace:*",
+    "@react-pdf/renderer": "^4.5.1",
     "@sentry/nextjs": "^10.51.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.49.4",

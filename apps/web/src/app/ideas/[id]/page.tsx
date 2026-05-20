@@ -9,6 +9,7 @@ import { FooterMicro } from "@/components/FooterMicro";
 import { formatDate } from "@/lib/mdx-utils";
 import { ExportButtons } from "./ExportButtons";
 import OttoChat from "@/components/OttoChat";
+import { getUserPlan } from "@/server/billing/getUserPlan";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -53,7 +54,7 @@ export default async function IdeaPage({ params }: Props) {
   const idea = ideaResult.value;
   if (idea.userId !== user.id) notFound();
 
-  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult] = await Promise.all([
+  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, plan] = await Promise.all([
     container._repos.decisionRepo.findByIdeaId(id),
     container._repos.signalRepo.findByIdeaId(id),
     container._repos.simulationRepo.findByIdeaId(id),
@@ -61,6 +62,7 @@ export default async function IdeaPage({ params }: Props) {
     container._repos.customerAnalysisRepo.findByIdeaId(id),
     container._repos.buildAnalysisRepo.findByIdeaId(id),
     container._repos.competitorAnalysisRepo.findByIdeaId(id),
+    getUserPlan(user.id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -106,7 +108,7 @@ export default async function IdeaPage({ params }: Props) {
                 </span>
               )}
             </div>
-              <ExportButtons ideaId={id} />
+              <ExportButtons ideaId={id} plan={plan} />
             </div>
             <h1 className="display text-[22px] font-semibold tracking-tight text-(--t1) leading-snug mb-3">
               {title}
