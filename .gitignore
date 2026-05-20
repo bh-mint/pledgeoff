@@ -33,6 +33,11 @@ Thumbs.db
 # Local editor settings
 .claude/
 
+# Playwright
+/apps/web/e2e/.auth-state.json
+/apps/web/playwright-report/
+/apps/web/test-results/
+
 # Logs
 *.log
 npm-debug.log*

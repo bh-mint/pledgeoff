@@ -23,7 +23,7 @@ vi.mock('@/server/billing/getUserPlan', () => ({ getUserPlan: mockGetUserPlan })
 vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: mockCheckRateLimit }));
 vi.mock('next/server', async (importOriginal) => {
   const actual = await importOriginal<typeof import('next/server')>();
-  return { ...actual, after: (_fn: () => void) => undefined };
+  return { ...actual, after: () => undefined };
 });
 vi.mock('@/lib/container', () => ({
   container: {
