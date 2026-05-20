@@ -9,6 +9,8 @@ import { ProfileButton } from "@/components/ProfileButton";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FooterMicro } from "@/components/FooterMicro";
+import { GoldmineFeed } from "@/components/GoldmineFeed";
+import { getGoldmineData } from "@/server/goldmine/getGoldmineData";
 import type { Decision } from "@pledgeoff/core";
 import { logger } from "@pledgeoff/observability";
 
@@ -71,6 +73,7 @@ export default async function DashboardPage() {
   ]);
   const isPaidPlan = plan !== "free";
   const team = teamResult.isOk() ? teamResult.value : null;
+  const goldmine = await getGoldmineData(plan);
   if (ideasResult.isErr()) {
     logger.error({ traceId: "dashboard", userId: user.id, error: String(ideasResult.error), outcome: "error" as const }, "dashboard: ideaRepo.findByUserId failed");
   }
@@ -516,9 +519,9 @@ export default async function DashboardPage() {
             );
           })()}
 
-          {/* Goldmine — coming soon */}
+          {/* Goldmine */}
           <div
-            className="border rounded-md"
+            className="border rounded-md overflow-hidden"
             style={{ borderColor: "var(--border)", background: "var(--surface)" }}
           >
             <div
@@ -526,26 +529,19 @@ export default async function DashboardPage() {
               style={{ borderColor: "var(--border)" }}
             >
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-(--border)" />
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--validated)" }} />
                 <span className="display text-[13px] font-semibold tracking-tight text-(--t1)">
                   Goldmine
                 </span>
               </div>
               <span
                 className="mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
-                style={{ background: "color-mix(in srgb, var(--accent) 8%, transparent)", color: "var(--accent)", border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)" }}
+                style={{ background: "color-mix(in srgb, var(--validated) 10%, transparent)", color: "var(--validated)", border: "1px solid color-mix(in srgb, var(--validated) 25%, transparent)" }}
               >
-                Soon
+                Pro+
               </span>
             </div>
-            <div className="px-5 py-8 text-center">
-              <div className="display text-[13px] font-semibold text-(--t1) mb-2">
-                Daily curated ideas
-              </div>
-              <div className="mono text-[11px] text-(--t3)">
-                Top validated opportunities from across the web — coming with Pro+
-              </div>
-            </div>
+            <GoldmineFeed niches={goldmine.data} locked={goldmine.locked} />
           </div>
         </div>
       </div>

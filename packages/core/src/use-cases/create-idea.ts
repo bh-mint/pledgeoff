@@ -1,5 +1,5 @@
 import { Result, err, ok } from 'neverthrow';
-import { createIdea, type Idea, type CreateIdeaError } from '../domain/idea';
+import { createIdea, type Idea, type CreateIdeaError, type Niche } from '../domain/idea';
 import type { IIdeaRepository, IdeaRepositoryError } from '../ports/idea-repository';
 import type { IEventBus, EventBusError } from '../ports/event-bus';
 
@@ -8,6 +8,7 @@ export interface CreateIdeaInput {
   readonly text: string;
   readonly traceId: string;
   readonly teamId?: string | null;
+  readonly niche?: Niche;
 }
 
 export type CreateIdeaUseCaseError = CreateIdeaError | IdeaRepositoryError | EventBusError;
@@ -19,7 +20,7 @@ export class CreateIdeaUseCase {
   ) {}
 
   async execute(input: CreateIdeaInput): Promise<Result<Idea, CreateIdeaUseCaseError>> {
-    const ideaResult = createIdea({ userId: input.userId, text: input.text, teamId: input.teamId });
+    const ideaResult = createIdea({ userId: input.userId, text: input.text, teamId: input.teamId, niche: input.niche });
     if (ideaResult.isErr()) return err(ideaResult.error);
 
     const idea = ideaResult.value;

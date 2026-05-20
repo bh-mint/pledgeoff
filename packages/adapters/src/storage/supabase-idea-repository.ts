@@ -8,6 +8,7 @@ type IdeaRow = {
   user_id: string;
   team_id: string | null;
   text: string;
+  niche: string;
   created_at: string;
 };
 
@@ -17,6 +18,7 @@ function rowToIdea(row: IdeaRow): Idea {
     userId: row.user_id,
     teamId: row.team_id ?? undefined,
     text: row.text,
+    niche: (row.niche ?? 'other') as Idea['niche'],
     createdAt: row.created_at,
   };
 }
@@ -32,6 +34,7 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
         user_id: idea.userId,
         team_id: idea.teamId ?? null,
         text: idea.text,
+        niche: idea.niche ?? 'other',
         created_at: idea.createdAt,
       })
       .select()

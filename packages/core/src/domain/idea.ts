@@ -1,11 +1,20 @@
 import { z } from 'zod';
 import { Result, ok, err } from 'neverthrow';
 
+export const NICHES = [
+  'ai_ml', 'dev_tools', 'saas_b2b', 'fintech', 'ecommerce',
+  'health', 'edtech', 'productivity', 'marketing', 'security',
+  'gaming', 'social', 'data', 'nocode', 'other',
+] as const;
+
+export type Niche = typeof NICHES[number];
+
 export const IdeaSchema = z.object({
   id: z.string().uuid(),
   userId: z.string().uuid(),
   teamId: z.string().uuid().nullable().optional(),
   text: z.string().min(10).max(2000),
+  niche: z.enum(NICHES).default('other'),
   createdAt: z.string().datetime(),
 });
 
@@ -33,6 +42,7 @@ export function createIdea(input: {
   userId: string;
   text: string;
   teamId?: string | null;
+  niche?: Niche;
 }): Result<Idea, CreateIdeaError> {
   const trimmed = input.text.trim();
   if (trimmed.length < 10) return err(new IdeaTooShortError());
@@ -43,6 +53,7 @@ export function createIdea(input: {
     userId: input.userId,
     teamId: input.teamId ?? null,
     text: trimmed,
+    niche: input.niche ?? 'other',
     createdAt: new Date().toISOString(),
   });
 }
