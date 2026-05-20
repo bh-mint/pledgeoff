@@ -1,6 +1,6 @@
 import { container } from '@/lib/container';
 import { getCachedIdea, setCachedIdea } from '@/lib/idea-cache';
-import { resolveUserId } from '@/lib/api-auth';
+import { resolveUserIdFromRequest } from '@/lib/api-auth';
 
 function unauthorizedResponse(traceId: string) {
   return Response.json(
@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
   const { id } = await params;
 
-  const userId = await resolveUserId(req.headers.get('authorization'));
+  const userId = await resolveUserIdFromRequest(req);
   if (!userId) return unauthorizedResponse(traceId);
 
   // Cache check — keyed by userId+ideaId so users never see each other's data

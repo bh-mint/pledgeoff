@@ -1,13 +1,13 @@
 export const maxDuration = 60;
 
 import { container } from '@/lib/container';
-import { resolveUserId } from '@/lib/api-auth';
+import { resolveUserIdFromRequest } from '@/lib/api-auth';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
   const { id: ideaId } = await params;
 
-  const userId = await resolveUserId(req.headers.get('authorization'));
+  const userId = await resolveUserIdFromRequest(req);
   if (!userId) {
     return Response.json({ error: { code: 'UNAUTHENTICATED' } }, { status: 401, headers: { 'X-Trace-Id': traceId } });
   }
@@ -33,7 +33,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
   const { id: ideaId } = await params;
 
-  const userId = await resolveUserId(req.headers.get('authorization'));
+  const userId = await resolveUserIdFromRequest(req);
   if (!userId) {
     return Response.json({ error: { code: 'UNAUTHENTICATED' } }, { status: 401, headers: { 'X-Trace-Id': traceId } });
   }

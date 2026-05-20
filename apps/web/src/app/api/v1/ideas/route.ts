@@ -5,7 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limiter';
 import { logger } from '@pledgeoff/observability';
 import { getUserPlan } from '@/server/billing/getUserPlan';
 import { PLAN_LIMITS } from '@pledgeoff/core';
-import { resolveUserId } from '@/lib/api-auth';
+import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { classifyNiche } from '@/lib/niche-classifier';
 
 export const maxDuration = 60;
@@ -20,7 +20,7 @@ function unauthorizedResponse(traceId: string) {
 export async function GET(req: Request) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 
-  const userId = await resolveUserId(req.headers.get('authorization'));
+  const userId = await resolveUserIdFromRequest(req);
   if (!userId) return unauthorizedResponse(traceId);
 
   const result = await container._repos.ideaRepo.findByUserId(userId);
@@ -47,7 +47,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 
-  const userId = await resolveUserId(req.headers.get('authorization'));
+  const userId = await resolveUserIdFromRequest(req);
   if (!userId) return unauthorizedResponse(traceId);
 
   // Plan gate

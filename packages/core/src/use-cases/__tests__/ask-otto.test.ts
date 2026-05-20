@@ -111,7 +111,7 @@ describe('AskOttoUseCase', () => {
   });
 
   it('rejects when included questions exhausted and no purchased questions', async () => {
-    const { ottoRepo, subRepo, llm } = makeRepos({ ottoIncludedUsed: 3, ottoPurchased: 0 });
+    const { ottoRepo, subRepo, llm } = makeRepos({ ottoIncludedUsed: 5, ottoPurchased: 0 });
     const useCase = new AskOttoUseCase(ottoRepo, subRepo, llm);
 
     const result = await useCase.execute(makeInput());

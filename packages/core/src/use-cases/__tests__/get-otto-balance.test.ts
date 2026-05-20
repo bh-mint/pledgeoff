@@ -51,10 +51,10 @@ describe('GetOttoBalanceUseCase', () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.included).toBe(2); // 3 limit - 1 used
+      expect(result.value.included).toBe(4); // 5 limit - 1 used
       expect(result.value.purchased).toBe(5);
-      expect(result.value.total).toBe(7);
-      expect(result.value.includedLimit).toBe(3);
+      expect(result.value.total).toBe(9);
+      expect(result.value.includedLimit).toBe(5);
       expect(result.value.plan).toBe('pro');
     }
   });
@@ -80,8 +80,8 @@ describe('GetOttoBalanceUseCase', () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.included).toBe(10);
-      expect(result.value.includedLimit).toBe(10);
+      expect(result.value.included).toBe(15);
+      expect(result.value.includedLimit).toBe(15);
     }
   });
 

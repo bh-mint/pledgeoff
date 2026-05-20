@@ -8,6 +8,7 @@ import type { Plan, SubscriptionStatus } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import { TeamSection } from "./TeamSection";
 import { AuditLogSection } from "./AuditLogSection";
+import { ApiKeySection } from "./ApiKeySection";
 
 type AvailablePlan = {
   id: 'pro' | 'pro_plus' | 'agency';
@@ -887,27 +888,7 @@ export function SettingsClient({
         )}
 
         {/* ── API ── */}
-        {section === "api" && (
-          <div>
-            <h1 className="display text-[28px] font-semibold tracking-tight text-(--t1) mb-1">API</h1>
-            <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
-              Programmatic access to your validations and decisions.
-            </p>
-
-            <div
-              className="border rounded-md p-6 text-center"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-            >
-              <div className="mono text-[10px] uppercase tracking-[0.12em] mb-3" style={{ color: "var(--t3)" }}>
-                Coming soon
-              </div>
-              <p className="text-[14px] mb-2 text-(--t1)">API access is in development.</p>
-              <p className="text-[13px] max-w-xs mx-auto" style={{ color: "var(--t2)" }}>
-                Pro accounts will get read access. Agency tier adds write access and webhooks.
-              </p>
-            </div>
-          </div>
-        )}
+        {section === "api" && <ApiKeySection />}
 
         {/* ── Danger zone ── */}
         {section === "danger" && (

@@ -14,6 +14,7 @@ import {
   SupabaseTeamRepository,
   SupabaseIdeaReactionRepository,
   SupabaseOttoConversationRepository,
+  SupabaseApiKeyRepository,
   StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
@@ -48,6 +49,9 @@ import {
   ReactToIdeaUseCase,
   AskOttoUseCase,
   GetOttoBalanceUseCase,
+  GenerateApiKeyUseCase,
+  RevokeApiKeyUseCase,
+  ListApiKeysUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -199,6 +203,11 @@ function buildContainer() {
   const askOttoUseCase = new AskOttoUseCase(ottoConversationRepo, subscriptionRepo, ottoLLMClient);
   const getOttoBalanceUseCase = new GetOttoBalanceUseCase(subscriptionRepo);
 
+  const apiKeyRepo = new SupabaseApiKeyRepository(supabase);
+  const generateApiKeyUseCase = new GenerateApiKeyUseCase(apiKeyRepo);
+  const revokeApiKeyUseCase = new RevokeApiKeyUseCase(apiKeyRepo);
+  const listApiKeysUseCase = new ListApiKeysUseCase(apiKeyRepo);
+
   // Wire: idea.created.v1 → FetchSignalsUseCase → generate embeddings for new signals (fire-and-forget)
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
     const result = await fetchSignalsUseCase.execute({
@@ -300,6 +309,10 @@ function buildContainer() {
     ideaRepo,
     eventBus,
     auditLog,
+    apiKeyRepo,
+    generateApiKeyUseCase,
+    revokeApiKeyUseCase,
+    listApiKeysUseCase,
     _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, subscriptionRepo, teamRepo, ideaReactionRepo },
   };
 }

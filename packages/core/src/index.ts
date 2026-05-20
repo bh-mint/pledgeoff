@@ -55,3 +55,8 @@ export * from './domain/otto-conversation';
 export * from './ports/otto-conversation-repository';
 export * from './use-cases/ask-otto';
 export * from './use-cases/get-otto-balance';
+export * from './domain/api-key';
+export * from './ports/IApiKeyRepository';
+export * from './use-cases/generate-api-key';
+export * from './use-cases/revoke-api-key';
+export * from './use-cases/list-api-keys';
