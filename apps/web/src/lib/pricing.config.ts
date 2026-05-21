@@ -1,14 +1,18 @@
 export const PRICING = {
-  pro: {
-    monthly: { eur: 149, annual_equivalent: 119, annual_total: 1428 },
-    label: "Pro",
+  founder: {
+    monthly: { eur: 49, annual_equivalent: 39, annual_total: 468 },
+    label: "Founder",
   },
-  pro_plus: {
-    monthly: { eur: 249, annual_equivalent: 199, annual_total: 2388 },
-    label: "Pro+",
+  team: {
+    monthly: { eur: 99, annual_equivalent: 79, annual_total: 948 },
+    label: "Team",
   },
-  agency: {
-    monthly: { eur: 499, annual_equivalent: 399, annual_total: 4788 },
-    label: "Agency",
+  studio: {
+    monthly: { eur: 349, annual_equivalent: 279, annual_total: 3348 },
+    label: "Studio",
+  },
+  enterprise: {
+    monthly: { eur: 1199, annual_equivalent: 959, annual_total: 11508 },
+    label: "Enterprise",
   },
 } as const;

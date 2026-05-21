@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const PlanSchema = z.enum(['free', 'pro', 'pro_plus', 'agency', 'enterprise']);
+export const PlanSchema = z.enum(['free', 'founder', 'team', 'studio', 'enterprise']);
 export type Plan = z.infer<typeof PlanSchema>;
 
 export const SubscriptionStatusSchema = z.enum([
@@ -33,21 +33,21 @@ export const SubscriptionSchema = z.object({
 export type Subscription = z.infer<typeof SubscriptionSchema>;
 
 export const PLAN_LIMITS = {
-  free:     { verificationsPerMonth: 1,        seatsIncluded: 1,  ottoQuestionsPerMonth: 0  },
-  pro:      { verificationsPerMonth: 50,       seatsIncluded: 1,  ottoQuestionsPerMonth: 5  },
-  pro_plus: { verificationsPerMonth: Infinity, seatsIncluded: 5,  ottoQuestionsPerMonth: 15 },
-  agency:     { verificationsPerMonth: Infinity, seatsIncluded: 10,       ottoQuestionsPerMonth: 30       },
-  enterprise: { verificationsPerMonth: Infinity, seatsIncluded: Infinity, ottoQuestionsPerMonth: Infinity },
+  free:       { verificationsPerMonth: 1,        seatsIncluded: 1,        ottoQuestionsPerMonth: 0        },
+  founder:    { verificationsPerMonth: 20,       seatsIncluded: 1,        ottoQuestionsPerMonth: 5        },
+  team:       { verificationsPerMonth: Infinity, seatsIncluded: 3,        ottoQuestionsPerMonth: 15       },
+  studio:     { verificationsPerMonth: Infinity, seatsIncluded: 8,        ottoQuestionsPerMonth: 50       },
+  enterprise: { verificationsPerMonth: Infinity, seatsIncluded: 25,       ottoQuestionsPerMonth: Infinity },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
 
-export const OTTO_PACK_SIZES = [1, 3, 5, 10] as const;
+export const OTTO_PACK_SIZES = [10, 25, 60, 150] as const;
 export type OttoPackSize = typeof OTTO_PACK_SIZES[number];
 
 export const OTTO_PACK_PRICES_EUR: Record<OttoPackSize, number> = {
-  1:  4,
-  3:  10,
-  5:  15,
-  10: 25,
+  10:  15,
+  25:  30,
+  60:  60,
+  150: 120,
 };
 
 export function ottoAvailableQuestions(sub: Subscription): { included: number; purchased: number; total: number } {
@@ -75,6 +75,6 @@ export function effectiveSeats(sub: Subscription): number {
   return PLAN_LIMITS[effectivePlan(sub)].seatsIncluded + (isActivePlan(sub) ? sub.extraSeats : 0);
 }
 
-export function isAgencyOrHigher(plan: Plan): boolean {
-  return plan === 'agency' || plan === 'enterprise';
+export function isStudioOrHigher(plan: Plan): boolean {
+  return plan === 'studio' || plan === 'enterprise';
 }

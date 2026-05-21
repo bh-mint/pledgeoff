@@ -10,7 +10,7 @@ const makeSub = (overrides: Partial<Subscription> = {}): Subscription => ({
   userId: 'user-1',
   stripeCustomerId: 'cus_1',
   stripeSubscriptionId: 'sub_stripe_1',
-  plan: 'pro',
+  plan: 'founder',
   status: 'active',
   currentPeriodEnd: null,
   extraSeats: 0,
@@ -55,7 +55,7 @@ describe('GetOttoBalanceUseCase', () => {
       expect(result.value.purchased).toBe(5);
       expect(result.value.total).toBe(9);
       expect(result.value.includedLimit).toBe(5);
-      expect(result.value.plan).toBe('pro');
+      expect(result.value.plan).toBe('founder');
     }
   });
 
@@ -73,7 +73,7 @@ describe('GetOttoBalanceUseCase', () => {
   });
 
   it('returns 10 included for Pro+ with none used', async () => {
-    const repo = makeRepo(makeSub({ plan: 'pro_plus', ottoIncludedUsed: 0, ottoPurchased: 0 }));
+    const repo = makeRepo(makeSub({ plan: 'team', ottoIncludedUsed: 0, ottoPurchased: 0 }));
     const useCase = new GetOttoBalanceUseCase(repo);
 
     const result = await useCase.execute('user-1');

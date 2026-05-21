@@ -3,7 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const PLANS = ['free', 'pro', 'pro_plus', 'agency'] as const;
+const PLANS = ['free', 'founder', 'team', 'studio', 'enterprise'] as const;
+const PLAN_LABELS: Record<typeof PLANS[number], string> = {
+  free: 'Free',
+  founder: 'Founder',
+  team: 'Team',
+  studio: 'Studio',
+  enterprise: 'Enterprise',
+};
 
 async function adminFetch(path: string, body?: object) {
   const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
@@ -67,7 +74,7 @@ export function AdminUserActions({
             padding: '7px 10px', fontSize: 13, color: 'var(--t1)', cursor: 'pointer',
           }}
         >
-          {PLANS.map((p) => <option key={p} value={p}>{p.replace('_', '+')}</option>)}
+          {PLANS.map((p) => <option key={p} value={p}>{PLAN_LABELS[p]}</option>)}
         </select>
         <button
           disabled={!!loading || overridePlan === currentPlan}

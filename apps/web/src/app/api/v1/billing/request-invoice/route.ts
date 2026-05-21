@@ -19,9 +19,9 @@ export async function POST(req: Request): Promise<Response> {
   const sub = subResult.isOk() ? subResult.value : null;
   const plan = sub ? effectivePlan(sub) : 'free';
 
-  if (plan !== 'agency' && plan !== 'enterprise') {
+  if (plan !== 'studio' && plan !== 'enterprise') {
     return Response.json(
-      { error: { code: 'PLAN_REQUIRED', message: 'Invoice billing is available for Agency plan only' } },
+      { error: { code: 'PLAN_REQUIRED', message: 'Invoice billing is available for Studio plan only' } },
       { status: 403, headers: { 'X-Trace-Id': traceId } },
     );
   }
@@ -51,7 +51,7 @@ export async function POST(req: Request): Promise<Response> {
     <tr><td style="padding:8px 12px;font-size:12px;color:#aaa;font-family:monospace;border:1px solid #2a2a2a;">Email</td><td style="padding:8px 12px;font-size:12px;color:#f5f5f5;border:1px solid #2a2a2a;">${userEmail}</td></tr>
     <tr><td style="padding:8px 12px;font-size:12px;color:#aaa;font-family:monospace;border:1px solid #2a2a2a;">Name</td><td style="padding:8px 12px;font-size:12px;color:#f5f5f5;border:1px solid #2a2a2a;">${displayName}</td></tr>
     <tr><td style="padding:8px 12px;font-size:12px;color:#aaa;font-family:monospace;border:1px solid #2a2a2a;">Company</td><td style="padding:8px 12px;font-size:12px;color:#f5f5f5;border:1px solid #2a2a2a;">${companyName ?? '—'}</td></tr>
-    <tr><td style="padding:8px 12px;font-size:12px;color:#aaa;font-family:monospace;border:1px solid #2a2a2a;">Plan</td><td style="padding:8px 12px;font-size:12px;color:#b6f04c;font-family:monospace;border:1px solid #2a2a2a;">Agency</td></tr>
+    <tr><td style="padding:8px 12px;font-size:12px;color:#aaa;font-family:monospace;border:1px solid #2a2a2a;">Plan</td><td style="padding:8px 12px;font-size:12px;color:#b6f04c;font-family:monospace;border:1px solid #2a2a2a;">Studio</td></tr>
     <tr><td style="padding:8px 12px;font-size:12px;color:#aaa;font-family:monospace;border:1px solid #2a2a2a;">User ID</td><td style="padding:8px 12px;font-size:12px;color:#555;font-family:monospace;border:1px solid #2a2a2a;">${userId}</td></tr>
   </table>
   <p style="margin:24px 0 0;font-size:12px;color:#555;font-family:monospace;">Trace: ${traceId}</p>
@@ -66,7 +66,7 @@ export async function POST(req: Request): Promise<Response> {
         body: JSON.stringify({
           from: 'PledgeOFF Billing <billing@pledgeoff.com>',
           to: ['hello@pledgeoff.com'],
-          subject: `[Invoice Request] ${displayName}${companyName ? ` — ${companyName}` : ''} — Agency`,
+          subject: `[Invoice Request] ${displayName}${companyName ? ` — ${companyName}` : ''} — Studio`,
           html: notificationHtml,
           reply_to: userEmail,
         }),

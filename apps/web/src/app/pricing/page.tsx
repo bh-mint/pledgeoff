@@ -4,11 +4,11 @@ import { PRICING } from "@/lib/pricing.config";
 
 export const metadata: Metadata = {
   title: { absolute: "Pricing — PledgeOFF" },
-  description: `Free until you're sure. Then €${PRICING.pro.monthly.eur}/mo for Pro or €${PRICING.pro_plus.monthly.eur}/mo for Pro+. Validate ideas with real signals from Reddit, GitHub, HN, and more.`,
+  description: `Free until you're sure. Then €${PRICING.founder.monthly.eur}/mo for Founder or €${PRICING.team.monthly.eur}/mo for Team. Validate ideas with real signals from Reddit, GitHub, HN, and more.`,
   alternates: { canonical: "https://pledgeoff.com/pricing" },
   openGraph: {
     title: "Pricing — PledgeOFF",
-    description: `Free until you're sure. Then €${PRICING.pro.monthly.eur}/mo for Pro or €${PRICING.pro_plus.monthly.eur}/mo for Pro+.`,
+    description: `Free until you're sure. Then €${PRICING.founder.monthly.eur}/mo for Founder or €${PRICING.team.monthly.eur}/mo for Team.`,
     url: "https://pledgeoff.com/pricing",
     type: "website",
   },
@@ -18,7 +18,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   name: "Pricing — PledgeOFF",
-  description: "Free until you're sure. Then €39/mo for Pro. Validate startup ideas with real Reddit, GitHub, and HN signals.",
+  description: "Free until you're sure. Then €49/mo for Founder. Validate startup ideas with real Reddit, GitHub, and HN signals.",
   url: "https://pledgeoff.com/pricing",
 };
 

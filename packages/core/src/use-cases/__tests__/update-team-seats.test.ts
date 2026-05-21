@@ -9,7 +9,7 @@ function makeSub(override?: Partial<Subscription>): Subscription {
   return {
     id: 'sub-1', userId: 'user-1',
     stripeCustomerId: 'cus_1', stripeSubscriptionId: 'sub_stripe_1',
-    plan: 'pro_plus', status: 'active',
+    plan: 'team', status: 'active',
     currentPeriodEnd: null, extraSeats: 0, stripeExtraSeatItemId: null,
     pastDueSince: null,
     ottoIncludedUsed: 0, ottoIncludedResetAt: null, ottoPurchased: 0,
@@ -68,7 +68,7 @@ describe('UpdateTeamSeatsUseCase', () => {
   });
 
   it('rejects when user has no Pro+ subscription', async () => {
-    const sub = makeSub({ plan: 'pro' });
+    const sub = makeSub({ plan: 'founder' });
     const repo = mockRepo({ findByUserId: async () => ok(sub) });
     const useCase = new UpdateTeamSeatsUseCase(repo);
     const result = await useCase.execute(baseInput);
@@ -78,7 +78,7 @@ describe('UpdateTeamSeatsUseCase', () => {
   });
 
   it('allows seat update when subscription is past_due (grace period active)', async () => {
-    const sub = makeSub({ status: 'past_due', plan: 'pro_plus' });
+    const sub = makeSub({ status: 'past_due', plan: 'team' });
     const repo = mockRepo({ findByUserId: async () => ok(sub) });
     const useCase = new UpdateTeamSeatsUseCase(repo);
     const result = await useCase.execute(baseInput);

@@ -18,8 +18,8 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const plan = await getUserPlan(user.id);
-  if (plan !== 'agency' && plan !== 'enterprise') {
-    return NextResponse.json({ error: 'Agency plan required' }, { status: 403 });
+  if (plan !== 'studio' && plan !== 'enterprise') {
+    return NextResponse.json({ error: 'Studio plan required' }, { status: 403 });
   }
 
   const ideaResult = await container._repos.ideaRepo.findById(ideaId);

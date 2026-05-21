@@ -15,43 +15,44 @@ const PRO_PLUS_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PLUS_ANNUAL_
 const AGENCY_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_PRICE_ID ?? "";
 const AGENCY_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_AGENCY_ANNUAL_PRICE_ID ?? "";
 
-type FeatureRow = { k: string; f: string; p: string; pp: string; a: string; soon?: boolean };
+type FeatureRow = { k: string; f: string; fo: string; t: string; s: string; soon?: boolean };
 
 const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Validation",
     rows: [
-      { k: "Validations / month",       f: "1",               p: "50",              pp: "Unlimited",       a: "Unlimited" },
-      { k: "Signal sources",            f: "Reddit + GitHub", p: "All 5 sources",   pp: "All 5 sources",   a: "All + custom" },
-      { k: "Competitor Intelligence",   f: "—",               p: "✓",               pp: "✓",               a: "✓" },
-      { k: "PDF / JSON export",         f: "—",               p: "✓",               pp: "✓",               a: "✓ · white-label" },
+      { k: "Validations / month",       f: "1",               fo: "20",             t: "Unlimited",        s: "Unlimited" },
+      { k: "Signal sources",            f: "Reddit + GitHub", fo: "All 5 sources",  t: "All 5 sources",    s: "All + custom" },
+      { k: "Competitor Intelligence",   f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "PDF / JSON export",         f: "—",               fo: "✓",              t: "✓",                s: "✓ · white-label" },
     ],
   },
   {
     group: "History",
     rows: [
-      { k: "Idea history",              f: "7 days",          p: "1 year",          pp: "Unlimited",       a: "Unlimited" },
+      { k: "Idea history",              f: "7 days",          fo: "1 year",         t: "Unlimited",        s: "Unlimited" },
     ],
   },
   {
     group: "Team",
     rows: [
-      { k: "Seats included",            f: "1",               p: "1",               pp: "5",               a: "10" },
-      { k: "Extra seats",               f: "—",               p: "—",               pp: "€7/seat/mo",      a: "Negotiated" },
-      { k: "Early access to features",  f: "—",               p: "—",               pp: "✓",               a: "✓" },
+      { k: "Seats included",            f: "1",               fo: "1",              t: "3",                s: "8" },
+      { k: "Extra seats",               f: "—",               fo: "—",              t: "€12/seat/mo",      s: "€20/seat/mo" },
+      { k: "Early access to features",  f: "—",               fo: "—",              t: "✓",                s: "✓" },
     ],
   },
   {
     group: "Otto AI",
     rows: [
-      { k: "Otto questions / month",    f: "—",               p: "5",               pp: "15",              a: "30" },
+      { k: "Otto questions / month",    f: "—",               fo: "5",              t: "15",               s: "50" },
     ],
   },
   {
     group: "Support",
     rows: [
-      { k: "Response SLA",              f: "Best effort",     p: "24h",             pp: "24h",             a: "4h dedicated" },
-      { k: "White-label reports",       f: "—",               p: "—",               pp: "—",               a: "✓", soon: true },
+      { k: "Response SLA",              f: "Best effort",     fo: "24h",            t: "24h",              s: "4h dedicated" },
+      { k: "White-label reports",       f: "—",               fo: "—",              t: "—",                s: "✓", soon: true },
+      { k: "Invoice billing (NET30)",   f: "—",               fo: "—",              t: "—",                s: "✓" },
     ],
   },
 ];
@@ -74,8 +75,8 @@ const FAQ = [
     a: "1 validation a month is enough to experience the product. If it's not for you, stay on Free forever. We mean it.",
   },
   {
-    q: "What's the difference between Pro and Pro+?",
-    a: "Pro gives you 20 validations/month and all signal sources. Pro+ removes the monthly limit, adds 3 team seats, and gets you early access to every new feature we ship.",
+    q: "What's the difference between Founder and Team?",
+    a: "Founder gives you 20 validations/month and all signal sources — perfect for solo builders. Team removes the monthly cap, adds 3 seats, extra Otto AI questions, and early access to every new feature we ship.",
   },
 ];
 
@@ -195,17 +196,17 @@ function UpgradeButton({
 export function PricingClient() {
   const [billing, setBilling] = useState<"month" | "year">("month");
 
-  const proPrice = billing === "month" ? String(PRICING.pro.monthly.eur) : String(PRICING.pro.monthly.annual_equivalent);
-  const proSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.pro.monthly.annual_total}/yr`;
-  const proPriceId = billing === "month" ? PRO_MONTHLY_PRICE_ID : PRO_ANNUAL_PRICE_ID;
+  const founderPrice = billing === "month" ? String(PRICING.founder.monthly.eur) : String(PRICING.founder.monthly.annual_equivalent);
+  const founderSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.founder.monthly.annual_total}/yr`;
+  const founderPriceId = billing === "month" ? PRO_MONTHLY_PRICE_ID : PRO_ANNUAL_PRICE_ID;
 
-  const proPlusPrice = billing === "month" ? String(PRICING.pro_plus.monthly.eur) : String(PRICING.pro_plus.monthly.annual_equivalent);
-  const proPlusSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.pro_plus.monthly.annual_total}/yr`;
-  const proPlusPriceId = billing === "month" ? PRO_PLUS_MONTHLY_PRICE_ID : PRO_PLUS_ANNUAL_PRICE_ID;
+  const teamPrice = billing === "month" ? String(PRICING.team.monthly.eur) : String(PRICING.team.monthly.annual_equivalent);
+  const teamSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.team.monthly.annual_total}/yr`;
+  const teamPriceId = billing === "month" ? PRO_PLUS_MONTHLY_PRICE_ID : PRO_PLUS_ANNUAL_PRICE_ID;
 
-  const agencyPrice = billing === "month" ? String(PRICING.agency.monthly.eur) : String(PRICING.agency.monthly.annual_equivalent);
-  const agencySub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.agency.monthly.annual_total}/yr`;
-  const agencyPriceId = billing === "month" ? AGENCY_MONTHLY_PRICE_ID : AGENCY_ANNUAL_PRICE_ID;
+  const studioPrice = billing === "month" ? String(PRICING.studio.monthly.eur) : String(PRICING.studio.monthly.annual_equivalent);
+  const studioSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.studio.monthly.annual_total}/yr`;
+  const studioPriceId = billing === "month" ? AGENCY_MONTHLY_PRICE_ID : AGENCY_ANNUAL_PRICE_ID;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
@@ -285,20 +286,20 @@ export function PricingClient() {
             </ul>
           </div>
 
-          {/* Pro */}
+          {/* Founder */}
           <div className="p-6 border-b sm:border-b-0 sm:border-r relative flex flex-col" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
             <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: "var(--accent)" }} />
             <div className="flex items-baseline justify-between mb-1">
-              <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Pro</div>
+              <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Founder</div>
               <span className="mono text-[10px]" style={{ color: "var(--accent)" }}>● best value</span>
             </div>
-            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>for serious founders</div>
+            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>solo builder</div>
             <div className="flex items-baseline gap-1">
-              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{proPrice}</span>
+              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{founderPrice}</span>
             </div>
-            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{proSub}</div>
+            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{founderSub}</div>
             <div className="mb-5">
-              <UpgradeButton priceId={proPriceId} label="Upgrade to Pro" primary />
+              <UpgradeButton priceId={founderPriceId} label="Upgrade to Founder" primary />
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
@@ -308,6 +309,7 @@ export function PricingClient() {
                 { label: "Competitor Intelligence" },
                 { label: "PDF + JSON export" },
                 { label: "1-year idea history" },
+                { label: "5 Otto questions / mo" },
                 { label: "24h support SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
@@ -318,16 +320,16 @@ export function PricingClient() {
             </ul>
           </div>
 
-          {/* Pro+ */}
+          {/* Team */}
           <div className="p-6 border-b sm:border-b-0 sm:border-r flex flex-col" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-            <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Pro+</div>
-            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>unlimited everything</div>
+            <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Team</div>
+            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>unlimited + collaborate</div>
             <div className="flex items-baseline gap-1">
-              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{proPlusPrice}</span>
+              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{teamPrice}</span>
             </div>
-            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{proPlusSub}</div>
+            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{teamSub}</div>
             <div className="mb-5">
-              <UpgradeButton priceId={proPlusPriceId} label="Upgrade to Pro+" />
+              <UpgradeButton priceId={teamPriceId} label="Upgrade to Team" />
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
@@ -338,6 +340,7 @@ export function PricingClient() {
                 { label: "PDF + JSON export" },
                 { label: "Unlimited idea history" },
                 { label: "3 team seats" },
+                { label: "15 Otto questions / mo" },
                 { label: "Early access to features" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
@@ -348,16 +351,16 @@ export function PricingClient() {
             </ul>
           </div>
 
-          {/* Agency */}
+          {/* Studio */}
           <div className="p-6 flex flex-col" style={{ background: "var(--canvas)" }}>
-            <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Agency</div>
-            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>vet client briefs</div>
+            <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Studio</div>
+            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>agencies & studios</div>
             <div className="flex items-baseline gap-1">
-              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{agencyPrice}</span>
+              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{studioPrice}</span>
             </div>
-            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{agencySub}</div>
+            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{studioSub}</div>
             <div className="mb-5">
-              <UpgradeButton priceId={agencyPriceId} label="Upgrade to Agency" />
+              <UpgradeButton priceId={studioPriceId} label="Upgrade to Studio" />
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
@@ -366,8 +369,9 @@ export function PricingClient() {
                 { label: "All sources + custom" },
                 { label: "Competitor Intelligence" },
                 { label: "White-label reports", soon: true },
-                { label: "10 team seats" },
-                { label: "30 Otto questions / mo" },
+                { label: "8 team seats" },
+                { label: "50 Otto questions / mo" },
+                { label: "Invoice billing (NET30)" },
                 { label: "4h dedicated SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
@@ -412,11 +416,11 @@ export function PricingClient() {
                 className="grid grid-cols-12 gap-3 px-6 py-3 mono text-[10px] uppercase tracking-[0.14em] border-b"
                 style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--t3)" }}
               >
-                <div className="col-span-4">Feature</div>
+                <div className="col-span-3">Feature</div>
                 <div className="col-span-2">Free</div>
-                <div className="col-span-2" style={{ color: "var(--accent)" }}>Pro</div>
-                <div className="col-span-2">Pro+</div>
-                <div className="col-span-2">Agency</div>
+                <div className="col-span-2" style={{ color: "var(--accent)" }}>Founder</div>
+                <div className="col-span-2">Team</div>
+                <div className="col-span-3">Studio</div>
               </div>
               {FEATURES.map((g) => (
                 <div key={g.group}>
@@ -428,13 +432,13 @@ export function PricingClient() {
                   </div>
                   {g.rows.map((r) => (
                     <div key={r.k} className="grid grid-cols-12 gap-3 px-6 py-3 border-b items-center" style={{ borderColor: "var(--border)" }}>
-                      <div className="col-span-4 text-[13px]" style={{ color: "var(--t1)" }}>
+                      <div className="col-span-3 text-[13px]" style={{ color: "var(--t1)" }}>
                         {r.k}{r.soon && <SoonBadge />}
                       </div>
                       <div className="col-span-2">{renderCell(r.f)}</div>
-                      <div className="col-span-2">{renderCell(r.p, true)}</div>
-                      <div className="col-span-2">{renderCell(r.pp)}</div>
-                      <div className="col-span-2">{renderCell(r.a)}</div>
+                      <div className="col-span-2">{renderCell(r.fo, true)}</div>
+                      <div className="col-span-2">{renderCell(r.t)}</div>
+                      <div className="col-span-3">{renderCell(r.s)}</div>
                     </div>
                   ))}
                 </div>
@@ -474,7 +478,7 @@ export function PricingClient() {
               </Link>
             </div>
           </div>
-          <UpgradeButton priceId={proPriceId} label={`Upgrade to Pro · €${proPrice}/mo →`} primary />
+          <UpgradeButton priceId={founderPriceId} label={`Upgrade to Founder · €${founderPrice}/mo →`} primary />
         </div>
       </div>
       <Footer />

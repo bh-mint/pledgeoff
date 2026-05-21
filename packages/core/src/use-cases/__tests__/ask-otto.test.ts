@@ -12,7 +12,7 @@ const makeProSub = (overrides: Partial<Subscription> = {}): Subscription => ({
   userId: 'user-1',
   stripeCustomerId: 'cus_1',
   stripeSubscriptionId: 'sub_stripe_1',
-  plan: 'pro',
+  plan: 'founder',
   status: 'active',
   currentPeriodEnd: null,
   extraSeats: 0,

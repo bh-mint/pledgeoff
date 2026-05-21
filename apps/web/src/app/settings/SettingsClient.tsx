@@ -11,7 +11,7 @@ import { AuditLogSection } from "./AuditLogSection";
 import { ApiKeySection } from "./ApiKeySection";
 
 type AvailablePlan = {
-  id: 'pro' | 'pro_plus' | 'agency';
+  id: 'founder' | 'team' | 'studio' | 'enterprise';
   label: string;
   monthlyEur: number;
   annualEquivalentEur: number;
@@ -59,17 +59,17 @@ const SECTIONS: Array<{ id: SectionId; label: string; agencyOnly?: boolean }> = 
 
 const PLAN_LABELS: Record<Plan, string> = {
   free: "Free",
-  pro: "Pro",
-  pro_plus: "Pro+",
-  agency: "Agency",
+  founder: "Founder",
+  team: "Team",
+  studio: "Studio",
   enterprise: "Enterprise",
 };
 
 const PLAN_COLORS: Record<Plan, string> = {
   free: "var(--t3)",
-  pro: "var(--accent)",
-  pro_plus: "var(--validated)",
-  agency: "var(--validated)",
+  founder: "var(--accent)",
+  team: "var(--validated)",
+  studio: "var(--validated)",
   enterprise: "var(--validated)",
 };
 
@@ -273,7 +273,7 @@ export function SettingsClient({
 
       {/* Mobile: horizontal tab row */}
       <div className="col-span-12 md:hidden flex gap-1 overflow-x-auto pb-2 border-b" style={{ borderColor: "var(--border)" }}>
-        {SECTIONS.filter((s) => !s.agencyOnly || plan === 'agency' || plan === 'enterprise').map((s) => {
+        {SECTIONS.filter((s) => !s.agencyOnly || plan === 'studio' || plan === 'enterprise').map((s) => {
           const active = section === s.id;
           return (
             <button
@@ -301,7 +301,7 @@ export function SettingsClient({
           settings
         </div>
         <nav className="flex flex-col">
-          {SECTIONS.filter((s) => !s.agencyOnly || plan === 'agency' || plan === 'enterprise').map((s) => {
+          {SECTIONS.filter((s) => !s.agencyOnly || plan === 'studio' || plan === 'enterprise').map((s) => {
             const active = section === s.id;
             return (
               <button
@@ -711,8 +711,8 @@ export function SettingsClient({
               )}
             </div>
 
-            {/* Invoice billing — Agency only */}
-            {(plan === "agency" || plan === "enterprise") && (
+            {/* Invoice billing — Studio only */}
+            {(plan === "studio" || plan === "enterprise") && (
               <div className="border rounded-md p-5 mb-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                 <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>Invoice billing</div>
                 <p className="text-[12px] mb-5" style={{ color: "var(--t2)" }}>
@@ -747,24 +747,24 @@ export function SettingsClient({
               </div>
             )}
 
-            {/* Seat add-ons — Pro+ only */}
-            {plan === "pro_plus" && (
+            {/* Seat add-ons — Team only */}
+            {plan === "team" && (
               <div className="border rounded-md p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                 <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>Team seats</div>
                 <p className="text-[12px] mb-5" style={{ color: "var(--t2)" }}>
-                  Pro+ includes 10 seats. Add extra seats at €7/seat/month, billed to your subscription.
+                  Team includes 3 seats. Add extra seats at €12/seat/month, billed to your subscription.
                 </p>
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-5">
                   {/* Seat breakdown */}
                   <div className="flex-1 flex items-center gap-3">
                     <div className="text-center">
-                      <div className="mono text-[22px] font-semibold text-(--t1)">{10 + seatExtra}</div>
+                      <div className="mono text-[22px] font-semibold text-(--t1)">{3 + seatExtra}</div>
                       <div className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5" style={{ color: "var(--t3)" }}>total seats</div>
                     </div>
                     <div className="text-(--t3) text-[18px]">=</div>
                     <div className="text-center">
-                      <div className="mono text-[16px] text-(--t2)">10</div>
+                      <div className="mono text-[16px] text-(--t2)">3</div>
                       <div className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5" style={{ color: "var(--t3)" }}>included</div>
                     </div>
                     <div className="text-(--t3)">+</div>
@@ -801,12 +801,12 @@ export function SettingsClient({
                   <div>
                     {seatExtra > 0 ? (
                       <span className="mono text-[12px] text-(--t2)">
-                        {seatExtra} × €7 ={" "}
-                        <span className="text-(--t1) font-semibold">€{seatExtra * 7}/month</span>
+                        {seatExtra} × €12 ={" "}
+                        <span className="text-(--t1) font-semibold">€{seatExtra * 12}/month</span>
                         {" "}added to your subscription
                       </span>
                     ) : (
-                      <span className="mono text-[12px]" style={{ color: "var(--t3)" }}>No extra seats — only the 10 included ones.</span>
+                      <span className="mono text-[12px]" style={{ color: "var(--t3)" }}>No extra seats — only the 3 included ones.</span>
                     )}
                   </div>
                   <button
@@ -832,14 +832,14 @@ export function SettingsClient({
             <h1 className="display text-[28px] font-semibold tracking-tight text-(--t1) mb-1">Team</h1>
             <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
               Invite colleagues to validate ideas together.
-              {plan === "free" && " Upgrade to Pro for 3 seats, Pro+ for 10."}
+              {plan === "free" && " Upgrade to Founder for solo use, Team for 3 seats, Studio for 8."}
             </p>
             <TeamSection plan={plan} subscriptionStatus={subscriptionStatus ?? null} />
           </div>
         )}
 
-        {/* ── Activity Log (Agency only) ── */}
-        {section === "activity" && (plan === "agency" || plan === "enterprise") && (
+        {/* ── Activity Log (Studio only) ── */}
+        {section === "activity" && (plan === "studio" || plan === "enterprise") && (
           <div>
             <AuditLogSection entries={auditEntries} />
           </div>

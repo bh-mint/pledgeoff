@@ -5,14 +5,14 @@ import { container } from '@/lib/container';
 import { logger } from '@pledgeoff/observability';
 
 const OttoPackSchema = z.object({
-  questionCount: z.union([z.literal(1), z.literal(3), z.literal(5), z.literal(10)]),
+  questionCount: z.union([z.literal(10), z.literal(25), z.literal(60), z.literal(150)]),
 });
 
 const OTTO_PACK_PRICE_IDS: Record<number, string | undefined> = {
-  1:  process.env.STRIPE_OTTO_1Q_PRICE_ID,
-  3:  process.env.STRIPE_OTTO_3Q_PRICE_ID,
-  5:  process.env.STRIPE_OTTO_5Q_PRICE_ID,
-  10: process.env.STRIPE_OTTO_10Q_PRICE_ID,
+  10:  process.env.STRIPE_OTTO_10Q_PRICE_ID,
+  25:  process.env.STRIPE_OTTO_25Q_PRICE_ID,
+  60:  process.env.STRIPE_OTTO_60Q_PRICE_ID,
+  150: process.env.STRIPE_OTTO_150Q_PRICE_ID,
 };
 
 export async function POST(req: Request) {

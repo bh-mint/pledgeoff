@@ -63,7 +63,7 @@ export function ExportButtons({ ideaId, plan }: Props) {
 
   return (
     <div className="flex items-center gap-2">
-      {plan === "agency" ? (
+      {(plan === "studio" || plan === "enterprise") ? (
         <button
           onClick={downloadPdf}
           disabled={pdfLoading}

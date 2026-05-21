@@ -30,7 +30,7 @@ export async function GET(req: Request) {
   if (!userId) return unauthorizedResponse(traceId);
 
   const plan = await getUserPlan(userId);
-  if (plan === 'free' || plan === 'pro') {
+  if (plan === 'free' || plan === 'founder') {
     return Response.json({ data: [], locked: true }, { status: 200, headers: { 'X-Trace-Id': traceId } });
   }
 

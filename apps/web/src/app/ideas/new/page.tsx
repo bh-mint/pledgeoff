@@ -30,7 +30,7 @@ export default async function NewIdeaPage() {
 
   const validationsLeft = isFinite(limit) ? Math.max(0, limit - ideasThisMonth) : 999;
 
-  const isPaidPlan = plan === "pro" || plan === "pro_plus";
+  const isPaidPlan = plan !== "free";
   const team = teamResult.isOk() ? teamResult.value : null;
   const teamId = isPaidPlan && team ? team.id : null;
   const teamName = isPaidPlan && team ? team.name : null;

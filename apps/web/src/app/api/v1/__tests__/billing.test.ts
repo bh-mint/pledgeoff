@@ -70,7 +70,7 @@ describe('GET /api/v1/billing/subscription', () => {
 
   it('returns 200 with pro plan for active subscriber', async () => {
     mockGetOrCreateSubscriptionUseCase.execute.mockResolvedValue(
-      ok(makeSub({ plan: 'pro', status: 'active', currentPeriodEnd: '2026-06-20T00:00:00.000Z' }))
+      ok(makeSub({ plan: 'founder', status: 'active', currentPeriodEnd: '2026-06-20T00:00:00.000Z' }))
     );
 
     const { GET } = await import('../billing/subscription/route');
@@ -81,13 +81,13 @@ describe('GET /api/v1/billing/subscription', () => {
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.data.plan).toBe('pro');
+    expect(body.data.plan).toBe('founder');
     expect(body.data.currentPeriodEnd).toBe('2026-06-20T00:00:00.000Z');
   });
 
   it('keeps pro plan during past_due grace period (24h)', async () => {
     mockGetOrCreateSubscriptionUseCase.execute.mockResolvedValue(
-      ok(makeSub({ plan: 'pro', status: 'past_due' }))
+      ok(makeSub({ plan: 'founder', status: 'past_due' }))
     );
 
     const { GET } = await import('../billing/subscription/route');
@@ -99,7 +99,7 @@ describe('GET /api/v1/billing/subscription', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     // past_due = grace period activ, planul rămâne pro până la downgrade de cron
-    expect(body.data.plan).toBe('pro');
+    expect(body.data.plan).toBe('founder');
     expect(body.data.status).toBe('past_due');
   });
 

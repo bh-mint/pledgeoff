@@ -12,9 +12,9 @@ function priceIdToPlan(priceId: string): Plan {
   const agencyMonthly = process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID;
   const agencyAnnual = process.env.STRIPE_AGENCY_ANNUAL_PRICE_ID;
 
-  if (priceId === agencyMonthly || priceId === agencyAnnual) return 'agency';
-  if (priceId === plusMonthly || priceId === plusAnnual) return 'pro_plus';
-  if (priceId === monthly || priceId === annual) return 'pro';
+  if (priceId === agencyMonthly || priceId === agencyAnnual) return 'studio';
+  if (priceId === plusMonthly || priceId === plusAnnual) return 'team';
+  if (priceId === monthly || priceId === annual) return 'founder';
 
   throw new Error(`Unknown Stripe priceId: ${priceId}. Update STRIPE_*_PRICE_ID env vars.`);
 }

@@ -45,29 +45,29 @@ export default async function SettingsPage() {
 
   const availablePlans = [
     {
-      id: 'pro' as const,
-      label: 'Pro',
-      monthlyEur: 149,
-      annualEquivalentEur: 119,
-      annualTotalEur: 1428,
+      id: 'founder' as const,
+      label: 'Founder',
+      monthlyEur: 49,
+      annualEquivalentEur: 39,
+      annualTotalEur: 468,
       monthlyPriceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID ?? '',
       annualPriceId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID ?? '',
     },
     {
-      id: 'pro_plus' as const,
-      label: 'Pro+',
-      monthlyEur: 249,
-      annualEquivalentEur: 199,
-      annualTotalEur: 2388,
+      id: 'team' as const,
+      label: 'Team',
+      monthlyEur: 99,
+      annualEquivalentEur: 79,
+      annualTotalEur: 948,
       monthlyPriceId: process.env.STRIPE_PRO_PLUS_MONTHLY_PRICE_ID ?? '',
       annualPriceId: process.env.STRIPE_PRO_PLUS_ANNUAL_PRICE_ID ?? '',
     },
     {
-      id: 'agency' as const,
-      label: 'Agency',
-      monthlyEur: 499,
-      annualEquivalentEur: 399,
-      annualTotalEur: 4788,
+      id: 'studio' as const,
+      label: 'Studio',
+      monthlyEur: 349,
+      annualEquivalentEur: 279,
+      annualTotalEur: 3348,
       monthlyPriceId: process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID ?? '',
       annualPriceId: process.env.STRIPE_AGENCY_ANNUAL_PRICE_ID ?? '',
     },
@@ -83,7 +83,7 @@ export default async function SettingsPage() {
     created_at: string;
   };
   let auditEntries: AuditRow[] = [];
-  if (plan === 'agency' || plan === 'enterprise') {
+  if (plan === 'studio' || plan === 'enterprise') {
     const { data } = await supabase
       .from('audit_log')
       .select('id, action, resource_type, resource_id, metadata, created_at')

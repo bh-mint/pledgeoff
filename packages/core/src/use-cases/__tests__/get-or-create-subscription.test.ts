@@ -48,7 +48,7 @@ function makeMockRepo(overrides: Partial<ISubscriptionRepository> = {}): ISubscr
 
 describe('GetOrCreateSubscriptionUseCase', () => {
   it('returns existing subscription when found', async () => {
-    const existing = makeSubscription({ plan: 'pro' });
+    const existing = makeSubscription({ plan: 'founder' });
     const repo = makeMockRepo({ findByUserId: async () => ok(existing) });
     const useCase = new GetOrCreateSubscriptionUseCase(repo);
 

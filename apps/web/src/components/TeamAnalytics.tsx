@@ -39,7 +39,7 @@ function DonutSlice({ pct, color, offset, r }: { pct: number; color: string; off
 }
 
 export function TeamAnalytics({ rows, plan }: Props) {
-  const isAgency = plan === 'agency' || plan === 'enterprise';
+  const isStudio = plan === 'studio' || plan === 'enterprise';
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
 
@@ -212,12 +212,12 @@ export function TeamAnalytics({ rows, plan }: Props) {
     </div>
   );
 
-  if (!isAgency) {
+  if (!isStudio) {
     return (
       <div className="relative mt-4">
         <div className="blur-sm pointer-events-none select-none">{content}</div>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-          <span className="mono text-[10px] uppercase tracking-[0.1em] text-(--t3)">Agency plan required</span>
+          <span className="mono text-[10px] uppercase tracking-[0.1em] text-(--t3)">Studio plan required</span>
           <Link
             href="/pricing"
             className="mono text-[11px] font-semibold px-3 py-1.5 rounded"

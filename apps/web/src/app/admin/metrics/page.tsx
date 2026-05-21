@@ -2,9 +2,10 @@ import { requireAdminServer } from '@/lib/admin-auth';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
 
 const PLAN_MRR: Record<string, number> = {
-  pro: 149,
-  pro_plus: 249,
-  agency: 499,
+  founder: 49,
+  team: 99,
+  studio: 349,
+  enterprise: 1199,
   free: 0,
 };
 
@@ -100,11 +101,11 @@ export default async function MetricsPage() {
         <div style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--t3)', marginBottom: 16 }}>
           Plan breakdown
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-          {['free', 'pro', 'pro_plus', 'agency'].map((plan) => (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
+          {['free', 'founder', 'team', 'studio', 'enterprise'].map((plan) => (
             <StatCard
               key={plan}
-              label={plan.replace('_', '+')}
+              label={plan.charAt(0).toUpperCase() + plan.slice(1)}
               value={planCounts[plan] ?? 0}
               sub={plan !== 'free' ? `€${PLAN_MRR[plan] ?? 0}/mo each` : undefined}
             />

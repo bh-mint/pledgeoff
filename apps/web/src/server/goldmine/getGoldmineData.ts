@@ -4,7 +4,7 @@ import { NICHE_LABELS, type Niche } from '@/lib/niche-classifier';
 import type { GoldmineNiche } from '@/app/api/v1/goldmine/route';
 
 export async function getGoldmineData(plan: string): Promise<{ data: GoldmineNiche[]; locked: boolean }> {
-  if (plan === 'free' || plan === 'pro') {
+  if (plan === 'free' || plan === 'founder') {
     return { data: [], locked: true };
   }
 
