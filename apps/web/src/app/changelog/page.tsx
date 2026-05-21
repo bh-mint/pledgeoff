@@ -11,6 +11,50 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "3.0",
+    date: "May 2026",
+    tag: "FEATURE",
+    items: [
+      "Agency plan launched at €499/month (€399/month annual) — includes all Pro+ features plus white-label PDF exports, advanced team analytics, NET30 invoicing on request, and a full activity audit log",
+      "Pricing updated across all tiers: Pro €149/month, Pro+ €249/month, Agency €499/month — annual plans available with up to 20% savings",
+      "Enterprise tier added for larger organizations: custom pricing, dedicated onboarding, SSO/SAML (Okta), contractual SLA, and custom DPA — contact via /enterprise",
+      "Annual billing available for Pro, Pro+, and Agency — switch in Settings → Billing",
+    ],
+  },
+  {
+    version: "2.9",
+    date: "May 2026",
+    tag: "FEATURE",
+    items: [
+      "API Keys: Pro+ and Agency users can generate personal API keys (po_live_...) for programmatic access to all validation endpoints",
+      "Keys are created and revoked in Settings → API — each key shows creation date and last used timestamp",
+      "Authenticate any API request with the X-API-Key header — same rate limits and plan gates as the web interface",
+      "Full API documentation at pledgeoff.com/api-docs — all 25 routes documented with request/response schemas and examples",
+    ],
+  },
+  {
+    version: "2.8",
+    date: "May 2026",
+    tag: "FEATURE",
+    items: [
+      "Niche Goldmine (Pro+): a live feed of trending startup niches ranked by heat score — 15 categories, continuously updated from real market signals, with sparklines showing momentum over the last 7 days",
+      "Decision log filters: filter your dashboard by GO, KILL, or PIVOT verdict — counts shown on each chip so you see the breakdown instantly",
+      "Team PDF export (Agency): generate a white-label PDF report for any validated idea — covers the verdict, score breakdown, signals, and all intelligence tools run on the idea",
+      "Advanced team analytics (Agency): verdict distribution donut chart, team velocity sparkline, top contributors ranked by activity, and most-engaged ideas by reaction count",
+    ],
+  },
+  {
+    version: "2.7",
+    date: "May 2026",
+    tag: "FEATURE",
+    items: [
+      "Agency invoice billing: Agency plan users can request a NET30 invoice directly from Settings → Billing — the request is logged and the finance team follows up within one business day",
+      "Activity audit log (Agency): every action taken by team members — idea creation, tool runs, plan changes, invite activity — recorded and viewable in Settings → Activity",
+      "Google Search added as a signal source alongside Reddit and GitHub — broader coverage for market validation",
+      "Domain redirect fixed: www.pledgeoff.com now correctly redirects to pledgeoff.com (308 permanent) — no more split authority in search rankings",
+    ],
+  },
+  {
     version: "2.6",
     date: "May 2026",
     tag: "FEATURE",
