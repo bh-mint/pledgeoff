@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { DecisionTimeline, DecisionTimelineEntry } from "@pledgeoff/core";
 
-type Plan = "free" | "pro" | "pro_plus" | "agency";
+type Plan = "free" | "pro" | "pro_plus" | "agency" | "enterprise";
 
 interface Props {
   ideaId: string;
@@ -59,7 +59,7 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
   const [loading, setLoading] = useState(true);
   const [exportLoading, setExportLoading] = useState(false);
 
-  const canExportPdf = plan === "agency";
+  const canExportPdf = plan === "agency" || plan === "enterprise";
 
   useEffect(() => {
     async function load() {

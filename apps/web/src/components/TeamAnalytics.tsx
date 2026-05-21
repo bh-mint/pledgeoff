@@ -39,7 +39,7 @@ function DonutSlice({ pct, color, offset, r }: { pct: number; color: string; off
 }
 
 export function TeamAnalytics({ rows, plan }: Props) {
-  const isAgency = plan === 'agency';
+  const isAgency = plan === 'agency' || plan === 'enterprise';
   // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
 

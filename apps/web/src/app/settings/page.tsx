@@ -83,7 +83,7 @@ export default async function SettingsPage() {
     created_at: string;
   };
   let auditEntries: AuditRow[] = [];
-  if (plan === 'agency') {
+  if (plan === 'agency' || plan === 'enterprise') {
     const { data } = await supabase
       .from('audit_log')
       .select('id, action, resource_type, resource_id, metadata, created_at')

@@ -62,6 +62,7 @@ const PLAN_LABELS: Record<Plan, string> = {
   pro: "Pro",
   pro_plus: "Pro+",
   agency: "Agency",
+  enterprise: "Enterprise",
 };
 
 const PLAN_COLORS: Record<Plan, string> = {
@@ -69,6 +70,7 @@ const PLAN_COLORS: Record<Plan, string> = {
   pro: "var(--accent)",
   pro_plus: "var(--validated)",
   agency: "var(--validated)",
+  enterprise: "var(--validated)",
 };
 
 function formatDate(iso: string): string {
@@ -271,7 +273,7 @@ export function SettingsClient({
 
       {/* Mobile: horizontal tab row */}
       <div className="col-span-12 md:hidden flex gap-1 overflow-x-auto pb-2 border-b" style={{ borderColor: "var(--border)" }}>
-        {SECTIONS.filter((s) => !s.agencyOnly || plan === 'agency').map((s) => {
+        {SECTIONS.filter((s) => !s.agencyOnly || plan === 'agency' || plan === 'enterprise').map((s) => {
           const active = section === s.id;
           return (
             <button
@@ -299,7 +301,7 @@ export function SettingsClient({
           settings
         </div>
         <nav className="flex flex-col">
-          {SECTIONS.filter((s) => !s.agencyOnly || plan === 'agency').map((s) => {
+          {SECTIONS.filter((s) => !s.agencyOnly || plan === 'agency' || plan === 'enterprise').map((s) => {
             const active = section === s.id;
             return (
               <button
@@ -710,7 +712,7 @@ export function SettingsClient({
             </div>
 
             {/* Invoice billing — Agency only */}
-            {plan === "agency" && (
+            {(plan === "agency" || plan === "enterprise") && (
               <div className="border rounded-md p-5 mb-3" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
                 <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>Invoice billing</div>
                 <p className="text-[12px] mb-5" style={{ color: "var(--t2)" }}>
@@ -837,7 +839,7 @@ export function SettingsClient({
         )}
 
         {/* ── Activity Log (Agency only) ── */}
-        {section === "activity" && plan === "agency" && (
+        {section === "activity" && (plan === "agency" || plan === "enterprise") && (
           <div>
             <AuditLogSection entries={auditEntries} />
           </div>

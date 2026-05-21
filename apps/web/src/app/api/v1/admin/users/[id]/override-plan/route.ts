@@ -3,7 +3,7 @@ import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { z } from 'zod';
 
 const Schema = z.object({
-  plan: z.enum(['free', 'pro', 'pro_plus', 'agency']),
+  plan: z.enum(['free', 'pro', 'pro_plus', 'agency', 'enterprise']),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {

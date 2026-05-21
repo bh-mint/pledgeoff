@@ -14,7 +14,7 @@ import { AuditTrailClient } from "./audit-trail/AuditTrailClient";
 import { LaunchKitClient } from "./launch-kit/LaunchKitClient";
 import type { Idea, Decision, Signal, Simulation, LandingPage, CustomerAnalysis, BuildAnalysis, CompetitorAnalysis, LaunchKit } from "@pledgeoff/core";
 
-type Plan = "free" | "pro" | "pro_plus" | "agency";
+type Plan = "free" | "pro" | "pro_plus" | "agency" | "enterprise";
 
 interface IdeaPageClientProps {
   idea: Idea;

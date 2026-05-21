@@ -29,7 +29,7 @@ export async function GET(req: Request) {
   if (!userId) return unauthorized(traceId);
 
   const plan = await getUserPlan(userId);
-  if (plan !== 'pro_plus' && plan !== 'agency') {
+  if (plan !== 'pro_plus' && plan !== 'agency' && plan !== 'enterprise') {
     return forbidden(traceId, 'API access requires Pro+ or Agency plan');
   }
 
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
   if (!userId) return unauthorized(traceId);
 
   const plan = await getUserPlan(userId);
-  if (plan !== 'pro_plus' && plan !== 'agency') {
+  if (plan !== 'pro_plus' && plan !== 'agency' && plan !== 'enterprise') {
     return forbidden(traceId, 'API access requires Pro+ or Agency plan');
   }
 

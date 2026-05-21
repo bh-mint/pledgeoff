@@ -19,7 +19,7 @@ export async function POST(req: Request): Promise<Response> {
   const sub = subResult.isOk() ? subResult.value : null;
   const plan = sub ? effectivePlan(sub) : 'free';
 
-  if (plan !== 'agency') {
+  if (plan !== 'agency' && plan !== 'enterprise') {
     return Response.json(
       { error: { code: 'PLAN_REQUIRED', message: 'Invoice billing is available for Agency plan only' } },
       { status: 403, headers: { 'X-Trace-Id': traceId } },

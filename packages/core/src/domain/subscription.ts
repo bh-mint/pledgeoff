@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const PlanSchema = z.enum(['free', 'pro', 'pro_plus', 'agency']);
+export const PlanSchema = z.enum(['free', 'pro', 'pro_plus', 'agency', 'enterprise']);
 export type Plan = z.infer<typeof PlanSchema>;
 
 export const SubscriptionStatusSchema = z.enum([
@@ -36,7 +36,8 @@ export const PLAN_LIMITS = {
   free:     { verificationsPerMonth: 1,        seatsIncluded: 1,  ottoQuestionsPerMonth: 0  },
   pro:      { verificationsPerMonth: 50,       seatsIncluded: 1,  ottoQuestionsPerMonth: 5  },
   pro_plus: { verificationsPerMonth: Infinity, seatsIncluded: 5,  ottoQuestionsPerMonth: 15 },
-  agency:   { verificationsPerMonth: Infinity, seatsIncluded: 10, ottoQuestionsPerMonth: 30 },
+  agency:     { verificationsPerMonth: Infinity, seatsIncluded: 10,       ottoQuestionsPerMonth: 30       },
+  enterprise: { verificationsPerMonth: Infinity, seatsIncluded: Infinity, ottoQuestionsPerMonth: Infinity },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
 
 export const OTTO_PACK_SIZES = [1, 3, 5, 10] as const;
@@ -72,4 +73,8 @@ export function effectivePlan(sub: Subscription): Plan {
 
 export function effectiveSeats(sub: Subscription): number {
   return PLAN_LIMITS[effectivePlan(sub)].seatsIncluded + (isActivePlan(sub) ? sub.extraSeats : 0);
+}
+
+export function isAgencyOrHigher(plan: Plan): boolean {
+  return plan === 'agency' || plan === 'enterprise';
 }

@@ -12,7 +12,7 @@ type TeamData = {
 };
 
 type Props = {
-  plan: "free" | "pro" | "pro_plus" | "agency";
+  plan: "free" | "pro" | "pro_plus" | "agency" | "enterprise";
   subscriptionStatus: SubscriptionStatus | null;
 };
 

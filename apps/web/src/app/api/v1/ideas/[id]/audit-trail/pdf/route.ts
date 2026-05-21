@@ -18,7 +18,7 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const plan = await getUserPlan(user.id);
-  if (plan !== 'agency') {
+  if (plan !== 'agency' && plan !== 'enterprise') {
     return NextResponse.json({ error: 'Agency plan required' }, { status: 403 });
   }
 
