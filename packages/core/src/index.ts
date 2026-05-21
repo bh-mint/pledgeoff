@@ -62,3 +62,6 @@ export * from './use-cases/revoke-api-key';
 export * from './use-cases/list-api-keys';
 export * from './ports/IUsageLogger';
 export * from './use-cases/get-decision-timeline';
+export * from './domain/launch-kit';
+export * from './ports/launch-kit-repository';
+export * from './use-cases/generate-launch-kit';

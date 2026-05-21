@@ -103,6 +103,40 @@ export interface LLMRelevanceResponse {
   readonly scores: ReadonlyArray<{ readonly id: string; readonly score: number }>;
 }
 
+export interface LLMLaunchKitRequest {
+  readonly ideaText: string;
+  readonly reasoning: string;
+  readonly signals: Signal[];
+  readonly traceId: string;
+}
+
+export interface LLMLaunchKitHeadline {
+  readonly variant: 'A' | 'B' | 'C';
+  readonly headline: string;
+  readonly angle: string;
+}
+
+export interface LLMLaunchKitEmail {
+  readonly sequence: 1 | 2 | 3;
+  readonly subject: string;
+  readonly body: string;
+  readonly sendAt: string;
+}
+
+export interface LLMLaunchKitPricing {
+  readonly tier: string;
+  readonly priceMonthly: number;
+  readonly currency: string;
+  readonly rationale: string;
+  readonly anchoring: string;
+}
+
+export interface LLMLaunchKitResponse {
+  readonly headlines: LLMLaunchKitHeadline[];
+  readonly emailSequence: LLMLaunchKitEmail[];
+  readonly pricingRecommendation: LLMLaunchKitPricing;
+}
+
 export interface LLMOttoMessage {
   readonly role: 'user' | 'assistant';
   readonly content: string;
@@ -137,4 +171,5 @@ export interface ILLMClient {
   analyzeBuild(request: LLMBuildRequest): Promise<Result<LLMBuildResponse, LLMClientError>>;
   analyzeCompetitors(request: LLMCompetitorRequest): Promise<Result<LLMCompetitorResponse, LLMClientError>>;
   chatWithOtto(request: LLMOttoRequest): Promise<Result<LLMOttoResponse, LLMClientError>>;
+  generateLaunchKit(request: LLMLaunchKitRequest): Promise<Result<LLMLaunchKitResponse, LLMClientError>>;
 }

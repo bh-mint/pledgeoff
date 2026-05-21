@@ -1,7 +1,7 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -12,6 +12,7 @@ import { buildBuildPrompt, BUILD_PROMPT_VERSION } from './build-prompt.v1';
 import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './search-queries-prompt.v1';
 import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
 import { buildRelevancePrompt, RELEVANCE_PROMPT_VERSION } from './relevance-prompt.v1';
+import { buildLaunchKitPrompt, LAUNCH_KIT_PROMPT_VERSION } from './launch-kit-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
 const tracer = getTracer('groq-llm-adapter');
@@ -129,6 +130,27 @@ const CompetitorGapItemSchema = z.object({
 const LLMCompetitorResponseSchema = z.object({
   competitors: z.array(CompetitorItemSchema).max(8),
   gaps: z.array(CompetitorGapItemSchema).max(5),
+});
+
+const LLMLaunchKitResponseSchemaG = z.object({
+  headlines: z.array(z.object({
+    variant: z.enum(['A', 'B', 'C']),
+    headline: z.string().min(1).max(120),
+    angle: z.string().min(1).max(200),
+  })).min(1).max(3),
+  emailSequence: z.array(z.object({
+    sequence: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+    subject: z.string().min(1).max(100),
+    body: z.string().min(1).max(3000),
+    sendAt: z.string().min(1).max(60),
+  })).min(1).max(3),
+  pricingRecommendation: z.object({
+    tier: z.string().min(1).max(60),
+    priceMonthly: z.number().positive(),
+    currency: z.string().length(3),
+    rationale: z.string().min(1).max(400),
+    anchoring: z.string().min(1).max(200),
+  }),
 });
 
 const TIMEOUT_MS = 30_000;
@@ -297,6 +319,27 @@ export class GroqLLMAdapter implements ILLMClient {
         'analyzeCompetitors',
         request.traceId,
         3072,
+      );
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  async generateLaunchKit(request: LLMLaunchKitRequest): Promise<Result<LLMLaunchKitResponse, LLMClientError>> {
+    return tracer.startActiveSpan('groq.generate-launch-kit', async (span) => {
+      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
+      const result = await this._callGroq(
+        buildLaunchKitPrompt(request.ideaText, request.signals),
+        `You are a B2B SaaS go-to-market strategist using prompt version ${LAUNCH_KIT_PROMPT_VERSION}. Always respond with valid JSON only. No markdown, no explanation, no code fences — raw JSON object only.`,
+        LLMLaunchKitResponseSchemaG,
+        'generateLaunchKit',
+        request.traceId,
+        2048,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });

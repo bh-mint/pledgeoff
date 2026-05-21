@@ -16,6 +16,7 @@ import {
   SupabaseOttoConversationRepository,
   SupabaseApiKeyRepository,
   SupabaseUsageLogAdapter,
+  SupabaseLaunchKitRepository,
   StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
@@ -54,6 +55,7 @@ import {
   RevokeApiKeyUseCase,
   ListApiKeysUseCase,
   GetDecisionTimelineUseCase,
+  GenerateLaunchKitUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -207,6 +209,9 @@ function buildContainer() {
   const askOttoUseCase = new AskOttoUseCase(ottoConversationRepo, subscriptionRepo, ottoLLMClient);
   const getOttoBalanceUseCase = new GetOttoBalanceUseCase(subscriptionRepo);
 
+  const launchKitRepo = new SupabaseLaunchKitRepository(supabase);
+  const generateLaunchKitUseCase = new GenerateLaunchKitUseCase(ideaRepo, signalRepo, launchKitRepo, llmClient);
+
   const apiKeyRepo = new SupabaseApiKeyRepository(supabase);
   const generateApiKeyUseCase = new GenerateApiKeyUseCase(apiKeyRepo);
   const revokeApiKeyUseCase = new RevokeApiKeyUseCase(apiKeyRepo);
@@ -319,7 +324,8 @@ function buildContainer() {
     revokeApiKeyUseCase,
     listApiKeysUseCase,
     getDecisionTimelineUseCase,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, subscriptionRepo, teamRepo, ideaReactionRepo },
+    generateLaunchKitUseCase,
+    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo },
   };
 }
 

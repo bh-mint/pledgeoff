@@ -32,3 +32,4 @@ export type { VerdictEmailParams, TeamInviteEmailParams, SequenceEmailParams, Se
 export { VoyageEmbeddingAdapter } from './embeddings/voyage-embedding-adapter';
 export { SupabaseApiKeyRepository } from './storage/supabase-api-key-repository';
 export { SupabaseUsageLogAdapter } from './storage/supabase-usage-log-adapter';
+export { SupabaseLaunchKitRepository } from './storage/supabase-launch-kit-repository';

@@ -11,7 +11,8 @@ import { CustomersClient } from "./customers/CustomersClient";
 import { BuildClient } from "./build/BuildClient";
 import { CompetitorsClient } from "./competitors/CompetitorsClient";
 import { AuditTrailClient } from "./audit-trail/AuditTrailClient";
-import type { Idea, Decision, Signal, Simulation, LandingPage, CustomerAnalysis, BuildAnalysis, CompetitorAnalysis } from "@pledgeoff/core";
+import { LaunchKitClient } from "./launch-kit/LaunchKitClient";
+import type { Idea, Decision, Signal, Simulation, LandingPage, CustomerAnalysis, BuildAnalysis, CompetitorAnalysis, LaunchKit } from "@pledgeoff/core";
 
 type Plan = "free" | "pro" | "pro_plus" | "agency";
 
@@ -24,6 +25,7 @@ interface IdeaPageClientProps {
   initialCustomers: CustomerAnalysis | null;
   initialBuild: BuildAnalysis | null;
   initialCompetitors: CompetitorAnalysis | null;
+  initialLaunchKit: LaunchKit | null;
   plan: Plan;
 }
 
@@ -97,7 +99,7 @@ const SOURCE_NAME: Record<string, string> = {
 };
 
 type Verdict = "GO" | "KILL" | "PIVOT";
-type ToolKey = "simulate" | "landing" | "customers" | "build" | "competitors";
+type ToolKey = "simulate" | "landing" | "customers" | "build" | "competitors" | "launch-kit";
 
 const OTTO_MESSAGE: Record<Verdict, (score: number | undefined) => string> = {
   GO: (score) =>
@@ -114,6 +116,7 @@ const TOOL_META: Record<ToolKey, { num: string; label: string; desc: string }> =
   customers:   { num: "04", label: "Customer Intelligence",   desc: "Segments, pain points, real quotes" },
   build:       { num: "05", label: "Engineering Stack",       desc: "Tech stack, libraries, GitHub gaps" },
   competitors: { num: "06", label: "Competitor Intelligence", desc: "Who exists, how they position, where the gaps are" },
+  "launch-kit": { num: "08", label: "Launch Kit",             desc: "A/B headlines · email sequence · pricing recommendation" },
 };
 
 const LOCK_REASONS: Record<ToolKey, Record<"PIVOT" | "KILL", string>> = {
@@ -137,29 +140,35 @@ const LOCK_REASONS: Record<ToolKey, Record<"PIVOT" | "KILL", string>> = {
     PIVOT: "",
     KILL:  "",
   },
+  "launch-kit": {
+    PIVOT: "Generate the launch kit after you lock the new direction and get a GO.",
+    KILL:  "No point building a launch kit for an idea you won't launch.",
+  },
 };
 
 function getAvailability(verdict: Verdict): { available: ToolKey[]; locked: Array<{ key: ToolKey; reason: string }> } {
   if (verdict === "GO") {
-    return { available: ["simulate", "landing", "customers", "build", "competitors"], locked: [] };
+    return { available: ["simulate", "landing", "customers", "build", "competitors", "launch-kit"], locked: [] };
   }
   if (verdict === "PIVOT") {
     return {
       available: ["customers", "competitors"],
       locked: [
-        { key: "simulate", reason: LOCK_REASONS.simulate.PIVOT },
-        { key: "landing",  reason: LOCK_REASONS.landing.PIVOT },
-        { key: "build",    reason: LOCK_REASONS.build.PIVOT },
+        { key: "simulate",    reason: LOCK_REASONS.simulate.PIVOT },
+        { key: "landing",     reason: LOCK_REASONS.landing.PIVOT },
+        { key: "build",       reason: LOCK_REASONS.build.PIVOT },
+        { key: "launch-kit",  reason: LOCK_REASONS["launch-kit"].PIVOT },
       ],
     };
   }
   return {
     available: ["competitors"],
     locked: [
-      { key: "simulate",  reason: LOCK_REASONS.simulate.KILL },
-      { key: "landing",   reason: LOCK_REASONS.landing.KILL },
-      { key: "customers", reason: LOCK_REASONS.customers.KILL },
-      { key: "build",     reason: LOCK_REASONS.build.KILL },
+      { key: "simulate",    reason: LOCK_REASONS.simulate.KILL },
+      { key: "landing",     reason: LOCK_REASONS.landing.KILL },
+      { key: "customers",   reason: LOCK_REASONS.customers.KILL },
+      { key: "build",       reason: LOCK_REASONS.build.KILL },
+      { key: "launch-kit",  reason: LOCK_REASONS["launch-kit"].KILL },
     ],
   };
 }
@@ -201,22 +210,24 @@ interface OttoSectionProps {
   initialCustomers: CustomerAnalysis | null;
   initialBuild: BuildAnalysis | null;
   initialCompetitors: CompetitorAnalysis | null;
+  initialLaunchKit: LaunchKit | null;
 }
 
 function OttoSection({
   verdict, score, ideaId,
-  initialSimulation, initialLanding, initialCustomers, initialBuild, initialCompetitors,
+  initialSimulation, initialLanding, initialCustomers, initialBuild, initialCompetitors, initialLaunchKit,
 }: OttoSectionProps) {
   const [overrideAll, setOverrideAll] = useState(false);
   const message = OTTO_MESSAGE[verdict](score);
   const { available, locked } = getAvailability(verdict);
 
   const isDone: Record<ToolKey, boolean> = {
-    simulate:    !!initialSimulation,
-    landing:     !!initialLanding,
-    customers:   !!initialCustomers,
-    build:       !!initialBuild,
-    competitors: !!initialCompetitors,
+    simulate:      !!initialSimulation,
+    landing:       !!initialLanding,
+    customers:     !!initialCustomers,
+    build:         !!initialBuild,
+    competitors:   !!initialCompetitors,
+    "launch-kit":  !!initialLaunchKit,
   };
 
   function renderToolContent(key: ToolKey) {
@@ -226,6 +237,7 @@ function OttoSection({
       case "customers":   return <CustomersClient   ideaId={ideaId} initialAnalysis={initialCustomers} />;
       case "build":       return <BuildClient       ideaId={ideaId} initialAnalysis={initialBuild} />;
       case "competitors": return <CompetitorsClient ideaId={ideaId} initialAnalysis={initialCompetitors} />;
+      case "launch-kit":  return <LaunchKitClient   ideaId={ideaId} initialKit={initialLaunchKit} />;
     }
   }
 
@@ -300,6 +312,7 @@ export function IdeaPageClient({
   initialCustomers,
   initialBuild,
   initialCompetitors,
+  initialLaunchKit,
   plan,
 }: IdeaPageClientProps) {
   const [decision, setDecision] = useState<Decision | null>(initialDecision);
@@ -431,6 +444,7 @@ export function IdeaPageClient({
               initialCustomers={initialCustomers}
               initialBuild={initialBuild}
               initialCompetitors={initialCompetitors}
+              initialLaunchKit={initialLaunchKit}
             />
           </div>
         ) : (

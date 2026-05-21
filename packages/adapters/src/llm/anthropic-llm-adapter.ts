@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, IUsageLogger } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, IUsageLogger } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -13,6 +13,7 @@ import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './searc
 import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
 import { buildRelevancePrompt, RELEVANCE_PROMPT_VERSION } from './relevance-prompt.v1';
 import { buildOttoSystemPrompt } from './otto-prompt.v1';
+import { buildLaunchKitPrompt, LAUNCH_KIT_PROMPT_VERSION } from './launch-kit-prompt.v1';
 
 const log = createLogger({ adapter: 'anthropic' });
 const tracer = getTracer('anthropic-llm-adapter');
@@ -132,6 +133,27 @@ const LLMCompetitorResponseSchemaA = z.object({
   gaps: z.array(CompetitorGapItemSchemaA).max(5),
 });
 
+const LLMLaunchKitResponseSchema = z.object({
+  headlines: z.array(z.object({
+    variant: z.enum(['A', 'B', 'C']),
+    headline: z.string().min(1).max(120),
+    angle: z.string().min(1).max(200),
+  })).min(1).max(3),
+  emailSequence: z.array(z.object({
+    sequence: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+    subject: z.string().min(1).max(100),
+    body: z.string().min(1).max(3000),
+    sendAt: z.string().min(1).max(60),
+  })).min(1).max(3),
+  pricingRecommendation: z.object({
+    tier: z.string().min(1).max(60),
+    priceMonthly: z.number().positive(),
+    currency: z.string().length(3),
+    rationale: z.string().min(1).max(400),
+    anchoring: z.string().min(1).max(200),
+  }),
+});
+
 const TIMEOUT_MS = 60_000;
 
 const COST_PER_MILLION: Record<string, { input: number; output: number }> = {
@@ -152,6 +174,7 @@ const CUSTOMER_SYSTEM_PROMPT = `You are a customer intelligence analyst using pr
 const BUILD_SYSTEM_PROMPT = `You are a senior software architect using prompt version ${BUILD_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const SEARCH_QUERIES_SYSTEM_PROMPT = `You are a market research assistant using prompt version ${SEARCH_QUERIES_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const COMPETITOR_SYSTEM_PROMPT = `You are a competitive intelligence analyst using prompt version ${COMPETITOR_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
+const LAUNCH_KIT_SYSTEM_PROMPT = `You are a B2B SaaS go-to-market strategist using prompt version ${LAUNCH_KIT_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 const RELEVANCE_SYSTEM_PROMPT = `You are a relevance scoring assistant using prompt version ${RELEVANCE_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
 
 export class AnthropicLLMAdapter implements ILLMClient {
@@ -381,6 +404,27 @@ export class AnthropicLLMAdapter implements ILLMClient {
         'analyzeCompetitors',
         request.traceId,
         3072,
+      );
+      if (result.isErr()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      } else {
+        span.setStatus({ code: SpanStatusCode.OK });
+      }
+      span.end();
+      return result;
+    });
+  }
+
+  async generateLaunchKit(request: LLMLaunchKitRequest): Promise<Result<LLMLaunchKitResponse, LLMClientError>> {
+    return tracer.startActiveSpan('anthropic.generate-launch-kit', async (span) => {
+      span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
+      const result = await this._callAnthropic(
+        buildLaunchKitPrompt(request.ideaText, request.signals),
+        LAUNCH_KIT_SYSTEM_PROMPT,
+        LLMLaunchKitResponseSchema,
+        'generateLaunchKit',
+        request.traceId,
+        2048,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });

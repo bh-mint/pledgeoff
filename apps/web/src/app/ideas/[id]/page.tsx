@@ -54,7 +54,7 @@ export default async function IdeaPage({ params }: Props) {
   const idea = ideaResult.value;
   if (idea.userId !== user.id) notFound();
 
-  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, plan] = await Promise.all([
+  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, plan] = await Promise.all([
     container._repos.decisionRepo.findByIdeaId(id),
     container._repos.signalRepo.findByIdeaId(id),
     container._repos.simulationRepo.findByIdeaId(id),
@@ -62,6 +62,7 @@ export default async function IdeaPage({ params }: Props) {
     container._repos.customerAnalysisRepo.findByIdeaId(id),
     container._repos.buildAnalysisRepo.findByIdeaId(id),
     container._repos.competitorAnalysisRepo.findByIdeaId(id),
+    container._repos.launchKitRepo.findByIdeaId(id),
     getUserPlan(user.id),
   ]);
 
@@ -72,6 +73,7 @@ export default async function IdeaPage({ params }: Props) {
   const initialCustomers = customersResult.isOk() ? customersResult.value : null;
   const initialBuild = buildResult.isOk() ? buildResult.value : null;
   const initialCompetitors = competitorsResult.isOk() ? competitorsResult.value : null;
+  const initialLaunchKit = launchKitResult.isOk() ? launchKitResult.value : null;
 
   const { title, description, category } = parseIdeaText(idea.text);
 
@@ -131,6 +133,7 @@ export default async function IdeaPage({ params }: Props) {
           initialCustomers={initialCustomers}
           initialBuild={initialBuild}
           initialCompetitors={initialCompetitors}
+          initialLaunchKit={initialLaunchKit}
           plan={plan}
         />
 
