@@ -53,6 +53,7 @@ import {
   GenerateApiKeyUseCase,
   RevokeApiKeyUseCase,
   ListApiKeysUseCase,
+  GetDecisionTimelineUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -210,6 +211,7 @@ function buildContainer() {
   const generateApiKeyUseCase = new GenerateApiKeyUseCase(apiKeyRepo);
   const revokeApiKeyUseCase = new RevokeApiKeyUseCase(apiKeyRepo);
   const listApiKeysUseCase = new ListApiKeysUseCase(apiKeyRepo);
+  const getDecisionTimelineUseCase = new GetDecisionTimelineUseCase(ideaRepo, decisionRepo, feedbackRepo);
 
   // Wire: idea.created.v1 → FetchSignalsUseCase → generate embeddings for new signals (fire-and-forget)
   eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
@@ -316,6 +318,7 @@ function buildContainer() {
     generateApiKeyUseCase,
     revokeApiKeyUseCase,
     listApiKeysUseCase,
+    getDecisionTimelineUseCase,
     _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, subscriptionRepo, teamRepo, ideaReactionRepo },
   };
 }

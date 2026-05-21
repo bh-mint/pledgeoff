@@ -10,7 +10,10 @@ import { LandingClient } from "./landing/LandingClient";
 import { CustomersClient } from "./customers/CustomersClient";
 import { BuildClient } from "./build/BuildClient";
 import { CompetitorsClient } from "./competitors/CompetitorsClient";
+import { AuditTrailClient } from "./audit-trail/AuditTrailClient";
 import type { Idea, Decision, Signal, Simulation, LandingPage, CustomerAnalysis, BuildAnalysis, CompetitorAnalysis } from "@pledgeoff/core";
+
+type Plan = "free" | "pro" | "pro_plus" | "agency";
 
 interface IdeaPageClientProps {
   idea: Idea;
@@ -21,6 +24,7 @@ interface IdeaPageClientProps {
   initialCustomers: CustomerAnalysis | null;
   initialBuild: BuildAnalysis | null;
   initialCompetitors: CompetitorAnalysis | null;
+  plan: Plan;
 }
 
 const POLL_INTERVAL_MS = 4000;
@@ -296,6 +300,7 @@ export function IdeaPageClient({
   initialCustomers,
   initialBuild,
   initialCompetitors,
+  plan,
 }: IdeaPageClientProps) {
   const [decision, setDecision] = useState<Decision | null>(initialDecision);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
@@ -495,6 +500,19 @@ export function IdeaPageClient({
         </div>
 
       </div>
+
+      {/* Audit Trail — full width, below two-column layout */}
+      <div className="mt-10 pt-8 border-t" style={{ borderColor: "var(--border)" }}>
+        <div className="flex items-center gap-3 mb-5">
+          <span className="mono text-[10px] w-5 shrink-0" style={{ color: "var(--t3)" }}>07</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold leading-snug" style={{ color: "var(--t1)" }}>Decision Audit Trail</p>
+            <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>Full history of validations · PDF export for Agency</p>
+          </div>
+        </div>
+        <AuditTrailClient ideaId={idea.id} plan={plan} />
+      </div>
+
     </>
   );
 }

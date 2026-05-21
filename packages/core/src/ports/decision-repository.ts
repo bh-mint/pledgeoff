@@ -8,4 +8,5 @@ export class DecisionRepositoryError extends Error {
 export interface IDecisionRepository {
   save(decision: Decision): Promise<Result<Decision, DecisionRepositoryError>>;
   findByIdeaId(ideaId: string): Promise<Result<Decision | null, DecisionRepositoryError>>;
+  findAllByIdeaId(ideaId: string): Promise<Result<Decision[], DecisionRepositoryError>>;
 }

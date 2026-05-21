@@ -42,6 +42,7 @@ function makeDecisionRepo(): IDecisionRepository {
   return {
     save: vi.fn().mockImplementation((d) => Promise.resolve(ok(d))),
     findByIdeaId: vi.fn().mockResolvedValue(ok(null)),
+    findAllByIdeaId: vi.fn().mockResolvedValue(ok([])),
   };
 }
 

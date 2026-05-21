@@ -65,4 +65,15 @@ export class SupabaseDecisionRepository implements IDecisionRepository {
     if (error) return err(new DecisionRepositoryError(error.message));
     return ok(data ? rowToDecision(data) : null);
   }
+
+  async findAllByIdeaId(ideaId: string): Promise<Result<Decision[], DecisionRepositoryError>> {
+    const { data, error } = await this.client
+      .from('decisions')
+      .select()
+      .eq('idea_id', ideaId)
+      .order('created_at', { ascending: true });
+
+    if (error) return err(new DecisionRepositoryError(error.message));
+    return ok((data as DecisionRow[]).map(rowToDecision));
+  }
 }

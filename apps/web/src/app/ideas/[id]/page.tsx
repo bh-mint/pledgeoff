@@ -131,6 +131,7 @@ export default async function IdeaPage({ params }: Props) {
           initialCustomers={initialCustomers}
           initialBuild={initialBuild}
           initialCompetitors={initialCompetitors}
+          plan={plan}
         />
 
         {decision && (
