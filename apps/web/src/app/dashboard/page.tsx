@@ -80,13 +80,24 @@ export default async function DashboardPage() {
   const ideas = ideasResult.isOk() ? ideasResult.value : [];
 
 
-  const [decisionResults, simulateResults, landingResults, customerResults, buildResults] = await Promise.all([
+  const [decisionResults, simulateResults, landingResults, customerResults, buildResults, outcomesResult] = await Promise.all([
     Promise.all(ideas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))),
     Promise.all(ideas.map((idea) => container._repos.simulationRepo.findByIdeaId(idea.id))),
     Promise.all(ideas.map((idea) => container._repos.landingPageRepo.findByIdeaId(idea.id))),
     Promise.all(ideas.map((idea) => container._repos.customerAnalysisRepo.findByIdeaId(idea.id))),
     Promise.all(ideas.map((idea) => container._repos.buildAnalysisRepo.findByIdeaId(idea.id))),
+    container._repos.decisionOutcomeRepo.findByUser(user.id),
   ]);
+
+  const outcomeMap = new Map<string, string>();
+  if (outcomesResult.isOk()) {
+    for (const o of outcomesResult.value) {
+      outcomeMap.set(o.ideaId, o.outcomeType);
+    }
+  }
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const failedDecisions = decisionResults.filter((r) => r.isErr()).length;
   if (failedDecisions > 0) {
@@ -163,21 +174,27 @@ export default async function DashboardPage() {
   const stepsLeft = pipelineSteps.filter((s) => !s.done).length;
 
   // Table rows
-  const tableRows: TableRow[] = rows.map(({ idea, decision, tools }) => ({
-    id: idea.id,
-    text: idea.text,
-    createdAt: idea.createdAt,
-    score: computeScore(decision),
-    verdict: decision?.verdict ?? null,
-    status: !decision
-      ? "pending"
-      : decision.verdict === "GO"
-      ? "validated"
-      : decision.verdict === "KILL"
-      ? "killed"
-      : "pivoting",
-    tools,
-  }));
+  const tableRows: TableRow[] = rows.map(({ idea, decision, tools }) => {
+    const isOlderThan30Days = new Date(idea.createdAt) < thirtyDaysAgo;
+    const outcomeType = outcomeMap.get(idea.id) ?? null;
+    return {
+      id: idea.id,
+      text: idea.text,
+      createdAt: idea.createdAt,
+      score: computeScore(decision),
+      verdict: decision?.verdict ?? null,
+      status: !decision
+        ? "pending"
+        : decision.verdict === "GO"
+        ? "validated"
+        : decision.verdict === "KILL"
+        ? "killed"
+        : "pivoting",
+      tools,
+      outcomeType,
+      needsOutcome: isOlderThan30Days && !!decision && !outcomeType,
+    };
+  });
 
   // ── Team feed ──
   let teamFeedRows: TeamFeedRow[] = [];

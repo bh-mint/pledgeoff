@@ -24,6 +24,8 @@ export type TableRow = {
   verdict: string | null;
   status: "pending" | "validated" | "killed" | "pivoting";
   tools: ToolStatus;
+  outcomeType: string | null;
+  needsOutcome: boolean;
 };
 
 export type TeamFeedRow = {
@@ -311,7 +313,33 @@ export function DashboardClient({
 
                 {/* Idea */}
                 <div className="sm:col-span-4 min-w-0 mb-1.5 sm:mb-0">
-                  <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
+                    {row.needsOutcome && (
+                      <span
+                        className="mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0"
+                        style={{
+                          color: "var(--caution)",
+                          background: "color-mix(in srgb, var(--caution) 10%, transparent)",
+                          border: "1px solid color-mix(in srgb, var(--caution) 25%, transparent)",
+                        }}
+                      >
+                        how did it go?
+                      </span>
+                    )}
+                    {row.outcomeType && (
+                      <span
+                        className="mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0"
+                        style={{
+                          color: row.outcomeType === "built_worked" ? "var(--validated)" : row.outcomeType === "not_built" ? "var(--t3)" : "var(--kill)",
+                          background: row.outcomeType === "built_worked" ? "color-mix(in srgb, var(--validated) 10%, transparent)" : "color-mix(in srgb, var(--border) 40%, transparent)",
+                          border: `1px solid ${row.outcomeType === "built_worked" ? "color-mix(in srgb, var(--validated) 25%, transparent)" : "var(--border)"}`,
+                        }}
+                      >
+                        {row.outcomeType === "built_worked" ? "built ✓" : row.outcomeType === "built_failed" ? "built ✗" : "not built"}
+                      </span>
+                    )}
+                  </div>
                   <div className="mono text-[10px] mt-0.5 text-(--t3)">
                     val_{row.id.slice(0, 8)}
                   </div>
