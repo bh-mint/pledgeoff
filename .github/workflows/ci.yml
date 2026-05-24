@@ -64,7 +64,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -89,10 +89,16 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
           SUPABASE_DB_URL: postgresql://placeholder:placeholder@placeholder:5432/postgres
           GROQ_API_KEY: placeholder-groq-key
+          ANTHROPIC_API_KEY: placeholder-anthropic-key
+          VOYAGE_API_KEY: placeholder-voyage-key
           GITHUB_PAT: placeholder-github-pat
+          GITHUB_TOKEN_MASTER_KEY: "0000000000000000000000000000000000000000000000000000000000000001"
           RESEND_API_KEY: placeholder-resend-key
           SENTRY_AUTH_TOKEN: placeholder-sentry-token
+          BRAVE_SEARCH_API_KEY: placeholder-brave-key
           CRON_SECRET: placeholder-cron-secret
+          WEBHOOK_SECRET: placeholder-webhook-secret
+          WEBHOOK_SECRET_NEW_USER: placeholder-webhook-secret-new-user
           FEATURE_FETCH_REDDIT: "true"
           FEATURE_FETCH_GITHUB: "true"
           FEATURE_LLM_DECIDE: "true"
