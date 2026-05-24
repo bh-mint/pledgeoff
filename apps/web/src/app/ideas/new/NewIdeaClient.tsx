@@ -1,11 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+
+const LOADING_MESSAGES = [
+  { step: "01", text: "Scanning Reddit communities…" },
+  { step: "02", text: "Fetching Hacker News discussions…" },
+  { step: "03", text: "Analyzing GitHub signals…" },
+  { step: "04", text: "Cross-referencing 847 data points…" },
+  { step: "05", text: "Calculating GO / KILL / PIVOT score…" },
+  { step: "06", text: "Finalizing verdict…" },
+] as const;
 
 const CATEGORIES = ["SaaS", "Consumer", "Marketplace", "Hardware", "Service", "Other"] as const;
 
@@ -26,6 +35,15 @@ export function NewIdeaClient({
   const [context, setContext] = useState<"personal" | "team">("personal");
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [loadingStep, setLoadingStep] = useState(0);
+
+  useEffect(() => {
+    if (status !== "loading") return;
+    const id = setInterval(() => {
+      setLoadingStep((s) => Math.min(s + 1, LOADING_MESSAGES.length - 1));
+    }, 2500);
+    return () => clearInterval(id);
+  }, [status]);
 
   const titleOk = title.trim().length >= 8;
   const descOk = desc.trim().length >= 24;
@@ -39,6 +57,7 @@ export function NewIdeaClient({
     if (!valid) return;
 
     setStatus("loading");
+    setLoadingStep(0);
     setErrorMsg("");
 
     const supabase = createSupabaseBrowserClient();
@@ -130,10 +149,40 @@ export function NewIdeaClient({
         </div>
       </div>
 
+      {/* Loading overlay */}
+      {status === "loading" && (
+        <div className="relative flex-1 flex items-center justify-center px-4">
+          <div className="max-w-lg w-full">
+            <div className="mono text-[10px] uppercase tracking-[0.14em] mb-8" style={{ color: "var(--t3)" }}>
+              {LOADING_MESSAGES[loadingStep].step} / {String(LOADING_MESSAGES.length).padStart(2, "0")} · analyzing
+            </div>
+            <p
+              className="display text-[32px] sm:text-[40px] font-semibold tracking-tight leading-[1.1]"
+              style={{ color: "var(--t1)" }}
+            >
+              {LOADING_MESSAGES[loadingStep].text}
+            </p>
+            <div className="mt-8 h-px w-full overflow-hidden" style={{ background: "var(--border)" }}>
+              <div
+                className="h-px"
+                style={{
+                  background: "var(--accent)",
+                  width: `${((loadingStep + 1) / LOADING_MESSAGES.length) * 100}%`,
+                  transition: "width 2.4s cubic-bezier(0.16,1,0.3,1)",
+                }}
+              />
+            </div>
+            <div className="mt-4 mono text-[10px]" style={{ color: "var(--t3)" }}>
+              Reddit · Hacker News · GitHub · under 60s
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="relative flex-1 flex items-start"
+        className={`relative flex-1 flex items-start${status === "loading" ? " hidden" : ""}`}
       >
         <div className="max-w-190 w-full mx-auto px-4 sm:px-10 py-8 sm:py-12">
           <div
