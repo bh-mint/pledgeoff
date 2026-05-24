@@ -3,6 +3,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { HomeTickerCounter } from "./HomeTickerCounter";
 import { PHBanner } from "@/components/PHBanner";
+import { PRICING } from "@/lib/pricing.config";
 
 const TICKER_ITEMS = [
   'r/SaaS          ·  "every B2B cold email tool does the same generic personalization"  ·  ↑418',
@@ -450,6 +451,134 @@ export function HomeClient() {
             Try it free →
           </span>
         </Link>
+      </section>
+
+      {/* ── PRICING PREVIEW ── */}
+      <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+          <div>
+            <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">Pricing</p>
+            <h2 className="display text-[40px] font-black leading-none text-(--t1)">
+              Free until<br />you&apos;re sure.
+            </h2>
+          </div>
+          <p className="text-[13px] text-(--t2) max-w-80 md:text-right">
+            Start with 1 free validation/month. Upgrade when it pays for itself.
+            Cancel anytime — no questions asked.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Free */}
+          <div className="bg-(--surface) border border-(--border) rounded-md p-5 flex flex-col gap-4">
+            <div>
+              <p className="display text-[14px] font-semibold text-(--t1)">Free</p>
+              <p className="mono text-[10px] text-(--t3) mt-0.5">Before you&apos;re sure</p>
+            </div>
+            <div>
+              <span className="display text-[28px] font-black tnum text-(--t1)">€0</span>
+              <span className="mono text-[10px] text-(--t3) ml-1">/ forever</span>
+            </div>
+            <ul className="space-y-1.5 text-[11px] text-(--t2) grow">
+              <li>1 validation / month</li>
+              <li>Reddit + GitHub signals</li>
+              <li>GO / KILL / PIVOT verdict</li>
+            </ul>
+            <Link
+              href="/ideas/new"
+              className="text-[12px] h-9 rounded-md border border-(--border) text-(--t2) flex items-center justify-center hover:border-(--t3) transition-colors"
+            >
+              Start free
+            </Link>
+          </div>
+
+          {/* Founder */}
+          <div className="bg-(--surface) border border-(--border) rounded-md p-5 flex flex-col gap-4">
+            <div>
+              <p className="display text-[14px] font-semibold text-(--t1)">{PRICING.founder.label}</p>
+              <p className="mono text-[10px] text-(--t3) mt-0.5">Validate seriously</p>
+            </div>
+            <div>
+              <span className="display text-[28px] font-black tnum text-(--t1)">€{PRICING.founder.monthly.eur}</span>
+              <span className="mono text-[10px] text-(--t3) ml-1">/ mo</span>
+            </div>
+            <ul className="space-y-1.5 text-[11px] text-(--t2) grow">
+              <li>20 validations / month</li>
+              <li>All signal sources</li>
+              <li>Forecast + Audience + Blueprint</li>
+            </ul>
+            <Link
+              href="/pricing"
+              className="text-[12px] h-9 rounded-md border border-(--border) text-(--t2) flex items-center justify-center hover:border-(--t3) transition-colors"
+            >
+              See plan
+            </Link>
+          </div>
+
+          {/* Team — highlighted */}
+          <div
+            className="rounded-md p-5 flex flex-col gap-4 relative"
+            style={{ background: "var(--surface)", border: "1px solid var(--accent)" }}
+          >
+            <div className="absolute -top-2.5 left-4">
+              <span
+                className="mono text-[9px] uppercase tracking-[0.12em] px-2 py-0.5 rounded-sm font-semibold"
+                style={{ background: "var(--accent)", color: "#000" }}
+              >
+                Most popular
+              </span>
+            </div>
+            <div>
+              <p className="display text-[14px] font-semibold text-(--t1)">{PRICING.team.label}</p>
+              <p className="mono text-[10px] text-(--t3) mt-0.5">Build with your team</p>
+            </div>
+            <div>
+              <span className="display text-[28px] font-black tnum text-(--t1)">€{PRICING.team.monthly.eur}</span>
+              <span className="mono text-[10px] text-(--t3) ml-1">/ mo</span>
+            </div>
+            <ul className="space-y-1.5 text-[11px] text-(--t2) grow">
+              <li>Unlimited validations</li>
+              <li>3 seats included</li>
+              <li>Otto AI Co-Founder (15q)</li>
+            </ul>
+            <Link
+              href="/pricing"
+              className="display text-[12px] font-semibold h-9 rounded-md flex items-center justify-center transition-opacity hover:opacity-90"
+              style={{ background: "var(--accent)", color: "#000" }}
+            >
+              See plan →
+            </Link>
+          </div>
+
+          {/* Studio */}
+          <div className="bg-(--surface) border border-(--border) rounded-md p-5 flex flex-col gap-4">
+            <div>
+              <p className="display text-[14px] font-semibold text-(--t1)">{PRICING.studio.label}</p>
+              <p className="mono text-[10px] text-(--t3) mt-0.5">For studios &amp; agencies</p>
+            </div>
+            <div>
+              <span className="display text-[28px] font-black tnum text-(--t1)">€{PRICING.studio.monthly.eur}</span>
+              <span className="mono text-[10px] text-(--t3) ml-1">/ mo</span>
+            </div>
+            <ul className="space-y-1.5 text-[11px] text-(--t2) grow">
+              <li>Unlimited validations</li>
+              <li>8 seats + white-label PDF</li>
+              <li>Audit Trail + API access</li>
+            </ul>
+            <Link
+              href="/pricing"
+              className="text-[12px] h-9 rounded-md border border-(--border) text-(--t2) flex items-center justify-center hover:border-(--t3) transition-colors"
+            >
+              See plan
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-6 text-center">
+          <Link href="/pricing" className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors">
+            Compare all plans — including Enterprise →
+          </Link>
+        </div>
       </section>
 
       {/* ── FINAL CTA ── */}
