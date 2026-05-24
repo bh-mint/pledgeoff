@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { HomeTickerCounter } from "./HomeTickerCounter";
 import { PHBanner } from "@/components/PHBanner";
 import { PRICING } from "@/lib/pricing.config";
 
@@ -239,16 +238,12 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── LIVE SIGNALS TICKER ── */}
+      {/* ── SIGNALS TICKER ── */}
       <section className="border-b border-(--border) py-8 overflow-hidden bg-(--surface)">
-        <div className="max-w-330 mx-auto px-8 mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full pulse-dot bg-(--accent)" />
-            <span className="mono text-[10px] uppercase tracking-[0.14em] text-(--t2)">
-              live signals scraped today · auto-refresh every 60s
-            </span>
-          </div>
-          <HomeTickerCounter />
+        <div className="max-w-330 mx-auto px-8 mb-4">
+          <span className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
+            examples of signals scanned · Reddit · Hacker News · GitHub
+          </span>
         </div>
 
         <div
