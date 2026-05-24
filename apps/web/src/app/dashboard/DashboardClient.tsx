@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { VerdictMark } from "@/components/brand/VerdictMark";
@@ -52,6 +52,12 @@ function shortDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
+function isToday(iso: string) {
+  const d = new Date(iso);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+}
+
 interface DashboardClientProps {
   rows: TableRow[];
   totalCount: number;
@@ -71,6 +77,7 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date");
+  const searchRef = useRef<HTMLInputElement>(null);
   const initialTab = (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "queue") ? "queue" as const : "personal" as const;
   const [tab, setTab] = useState<"personal" | "team" | "queue">(initialTab);
   const [verdictFilter, setVerdictFilter] = useState<string>("all");
@@ -120,6 +127,23 @@ export function DashboardClient({
     return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "n" || e.key === "N") {
+        e.preventDefault();
+        router.push("/ideas/new");
+      } else if (e.key === "/") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [router]);
 
   const handleReact = useCallback(async (ideaId: string, reaction: "agree" | "disagree") => {
     const current = reactionState[ideaId];
@@ -216,13 +240,18 @@ export function DashboardClient({
           </button>
         </div>
 
-        <Link
-          href="/ideas/new"
-          className="mono text-[11px] px-3 h-8 rounded-md border inline-flex items-center gap-1.5 transition-colors hover:border-(--accent) hover:text-(--accent) shrink-0"
-          style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-        >
-          + New validation
-        </Link>
+        <div className="flex items-center gap-2">
+          <span className="hidden sm:inline mono text-[10px] px-2 py-1 rounded border" style={{ borderColor: "var(--border)", color: "var(--t3)" }}>
+            [N] new · [/] search
+          </span>
+          <Link
+            href="/ideas/new"
+            className="mono text-[11px] px-3 h-8 rounded-md border inline-flex items-center gap-1.5 transition-colors hover:border-(--accent) hover:text-(--accent) shrink-0"
+            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+          >
+            + New validation
+          </Link>
+        </div>
       </div>
 
       {/* ── Personal tab ── */}
@@ -261,6 +290,7 @@ export function DashboardClient({
               ))}
             </div>
             <input
+              ref={searchRef}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="search ideas…"
@@ -322,11 +352,17 @@ export function DashboardClient({
                 key={row.id}
                 href={`/ideas/${row.id}`}
                 className="px-4 sm:px-6 py-3 sm:grid sm:grid-cols-12 sm:gap-3 border-b items-center cursor-pointer transition-colors"
-                style={{ borderColor: "var(--border)" }}
+                style={{
+                  borderColor: "var(--border)",
+                  background: isToday(row.createdAt) ? "rgba(var(--accent-rgb,99,102,241),0.04)" : undefined,
+                  borderLeft: isToday(row.createdAt) ? "2px solid var(--accent)" : undefined,
+                }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.background = "rgba(255,255,255,0.015)")
                 }
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = isToday(row.createdAt) ? "rgba(var(--accent-rgb,99,102,241),0.04)" : "transparent")
+                }
               >
                 {/* Verdict icon */}
                 <div className="hidden sm:flex sm:col-span-1 items-center" style={{ color: "var(--t1)" }}>
@@ -424,8 +460,12 @@ export function DashboardClient({
                   </div>
 
                   {/* Date */}
-                  <div className="sm:col-span-1 ml-auto sm:ml-0 sm:text-right mono text-[10px] text-(--t3) shrink-0">
-                    {shortDate(row.createdAt)}
+                  <div className="sm:col-span-1 ml-auto sm:ml-0 sm:text-right mono text-[10px] shrink-0" style={{ color: "var(--t3)" }}>
+                    {isToday(row.createdAt) ? (
+                      <span style={{ color: "var(--accent)" }}>Today</span>
+                    ) : (
+                      shortDate(row.createdAt)
+                    )}
                   </div>
                 </div>
               </Link>
