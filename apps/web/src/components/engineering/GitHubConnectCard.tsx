@@ -74,9 +74,24 @@ export function GitHubConnectCard({ isConnected, githubOrg, onDisconnect }: Prop
       </div>
 
       {!isConnected && (
-        <p className="mt-3 text-xs" style={{ color: 'var(--t3)' }}>
-          Requires read:org and repo permissions. Available on Team plan and above.
-        </p>
+        <div className="mt-4 space-y-2">
+          <p className="text-xs font-medium" style={{ color: 'var(--t2)' }}>After connecting you get:</p>
+          <ul className="space-y-1.5">
+            {[
+              'Delivery estimates based on your team\'s actual cycle time',
+              'Velocity metrics: PRs merged, review lag, avg story size',
+              'Engineering bottlenecks surfaced automatically per idea',
+            ].map((benefit) => (
+              <li key={benefit} className="flex items-start gap-2 text-xs" style={{ color: 'var(--t3)' }}>
+                <span className="mt-px shrink-0" style={{ color: 'var(--validated)' }}>✓</span>
+                {benefit}
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs pt-1" style={{ color: 'var(--t3)' }}>
+            Requires read:org and repo permissions · Team plan and above
+          </p>
+        </div>
       )}
     </div>
   );

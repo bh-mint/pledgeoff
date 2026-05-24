@@ -73,6 +73,23 @@ export default function TermsPage() {
         {/* Content */}
         <main className="flex-1 min-w-0">
           <div className="prose-legal">
+
+          {/* TL;DR */}
+          <div
+            className="mb-10 rounded-md border p-5"
+            style={{ borderColor: "var(--accent)", background: "rgba(var(--accent-rgb, 99,102,241),0.06)" }}
+          >
+            <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{ color: "var(--accent)" }}>
+              In plain English
+            </div>
+            <p className="text-[14px] leading-relaxed" style={{ color: "var(--t2)" }}>
+              Use PledgeOFF to validate ideas. Don&apos;t abuse the platform or use AI verdicts as
+              professional advice — they&apos;re signals, not guarantees. We can suspend accounts that
+              violate these rules. Cancel anytime from{" "}
+              <Link href="/settings">Settings</Link>; no refunds for the current billing period.
+            </p>
+          </div>
+
           <Section id="s1" title="1. Acceptance of terms">
             <p>
               By accessing or using PledgeOFF at{" "}

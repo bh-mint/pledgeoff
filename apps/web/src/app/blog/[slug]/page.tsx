@@ -9,6 +9,8 @@ import { ReadingProgress } from "@/components/blog/ReadingProgress";
 import { TableOfContents } from "@/components/blog/TableOfContents";
 import { ArticleViewTracker } from "@/components/blog/ArticleViewTracker";
 import { ArticleCTAButton } from "@/components/blog/ArticleCTAButton";
+import { ArticleFeedback } from "@/components/blog/ArticleFeedback";
+import { MidArticleCTA } from "@/components/blog/MidArticleCTA";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
@@ -176,6 +178,9 @@ export default async function ArticlePage({ params }: Props) {
             <MDXRemote source={article.content} components={mdxComponents} />
           </div>
 
+          {/* Mid-article CTA — fires at 60% scroll */}
+          <MidArticleCTA />
+
           {/* Affiliate disclosure */}
           {article.affiliateDisclosure && (
             <div className="mt-12 pt-6" style={{ borderTop: "1px solid var(--border)" }}>
@@ -227,17 +232,24 @@ export default async function ArticlePage({ params }: Props) {
             style={{ borderTop: "1px solid var(--border)" }}
           >
             <div
-              className="w-10 h-10 rounded-full border shrink-0"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-            />
+              className="w-10 h-10 rounded-full border shrink-0 flex items-center justify-center mono text-[11px]"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--t3)" }}
+            >
+              PO
+            </div>
             <div className="flex-1">
-              <div className="text-[14px]" style={{ color: "var(--t1)" }}>PledgeOFF Team</div>
+              <div className="text-[14px]" style={{ color: "var(--t1)" }}>
+                PledgeOFF Team{" "}
+                <Link href="/about" className="mono text-[11px] underline" style={{ color: "var(--t3)" }}>
+                  About us →
+                </Link>
+              </div>
               <div className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
-                Writes on validation &amp; founder strategy
+                Writes on idea validation, market timing &amp; founder strategy
               </div>
             </div>
-            <Link href="/blog" className="mono text-[11px] underline" style={{ color: "var(--t3)" }}>
-              More posts →
+            <Link href="/blog" className="mono text-[11px] underline shrink-0" style={{ color: "var(--t3)" }}>
+              All posts →
             </Link>
           </div>
 
@@ -268,6 +280,9 @@ export default async function ArticlePage({ params }: Props) {
               LinkedIn
             </a>
           </div>
+
+          {/* Feedback */}
+          <ArticleFeedback slug={slug} />
 
           {/* Related — same cluster */}
           {related.length > 0 && (

@@ -74,6 +74,23 @@ export default function PrivacyPage() {
         {/* Content */}
         <main className="flex-1 min-w-0">
           <div className="prose-legal">
+
+          {/* TL;DR */}
+          <div
+            className="mb-10 rounded-md border p-5"
+            style={{ borderColor: "var(--accent)", background: "rgba(var(--accent-rgb, 99,102,241),0.06)" }}
+          >
+            <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{ color: "var(--accent)" }}>
+              In plain English
+            </div>
+            <p className="text-[14px] leading-relaxed" style={{ color: "var(--t2)" }}>
+              We collect your email and the ideas you submit. We use them to run the service and send you
+              account emails. We don&apos;t sell your data. You can delete everything anytime from{" "}
+              <Link href="/settings">Settings</Link>. Questions?{" "}
+              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
+            </p>
+          </div>
+
           <Section id="s1" title="1. Who we are">
             <p>
               PledgeOFF (&quot;PledgeOFF&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is a Decision Intelligence

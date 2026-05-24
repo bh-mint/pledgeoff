@@ -9,6 +9,12 @@ import { Footer } from "@/components/Footer";
 
 const ARTICLES_PER_PAGE = 9;
 
+const START_HERE_SLUGS = [
+  "how-to-know-if-youre-building-for-a-real-problem",
+  "how-to-find-out-if-people-will-pay-for-your-idea",
+  "how-to-decide-when-to-quit-your-idea-and-move-on",
+];
+
 type Category = "all" | "idea-validation" | "product-decisions" | "founder";
 
 const CATEGORIES: { value: Category; label: string; color?: string }[] = [
@@ -139,6 +145,40 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
           </div>
         </div>
       </section>
+
+      {/* Start here */}
+      {activeTag === "all" && !query && (
+        <section className="border-b" style={{ borderColor: "var(--border)" }}>
+          <div className="max-w-[1100px] mx-auto px-8 py-8">
+            <div className="mono text-[10px] uppercase tracking-[0.1em] mb-4" style={{ color: "var(--t3)" }}>
+              ▎ Start here — if it&apos;s your first time
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {articles
+                .filter((a) => START_HERE_SLUGS.includes(a.slug))
+                .sort((a, b) => START_HERE_SLUGS.indexOf(a.slug) - START_HERE_SLUGS.indexOf(b.slug))
+                .map((a, i) => (
+                  <Link
+                    key={a.slug}
+                    href={`/blog/${a.slug}`}
+                    className="group rounded-md border p-4 transition-colors hover:bg-white/[0.02]"
+                    style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                  >
+                    <div className="mono text-[10px] mb-2" style={{ color: "var(--t3)" }}>
+                      READ FIRST · 0{i + 1}
+                    </div>
+                    <div className="display text-[15px] font-medium leading-snug group-hover:underline" style={{ color: "var(--t1)" }}>
+                      {a.title}
+                    </div>
+                    <div className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
+                      {a.readingTime} min read →
+                    </div>
+                  </Link>
+                ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Sticky filter bar */}
       <section
