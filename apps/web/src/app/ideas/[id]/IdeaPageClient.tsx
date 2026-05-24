@@ -213,13 +213,34 @@ interface OttoSectionProps {
   initialLaunchKit: LaunchKit | null;
 }
 
+type ToolGroup = "all" | "analysis" | "execution" | "intelligence";
+
+const TOOL_GROUP_KEYS: Record<ToolGroup, ToolKey[]> = {
+  all:          ["simulate", "landing", "customers", "build", "competitors", "launch-kit"],
+  analysis:     ["simulate", "competitors"],
+  execution:    ["landing", "build", "launch-kit"],
+  intelligence: ["customers"],
+};
+
+const TOOL_GROUP_LABELS: Record<ToolGroup, string> = {
+  all:          "All",
+  analysis:     "Analysis",
+  execution:    "Execution",
+  intelligence: "Intelligence",
+};
+
 function OttoSection({
   verdict, score, ideaId,
   initialSimulation, initialLanding, initialCustomers, initialBuild, initialCompetitors, initialLaunchKit,
 }: OttoSectionProps) {
   const [overrideAll, setOverrideAll] = useState(false);
+  const [toolGroup, setToolGroup] = useState<ToolGroup>("all");
   const message = OTTO_MESSAGE[verdict](score);
   const { available, locked } = getAvailability(verdict);
+
+  const groupKeys = TOOL_GROUP_KEYS[toolGroup];
+  const filteredAvailable = available.filter((k) => groupKeys.includes(k));
+  const filteredLocked = locked.filter(({ key }) => groupKeys.includes(key));
 
   const isDone: Record<ToolKey, boolean> = {
     simulate:      !!initialSimulation,
@@ -241,23 +262,40 @@ function OttoSection({
     }
   }
 
-  const lockedToShow = locked.filter(({ key }) => key !== "customers" || verdict !== "PIVOT");
+  const lockedToShow = filteredLocked.filter(({ key }) => key !== "customers" || verdict !== "PIVOT");
 
   return (
     <div className="space-y-0">
-      <p className="text-[13px] leading-[1.65] mb-6" style={{ color: "var(--t2)" }}>
+      <p className="text-[13px] leading-[1.65] mb-5" style={{ color: "var(--t2)" }}>
         {message}
       </p>
 
+      {/* Group filter pills */}
+      <div className="flex flex-wrap gap-1.5 mb-6">
+        {(Object.keys(TOOL_GROUP_LABELS) as ToolGroup[]).map((g) => (
+          <button
+            key={g}
+            onClick={() => setToolGroup(g)}
+            className="mono text-[10px] px-3 h-7 rounded-full border transition-all"
+            style={toolGroup === g
+              ? { borderColor: "var(--accent)", color: "var(--accent)", background: "color-mix(in srgb, var(--accent) 10%, transparent)" }
+              : { borderColor: "var(--border)", color: "var(--t3)" }
+            }
+          >
+            {TOOL_GROUP_LABELS[g]}
+          </button>
+        ))}
+      </div>
+
       {/* Available tools — rendered inline */}
-      {available.map((key) => (
+      {filteredAvailable.map((key) => (
         <ToolSection key={key} toolKey={key} done={isDone[key]}>
           {renderToolContent(key)}
         </ToolSection>
       ))}
 
       {/* Override — all tools unlocked */}
-      {overrideAll && locked.map(({ key }) => (
+      {overrideAll && filteredLocked.map(({ key }) => (
         <ToolSection key={key} toolKey={key} done={isDone[key]}>
           {renderToolContent(key)}
         </ToolSection>
