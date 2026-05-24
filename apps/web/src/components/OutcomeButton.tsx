@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { OutcomeType } from "@pledgeoff/core";
 
 const OPTIONS: Array<{ type: OutcomeType; label: string; color: string }> = [
@@ -23,12 +24,17 @@ export function OutcomeButton({ ideaId, initialOutcome }: OutcomeButtonProps) {
     setSaving(true);
     setOpen(false);
     try {
-      await fetch(`/api/v1/ideas/${ideaId}/outcome`, {
+      const supabase = createSupabaseBrowserClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`/api/v1/ideas/${ideaId}/outcome`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ outcomeType: type }),
       });
-      setCurrent(type);
+      if (res.ok) setCurrent(type);
     } finally {
       setSaving(false);
     }

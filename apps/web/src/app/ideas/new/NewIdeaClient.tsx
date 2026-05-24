@@ -18,6 +18,24 @@ const LOADING_MESSAGES = [
 
 const CATEGORIES = ["SaaS", "Consumer", "Marketplace", "Hardware", "Service", "Other"] as const;
 
+const IDEA_EXAMPLES = [
+  {
+    title: "AI code review bot for GitHub pull requests",
+    desc: "Automatically reviews PRs for security issues, performance problems, and coding standards. For solo developers and small teams who can't afford a dedicated code reviewer.",
+    cat: "SaaS",
+  },
+  {
+    title: "Subscription box for indie game merchandise",
+    desc: "Monthly box with exclusive merch from indie studios — art prints, pins, stickers. Target: PC gamers aged 18–35 who follow indie releases on Steam and Itch.io.",
+    cat: "Consumer",
+  },
+  {
+    title: "Freelance contract negotiation assistant",
+    desc: "Analyzes freelance contracts, highlights unfair clauses, and suggests counter-offers based on market rates. For designers and developers who struggle to negotiate fair terms.",
+    cat: "SaaS",
+  },
+] as const;
+
 export function NewIdeaClient({
   validationsLeft,
   teamId,
@@ -286,6 +304,38 @@ export function NewIdeaClient({
             </div>
           </label>
 
+          {/* Examples — clickable demos */}
+          <div className="mt-4">
+            <p className="mono text-[10px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--t3)" }}>
+              Try an example
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {IDEA_EXAMPLES.map((ex) => (
+                <button
+                  key={ex.title}
+                  type="button"
+                  onClick={() => {
+                    setTitle(ex.title);
+                    setDesc(ex.desc);
+                    setCat(ex.cat);
+                  }}
+                  className="mono text-[10px] px-3 h-7 rounded border transition-all text-left truncate max-w-[240px]"
+                  style={{ borderColor: "var(--border)", color: "var(--t3)", background: "var(--surface)" }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--accent)";
+                    e.currentTarget.style.color = "var(--accent)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--border)";
+                    e.currentTarget.style.color = "var(--t3)";
+                  }}
+                >
+                  {ex.title}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Q3 — category */}
           <div className="mt-12">
             <div
@@ -349,23 +399,42 @@ export function NewIdeaClient({
             <p className="mt-4 text-[12px] text-(--kill)">{errorMsg}</p>
           )}
 
+          {/* Upgrade CTA — shown when validations exhausted */}
+          {validationsLeft === 0 && (
+            <div
+              className="mt-10 rounded-md border px-4 py-3 flex items-center justify-between gap-4 flex-wrap"
+              style={{ borderColor: "rgba(214,255,61,0.25)", background: "rgba(214,255,61,0.04)" }}
+            >
+              <p className="text-[13px]" style={{ color: "var(--t2)" }}>
+                You&apos;ve used all your validations this month.
+              </p>
+              <a
+                href="/pricing"
+                className="mono text-[11px] shrink-0 transition-opacity hover:opacity-70"
+                style={{ color: "var(--accent)" }}
+              >
+                Upgrade to Founder for unlimited →
+              </a>
+            </div>
+          )}
+
           {/* CTA */}
           <div className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             <button
               type="submit"
-              disabled={!valid || status === "loading"}
+              disabled={!valid || status === "loading" || validationsLeft === 0}
               className="display text-[14px] font-semibold px-6 h-12 rounded-md flex items-center justify-center gap-2 transition-all"
               style={{
-                background: valid ? "var(--accent)" : "var(--surface)",
-                color: valid ? "#000" : "var(--t3)",
-                border: valid ? "none" : "1px solid var(--border)",
-                cursor: valid ? "pointer" : "not-allowed",
+                background: valid && validationsLeft > 0 ? "var(--accent)" : "var(--surface)",
+                color: valid && validationsLeft > 0 ? "#000" : "var(--t3)",
+                border: valid && validationsLeft > 0 ? "none" : "1px solid var(--border)",
+                cursor: valid && validationsLeft > 0 ? "pointer" : "not-allowed",
               }}
             >
               {status === "loading" ? "Analyzing…" : "Validate →"}
             </button>
 
-            {!valid && (
+            {!valid && validationsLeft > 0 && (
               <span
                 className="mono text-[11px]"
                 style={{ color: "var(--t3)" }}

@@ -59,14 +59,13 @@ export default function NotFound() {
             className="reveal display font-bold mt-8"
             style={{ fontSize: "34px", color: "var(--t1)", animationDelay: "400ms" }}
           >
-            Page not found.
+            This idea doesn&apos;t validate either.
           </h1>
           <p
             className="reveal text-[14px] mt-3 max-w-md mx-auto leading-relaxed"
             style={{ color: "var(--t2)", animationDelay: "520ms" }}
           >
-            The URL you followed doesn&apos;t match a route in our app. It may have been moved, archived, or never
-            existed in the first place.
+            But yours might. The page you&apos;re looking for doesn&apos;t exist — but your next idea could be the one.
           </p>
 
           {/* ID line */}
@@ -92,18 +91,18 @@ export default function NotFound() {
             style={{ animationDelay: "760ms" }}
           >
             <Link
-              href="/dashboard"
+              href="/ideas/new"
               className="inline-flex items-center gap-2 h-11 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
               style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
             >
-              <span aria-hidden="true">←</span> Back to dashboard
+              Validate yours →
             </Link>
             <Link
-              href="/ideas/new"
+              href="/dashboard"
               className="inline-flex items-center gap-2 h-11 px-5 rounded-md border display text-[13px] transition-colors hover:bg-white/5"
               style={{ borderColor: "var(--border)", color: "var(--t1)" }}
             >
-              Validate a new idea
+              <span aria-hidden="true">←</span> Back to dashboard
             </Link>
           </div>
 

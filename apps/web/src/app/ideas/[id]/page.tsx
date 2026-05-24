@@ -11,6 +11,8 @@ import { ExportButtons } from "./ExportButtons";
 import OttoChat from "@/components/OttoChat";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { OutcomeButton } from "@/components/OutcomeButton";
+import { ShareVerdictButton } from "@/components/ShareVerdictButton";
+import { OutcomeBanner } from "@/components/OutcomeBanner";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -78,15 +80,17 @@ export default async function IdeaPage({ params }: Props) {
   const initialLaunchKit = launchKitResult.isOk() ? launchKitResult.value : null;
   const existingOutcome = outcomeResult.isOk() ? outcomeResult.value : null;
 
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  const isOlderThan30Days = new Date(idea.createdAt) < thirtyDaysAgo;
+  const now = new Date();
+  const daysOld = Math.floor((now.getTime() - new Date(idea.createdAt).getTime()) / (1000 * 60 * 60 * 24));
+  const isOlderThan30Days = daysOld >= 30;
+  const showOutcomeBanner = isOlderThan30Days && !existingOutcome;
 
   const { title, description, category } = parseIdeaText(idea.text);
 
   return (
     <div className="min-h-screen bg-(--canvas)">
       <Nav loggedIn={true} />
+      {showOutcomeBanner && <OutcomeBanner ideaId={id} daysOld={daysOld} />}
 
       <div className="max-w-360 mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Back + Idea header — narrow */}
@@ -117,7 +121,8 @@ export default async function IdeaPage({ params }: Props) {
                 </span>
               )}
             </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {decision && <ShareVerdictButton ideaId={id} />}
                 {isOlderThan30Days && (
                   <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
                 )}
