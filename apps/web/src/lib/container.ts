@@ -18,6 +18,8 @@ import {
   SupabaseUsageLogAdapter,
   SupabaseLaunchKitRepository,
   SupabaseDecisionQueueRepository,
+  SupabaseEngineeringSnapshotRepository,
+  GitHubVelocityAdapter,
   StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
@@ -59,6 +61,9 @@ import {
   GenerateLaunchKitUseCase,
   UpdateDecisionQueueUseCase,
   GetDecisionQueueUseCase,
+  ConnectGitHubUseCase,
+  RefreshEngineeringSnapshotUseCase,
+  EstimateDeliveryUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -219,6 +224,15 @@ function buildContainer() {
   const updateDecisionQueueUseCase = new UpdateDecisionQueueUseCase(ideaRepo, decisionRepo, decisionQueueRepo, llmClient);
   const getDecisionQueueUseCase = new GetDecisionQueueUseCase(decisionQueueRepo, ideaRepo, decisionRepo);
 
+  const engineeringSnapshotRepo = new SupabaseEngineeringSnapshotRepository(
+    supabase,
+    process.env.GITHUB_TOKEN_MASTER_KEY ?? '',
+  );
+  const gitHubVelocityAdapter = new GitHubVelocityAdapter();
+  const connectGitHubUseCase = new ConnectGitHubUseCase(gitHubVelocityAdapter, engineeringSnapshotRepo);
+  const refreshEngineeringSnapshotUseCase = new RefreshEngineeringSnapshotUseCase(gitHubVelocityAdapter, engineeringSnapshotRepo);
+  const estimateDeliveryUseCase = new EstimateDeliveryUseCase(buildAnalysisRepo, engineeringSnapshotRepo);
+
   const apiKeyRepo = new SupabaseApiKeyRepository(supabase);
   const generateApiKeyUseCase = new GenerateApiKeyUseCase(apiKeyRepo);
   const revokeApiKeyUseCase = new RevokeApiKeyUseCase(apiKeyRepo);
@@ -334,6 +348,10 @@ function buildContainer() {
     generateLaunchKitUseCase,
     updateDecisionQueueUseCase,
     getDecisionQueueUseCase,
+    connectGitHubUseCase,
+    refreshEngineeringSnapshotUseCase,
+    estimateDeliveryUseCase,
+    engineeringSnapshotRepo,
     _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo },
   };
 }
