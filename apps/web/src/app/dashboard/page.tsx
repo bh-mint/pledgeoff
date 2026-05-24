@@ -161,6 +161,18 @@ export default async function DashboardPage() {
     .map((_, i) => i + 1)
     .slice(-10);
 
+  // Onboarding checklist — shows until all 3 steps are done
+  const hasIdea = ideas.length > 0;
+  const hasVerdict = withDecision.length > 0;
+  const hasDeepTool = rows.some((r) => r.tools.simulate || r.tools.landing || r.tools.customers || r.tools.build);
+  const onboardingDone = hasIdea && hasVerdict && hasDeepTool;
+
+  const onboardingSteps = [
+    { label: "Submit your first idea", href: "/ideas/new", done: hasIdea },
+    { label: "Get a verdict", href: "/ideas/new", done: hasVerdict },
+    { label: "Run a deep tool (Simulate, Audience, Blueprint…)", href: hasVerdict ? `/ideas/${rows.find((r) => r.decision)?.idea.id}` : "/ideas/new", done: hasDeepTool },
+  ];
+
   // Pipeline — dynamic status based on top GO idea's tool completions
   const pipelineRow = rows.find((r) => r.decision?.verdict === "GO");
   const pt = pipelineRow?.tools;
@@ -413,6 +425,49 @@ export default async function DashboardPage() {
                 >
                   How it works
                 </Link>
+              </div>
+            </div>
+          )}
+
+          {/* Onboarding checklist — hidden once all done */}
+          {!onboardingDone && (
+            <div
+              className="rounded-md border p-5"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            >
+              <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3) mb-3">
+                Getting started
+              </div>
+              <div className="space-y-2">
+                {onboardingSteps.map((step, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div
+                      className="w-5 h-5 rounded shrink-0 flex items-center justify-center"
+                      style={{
+                        background: step.done ? "color-mix(in srgb, var(--validated) 15%, transparent)" : "var(--border)",
+                        border: `1px solid ${step.done ? "color-mix(in srgb, var(--validated) 40%, transparent)" : "var(--border)"}`,
+                      }}
+                    >
+                      {step.done && (
+                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                          <path d="M1 4L3.5 6.5L9 1" stroke="var(--validated)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                    <span
+                      className="text-[13px]"
+                      style={{
+                        color: step.done ? "var(--t3)" : "var(--t1)",
+                        textDecoration: step.done ? "line-through" : "none",
+                      }}
+                    >
+                      {step.done ? step.label : (
+                        <a href={step.href} style={{ color: "var(--t1)", textDecoration: "none" }}
+                          className="hover:underline">{step.label}</a>
+                      )}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
