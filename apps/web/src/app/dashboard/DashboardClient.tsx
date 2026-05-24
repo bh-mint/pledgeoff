@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { VerdictMark } from "@/components/brand/VerdictMark";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -86,6 +86,32 @@ export function DashboardClient({
 
   const hasTeam = !!teamId;
   const isPaid = plan !== "free";
+  const router = useRouter();
+  const [quickText, setQuickText] = useState("");
+  const [quickStatus, setQuickStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [quickError, setQuickError] = useState("");
+
+  const handleQuickValidate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (quickText.trim().length < 10) return;
+    setQuickStatus("loading");
+    setQuickError("");
+    const supabase = createSupabaseBrowserClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { router.push("/login"); return; }
+    const res = await fetch("/api/v1/ideas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ text: quickText.trim() }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setQuickError(json.error?.message ?? "Something went wrong. Try again.");
+      setQuickStatus("error");
+      return;
+    }
+    router.push(`/ideas/${json.data.id}`);
+  };
   const showTeamTab = isPaid;
 
   useEffect(() => {
@@ -408,23 +434,56 @@ export function DashboardClient({
 
           {/* Empty */}
           {filtered.length === 0 && (
-            <div className="px-6 py-16 text-center">
-              <div className="display text-[18px] font-semibold tracking-tight text-(--t1) mb-2">
-                {search ? "No results." : "No validations yet."}
-              </div>
-              {!search && (
-                <>
-                  <p className="text-[13px] text-(--t2) max-w-[420px] mx-auto">
-                    Type a one-sentence idea. Get a score in under 60 seconds.
+            <div className="px-6 py-16">
+              {search ? (
+                <p className="text-center text-[13px] text-(--t3)">No results for &ldquo;{search}&rdquo;.</p>
+              ) : (
+                <div className="max-w-[560px] mx-auto">
+                  <p className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3) mb-4">
+                    step 01 · idea validator
                   </p>
-                  <Link
-                    href="/ideas/new"
-                    className="inline-block mt-5 display text-[13px] font-semibold px-5 h-10 leading-[40px] rounded-md"
-                    style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-                  >
-                    Validate your first idea →
-                  </Link>
-                </>
+                  <h2 className="display text-[28px] sm:text-[36px] font-semibold tracking-tight leading-[1.05] text-(--t1) mb-2">
+                    What are you building?
+                  </h2>
+                  <p className="text-[13px] text-(--t2) mb-6">
+                    One sentence. Get a GO / KILL / PIVOT verdict in under 60 seconds.
+                  </p>
+                  <form onSubmit={handleQuickValidate} className="space-y-3">
+                    <textarea
+                      value={quickText}
+                      onChange={(e) => setQuickText(e.target.value)}
+                      placeholder="AI-powered meal planner that adapts to your gym schedule…"
+                      rows={3}
+                      disabled={quickStatus === "loading"}
+                      className="w-full bg-transparent outline-none border rounded-md p-4 text-[14px] leading-[1.6] resize-none transition-colors"
+                      style={{
+                        borderColor: quickText.length >= 10 ? "var(--accent)" : "var(--border)",
+                        color: "var(--t1)",
+                      }}
+                    />
+                    {quickError && (
+                      <p className="text-[12px]" style={{ color: "var(--kill)" }}>{quickError}</p>
+                    )}
+                    <div className="flex items-center gap-4">
+                      <button
+                        type="submit"
+                        disabled={quickText.trim().length < 10 || quickStatus === "loading"}
+                        className="display text-[13px] font-semibold px-5 h-10 rounded-md flex items-center gap-2 transition-all disabled:opacity-40"
+                        style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+                      >
+                        {quickStatus === "loading" ? (
+                          <>
+                            <span className="inline-block w-3 h-3 rounded-full border-2 border-black/30 border-t-black/90 animate-spin" />
+                            Analyzing…
+                          </>
+                        ) : "Validate →"}
+                      </button>
+                      <span className="mono text-[10px] text-(--t3)">
+                        {quickText.length < 10 ? `${10 - quickText.length} chars min` : "ready"}
+                      </span>
+                    </div>
+                  </form>
+                </div>
               )}
             </div>
           )}
