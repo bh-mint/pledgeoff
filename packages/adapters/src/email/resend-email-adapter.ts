@@ -393,3 +393,43 @@ export async function sendVerdictEmail(
     log.error({ traceId, target: 'resend', operation: 'sendVerdictEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'FETCH_ERROR' }, `Resend fetch failed: ${message}`);
   }
 }
+
+export type QueueAlertEmailParams = {
+  to: string;
+  significantChanges: number;
+  traceId: string;
+};
+
+export async function sendQueueAlertEmail(
+  apiKey: string,
+  params: QueueAlertEmailParams,
+): Promise<void> {
+  const { to, significantChanges, traceId } = params;
+  const subject = `${significantChanges === 1 ? '1 idea' : `${significantChanges} ideas`} moved in your Decision Queue`;
+  const dashboardUrl = 'https://pledgeoff.com/dashboard';
+  const html = `<!DOCTYPE html><html><body style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#111">
+<h2 style="margin:0 0 16px">Your Decision Queue changed</h2>
+<p style="margin:0 0 16px">The market signals have shifted. <strong>${significantChanges === 1 ? '1 idea' : `${significantChanges} ideas`}</strong> in your queue moved significantly in priority.</p>
+<p style="margin:0 0 24px">Open your Decision Queue to see what changed and why.</p>
+<a href="${dashboardUrl}?tab=queue" style="background:#6366f1;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600">View Decision Queue</a>
+<p style="margin:24px 0 0;font-size:12px;color:#666">PledgeOFF — Decision Intelligence Platform</p>
+</body></html>`;
+
+  const start = Date.now();
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: 'PledgeOFF <hello@pledgeoff.com>', to: [to], subject, html }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      log.warn({ traceId, target: 'resend', operation: 'sendQueueAlertEmail', latencyMs: Date.now() - start, outcome: 'error' }, `Resend error: ${body}`);
+      return;
+    }
+    log.info({ traceId, target: 'resend', operation: 'sendQueueAlertEmail', latencyMs: Date.now() - start, outcome: 'success' }, 'Queue alert email sent');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown';
+    log.error({ traceId, target: 'resend', operation: 'sendQueueAlertEmail', latencyMs: Date.now() - start, outcome: 'error' }, `Resend fetch failed: ${message}`);
+  }
+}

@@ -33,6 +33,7 @@ function makeLLMClient(response = llmResponse): ILLMClient {
     analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(),
     chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn(),
+    generatePriorityExplanation: vi.fn(),
   };
 }
 
@@ -82,6 +83,7 @@ describe('GenerateLandingUseCase', () => {
       analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(),
     chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn(),
+    generatePriorityExplanation: vi.fn(),
     };
     const useCase = new GenerateLandingUseCase(makeLandingRepo(), llm);
 

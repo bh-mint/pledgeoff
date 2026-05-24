@@ -157,6 +157,18 @@ export interface LLMOttoResponse {
   readonly reply: string;
 }
 
+export interface LLMPriorityExplanationRequest {
+  readonly ideaText: string;
+  readonly verdict: string;
+  readonly previousScore: number;
+  readonly currentScore: number;
+  readonly traceId: string;
+}
+
+export interface LLMPriorityExplanationResponse {
+  readonly explanation: string; // e.g. "Competitor X failed → opportunity increased"
+}
+
 export class LLMClientError extends Error {
   readonly code = 'LLM_CLIENT_ERROR' as const;
 }
@@ -172,4 +184,5 @@ export interface ILLMClient {
   analyzeCompetitors(request: LLMCompetitorRequest): Promise<Result<LLMCompetitorResponse, LLMClientError>>;
   chatWithOtto(request: LLMOttoRequest): Promise<Result<LLMOttoResponse, LLMClientError>>;
   generateLaunchKit(request: LLMLaunchKitRequest): Promise<Result<LLMLaunchKitResponse, LLMClientError>>;
+  generatePriorityExplanation(request: LLMPriorityExplanationRequest): Promise<Result<LLMPriorityExplanationResponse, LLMClientError>>;
 }

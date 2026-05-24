@@ -6,6 +6,7 @@ import Link from "next/link";
 import { VerdictMark } from "@/components/brand/VerdictMark";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { TeamAnalytics } from "@/components/TeamAnalytics";
+import { DecisionQueueView } from "./DecisionQueueView";
 import type { Plan } from "@pledgeoff/core";
 
 export type ToolStatus = {
@@ -68,7 +69,8 @@ export function DashboardClient({
 }: DashboardClientProps) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date");
-  const [tab, setTab] = useState<"personal" | "team">("personal");
+  const initialTab = (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "queue") ? "queue" as const : "personal" as const;
+  const [tab, setTab] = useState<"personal" | "team" | "queue">(initialTab);
   const [verdictFilter, setVerdictFilter] = useState<string>("all");
   const [memberFilter, setMemberFilter] = useState<string>("all");
   const searchParams = useSearchParams();
@@ -173,6 +175,17 @@ export function DashboardClient({
               Team {teamName ? `· ${teamName}` : ""}
             </button>
           )}
+          <button
+            onClick={() => setTab("queue")}
+            className="mono text-[11px] px-3 h-8 rounded-md border transition-colors"
+            style={{
+              background: tab === "queue" ? "var(--accent)" : "transparent",
+              color: tab === "queue" ? "var(--accent-fg)" : "var(--t2)",
+              borderColor: tab === "queue" ? "var(--accent)" : "var(--border)",
+            }}
+          >
+            Queue
+          </button>
         </div>
 
         <Link
@@ -603,6 +616,9 @@ export function DashboardClient({
           })()}
         </>
       )}
+
+      {/* ── Queue tab ── */}
+      {tab === "queue" && <DecisionQueueView />}
     </>
   );
 }

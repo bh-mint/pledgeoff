@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, IUsageLogger } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, IUsageLogger } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -431,6 +431,26 @@ export class AnthropicLLMAdapter implements ILLMClient {
       } else {
         span.setStatus({ code: SpanStatusCode.OK });
       }
+      span.end();
+      return result;
+    });
+  }
+
+  async generatePriorityExplanation(request: LLMPriorityExplanationRequest): Promise<Result<LLMPriorityExplanationResponse, LLMClientError>> {
+    return tracer.startActiveSpan('anthropic.generate-priority-explanation', async (span) => {
+      span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
+      const prompt = `Idea: "${request.ideaText}"\nVerdict: ${request.verdict}\nPriority score changed from ${request.previousScore.toFixed(2)} to ${request.currentScore.toFixed(2)}.\nExplain in one short sentence why this idea's priority changed. Focus on market signals, not the score number.`;
+      const schema = z.object({ explanation: z.string().min(1).max(200) });
+      const result = await this._callAnthropic(
+        prompt,
+        'You are a market analyst. Respond with valid JSON only: {"explanation": "..."}',
+        schema,
+        'generatePriorityExplanation',
+        request.traceId,
+        128,
+      );
+      if (result.isErr()) span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
+      else span.setStatus({ code: SpanStatusCode.OK });
       span.end();
       return result;
     });

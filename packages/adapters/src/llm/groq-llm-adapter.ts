@@ -1,7 +1,7 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -405,5 +405,23 @@ export class GroqLLMAdapter implements ILLMClient {
   // Otto uses Anthropic Haiku — Groq adapter does not support chat
   async chatWithOtto(): Promise<Result<never, LLMClientError>> {
     return err(new LLMClientError('chatWithOtto is not supported by GroqLLMAdapter — use AnthropicLLMAdapter'));
+  }
+
+  async generatePriorityExplanation(request: LLMPriorityExplanationRequest): Promise<Result<LLMPriorityExplanationResponse, LLMClientError>> {
+    return tracer.startActiveSpan('groq.generate-priority-explanation', async (span) => {
+      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId });
+      const prompt = `Idea: "${request.ideaText}"\nVerdict: ${request.verdict}\nPriority score changed from ${request.previousScore.toFixed(2)} to ${request.currentScore.toFixed(2)}.\nExplain in one short sentence why this idea's priority changed. Focus on market signals, not the score number.`;
+      const schema = z.object({ explanation: z.string().min(1).max(200) });
+      const result = await this._callGroq(
+        prompt,
+        'You are a market analyst. Respond with valid JSON only: {"explanation": "..."}',
+        schema,
+        'generatePriorityExplanation',
+        request.traceId,
+        128,
+      );
+      span.end();
+      return result;
+    });
   }
 }

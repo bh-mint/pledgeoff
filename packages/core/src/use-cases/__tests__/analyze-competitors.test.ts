@@ -72,6 +72,7 @@ function makeLLM(response = llmResponse): ILLMClient {
     analyzeCompetitors: vi.fn().mockResolvedValue(ok(response)),
     chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn(),
+    generatePriorityExplanation: vi.fn(),
   };
 }
 
@@ -132,6 +133,7 @@ describe('AnalyzeCompetitorsUseCase', () => {
       analyzeCompetitors: vi.fn().mockResolvedValue(err(llmError)),
       chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn(),
+    generatePriorityExplanation: vi.fn(),
     };
     const useCase = new AnalyzeCompetitorsUseCase(makeRepo(), makeSignalRepo(), llm);
 

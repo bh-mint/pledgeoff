@@ -77,6 +77,7 @@ function makeLlmClient(response: LLMLaunchKitResponse = mockLlmResponse): ILLMCl
     analyzeCompetitors: vi.fn(),
     chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn().mockResolvedValue(ok(response)),
+    generatePriorityExplanation: vi.fn(),
   };
 }
 

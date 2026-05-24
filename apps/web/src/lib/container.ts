@@ -17,6 +17,7 @@ import {
   SupabaseApiKeyRepository,
   SupabaseUsageLogAdapter,
   SupabaseLaunchKitRepository,
+  SupabaseDecisionQueueRepository,
   StripeAdapter,
   HNSourceAdapter,
   DevToSourceAdapter,
@@ -56,6 +57,8 @@ import {
   ListApiKeysUseCase,
   GetDecisionTimelineUseCase,
   GenerateLaunchKitUseCase,
+  UpdateDecisionQueueUseCase,
+  GetDecisionQueueUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -212,6 +215,10 @@ function buildContainer() {
   const launchKitRepo = new SupabaseLaunchKitRepository(supabase);
   const generateLaunchKitUseCase = new GenerateLaunchKitUseCase(ideaRepo, signalRepo, launchKitRepo, llmClient);
 
+  const decisionQueueRepo = new SupabaseDecisionQueueRepository(supabase);
+  const updateDecisionQueueUseCase = new UpdateDecisionQueueUseCase(ideaRepo, decisionRepo, decisionQueueRepo, llmClient);
+  const getDecisionQueueUseCase = new GetDecisionQueueUseCase(decisionQueueRepo, ideaRepo, decisionRepo);
+
   const apiKeyRepo = new SupabaseApiKeyRepository(supabase);
   const generateApiKeyUseCase = new GenerateApiKeyUseCase(apiKeyRepo);
   const revokeApiKeyUseCase = new RevokeApiKeyUseCase(apiKeyRepo);
@@ -325,6 +332,8 @@ function buildContainer() {
     listApiKeysUseCase,
     getDecisionTimelineUseCase,
     generateLaunchKitUseCase,
+    updateDecisionQueueUseCase,
+    getDecisionQueueUseCase,
     _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo },
   };
 }
