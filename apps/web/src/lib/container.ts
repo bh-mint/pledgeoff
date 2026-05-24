@@ -19,6 +19,7 @@ import {
   SupabaseLaunchKitRepository,
   SupabaseDecisionQueueRepository,
   SupabaseEngineeringSnapshotRepository,
+  SupabaseDecisionOutcomeRepository,
   GitHubVelocityAdapter,
   StripeAdapter,
   HNSourceAdapter,
@@ -64,6 +65,8 @@ import {
   ConnectGitHubUseCase,
   RefreshEngineeringSnapshotUseCase,
   EstimateDeliveryUseCase,
+  RecordOutcomeUseCase,
+  GetFlywheelStatsUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -233,6 +236,10 @@ function buildContainer() {
   const refreshEngineeringSnapshotUseCase = new RefreshEngineeringSnapshotUseCase(gitHubVelocityAdapter, engineeringSnapshotRepo);
   const estimateDeliveryUseCase = new EstimateDeliveryUseCase(buildAnalysisRepo, engineeringSnapshotRepo);
 
+  const decisionOutcomeRepo = new SupabaseDecisionOutcomeRepository(supabase);
+  const recordOutcomeUseCase = new RecordOutcomeUseCase(decisionOutcomeRepo, decisionRepo);
+  const getFlywheelStatsUseCase = new GetFlywheelStatsUseCase(decisionOutcomeRepo);
+
   const apiKeyRepo = new SupabaseApiKeyRepository(supabase);
   const generateApiKeyUseCase = new GenerateApiKeyUseCase(apiKeyRepo);
   const revokeApiKeyUseCase = new RevokeApiKeyUseCase(apiKeyRepo);
@@ -352,7 +359,9 @@ function buildContainer() {
     refreshEngineeringSnapshotUseCase,
     estimateDeliveryUseCase,
     engineeringSnapshotRepo,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo },
+    recordOutcomeUseCase,
+    getFlywheelStatsUseCase,
+    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo, decisionOutcomeRepo },
   };
 }
 

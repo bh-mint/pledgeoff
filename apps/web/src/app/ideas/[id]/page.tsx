@@ -10,6 +10,7 @@ import { formatDate } from "@/lib/mdx-utils";
 import { ExportButtons } from "./ExportButtons";
 import OttoChat from "@/components/OttoChat";
 import { getUserPlan } from "@/server/billing/getUserPlan";
+import { OutcomeButton } from "@/components/OutcomeButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -54,7 +55,7 @@ export default async function IdeaPage({ params }: Props) {
   const idea = ideaResult.value;
   if (idea.userId !== user.id) notFound();
 
-  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, plan] = await Promise.all([
+  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, plan] = await Promise.all([
     container._repos.decisionRepo.findByIdeaId(id),
     container._repos.signalRepo.findByIdeaId(id),
     container._repos.simulationRepo.findByIdeaId(id),
@@ -63,6 +64,7 @@ export default async function IdeaPage({ params }: Props) {
     container._repos.buildAnalysisRepo.findByIdeaId(id),
     container._repos.competitorAnalysisRepo.findByIdeaId(id),
     container._repos.launchKitRepo.findByIdeaId(id),
+    container._repos.decisionOutcomeRepo.findByIdea(id),
     getUserPlan(user.id),
   ]);
 
@@ -74,6 +76,11 @@ export default async function IdeaPage({ params }: Props) {
   const initialBuild = buildResult.isOk() ? buildResult.value : null;
   const initialCompetitors = competitorsResult.isOk() ? competitorsResult.value : null;
   const initialLaunchKit = launchKitResult.isOk() ? launchKitResult.value : null;
+  const existingOutcome = outcomeResult.isOk() ? outcomeResult.value : null;
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const isOlderThan30Days = new Date(idea.createdAt) < thirtyDaysAgo;
 
   const { title, description, category } = parseIdeaText(idea.text);
 
@@ -110,7 +117,12 @@ export default async function IdeaPage({ params }: Props) {
                 </span>
               )}
             </div>
-              <ExportButtons ideaId={id} plan={plan} />
+              <div className="flex items-center gap-2">
+                {isOlderThan30Days && (
+                  <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
+                )}
+                <ExportButtons ideaId={id} plan={plan} />
+              </div>
             </div>
             <h1 className="display text-[22px] font-semibold tracking-tight text-(--t1) leading-snug mb-3">
               {title}

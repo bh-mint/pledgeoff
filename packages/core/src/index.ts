@@ -75,3 +75,7 @@ export * from './ports/engineering-snapshot-repository';
 export * from './use-cases/connect-github';
 export * from './use-cases/refresh-engineering-snapshot';
 export * from './use-cases/estimate-delivery';
+export * from './domain/decision-outcome';
+export * from './ports/decision-outcome-repository';
+export * from './use-cases/record-outcome';
+export * from './use-cases/get-flywheel-stats';
