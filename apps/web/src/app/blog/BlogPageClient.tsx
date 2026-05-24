@@ -83,7 +83,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
           >
             {[
               { value: String(articles.length), label: "ARTICLES" },
-              { value: "11.4k", label: "SUBSCRIBERS" },
+              { value: "Weekly", label: "NEW CONTENT" },
               { value: "7m", label: "AVG READ" },
             ].map(({ value, label }) => (
               <div key={label} className="p-4" style={{ background: "var(--canvas)" }}>
