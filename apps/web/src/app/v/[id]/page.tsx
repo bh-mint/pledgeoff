@@ -40,6 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const score = computeScore(decision);
   const title = `${decision.verdict} · ${score}/100 — ${idea.text.slice(0, 60)}`;
   const description = `PledgeOFF verdict: ${decision.verdict}. Score: ${score}/100. ${decision.reasoning.slice(0, 120)}`;
+  const ogImageUrl = `https://pledgeoff.com/api/og?type=verdict&verdict=${encodeURIComponent(decision.verdict)}&score=${score}&text=${encodeURIComponent(idea.text.slice(0, 80))}`;
 
   return {
     title,
@@ -49,6 +50,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       type: "article",
       url: `https://pledgeoff.com/v/${id}`,
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl],
     },
     alternates: { canonical: `https://pledgeoff.com/v/${id}` },
   };
