@@ -394,6 +394,100 @@ export async function sendVerdictEmail(
   }
 }
 
+export type AccuracyReportEmailParams = {
+  to: string;
+  accuracyRate: number | null;
+  totalOutcomes: number;
+  byVerdict: {
+    GO: { total: number; correct: number };
+    KILL: { total: number; correct: number };
+    PIVOT: { total: number; total_reported: number };
+  };
+  traceId: string;
+};
+
+export async function sendAccuracyReportEmail(
+  apiKey: string,
+  params: AccuracyReportEmailParams,
+): Promise<void> {
+  const { to, accuracyRate, totalOutcomes, byVerdict, traceId } = params;
+
+  const rateLabel =
+    accuracyRate === null ? 'Not enough data yet' : `${accuracyRate}%`;
+
+  const html = EMAIL_SHELL(`
+    <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">MONTHLY REPORT · PLEDGEOFF</p>
+    <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+      How accurate were your verdicts last month?
+    </h1>
+    <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
+      You've reported outcomes on <strong style="color:#f5f5f5;">${totalOutcomes} idea${totalOutcomes === 1 ? '' : 's'}</strong>.
+      Here's how the verdicts held up in the real world.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:6px;padding:16px 20px;text-align:center;">
+          <p style="margin:0 0 4px;font-family:monospace;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:0.08em;">Accuracy Rate</p>
+          <p style="margin:0;font-size:36px;font-weight:700;color:${accuracyRate === null ? '#666' : accuracyRate >= 70 ? '#b6f04c' : accuracyRate >= 50 ? '#e8b341' : '#e55b3c'};">${rateLabel}</p>
+        </td>
+      </tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;border-collapse:collapse;">
+      <tr>
+        <td style="padding:8px 0;font-family:monospace;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid #2a2a2a;">Verdict</td>
+        <td style="padding:8px 0;font-family:monospace;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid #2a2a2a;text-align:right;">Reported</td>
+        <td style="padding:8px 0;font-family:monospace;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid #2a2a2a;text-align:right;">Correct</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;font-size:13px;color:#7dd66b;font-weight:600;border-bottom:1px solid #1e1e1e;">GO</td>
+        <td style="padding:10px 0;font-size:13px;color:#aaa;text-align:right;border-bottom:1px solid #1e1e1e;">${byVerdict.GO.total}</td>
+        <td style="padding:10px 0;font-size:13px;color:#aaa;text-align:right;border-bottom:1px solid #1e1e1e;">${byVerdict.GO.correct}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;font-size:13px;color:#e55b3c;font-weight:600;border-bottom:1px solid #1e1e1e;">KILL</td>
+        <td style="padding:10px 0;font-size:13px;color:#aaa;text-align:right;border-bottom:1px solid #1e1e1e;">${byVerdict.KILL.total}</td>
+        <td style="padding:10px 0;font-size:13px;color:#aaa;text-align:right;border-bottom:1px solid #1e1e1e;">${byVerdict.KILL.correct}</td>
+      </tr>
+      <tr>
+        <td style="padding:10px 0;font-size:13px;color:#e8b341;font-weight:600;">PIVOT</td>
+        <td style="padding:10px 0;font-size:13px;color:#aaa;text-align:right;">${byVerdict.PIVOT.total_reported}</td>
+        <td style="padding:10px 0;font-size:13px;color:#555;text-align:right;">—</td>
+      </tr>
+    </table>
+
+    <a href="https://pledgeoff.com/admin/flywheel" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+      View full flywheel →
+    </a>
+    <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+    <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
+  `);
+
+  const start = Date.now();
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'PledgeOFF <hello@pledgeoff.com>',
+        to: [to],
+        subject: `Your PledgeOFF accuracy report — ${rateLabel} on ${totalOutcomes} idea${totalOutcomes === 1 ? '' : 's'}`,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      log.warn({ traceId, target: 'resend', operation: 'sendAccuracyReportEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${res.status}` }, `Resend error: ${body}`);
+      return;
+    }
+    log.info({ traceId, target: 'resend', operation: 'sendAccuracyReportEmail', latencyMs: Date.now() - start, outcome: 'success' }, 'Accuracy report email sent');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown';
+    log.error({ traceId, target: 'resend', operation: 'sendAccuracyReportEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'FETCH_ERROR' }, `Resend fetch failed: ${message}`);
+  }
+}
+
 export type QueueAlertEmailParams = {
   to: string;
   significantChanges: number;

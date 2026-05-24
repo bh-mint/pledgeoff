@@ -67,6 +67,7 @@ import {
   EstimateDeliveryUseCase,
   RecordOutcomeUseCase,
   GetFlywheelStatsUseCase,
+  GetUsersAccuracyReportUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -239,6 +240,7 @@ function buildContainer() {
   const decisionOutcomeRepo = new SupabaseDecisionOutcomeRepository(supabase);
   const recordOutcomeUseCase = new RecordOutcomeUseCase(decisionOutcomeRepo, decisionRepo);
   const getFlywheelStatsUseCase = new GetFlywheelStatsUseCase(decisionOutcomeRepo);
+  const getUsersAccuracyReportUseCase = new GetUsersAccuracyReportUseCase(decisionOutcomeRepo);
 
   const apiKeyRepo = new SupabaseApiKeyRepository(supabase);
   const generateApiKeyUseCase = new GenerateApiKeyUseCase(apiKeyRepo);
@@ -361,6 +363,7 @@ function buildContainer() {
     engineeringSnapshotRepo,
     recordOutcomeUseCase,
     getFlywheelStatsUseCase,
+    getUsersAccuracyReportUseCase,
     _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo, decisionOutcomeRepo },
   };
 }

@@ -79,3 +79,4 @@ export * from './domain/decision-outcome';
 export * from './ports/decision-outcome-repository';
 export * from './use-cases/record-outcome';
 export * from './use-cases/get-flywheel-stats';
+export * from './use-cases/get-users-accuracy-report';
