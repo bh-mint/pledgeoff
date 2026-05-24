@@ -1,8 +1,8 @@
 /**
  * Chaos tests: verify use cases handle unexpected failures gracefully.
  * Rules:
- *   - Repos that throw (not err()) must not crash the use case
- *   - Malformed/edge-case inputs must return typed errors, not throw
+ *   - Repos that return err() must propagate correctly
+ *   - Edge-case inputs must return typed errors, not throw
  *   - Concurrent calls must not corrupt shared state
  */
 import { describe, it, expect } from 'vitest';
@@ -18,9 +18,12 @@ import { IdeaRepositoryError } from '../../ports/idea-repository';
 import { DecisionOutcomeRepositoryError } from '../../ports/decision-outcome-repository';
 import { DecisionRepositoryError } from '../../ports/decision-repository';
 import { DecisionQueueRepositoryError } from '../../ports/decision-queue-repository';
+import type { IEventBus } from '../../ports/event-bus';
+import type { IIdeaRepository } from '../../ports/idea-repository';
+import type { IDecisionRepository } from '../../ports/decision-repository';
+import type { IDecisionQueueRepository } from '../../ports/decision-queue-repository';
 import type { DecisionOutcome } from '../../domain/decision-outcome';
 import type { Decision } from '../../domain/decision';
-import type { DecisionQueueItem } from '../../domain/decision-queue';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
@@ -44,34 +47,46 @@ function makeDecision(overrides: Partial<Decision> = {}): Decision {
     verdict: 'GO',
     confidence: 0.8,
     reasoning: 'Strong signal',
-    signals: [],
-    dimensions: [],
+    signalIds: [],
     score: 80,
     createdAt: new Date().toISOString(),
     ...overrides,
   };
 }
 
-function makeQueueItem(overrides: Partial<DecisionQueueItem> = {}): DecisionQueueItem {
-  return {
-    id: crypto.randomUUID(),
-    ideaId: crypto.randomUUID(),
-    userId: 'user-1',
-    priorityScore: 75,
-    priorityExplanation: 'High signal',
-    updatedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    ...overrides,
-  };
-}
+const mockOutcomeRepo = {
+  upsert: async (o: DecisionOutcome) => ok(o),
+  findByIdea: async () => ok(null as DecisionOutcome | null),
+  findByUser: async () => ok([] as DecisionOutcome[]),
+  findAll: async () => ok([] as DecisionOutcome[]),
+};
+
+const mockDecisionRepo: IDecisionRepository = {
+  save: async (d) => ok(d),
+  findByIdeaId: async () => ok(null),
+  findAllByIdeaId: async () => ok([]),
+};
+
+const mockEventBus: IEventBus = {
+  publish: async () => ok(undefined as void),
+  subscribe: () => {},
+};
+
+const mockIdeaRepo: IIdeaRepository = {
+  save: async (idea) => ok(idea),
+  findById: async () => ok(null),
+  findByUserId: async () => ok([]),
+  findByUserIds: async () => ok([]),
+  countThisMonth: async () => ok(0),
+};
 
 // ── CreateIdeaUseCase ───────────────────────────────────────────────────────
 
 describe('chaos: CreateIdeaUseCase', () => {
   it('returns err when repo.save returns error', async () => {
     const uc = new CreateIdeaUseCase(
-      { save: async () => err(new IdeaRepositoryError('disk full')) },
-      { publish: async () => ok(undefined) },
+      { ...mockIdeaRepo, save: async () => err(new IdeaRepositoryError('disk full')) },
+      mockEventBus,
     );
     const result = await uc.execute({ userId: crypto.randomUUID(), text: 'An idea long enough', traceId: 'trace' });
     expect(result.isErr()).toBe(true);
@@ -79,8 +94,8 @@ describe('chaos: CreateIdeaUseCase', () => {
 
   it('rejects idea with empty text', async () => {
     const uc = new CreateIdeaUseCase(
-      { save: async (idea) => ok(idea) },
-      { publish: async () => ok(undefined) },
+      mockIdeaRepo,
+      mockEventBus,
     );
     const result = await uc.execute({ userId: crypto.randomUUID(), text: '', traceId: 'trace' });
     expect(result.isErr()).toBe(true);
@@ -88,8 +103,8 @@ describe('chaos: CreateIdeaUseCase', () => {
 
   it('rejects idea with whitespace-only text', async () => {
     const uc = new CreateIdeaUseCase(
-      { save: async (idea) => ok(idea) },
-      { publish: async () => ok(undefined) },
+      mockIdeaRepo,
+      mockEventBus,
     );
     const result = await uc.execute({ userId: crypto.randomUUID(), text: '     ', traceId: 'trace' });
     expect(result.isErr()).toBe(true);
@@ -97,8 +112,8 @@ describe('chaos: CreateIdeaUseCase', () => {
 
   it('handles 2000-char idea text without throwing', async () => {
     const uc = new CreateIdeaUseCase(
-      { save: async (idea) => ok(idea) },
-      { publish: async () => ok(undefined) },
+      mockIdeaRepo,
+      mockEventBus,
     );
     const text = 'A'.repeat(2000);
     const result = await uc.execute({ userId: crypto.randomUUID(), text, traceId: 'trace' });
@@ -108,8 +123,8 @@ describe('chaos: CreateIdeaUseCase', () => {
   it('concurrent saves do not corrupt each other', async () => {
     const saved: string[] = [];
     const uc = new CreateIdeaUseCase(
-      { save: async (idea) => { saved.push(idea.id); return ok(idea); } },
-      { publish: async () => ok(undefined) },
+      { ...mockIdeaRepo, save: async (idea) => { saved.push(idea.id); return ok(idea); } },
+      mockEventBus,
     );
     const userId = crypto.randomUUID();
     await Promise.all(
@@ -118,7 +133,7 @@ describe('chaos: CreateIdeaUseCase', () => {
       )
     );
     expect(saved).toHaveLength(5);
-    expect(new Set(saved).size).toBe(5); // all unique IDs
+    expect(new Set(saved).size).toBe(5);
   });
 });
 
@@ -127,8 +142,8 @@ describe('chaos: CreateIdeaUseCase', () => {
 describe('chaos: RecordOutcomeUseCase', () => {
   it('returns err when decisionRepo fails', async () => {
     const uc = new RecordOutcomeUseCase(
-      { upsert: async (o) => ok(o), findByIdea: async () => ok(null), findByUser: async () => ok([]), findAll: async () => ok([]) },
-      { findAllByIdeaId: async () => err(new DecisionRepositoryError('timeout')), findByIdeaId: async () => ok(null) },
+      mockOutcomeRepo,
+      { ...mockDecisionRepo, findAllByIdeaId: async () => err(new DecisionRepositoryError('timeout')) },
     );
     const result = await uc.execute({ ideaId: 'idea-1', userId: 'user-1', outcomeType: 'built_worked', traceId: 'trace' });
     expect(result.isErr()).toBe(true);
@@ -136,13 +151,8 @@ describe('chaos: RecordOutcomeUseCase', () => {
 
   it('returns err when outcomeRepo.upsert fails', async () => {
     const uc = new RecordOutcomeUseCase(
-      {
-        upsert: async () => err(new DecisionOutcomeRepositoryError('write failed')),
-        findByIdea: async () => ok(null),
-        findByUser: async () => ok([]),
-        findAll: async () => ok([]),
-      },
-      { findAllByIdeaId: async () => ok([makeDecision()]), findByIdeaId: async () => ok(null) },
+      { ...mockOutcomeRepo, upsert: async () => err(new DecisionOutcomeRepositoryError('write failed')) },
+      { ...mockDecisionRepo, findAllByIdeaId: async () => ok([makeDecision()]) },
     );
     const result = await uc.execute({ ideaId: 'idea-1', userId: 'user-1', outcomeType: 'built_worked', traceId: 'trace' });
     expect(result.isErr()).toBe(true);
@@ -151,13 +161,8 @@ describe('chaos: RecordOutcomeUseCase', () => {
   it('concurrent records for same idea do not throw', async () => {
     const calls: string[] = [];
     const uc = new RecordOutcomeUseCase(
-      {
-        upsert: async (o) => { calls.push(o.ideaId); return ok(o); },
-        findByIdea: async () => ok(null),
-        findByUser: async () => ok([]),
-        findAll: async () => ok([]),
-      },
-      { findAllByIdeaId: async () => ok([makeDecision({ ideaId: 'shared-idea' })]), findByIdeaId: async () => ok(null) },
+      { ...mockOutcomeRepo, upsert: async (o) => { calls.push(o.ideaId); return ok(o); } },
+      { ...mockDecisionRepo, findAllByIdeaId: async () => ok([makeDecision({ ideaId: 'shared-idea' })]) },
     );
     const results = await Promise.all(
       Array.from({ length: 3 }, () =>
@@ -173,10 +178,8 @@ describe('chaos: RecordOutcomeUseCase', () => {
 describe('chaos: GetFlywheelStatsUseCase', () => {
   it('returns err when repo fails', async () => {
     const uc = new GetFlywheelStatsUseCase({
+      ...mockOutcomeRepo,
       findAll: async () => err(new DecisionOutcomeRepositoryError('db down')),
-      findByIdea: async () => ok(null),
-      findByUser: async () => ok([]),
-      upsert: async (o) => ok(o),
     });
     const result = await uc.execute();
     expect(result.isErr()).toBe(true);
@@ -190,12 +193,7 @@ describe('chaos: GetFlywheelStatsUseCase', () => {
         outcomeType: i % 2 === 0 ? 'built_worked' : 'not_built',
       })
     );
-    const uc = new GetFlywheelStatsUseCase({
-      findAll: async () => ok(outcomes),
-      findByIdea: async () => ok(null),
-      findByUser: async () => ok([]),
-      upsert: async (o) => ok(o),
-    });
+    const uc = new GetFlywheelStatsUseCase({ ...mockOutcomeRepo, findAll: async () => ok(outcomes) });
     const result = await uc.execute();
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap().totalOutcomes).toBe(1000);
@@ -205,12 +203,7 @@ describe('chaos: GetFlywheelStatsUseCase', () => {
     const outcomes = Array.from({ length: 5 }, () =>
       makeOutcome({ verdictAtTime: 'PIVOT', outcomeType: 'not_built' })
     );
-    const uc = new GetFlywheelStatsUseCase({
-      findAll: async () => ok(outcomes),
-      findByIdea: async () => ok(null),
-      findByUser: async () => ok([]),
-      upsert: async (o) => ok(o),
-    });
+    const uc = new GetFlywheelStatsUseCase({ ...mockOutcomeRepo, findAll: async () => ok(outcomes) });
     const result = await uc.execute();
     expect(result._unsafeUnwrap().accuracyRate).toBeNull();
   });
@@ -221,10 +214,8 @@ describe('chaos: GetFlywheelStatsUseCase', () => {
 describe('chaos: GetUsersAccuracyReportUseCase', () => {
   it('returns err when repo fails', async () => {
     const uc = new GetUsersAccuracyReportUseCase({
+      ...mockOutcomeRepo,
       findAll: async () => err(new DecisionOutcomeRepositoryError('timeout')),
-      findByIdea: async () => ok(null),
-      findByUser: async () => ok([]),
-      upsert: async (o) => ok(o),
     });
     const result = await uc.execute();
     expect(result.isErr()).toBe(true);
@@ -234,12 +225,7 @@ describe('chaos: GetUsersAccuracyReportUseCase', () => {
     const outcomes = Array.from({ length: 500 * 3 }, (_, i) =>
       makeOutcome({ userId: `user-${Math.floor(i / 3)}` })
     );
-    const uc = new GetUsersAccuracyReportUseCase({
-      findAll: async () => ok(outcomes),
-      findByIdea: async () => ok(null),
-      findByUser: async () => ok([]),
-      upsert: async (o) => ok(o),
-    });
+    const uc = new GetUsersAccuracyReportUseCase({ ...mockOutcomeRepo, findAll: async () => ok(outcomes) });
     const result = await uc.execute();
     expect(result.isOk()).toBe(true);
     expect(result._unsafeUnwrap()).toHaveLength(500);
@@ -248,29 +234,16 @@ describe('chaos: GetUsersAccuracyReportUseCase', () => {
 
 // ── GetDecisionQueueUseCase ─────────────────────────────────────────────────
 
-const mockIdeaRepo = {
-  save: async (idea: { id: string; userId: string; text: string; createdAt: string }) => ok(idea as Parameters<typeof ok>[0]),
-  findById: async () => ok(null),
+const mockQueueRepo: IDecisionQueueRepository = {
+  upsert: async (i) => ok(i),
   findByUserId: async () => ok([]),
-  findByUserIds: async () => ok([]),
-  delete: async () => ok(undefined),
-};
-
-const mockDecisionRepo = {
-  save: async (d: Decision) => ok(d),
   findByIdeaId: async () => ok(null),
-  findAllByIdeaId: async () => ok([]),
 };
 
 describe('chaos: GetDecisionQueueUseCase', () => {
   it('returns err when queueRepo fails', async () => {
     const uc = new GetDecisionQueueUseCase(
-      {
-        upsert: async (i) => ok(i),
-        findByUserId: async () => err(new DecisionQueueRepositoryError('connection lost')),
-        findAll: async () => ok([]),
-        deleteByIdeaId: async () => ok(undefined),
-      },
+      { ...mockQueueRepo, findByUserId: async () => err(new DecisionQueueRepositoryError('connection lost')) },
       mockIdeaRepo,
       mockDecisionRepo,
     );
@@ -280,12 +253,7 @@ describe('chaos: GetDecisionQueueUseCase', () => {
 
   it('returns empty items when user has no queue entries', async () => {
     const uc = new GetDecisionQueueUseCase(
-      {
-        upsert: async (i) => ok(i),
-        findByUserId: async () => ok([]),
-        findAll: async () => ok([]),
-        deleteByIdeaId: async () => ok(undefined),
-      },
+      { ...mockQueueRepo, findByUserId: async () => ok([]) },
       mockIdeaRepo,
       mockDecisionRepo,
     );
