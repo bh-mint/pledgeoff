@@ -1,14 +1,21 @@
 import { requireAdminServer } from '@/lib/admin-auth';
 import { container } from '@/lib/container';
+import { calculateAccuracy } from '@pledgeoff/core';
+import { PeriodSelector, ExportCsvButton } from './FlywheelClient';
+
+type Period = '3m' | '6m' | '1y' | 'all';
+
+function periodToDate(period: Period): Date | null {
+  const now = new Date();
+  if (period === '3m') return new Date(now.setMonth(now.getMonth() - 3));
+  if (period === '6m') return new Date(now.setMonth(now.getMonth() - 6));
+  if (period === '1y') return new Date(now.setFullYear(now.getFullYear() - 1));
+  return null;
+}
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div style={{
-      background: 'var(--surface)',
-      border: '1px solid var(--border)',
-      borderRadius: 8,
-      padding: '20px 24px',
-    }}>
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '20px 24px' }}>
       <div style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--t3)', marginBottom: 8 }}>
         {label}
       </div>
@@ -39,26 +46,50 @@ function AccuracyBar({ label, correct, total }: { label: string; correct: number
   );
 }
 
-export default async function FlywheelPage() {
+interface Props {
+  searchParams: Promise<{ period?: string }>;
+}
+
+export default async function FlywheelPage({ searchParams }: Props) {
   await requireAdminServer();
 
-  const statsResult = await container.getFlywheelStatsUseCase.execute();
-  const stats = statsResult.isOk() ? statsResult.value : null;
+  const { period: rawPeriod } = await searchParams;
+  const period: Period = (['3m', '6m', '1y', 'all'] as const).includes(rawPeriod as Period)
+    ? (rawPeriod as Period)
+    : 'all';
+
+  const allOutcomesResult = await container._repos.decisionOutcomeRepo.findAll();
+  const allOutcomes = allOutcomesResult.isOk() ? allOutcomesResult.value : [];
+
+  const since = periodToDate(period);
+  const outcomes = since
+    ? allOutcomes.filter((o) => new Date(o.reportedAt) >= since)
+    : allOutcomes;
+
+  const stats = calculateAccuracy(outcomes);
 
   return (
     <div>
-      <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.04em', marginBottom: 4, fontFamily: '"Inter Tight", system-ui' }}>
-        Data Flywheel
-      </h1>
-      <p style={{ fontSize: 13, color: 'var(--t2)', marginBottom: 32 }}>
-        Verdict accuracy based on user-reported outcomes. Minimum 3 outcomes required for rate calculation.
-      </p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.04em', marginBottom: 4, fontFamily: '"Inter Tight", system-ui' }}>
+            Data Flywheel
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--t2)' }}>
+            Verdict accuracy based on user-reported outcomes. Minimum 3 required for rate calculation.
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <PeriodSelector current={period} />
+          <ExportCsvButton period={period} />
+        </div>
+      </div>
 
-      {!stats && (
+      {allOutcomesResult.isErr() && (
         <div style={{ color: 'var(--t3)', fontSize: 13 }}>Failed to load flywheel stats.</div>
       )}
 
-      {stats && (
+      {allOutcomesResult.isOk() && (
         <>
           {/* Overview */}
           <section style={{ marginBottom: 40 }}>
@@ -69,7 +100,7 @@ export default async function FlywheelPage() {
               <StatCard
                 label="Total outcomes"
                 value={stats.totalOutcomes}
-                sub={stats.totalOutcomes < 3 ? 'need 3+ to calculate accuracy' : 'outcomes reported'}
+                sub={stats.totalOutcomes < 3 ? 'need 3+ to calculate accuracy' : `in selected period`}
               />
               <StatCard
                 label="Overall accuracy"
@@ -89,12 +120,7 @@ export default async function FlywheelPage() {
             <div style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--t3)', marginBottom: 16 }}>
               Accuracy by verdict
             </div>
-            <div style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 8,
-              padding: '24px',
-            }}>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '24px' }}>
               <AccuracyBar
                 label="GO → built_worked"
                 correct={stats.byVerdict.GO.correct}
@@ -114,13 +140,7 @@ export default async function FlywheelPage() {
               <div style={{ fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--t3)', marginBottom: 16 }}>
                 Monthly trend
               </div>
-              <div style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                padding: '24px',
-                overflowX: 'auto',
-              }}>
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '24px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                   <thead>
                     <tr>
