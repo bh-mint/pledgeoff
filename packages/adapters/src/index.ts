@@ -34,3 +34,5 @@ export { SupabaseApiKeyRepository } from './storage/supabase-api-key-repository'
 export { SupabaseUsageLogAdapter } from './storage/supabase-usage-log-adapter';
 export { SupabaseLaunchKitRepository } from './storage/supabase-launch-kit-repository';
 export { SupabaseDecisionQueueRepository } from './storage/supabase-decision-queue-repository';
+export { SupabaseEngineeringSnapshotRepository } from './storage/supabase-engineering-snapshot-repository';
+export { GitHubVelocityAdapter } from './engineering/github-velocity-adapter';
