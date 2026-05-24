@@ -13,9 +13,18 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="min-h-screen flex flex-col relative overflow-hidden"
       style={{ background: "var(--canvas)", color: "var(--t1)" }}
     >
+      {/* Subtle dot grid */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "radial-gradient(circle, var(--t3) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+          opacity: 0.05,
+        }}
+      />
       {/* Minimal auth nav — logo centered, toggle right */}
       <nav
         className="relative h-14 border-b flex items-center px-4 sm:px-8 flex-shrink-0"

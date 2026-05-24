@@ -78,10 +78,10 @@ export default function EnterprisePage() {
               enterprise
             </div>
             <h1 className="display text-[36px] sm:text-[64px] font-semibold tracking-tight leading-[0.95] max-w-200" style={{ color: "var(--t1)" }}>
-              Built for teams that can&apos;t afford to build the wrong thing.
+              Decision intelligence<br />at organizational scale.
             </h1>
             <p className="mt-6 max-w-140 text-[14px] sm:text-[16px] leading-[1.65]" style={{ color: "var(--t2)" }}>
-              Agencies, product studios, and in-house product teams use PledgeOFF to vet briefs before committing engineering time.
+              For teams that make dozens of product decisions a month and can&apos;t afford to get them wrong.
               Enterprise adds the contracts, compliance, and integrations your legal and IT teams require.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -156,8 +156,8 @@ export default function EnterprisePage() {
               <div>
                 <div className="mono text-[10px] uppercase tracking-[0.14em] mb-3" style={{ color: "var(--t3)" }}>pricing</div>
                 <div className="display text-[28px] sm:text-[36px] font-semibold tracking-tight leading-[1.05]" style={{ color: "var(--t1)" }}>
-                  Custom pricing.<br />
-                  <span style={{ color: "var(--t3)" }}>Negotiated once a year.</span>
+                  From €1,199/mo.<br />
+                  <span style={{ color: "var(--t3)" }}>Negotiated annually, flat fee.</span>
                 </div>
                 <p className="mt-4 text-[13px] leading-[1.65]" style={{ color: "var(--t2)" }}>
                   No per-seat multiplication that blows up as you grow.

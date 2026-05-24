@@ -160,11 +160,15 @@ function PreviewCard() {
       </div>
 
       <div className="border-t px-4 py-3 grid grid-cols-3 gap-2" style={{ borderColor: "var(--border)" }}>
-        {PREVIEW_POSTS.map((p) => (
+        {PREVIEW_POSTS.map((p, i) => (
           <div
             key={p.u}
-            className="border rounded p-2"
-            style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+            className="border rounded p-2 reveal"
+            style={{
+              borderColor: "var(--border)",
+              background: "var(--canvas)",
+              animationDelay: `${0.8 + i * 0.8}s`,
+            }}
           >
             <div className="mono text-[8px] text-(--t3)">{p.sub} · {p.u}</div>
             <div className="text-[9px] mt-1 leading-snug text-(--t1)">&ldquo;{p.txt}&rdquo;</div>
@@ -328,6 +332,67 @@ export function HomeClient() {
         </div>
       </section>
 
+      {/* ── HOW THE SCORE WORKS ── */}
+      <section className="border-b border-(--border)">
+        <div className="max-w-330 mx-auto px-8 py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+            <div>
+              <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
+                Score breakdown
+              </p>
+              <h2 className="display text-[40px] font-black leading-none text-(--t1)">
+                What does<br />the score mean?
+              </h2>
+            </div>
+            <p className="text-[14px] text-(--t2) leading-relaxed self-end">
+              Every verdict is a weighted composite of 4 real-data dimensions.
+              Not a GPT guess — each point is traceable to a live signal.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              {
+                num: "01",
+                label: "Market Signals",
+                desc: "How many people are complaining about this problem right now, and how loudly.",
+                color: "var(--validated)",
+              },
+              {
+                num: "02",
+                label: "Competitor Weakness",
+                desc: "Gaps in existing solutions the market openly complains about on Reddit and GitHub.",
+                color: "var(--accent)",
+              },
+              {
+                num: "03",
+                label: "Search Demand",
+                desc: "Volume of people actively looking for this — growing, flat, or shrinking.",
+                color: "var(--caution)",
+              },
+              {
+                num: "04",
+                label: "Timing",
+                desc: "Whether the category is accelerating or cooling based on trend momentum.",
+                color: "var(--t2)",
+              },
+            ].map((d) => (
+              <div
+                key={d.num}
+                className="border rounded-md p-5 flex flex-col gap-3"
+                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>{d.num}</span>
+                  <div className="flex-1 h-px" style={{ background: d.color, opacity: 0.4 }} />
+                </div>
+                <p className="display text-[15px] font-semibold text-(--t1)">{d.label}</p>
+                <p className="text-[12px] text-(--t2) leading-[1.55]">{d.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── EVIDENCE WALL ── */}
       <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
         <div className="flex items-start justify-between mb-10">
@@ -355,7 +420,8 @@ export function HomeClient() {
               href={card.subredditUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-(--surface) border border-(--border) rounded-md p-5 flex flex-col justify-between gap-4 hover:border-(--accent) transition-colors group"
+              className="bg-(--surface) border border-(--border) rounded-md p-5 flex flex-col justify-between gap-4 hover:border-(--accent) transition-colors group reveal"
+              style={{ animationDelay: `${i * 0.12}s` }}
             >
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -406,6 +472,44 @@ export function HomeClient() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* ── WHO THIS IS FOR ── */}
+      <section className="border-b border-(--border)">
+        <div className="max-w-330 mx-auto px-8 py-20">
+          <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-10">
+            Who it&apos;s for
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-px border rounded-md overflow-hidden" style={{ borderColor: "var(--border)", background: "var(--border)" }}>
+            {[
+              {
+                role: "Indie hacker",
+                line: "Validate before you build — because one month of wasted effort compounds into six.",
+                accent: "var(--validated)",
+              },
+              {
+                role: "PM at a startup",
+                line: "Kill bad roadmap items with data, not debate. Give engineering a reason to say no.",
+                accent: "var(--accent)",
+              },
+              {
+                role: "Agency founder",
+                line: "Vet client briefs before you quote. Stop committing to projects that were dead on arrival.",
+                accent: "var(--caution)",
+              },
+            ].map((p) => (
+              <div key={p.role} className="p-8" style={{ background: "var(--surface)" }}>
+                <div
+                  className="mono text-[10px] uppercase tracking-[0.12em] mb-3"
+                  style={{ color: p.accent }}
+                >
+                  {p.role}
+                </div>
+                <p className="text-[14px] leading-[1.6]" style={{ color: "var(--t2)" }}>{p.line}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

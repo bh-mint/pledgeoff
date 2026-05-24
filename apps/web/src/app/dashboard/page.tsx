@@ -13,6 +13,7 @@ import { GoldmineFeed } from "@/components/GoldmineFeed";
 import { getGoldmineData } from "@/server/goldmine/getGoldmineData";
 import type { Decision } from "@pledgeoff/core";
 import { logger } from "@pledgeoff/observability";
+import { StatNumber } from "@/components/StatNumber";
 
 export const metadata: Metadata = {
   title: { absolute: "Dashboard — PledgeOFF" },
@@ -330,9 +331,7 @@ export default async function DashboardPage() {
               ideas validated
             </div>
             <div className="flex items-baseline justify-between mt-2">
-              <div className="display text-[36px] tnum font-semibold leading-none text-(--t1)">
-                {withDecision.length}
-              </div>
+              <StatNumber value={withDecision.length} className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
               <Spark data={sparkValidated} color="var(--accent)" />
             </div>
             <div className="mono text-[10px] tnum mt-2 text-(--validated)">
@@ -346,9 +345,7 @@ export default async function DashboardPage() {
               average score
             </div>
             <div className="flex items-baseline justify-between mt-2">
-              <div className="display text-[36px] tnum font-semibold leading-none text-(--t1)">
-                {avgScore ?? "—"}
-              </div>
+              <StatNumber value={avgScore} fallback="—" className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
               <Spark data={sparkScores} color="var(--validated)" />
             </div>
             <div className="mono text-[10px] tnum mt-2 text-(--validated)">
@@ -362,9 +359,7 @@ export default async function DashboardPage() {
               ideas killed early
             </div>
             <div className="flex items-baseline justify-between mt-2">
-              <div className="display text-[36px] tnum font-semibold leading-none text-(--t1)">
-                {killed}
-              </div>
+              <StatNumber value={killed} className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
               <Spark data={sparkKilled} color="var(--kill)" />
             </div>
             <div className="mono text-[10px] tnum mt-2 text-(--t2)">
@@ -378,9 +373,7 @@ export default async function DashboardPage() {
               days · first launch-ready
             </div>
             <div className="flex items-baseline justify-between mt-2">
-              <div className="display text-[36px] tnum font-semibold leading-none text-(--t1)">
-                {daysToFirstGo ?? "—"}
-              </div>
+              <StatNumber value={daysToFirstGo} fallback="—" className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
             </div>
             <div className="mono text-[10px] tnum mt-2 text-(--validated)">
               {daysToFirstGo ? "Pledge avg 23" : "no GO verdict yet"}

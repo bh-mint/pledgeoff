@@ -34,11 +34,18 @@ interface BlogPageClientProps {
 export function BlogPageClient({ articles }: BlogPageClientProps) {
   const [activeTag, setActiveTag] = useState<Category>("all");
   const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
 
-  const filtered = useMemo(
-    () => activeTag === "all" ? articles : articles.filter((a) => a.tag === activeTag),
-    [articles, activeTag]
-  );
+  const filtered = useMemo(() => {
+    const byTag = activeTag === "all" ? articles : articles.filter((a) => a.tag === activeTag);
+    if (!query.trim()) return byTag;
+    const q = query.toLowerCase();
+    return byTag.filter(
+      (a) =>
+        a.title.toLowerCase().includes(q) ||
+        (a.excerpt ?? "").toLowerCase().includes(q)
+    );
+  }, [articles, activeTag, query]);
 
   const totalPages = Math.ceil(filtered.length / ARTICLES_PER_PAGE);
   const featured = filtered[0];
@@ -47,6 +54,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
   const handleTagChange = (tag: Category) => {
     setActiveTag(tag);
     setPage(1);
+    setQuery("");
   };
 
   const tagCount = (tag: Category) =>
@@ -99,11 +107,12 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.filter((c) => c.value !== "all").map((c) => {
                 const isActive = activeTag === c.value;
+                const count = tagCount(c.value);
                 return (
                   <button
                     key={c.value}
                     onClick={() => handleTagChange(c.value)}
-                    className="mono text-[11px] rounded-full border h-7 px-3 inline-flex items-center transition-all"
+                    className="mono text-[11px] rounded-full border h-7 px-3 inline-flex items-center gap-1.5 transition-all"
                     style={{
                       borderColor: isActive ? c.color : "var(--border)",
                       color: isActive ? c.color : "var(--t3)",
@@ -111,8 +120,9 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                       fontWeight: isActive ? 600 : 400,
                     }}
                   >
-                    {isActive && <span className="mr-1.5 text-[8px]">●</span>}
+                    {isActive && <span className="text-[8px]">●</span>}
                     {c.label}
+                    <span style={{ opacity: 0.6 }}>({count})</span>
                   </button>
                 );
               })}
@@ -159,7 +169,16 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
               );
             })}
           </div>
-          <div className="mono text-[10px] hidden sm:block flex-shrink-0 ml-4" style={{ color: "var(--t3)" }}>SORT · NEWEST FIRST</div>
+          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+          placeholder="Search…"
+          className="mono text-[11px] h-7 px-3 rounded-full border bg-transparent outline-none w-28 focus:w-44 transition-all"
+          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+        />
+      </div>
         </div>
       </section>
 

@@ -30,6 +30,8 @@ interface SettingsClientProps {
   plan: Plan;
   subscriptionStatus?: SubscriptionStatus | null;
   ideasThisMonth: number;
+  goVerdictsThisMonth?: number;
+  outcomesReported?: number;
   renewsAt?: string | null;
   stripeCustomerId?: string | null;
   extraSeats?: number;
@@ -110,6 +112,8 @@ export function SettingsClient({
   plan,
   subscriptionStatus,
   ideasThisMonth,
+  goVerdictsThisMonth = 0,
+  outcomesReported = 0,
   renewsAt,
   extraSeats: initialExtraSeats = 0,
   cancelAtPeriodEnd: initialCancelAtPeriodEnd = false,
@@ -349,6 +353,28 @@ export function SettingsClient({
 
       {/* Content area */}
       <main className="col-span-12 md:col-span-9 max-w-170">
+
+        {/* Usage strip — always visible at top */}
+        <div
+          className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 rounded-md border mb-6 mono text-[11px]"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <span style={{ color: "var(--t3)" }}>This month:</span>
+          <span style={{ color: "var(--t1)" }}>
+            <span style={{ color: "var(--accent)" }}>{ideasThisMonth}</span>{" "}
+            validation{ideasThisMonth !== 1 ? "s" : ""}
+          </span>
+          <span style={{ color: "var(--border)" }}>·</span>
+          <span style={{ color: "var(--t1)" }}>
+            <span style={{ color: "var(--validated)" }}>{goVerdictsThisMonth}</span>{" "}
+            GO verdict{goVerdictsThisMonth !== 1 ? "s" : ""}
+          </span>
+          <span style={{ color: "var(--border)" }}>·</span>
+          <span style={{ color: "var(--t1)" }}>
+            <span style={{ color: "var(--t2)" }}>{outcomesReported}</span>{" "}
+            outcome{outcomesReported !== 1 ? "s" : ""} reported
+          </span>
+        </div>
 
         {/* ── Account ── */}
         {section === "account" && (

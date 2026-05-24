@@ -94,10 +94,23 @@ export default async function SettingsPage() {
   }
 
   const now = new Date();
-  const ideasThisMonth = ideas.filter((idea) => {
+  const ideasThisMonthList = ideas.filter((idea) => {
     const d = new Date(idea.createdAt);
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-  }).length;
+  });
+  const ideasThisMonth = ideasThisMonthList.length;
+
+  // GO verdicts this month + total outcomes reported
+  let goVerdictsThisMonth = 0;
+  let outcomesReported = 0;
+  const [decisionsResult, outcomesCountResult] = await Promise.all([
+    ideasThisMonthList.length > 0
+      ? supabase.from("decisions").select("verdict").in("idea_id", ideasThisMonthList.map((i) => i.id))
+      : Promise.resolve({ data: [] }),
+    supabase.from("decision_outcomes").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+  ]);
+  goVerdictsThisMonth = (decisionsResult.data ?? []).filter((d) => d.verdict === "GO").length;
+  outcomesReported = (outcomesCountResult as { count: number | null }).count ?? 0;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
@@ -120,6 +133,8 @@ export default async function SettingsPage() {
           plan={plan}
           subscriptionStatus={subscriptionStatus}
           ideasThisMonth={ideasThisMonth}
+          goVerdictsThisMonth={goVerdictsThisMonth}
+          outcomesReported={outcomesReported}
           renewsAt={renewsAt}
           stripeCustomerId={stripeCustomerId}
           extraSeats={extraSeats}

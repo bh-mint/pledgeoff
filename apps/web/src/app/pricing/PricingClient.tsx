@@ -220,9 +220,9 @@ export function PricingClient() {
               upgrade
             </div>
             <h1 className="display text-[36px] sm:text-[56px] font-semibold tracking-tight leading-[0.95]" style={{ color: "var(--t1)" }}>
-              Free until you&apos;re sure.
+              Start free.
               <br />
-              <span style={{ color: "var(--t3)" }}>Then validate without limits.</span>
+              <span style={{ color: "var(--t3)" }}>Pay when it saves you a month of work.</span>
             </h1>
             <p className="mt-6 max-w-130 text-[14px] sm:text-[15px] leading-[1.6]" style={{ color: "var(--t2)" }}>
               Validate ideas with real signals from Reddit, GitHub, HN, Dev.to, and more.{" "}
@@ -284,10 +284,23 @@ export function PricingClient() {
                 </li>
               ))}
             </ul>
+            <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
+              <p className="text-[11px] leading-[1.55]" style={{ color: "var(--t3)" }}>
+                Hit your free validation?{" "}
+                <span style={{ color: "var(--t2)" }}>You&apos;re building seriously.</span>
+              </p>
+              <a
+                href="#founder"
+                className="mono text-[10px] mt-1 inline-block transition-opacity hover:opacity-70"
+                style={{ color: "var(--accent)" }}
+              >
+                Upgrade to Founder →
+              </a>
+            </div>
           </div>
 
           {/* Founder */}
-          <div className="p-6 border-b sm:border-b-0 sm:border-r relative flex flex-col" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
+          <div id="founder" className="p-6 border-b sm:border-b-0 sm:border-r relative flex flex-col" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
             <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: "var(--accent)" }} />
             <div className="flex items-baseline justify-between mb-1">
               <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Founder</div>
