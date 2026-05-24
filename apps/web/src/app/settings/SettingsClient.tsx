@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -9,6 +9,7 @@ import { PLAN_LIMITS } from "@pledgeoff/core";
 import { TeamSection } from "./TeamSection";
 import { AuditLogSection } from "./AuditLogSection";
 import { ApiKeySection } from "./ApiKeySection";
+import { GitHubConnectCard } from "@/components/engineering/GitHubConnectCard";
 
 type AvailablePlan = {
   id: 'founder' | 'team' | 'studio' | 'enterprise';
@@ -45,7 +46,7 @@ interface SettingsClientProps {
   }[];
 }
 
-type SectionId = "account" | "billing" | "team" | "activity" | "notifications" | "api" | "danger";
+type SectionId = "account" | "billing" | "team" | "activity" | "notifications" | "api" | "integrations" | "danger";
 
 const SECTIONS: Array<{ id: SectionId; label: string; agencyOnly?: boolean }> = [
   { id: "account", label: "Account" },
@@ -54,6 +55,7 @@ const SECTIONS: Array<{ id: SectionId; label: string; agencyOnly?: boolean }> = 
   { id: "activity", label: "Activity", agencyOnly: true },
   { id: "notifications", label: "Notifications" },
   { id: "api", label: "API" },
+  { id: "integrations", label: "Integrations" },
   { id: "danger", label: "Danger zone" },
 ];
 
@@ -116,7 +118,31 @@ export function SettingsClient({
   auditEntries = [],
 }: SettingsClientProps) {
   const router = useRouter();
-  const [section, setSection] = useState<SectionId>("account");
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const githubParam = searchParams?.get('github');
+  const [section, setSection] = useState<SectionId>(
+    githubParam ? 'integrations' : 'account',
+  );
+  const [githubConnected, setGithubConnected] = useState<boolean>(false);
+  const [githubOrg, setGithubOrg] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    void (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+      const res = await fetch('/api/v1/engineering/snapshot', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (res.ok) {
+        const json = await res.json() as { data: { githubOrg: string } | null };
+        if (json.data) {
+          setGithubConnected(true);
+          setGithubOrg(json.data.githubOrg);
+        }
+      }
+    })();
+  }, []);
   const [first, setFirst] = useState(firstName ?? "");
   const [last, setLast] = useState(lastName ?? "");
   const [uname, setUname] = useState(username ?? "");
@@ -891,6 +917,42 @@ export function SettingsClient({
 
         {/* ── API ── */}
         {section === "api" && <ApiKeySection />}
+
+        {/* ── Integrations ── */}
+        {section === "integrations" && (
+          <div>
+            <h1 className="display text-[28px] font-semibold tracking-tight mb-1" style={{ color: "var(--t1)" }}>
+              Integrations
+            </h1>
+            <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
+              Connect external tools to enhance your decision intelligence.
+            </p>
+            {githubParam === 'connected' && (
+              <div
+                className="mb-6 rounded-lg border px-4 py-3 text-sm"
+                style={{ background: '#0d1f0d', borderColor: 'var(--validated)', color: 'var(--validated)' }}
+              >
+                GitHub connected successfully. Velocity metrics will be available shortly.
+              </div>
+            )}
+            {githubParam === 'error' && (
+              <div
+                className="mb-6 rounded-lg border px-4 py-3 text-sm"
+                style={{ background: '#1f0d0d', borderColor: 'var(--kill)', color: 'var(--kill)' }}
+              >
+                GitHub connection failed. Please try again.
+              </div>
+            )}
+            <GitHubConnectCard
+              isConnected={githubConnected}
+              githubOrg={githubOrg}
+              onDisconnect={() => {
+                setGithubConnected(false);
+                setGithubOrg(undefined);
+              }}
+            />
+          </div>
+        )}
 
         {/* ── Danger zone ── */}
         {section === "danger" && (
