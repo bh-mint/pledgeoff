@@ -69,10 +69,15 @@ export function LoginClient() {
   const handleGoogleLogin = async () => {
     setUiState("loading");
     const supabase = createSupabaseBrowserClient();
-    const next = searchParams.get("next") ?? "/onboarding";
+    // Pass next param only if explicitly set (e.g. from middleware redirect).
+    // Without next, /auth/callback auto-detects new vs returning user.
+    const nextParam = searchParams.get("next");
+    const redirectTo = nextParam
+      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextParam)}`
+      : `${window.location.origin}/auth/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      options: { redirectTo },
     });
     if (error) {
       setErrorMsg(error.message);
