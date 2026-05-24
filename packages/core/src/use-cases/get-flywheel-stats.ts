@@ -1,6 +1,6 @@
 import { Result, err, ok } from 'neverthrow';
-import { calculateAccuracy, FlywheelStats } from '../domain/decision-outcome.js';
-import type { IDecisionOutcomeRepository, DecisionOutcomeRepositoryError } from '../ports/decision-outcome-repository.js';
+import { calculateAccuracy, FlywheelStats } from '../domain/decision-outcome';
+import type { IDecisionOutcomeRepository, DecisionOutcomeRepositoryError } from '../ports/decision-outcome-repository';
 
 export type GetFlywheelStatsError = DecisionOutcomeRepositoryError;
 

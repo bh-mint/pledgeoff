@@ -5,9 +5,9 @@ import {
   OutcomeType,
   OutcomeAlreadyReportedError,
   InvalidVerdictError,
-} from '../domain/decision-outcome.js';
-import type { IDecisionOutcomeRepository, DecisionOutcomeRepositoryError } from '../ports/decision-outcome-repository.js';
-import type { IDecisionRepository, DecisionRepositoryError } from '../ports/decision-repository.js';
+} from '../domain/decision-outcome';
+import type { IDecisionOutcomeRepository, DecisionOutcomeRepositoryError } from '../ports/decision-outcome-repository';
+import type { IDecisionRepository, DecisionRepositoryError } from '../ports/decision-repository';
 
 export interface RecordOutcomeInput {
   readonly ideaId: string;

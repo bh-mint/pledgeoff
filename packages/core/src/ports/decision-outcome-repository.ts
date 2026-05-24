@@ -1,5 +1,5 @@
 import { Result } from 'neverthrow';
-import { DecisionOutcome } from '../domain/decision-outcome.js';
+import { DecisionOutcome } from '../domain/decision-outcome';
 
 export class DecisionOutcomeRepositoryError extends Error {
   readonly code = 'DECISION_OUTCOME_REPOSITORY_ERROR';
