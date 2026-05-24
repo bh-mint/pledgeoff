@@ -18,6 +18,7 @@ const TICKER_ITEMS = [
 const EVIDENCE_CARDS = [
   {
     source: "r/Entrepreneur",
+    subredditUrl: "https://www.reddit.com/r/Entrepreneur/",
     upvotes: "↑892",
     quote:
       "spent 3 months building before talking to one customer. the product was technically impressive and completely wrong. validation first, always.",
@@ -25,6 +26,7 @@ const EVIDENCE_CARDS = [
   },
   {
     source: "r/SaaS",
+    subredditUrl: "https://www.reddit.com/r/SaaS/",
     upvotes: "↑418",
     quote:
       "every B2B cold email tool does the same generic personalization. scrape LinkedIn title, paste into template, call it AI. nobody is solving the actual research problem.",
@@ -32,6 +34,7 @@ const EVIDENCE_CARDS = [
   },
   {
     source: "r/indiehackers",
+    subredditUrl: "https://www.reddit.com/r/indiehackers/",
     upvotes: "↑276",
     quote:
       "churn is killing me and I have no idea why people are leaving. built every feature users asked for. retention still goes down every month.",
@@ -39,6 +42,7 @@ const EVIDENCE_CARDS = [
   },
   {
     source: "r/startups",
+    subredditUrl: "https://www.reddit.com/r/startups/",
     upvotes: "↑341",
     quote:
       "built a Notion alternative for developers. got 400 signups on launch, 2 paying after 30 days. the gap between interest and willingness to pay is brutal.",
@@ -46,6 +50,7 @@ const EVIDENCE_CARDS = [
   },
   {
     source: "r/SideProject",
+    subredditUrl: "https://www.reddit.com/r/SideProject/",
     upvotes: "↑189",
     quote:
       "launched a Stripe analytics dashboard 6 months ago. $0. then I found out Baremetrics and ChartMogul exist. please validate your idea before you build.",
@@ -53,6 +58,7 @@ const EVIDENCE_CARDS = [
   },
   {
     source: "r/Entrepreneur",
+    subredditUrl: "https://www.reddit.com/r/Entrepreneur/",
     upvotes: "↑512",
     quote:
       "the market research phase used to take me 2 weeks minimum. reddit threads, google trends, competitor pricing. all manual. there has to be a better way.",
@@ -338,19 +344,22 @@ export function HomeClient() {
           <p className="text-[11px] text-(--t3) text-right mt-2">
             6 of 847 posts shown
             <br />
-            click any to verify on Reddit
+            click any to open subreddit
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {EVIDENCE_CARDS.map((card, i) => (
-            <div
+            <a
               key={i}
-              className="bg-(--surface) border border-(--border) rounded-md p-5 flex flex-col justify-between gap-4"
+              href={card.subredditUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-(--surface) border border-(--border) rounded-md p-5 flex flex-col justify-between gap-4 hover:border-(--accent) transition-colors group"
             >
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="mono text-[10px] font-semibold text-(--t2)">
+                  <span className="mono text-[10px] font-semibold text-(--t2) group-hover:text-(--accent) transition-colors">
                     {card.source}
                   </span>
                   <span className="mono text-[10px] text-(--validated)">
@@ -362,7 +371,7 @@ export function HomeClient() {
                 </p>
               </div>
               <p className="mono text-[10px] text-(--t3)">{card.author}</p>
-            </div>
+            </a>
           ))}
         </div>
       </section>
