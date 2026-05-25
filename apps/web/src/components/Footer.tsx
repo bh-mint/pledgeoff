@@ -105,7 +105,7 @@ export function Footer() {
           </span>
           <div className="flex items-center gap-1">
             <a
-              href="https://x.com/pledgeoff"
+              href="https://x.com/pledgeoffhq"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="X / Twitter"
