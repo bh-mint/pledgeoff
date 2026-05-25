@@ -27,6 +27,7 @@ interface IdeaPageClientProps {
   initialCompetitors: CompetitorAnalysis | null;
   initialLaunchKit: LaunchKit | null;
   plan: Plan;
+  categoryAvg?: number | null;
 }
 
 const POLL_INTERVAL_MS = 4000;
@@ -352,6 +353,7 @@ export function IdeaPageClient({
   initialCompetitors,
   initialLaunchKit,
   plan,
+  categoryAvg,
 }: IdeaPageClientProps) {
   const [decision, setDecision] = useState<Decision | null>(initialDecision);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
@@ -436,7 +438,7 @@ export function IdeaPageClient({
         <div className="xl:sticky xl:top-6 xl:self-start">
           {decision ? (
             <>
-              <DecisionCard decision={decision} ideaId={idea.id} />
+              <DecisionCard decision={decision} ideaId={idea.id} categoryAvg={categoryAvg} />
               <div className="mt-4">
                 <FeedbackButtons ideaId={idea.id} decisionId={decision.id} />
               </div>

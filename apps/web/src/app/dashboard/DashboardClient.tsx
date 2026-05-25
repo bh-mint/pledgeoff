@@ -295,6 +295,7 @@ export function DashboardClient({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="search ideas…"
+              aria-label="Search ideas"
               className="w-full sm:w-44 bg-transparent outline-none px-3 h-8 sm:h-7 text-[12px] rounded-md border"
               style={{ borderColor: "var(--border)", color: "var(--t1)" }}
             />

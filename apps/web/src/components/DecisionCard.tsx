@@ -46,9 +46,10 @@ function useCountUp(target: number, delay = 400, duration = 1200) {
 interface DecisionCardProps {
   decision: Decision;
   ideaId: string;
+  categoryAvg?: number | null;
 }
 
-export function DecisionCard({ decision, ideaId }: DecisionCardProps) {
+export function DecisionCard({ decision, ideaId, categoryAvg }: DecisionCardProps) {
   const cfg = VERDICT_CONFIG[decision.verdict];
   const [revealed, setRevealed] = useState(false);
   const [glowVisible, setGlowVisible] = useState(false);
@@ -131,6 +132,14 @@ export function DecisionCard({ decision, ideaId }: DecisionCardProps) {
               {hasDimensions ? `${decision.dimensions!.length} dimensions` : "confidence"} ·{" "}
               {Math.round(decision.confidence * 100)}%
             </div>
+            {categoryAvg !== null && categoryAvg !== undefined && (
+              <div className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
+                Category avg: {Math.round(categoryAvg)} · Yours:{" "}
+                <span style={{ color: score >= categoryAvg ? "var(--validated)" : "var(--caution)" }}>
+                  {score}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

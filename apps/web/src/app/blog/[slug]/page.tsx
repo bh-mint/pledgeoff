@@ -11,6 +11,7 @@ import { ArticleViewTracker } from "@/components/blog/ArticleViewTracker";
 import { ArticleCTAButton } from "@/components/blog/ArticleCTAButton";
 import { ArticleFeedback } from "@/components/blog/ArticleFeedback";
 import { MidArticleCTA } from "@/components/blog/MidArticleCTA";
+import { HighlightToTweet } from "@/components/blog/HighlightToTweet";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 
@@ -27,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = getArticleBySlug(slug);
   if (!article) return {};
 
-  const ogImage = `/api/og?title=${encodeURIComponent(article.title)}&tag=${encodeURIComponent(article.tag)}`;
+  const ogImage = `/api/og?title=${encodeURIComponent(article.title)}&tag=${encodeURIComponent(article.tag)}&excerpt=${encodeURIComponent(article.excerpt ?? "")}`;
 
   return {
     title: article.title,
@@ -73,7 +74,7 @@ export default async function ArticlePage({ params }: Props) {
   const seeAlso = getSeeAlsoArticles(slug, article.tag, 2);
   const cluster = CLUSTER_META[article.tag];
 
-  const ogImage = `/api/og?title=${encodeURIComponent(article.title)}&tag=${encodeURIComponent(article.tag)}`;
+  const ogImage = `/api/og?title=${encodeURIComponent(article.title)}&tag=${encodeURIComponent(article.tag)}&excerpt=${encodeURIComponent(article.excerpt ?? "")}`;
 
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -177,6 +178,9 @@ export default async function ArticlePage({ params }: Props) {
           <div className="prose-pledgeoff mt-6">
             <MDXRemote source={article.content} components={mdxComponents} />
           </div>
+
+          {/* Highlight to share on X */}
+          <HighlightToTweet />
 
           {/* Mid-article CTA — fires at 60% scroll */}
           <MidArticleCTA />

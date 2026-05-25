@@ -251,6 +251,7 @@ export function NewIdeaClient({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="AI-powered meal planner that adapts to your gym schedule"
+              aria-label="Idea title"
               className="w-full bg-transparent outline-none border-b pb-3 display text-[18px] sm:text-[22px] font-semibold tracking-tight"
               style={{
                 borderColor: title ? "var(--accent)" : "var(--border)",

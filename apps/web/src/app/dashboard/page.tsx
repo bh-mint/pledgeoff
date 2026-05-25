@@ -11,6 +11,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { FooterMicro } from "@/components/FooterMicro";
 import { GoldmineFeed } from "@/components/GoldmineFeed";
 import { getGoldmineData } from "@/server/goldmine/getGoldmineData";
+import { WeeklyDigestBanner } from "@/components/WeeklyDigestBanner";
 import type { Decision } from "@pledgeoff/core";
 import { logger } from "@pledgeoff/observability";
 import { StatNumber } from "@/components/StatNumber";
@@ -422,6 +423,9 @@ export default async function DashboardPage() {
               </div>
             </div>
           )}
+
+          {/* Weekly digest opt-in banner — dismissible */}
+          {onboardingDone && <WeeklyDigestBanner />}
 
           {/* Onboarding checklist — hidden once all done */}
           {!onboardingDone && (

@@ -14,6 +14,7 @@ import { OutcomeButton } from "@/components/OutcomeButton";
 import { ShareVerdictButton } from "@/components/ShareVerdictButton";
 import { OutcomeBanner } from "@/components/OutcomeBanner";
 import { RevalidateButton } from "@/components/RevalidateButton";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -97,6 +98,17 @@ export default async function IdeaPage({ params }: Props) {
 
   const { title, description, category } = parseIdeaText(idea.text);
 
+  // Category average score — query other decisions platform-wide for same category
+  let categoryAvg: number | null = null;
+  if (category && decision?.score !== null && decision?.score !== undefined) {
+    const svc = createSupabaseServiceClient();
+    const { data } = await svc.rpc('avg_score_by_category', { category_name: category, exclude_idea_id: id })
+      .maybeSingle<{ avg_score: number | null; count: number }>();
+    if (data && data.count >= 3) {
+      categoryAvg = data.avg_score !== null ? Math.round(data.avg_score) : null;
+    }
+  }
+
   return (
     <div className="min-h-screen bg-(--canvas)">
       <Nav loggedIn={true} />
@@ -163,6 +175,7 @@ export default async function IdeaPage({ params }: Props) {
           initialCompetitors={initialCompetitors}
           initialLaunchKit={initialLaunchKit}
           plan={plan}
+          categoryAvg={categoryAvg}
         />
 
         {decision && (

@@ -215,6 +215,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
           value={query}
           onChange={(e) => { setQuery(e.target.value); setPage(1); }}
           placeholder="Search…"
+          aria-label="Search articles"
           className="mono text-[11px] h-7 px-3 rounded-full border bg-transparent outline-none w-28 focus:w-44 transition-all"
           style={{ borderColor: "var(--border)", color: "var(--t1)" }}
         />

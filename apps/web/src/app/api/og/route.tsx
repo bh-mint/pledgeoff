@@ -95,6 +95,7 @@ export async function GET(req: NextRequest) {
   const title = searchParams.get("title") ?? "PledgeOFF Blog";
   const tag = searchParams.get("tag") ?? "";
   const tagLabel = TAG_LABELS[tag] ?? "";
+  const excerpt = searchParams.get("excerpt") ?? "";
 
   return new ImageResponse(
     (
@@ -149,6 +150,19 @@ export async function GET(req: NextRequest) {
           >
             {title}
           </p>
+          {excerpt && (
+            <p
+              style={{
+                fontSize: "18px",
+                color: "#737373",
+                lineHeight: 1.5,
+                margin: 0,
+                maxWidth: "820px",
+              }}
+            >
+              {excerpt.length > 120 ? excerpt.slice(0, 117) + "…" : excerpt}
+            </p>
+          )}
         </div>
 
         {/* Bottom */}

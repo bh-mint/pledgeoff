@@ -80,6 +80,10 @@ export default async function SharePage({ params }: Props) {
   const hasDimensions = decision.dimensions && decision.dimensions.length > 0;
   const valId = `val_${id.slice(0, 8)}`;
 
+  const verdictDaysAgo = Math.floor(
+    (new Date().getTime() - new Date(decision.createdAt).getTime()) / (1000 * 60 * 60 * 24),
+  );
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--canvas)" }}>
       {/* Top bar */}
@@ -189,6 +193,15 @@ export default async function SharePage({ params }: Props) {
                 {decision.reasoning}
               </p>
             </div>
+
+            {verdictDaysAgo >= 7 && (
+              <div
+                className="mt-6 pt-5 border-t mono text-[11px]"
+                style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+              >
+                ⏱ This verdict was generated {verdictDaysAgo} day{verdictDaysAgo !== 1 ? "s" : ""} ago. Signals may have changed.
+              </div>
+            )}
           </div>
         </div>
 
