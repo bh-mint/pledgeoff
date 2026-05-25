@@ -366,7 +366,7 @@ export default async function DashboardPage() {
               <Spark data={sparkKilled} color="var(--kill)" />
             </div>
             <div className="mono text-[10px] tnum mt-2 text-(--t2)">
-              {killed > 0 ? `≈ ${killed * 50}h saved` : "none yet"}
+              {killed > 0 ? `${killed} idea${killed !== 1 ? "s" : ""} saved from being built` : "none yet"}
             </div>
           </div>
 
@@ -379,7 +379,7 @@ export default async function DashboardPage() {
               <StatNumber value={daysToFirstGo} fallback="—" className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
             </div>
             <div className="mono text-[10px] tnum mt-2 text-(--validated)">
-              {daysToFirstGo ? "Pledge avg 23" : "no GO verdict yet"}
+              {daysToFirstGo ? "avg on PledgeOFF: 23d" : "no GO verdict yet"}
             </div>
           </div>
         </div>

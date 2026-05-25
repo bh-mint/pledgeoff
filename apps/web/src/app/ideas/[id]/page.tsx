@@ -128,7 +128,7 @@ export default async function IdeaPage({ params }: Props) {
             <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-3">
               <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
-                Idea · {formatDate(idea.createdAt)}
+                Signal Verdict · {formatDate(idea.createdAt)}
               </p>
               {category && (
                 <span

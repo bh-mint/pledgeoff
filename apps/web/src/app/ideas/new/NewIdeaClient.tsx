@@ -11,7 +11,7 @@ const LOADING_MESSAGES = [
   { step: "01", text: "Scanning Reddit communities…" },
   { step: "02", text: "Fetching Hacker News discussions…" },
   { step: "03", text: "Analyzing GitHub signals…" },
-  { step: "04", text: "Cross-referencing 847 data points…" },
+  { step: "04", text: "Cross-referencing live data points…" },
   { step: "05", text: "Calculating GO / KILL / PIVOT score…" },
   { step: "06", text: "Finalizing verdict…" },
 ] as const;
@@ -207,7 +207,7 @@ export function NewIdeaClient({
             className="mono text-[10px] uppercase tracking-[0.14em] mb-4"
             style={{ color: "var(--t3)" }}
           >
-            step 01 · idea validator
+            step 01 · signal verdict
           </div>
 
           {/* Context toggle — only shown for paid users with a team */}

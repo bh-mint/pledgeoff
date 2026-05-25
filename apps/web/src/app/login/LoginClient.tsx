@@ -246,7 +246,6 @@ export function LoginClient() {
           className="rounded-md border p-3 flex gap-3 mt-5"
           style={{ borderColor: "rgba(229,91,60,0.4)", background: "rgba(229,91,60,0.06)" }}
         >
-          <span className="mono text-[10px] mt-0.5" style={{ color: "var(--kill)" }}>err_auth</span>
           <div className="flex-1">
             <div className="text-[12px]" style={{ color: "var(--t1)" }}>{errorMsg}</div>
           </div>

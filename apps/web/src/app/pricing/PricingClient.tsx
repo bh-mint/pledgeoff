@@ -264,7 +264,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
           {/* Free */}
           <div className="p-6 border-b sm:border-b-0 sm:border-r flex flex-col" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
             <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Free</div>
-            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>kick the tires</div>
+            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>before you commit</div>
             <div className="display text-[42px] tnum font-semibold mb-0.5 leading-none" style={{ color: "var(--t1)" }}>€0</div>
             <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>forever</div>
             <Link

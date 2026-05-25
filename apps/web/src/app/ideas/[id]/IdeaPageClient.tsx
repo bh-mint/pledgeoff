@@ -417,7 +417,7 @@ export function IdeaPageClient({
               Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
             </span>
             <span>·</span>
-            <span className="hidden sm:inline">validation ·</span>
+            <span className="hidden sm:inline">signal verdict ·</span>
             <span>{valId}</span>
           </div>
           <div className="mono text-[10px] text-(--t3)">

@@ -284,7 +284,7 @@ export function HomeClient() {
             },
             {
               label: "02 / SCAN",
-              title: "We scan 847 live signals",
+              title: "We scan thousands of live signals",
               body: "Reddit complaints, GitHub issues, Google Trends momentum, competitor weaknesses — scanned in real-time across the sources that actually matter to your market.",
               detail: "Reddit · GitHub · Trends",
             },
@@ -391,7 +391,7 @@ export function HomeClient() {
             </h2>
           </div>
           <p className="text-[11px] text-(--t3) text-right mt-2">
-            6 of 847 posts shown
+            6 signals shown
             <br />
             click any to open subreddit
           </p>

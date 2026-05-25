@@ -96,7 +96,7 @@ export default async function SharePage({ params }: Props) {
         </Link>
         <div className="flex items-center gap-3">
           <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
-            public validation · {valId}
+            signal verdict · {valId}
           </span>
           <Link
             href="/login"
@@ -199,7 +199,7 @@ export default async function SharePage({ params }: Props) {
                 className="mt-6 pt-5 border-t mono text-[11px]"
                 style={{ borderColor: "var(--border)", color: "var(--t3)" }}
               >
-                ⏱ This verdict was generated {verdictDaysAgo} day{verdictDaysAgo !== 1 ? "s" : ""} ago. Signals may have changed.
+                This verdict was generated {verdictDaysAgo} day{verdictDaysAgo !== 1 ? "s" : ""} ago. Signals may have changed.
               </div>
             )}
           </div>
@@ -218,7 +218,7 @@ export default async function SharePage({ params }: Props) {
             Start free →
           </Link>
           <p className="mt-3 mono text-[10px]" style={{ color: "var(--t3)" }}>
-            Free · No credit card · 3 validations included
+            Free · No credit card · 1 free validation / month
           </p>
         </div>
       </div>

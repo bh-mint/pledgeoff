@@ -189,7 +189,7 @@ export function DashboardClient({
           style={{ background: "color-mix(in srgb, var(--accent) 6%, transparent)", borderColor: "color-mix(in srgb, var(--accent) 25%, transparent)" }}
         >
           <span className="text-[13px]" style={{ color: "var(--accent)" }}>
-            Welcome to Pro! Your plan is now active.
+            Upgrade successful! Your new plan is now active.
           </span>
           <button
             onClick={() => setShowBillingBanner(false)}
@@ -416,9 +416,6 @@ export function DashboardClient({
                       </span>
                     )}
                   </div>
-                  <div className="mono text-[10px] mt-0.5 text-(--t3)">
-                    val_{row.id.slice(0, 8)}
-                  </div>
                 </div>
 
                 {/* Mobile meta row */}
@@ -494,7 +491,7 @@ export function DashboardClient({
               ) : (
                 <div className="max-w-[560px] mx-auto">
                   <p className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3) mb-4">
-                    step 01 · idea validator
+                    step 01 · signal verdict
                   </p>
                   <h2 className="display text-[28px] sm:text-[36px] font-semibold tracking-tight leading-[1.05] text-(--t1) mb-2">
                     What are you building?

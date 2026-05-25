@@ -4,7 +4,7 @@ import { HomeClient } from "./HomeClient";
 export const metadata: Metadata = {
   title: { absolute: "PledgeOFF — Kill bad ideas before they kill you" },
   description:
-    "GO / KILL / PIVOT — decided by 847 live signals from Reddit and GitHub. Validate your startup idea in under 60 seconds. Not your gut.",
+    "GO / KILL / PIVOT — decided by live signals from Reddit and GitHub. Validate your startup idea in under 60 seconds. Not your gut.",
   alternates: { canonical: "https://pledgeoff.com" },
   openGraph: {
     title: "PledgeOFF — Kill bad ideas before they kill you",
@@ -27,7 +27,7 @@ const orgJsonLd = {
   },
   description: "Decision Intelligence Platform — GO / KILL / PIVOT in under 60 seconds using live market signals.",
   sameAs: [
-    "https://twitter.com/pledgeoff",
+    "https://x.com/pledgeoffhq",
   ],
 };
 
