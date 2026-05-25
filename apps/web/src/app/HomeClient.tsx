@@ -223,10 +223,12 @@ export function HomeClient() {
             </div>
 
             <h1 className="display font-semibold tracking-tight text-(--t1)"
-              style={{ fontSize: "clamp(56px, 7vw, 96px)", lineHeight: 0.92 }}>
-              Stop building<br />
-              things <span className="text-(--t3)">nobody</span><br />
-              <span className="text-(--t1)">asked for.</span>
+              style={{ fontSize: "clamp(40px, 5.5vw, 76px)", lineHeight: 1.0 }}>
+              Market intelligence<br />
+              for product decisions.<br />
+              <span className="text-(--t3)">GO, KILL, or PIVOT</span><br />
+              <span className="text-(--t1)">backed by real signals,</span><br />
+              <span className="text-(--t2)" style={{ fontSize: "clamp(28px, 3.5vw, 52px)" }}>not gut feelings.</span>
             </h1>
 
             <p className="mt-8 max-w-135 text-[14px] leading-[1.6] text-(--t2)">
