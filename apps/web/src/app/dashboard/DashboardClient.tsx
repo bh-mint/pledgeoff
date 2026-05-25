@@ -245,6 +245,15 @@ export function DashboardClient({
           <span className="hidden sm:inline mono text-[10px] px-2 py-1 rounded border" style={{ borderColor: "var(--border)", color: "var(--t3)" }}>
             [N] new · [/] search
           </span>
+          {(plan === "free" || plan === "founder") && (
+            <Link
+              href="/pricing"
+              className="hidden sm:inline-flex mono text-[11px] px-3 h-8 rounded-md border items-center transition-colors hover:border-(--accent) hover:text-(--accent) shrink-0"
+              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+            >
+              Upgrade →
+            </Link>
+          )}
           <Link
             href="/ideas/new"
             aria-keyshortcuts="n"
@@ -758,7 +767,23 @@ export function DashboardClient({
       )}
 
       {/* ── Queue tab ── */}
-      {tab === "queue" && <DecisionQueueView />}
+      {tab === "queue" && (
+        plan === "free" ? (
+          <div className="border rounded-md p-8 text-center" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+            <p className="display text-[18px] font-semibold text-(--t1) mb-2">Decision Queue</p>
+            <p className="text-[13px] mb-5" style={{ color: "var(--t2)" }}>
+              Automatically surfaces which stale ideas need a decision. Available on Founder and above.
+            </p>
+            <Link
+              href="/pricing"
+              className="mono text-[11px] px-4 h-9 rounded-md inline-flex items-center transition-opacity hover:opacity-90"
+              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+            >
+              Upgrade to Founder →
+            </Link>
+          </div>
+        ) : <DecisionQueueView />
+      )}
     </>
   );
 }

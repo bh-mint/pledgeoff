@@ -122,7 +122,7 @@ export default async function SharePage({ params }: Props) {
 
         {/* Verdict card */}
         <div
-          className="rounded-md border overflow-hidden"
+          className="rounded-md border overflow-hidden relative"
           style={{ borderColor: `${cfg.color}30`, background: "var(--surface)" }}
         >
           {/* Ambient glow */}
@@ -154,6 +154,15 @@ export default async function SharePage({ params }: Props) {
                 <div className="mono text-[10px] mt-2 uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>
                   {hasDimensions ? `${decision.dimensions!.length} dimensions` : "confidence"} · {Math.round(decision.confidence * 100)}%
                 </div>
+                {decision.verdict === "GO" && (
+                  <Link
+                    href="/login?mode=signup"
+                    className="mt-3 mono text-[11px] px-3 h-8 rounded border inline-flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+                    style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                  >
+                    Validate your idea in 60s →
+                  </Link>
+                )}
               </div>
             </div>
 

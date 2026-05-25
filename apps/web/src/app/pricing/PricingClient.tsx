@@ -371,7 +371,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             </div>
             <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{teamSub}</div>
             <div className="mb-5">
-              <UpgradeButton priceId={teamPriceId} label="Upgrade to Team" />
+              <UpgradeButton priceId={teamPriceId} label="Upgrade to Team" primary />
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
@@ -441,7 +441,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
           </div>
           <a
             href="/enterprise"
-            className="mono text-[11px] px-4 h-8 rounded-md border inline-flex items-center shrink-0 transition-colors"
+            className="mono text-[11px] px-4 h-10 rounded-md border inline-flex items-center shrink-0 transition-colors"
             style={{ borderColor: "var(--border)", color: "var(--t2)" }}
           >
             Enterprise →
@@ -528,7 +528,11 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               </Link>
             </div>
           </div>
-          <UpgradeButton priceId={founderPriceId} label={`Upgrade to Founder · €${founderPrice}/mo →`} primary />
+          <div className="flex flex-col sm:flex-row gap-2">
+            <UpgradeButton priceId={founderPriceId} label={`Founder · €${founderPrice}/mo →`} primary />
+            <UpgradeButton priceId={teamPriceId} label={`Team · €${teamPrice}/mo →`} />
+            <UpgradeButton priceId={studioPriceId} label={`Studio · €${studioPrice}/mo →`} />
+          </div>
         </div>
       </div>
       <Footer />

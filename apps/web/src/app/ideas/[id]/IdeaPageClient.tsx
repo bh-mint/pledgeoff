@@ -330,7 +330,7 @@ function OttoSection({
           <button
             onClick={() => setOverrideAll((v) => !v)}
             className="mono text-[10px] transition-colors"
-            style={{ color: overrideAll ? "var(--validated)" : "var(--kill)" }}
+            style={{ color: overrideAll ? "var(--validated)" : "var(--t3)" }}
           >
             {overrideAll
               ? "← Back to Otto's recommendations"
@@ -541,7 +541,14 @@ export function IdeaPageClient({
 
           {!decision && polls >= MAX_POLLS && (
             <p className="text-[13px] text-(--t3)">
-              Analysis is taking longer than expected. Refresh the page in a few seconds.
+              Analysis is taking longer than usual.{" "}
+              <button
+                onClick={() => window.location.reload()}
+                className="underline transition-opacity hover:opacity-70"
+                style={{ color: "var(--accent)" }}
+              >
+                Refresh →
+              </button>
             </p>
           )}
         </div>

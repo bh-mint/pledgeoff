@@ -156,7 +156,7 @@ export function Nav({ loggedIn: loggedInProp }: NavProps) {
                 onMouseLeave={e => (e.currentTarget.style.color = "var(--t2)")}>
                 Login
               </Link>
-              <Link href="/ideas/new"
+              <Link href="/login?mode=signup"
                 className="inline-flex items-center h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
                 style={{ background: "var(--accent)", color: "var(--accent-fg)" }}>
                 Start free →

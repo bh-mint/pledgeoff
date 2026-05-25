@@ -403,7 +403,7 @@ export function NewIdeaClient({
             <p className="mt-4 text-[12px] text-(--kill)">{errorMsg}</p>
           )}
 
-          {/* Upgrade CTA — shown when validations exhausted */}
+          {/* Upgrade CTA — shown when validations exhausted, directly above submit */}
           {validationsLeft === 0 && (
             <div
               className="mt-10 rounded-md border px-4 py-3 flex items-center justify-between gap-4 flex-wrap"
@@ -417,13 +417,13 @@ export function NewIdeaClient({
                 className="mono text-[11px] shrink-0 transition-opacity hover:opacity-70"
                 style={{ color: "var(--accent)" }}
               >
-                Upgrade to Founder for unlimited →
+                Upgrade to Founder — 20 validations/mo →
               </a>
             </div>
           )}
 
           {/* CTA */}
-          <div className="mt-10 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
+          <div className={`flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 ${validationsLeft === 0 ? "mt-4" : "mt-10"}`}>
             <button
               type="submit"
               disabled={!valid || status === "loading" || validationsLeft === 0}
