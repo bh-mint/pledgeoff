@@ -3,6 +3,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { PHBanner } from "@/components/PHBanner";
 import { PRICING } from "@/lib/pricing.config";
+import { LastValidatedBadge } from "@/components/home/LastValidatedBadge";
 
 const TICKER_ITEMS = [
   'r/SaaS          ·  "every B2B cold email tool does the same generic personalization"  ·  ↑418',
@@ -230,6 +231,9 @@ export function HomeClient() {
                 See a live validation
               </Link>
               <span className="mono text-[10px] text-(--t3) ml-1">free · 1 idea / mo</span>
+            </div>
+            <div className="mt-4">
+              <LastValidatedBadge />
             </div>
 
             <div className="mt-12 flex flex-wrap items-center gap-6 mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">

@@ -26,6 +26,7 @@ export type TableRow = {
   tools: ToolStatus;
   outcomeType: string | null;
   needsOutcome: boolean;
+  signalsStale: boolean;
 };
 
 export type TeamFeedRow = {
@@ -399,6 +400,18 @@ export function DashboardClient({
                         }}
                       >
                         {row.outcomeType === "built_worked" ? "built ✓" : row.outcomeType === "built_failed" ? "built ✗" : "not built"}
+                      </span>
+                    )}
+                    {row.signalsStale && !row.needsOutcome && (
+                      <span
+                        className="mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0"
+                        style={{
+                          color: "var(--t3)",
+                          background: "color-mix(in srgb, var(--border) 40%, transparent)",
+                          border: "1px solid var(--border)",
+                        }}
+                      >
+                        signals outdated
                       </span>
                     )}
                   </div>

@@ -206,6 +206,7 @@ export default async function DashboardPage() {
       tools,
       outcomeType,
       needsOutcome: isOlderThan30Days && !!decision && !outcomeType,
+      signalsStale: isOlderThan30Days && !!decision,
     };
   });
 

@@ -7,6 +7,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 import { PRICING } from "@/lib/pricing.config";
+import { ROICalculator } from "@/components/pricing/ROICalculator";
 
 const PRO_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID ?? "";
 const PRO_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID ?? "";
@@ -459,6 +460,9 @@ export function PricingClient() {
             </div>
           </div>
         </div>
+
+        {/* ROI Calculator */}
+        <ROICalculator />
 
         {/* FAQ */}
         <div className="mt-16">
