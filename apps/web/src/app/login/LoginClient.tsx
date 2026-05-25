@@ -158,7 +158,7 @@ export function LoginClient() {
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--validated)" }} />
             <span className="mono text-[10px]" style={{ color: "var(--validated)" }}>SENT</span>
             <span className="mono text-[10px] ml-auto" style={{ color: "var(--t3)" }}>
-              {new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" })} UTC
+              {new Date().toISOString().slice(11, 19)} UTC
             </span>
           </div>
           <div className="mono text-[11px]" style={{ color: "var(--t2)" }}>to: {email}</div>
@@ -181,15 +181,13 @@ export function LoginClient() {
           >
             Back to sign in
           </button>
-          <a
-            href="https://mail.google.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => setUiState("idle")}
             className="h-10 rounded-md display text-[13px] font-semibold flex items-center justify-center transition-opacity hover:opacity-90"
             style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
           >
-            Open inbox →
-          </a>
+            Sign in →
+          </button>
         </div>
 
         <p className="mono text-[10px] mt-5" style={{ color: "var(--t3)" }}>
@@ -219,7 +217,7 @@ export function LoginClient() {
             key={m}
             onClick={() => switchMode(m)}
             disabled={isLoading}
-            className="py-1.5 rounded-md text-[12px] font-semibold display transition-colors"
+            className="h-9 rounded-md text-[12px] font-semibold display transition-colors"
             style={
               mode === m
                 ? { background: "var(--accent)", color: "var(--accent-fg)" }

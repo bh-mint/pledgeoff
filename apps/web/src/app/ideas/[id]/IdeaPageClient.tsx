@@ -277,7 +277,7 @@ function OttoSection({
           <button
             key={g}
             onClick={() => setToolGroup(g)}
-            className="mono text-[10px] px-3 h-7 rounded-full border transition-all"
+            className="mono text-[10px] px-3 h-9 rounded-full border transition-all"
             style={toolGroup === g
               ? { borderColor: "var(--accent)", color: "var(--accent)", background: "color-mix(in srgb, var(--accent) 10%, transparent)" }
               : { borderColor: "var(--border)", color: "var(--t3)" }
@@ -401,13 +401,6 @@ export function IdeaPageClient({
 
   return (
     <>
-      <style>{`
-        @keyframes ottoBreath{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(1.18);opacity:1}}
-        @keyframes ottoRing{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.4);opacity:0}}
-        .otto-dot{animation:ottoBreath 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
-        .otto-ring{animation:ottoRing 4400ms cubic-bezier(0.4,0,0.6,1) infinite}
-      `}</style>
-
       {/* ── Full-width top bar ── */}
       {decision && (
         <div className="flex items-center justify-between pb-3 mb-1 border-b"

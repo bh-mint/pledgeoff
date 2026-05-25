@@ -280,7 +280,7 @@ export function DashboardClient({
                 <button
                   key={key}
                   onClick={() => setSort(key)}
-                  className="mono text-[9px] px-2.5 h-7 uppercase tracking-[0.08em] transition-colors"
+                  className="mono text-[9px] px-2.5 h-8 uppercase tracking-[0.08em] transition-colors"
                   style={{
                     background: sort === key ? "var(--border)" : "transparent",
                     color: sort === key ? "var(--t1)" : "var(--t3)",
@@ -313,7 +313,7 @@ export function DashboardClient({
                   <button
                     key={key}
                     onClick={() => setVerdictFilter(key)}
-                    className="mono text-[9px] px-2 h-6 rounded border transition-colors shrink-0"
+                    className="mono text-[9px] px-2.5 h-9 rounded border transition-colors shrink-0"
                     style={{
                       borderColor: active ? color : "var(--border)",
                       color: active ? color : "var(--t3)",

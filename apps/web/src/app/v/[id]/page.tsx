@@ -100,7 +100,7 @@ export default async function SharePage({ params }: Props) {
           </span>
           <Link
             href="/login"
-            className="mono text-[11px] px-3 h-8 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
+            className="mono text-[11px] px-3 h-10 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
             style={{ borderColor: "var(--border)", color: "var(--t2)" }}
           >
             Validate your idea →

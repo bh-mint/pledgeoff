@@ -238,20 +238,30 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               <span style={{ color: "var(--t3)" }}>Cancel anytime — really.</span>
             </p>
           </div>
-          {/* Billing toggle */}
-          <div className="sm:col-span-5 flex sm:justify-end items-center gap-3">
-            <span className="mono text-[11px]" style={{ color: billing === "month" ? "var(--t1)" : "var(--t3)" }}>monthly</span>
-            <button
-              onClick={() => setBilling(billing === "month" ? "year" : "month")}
-              className="w-10 h-5 rounded-full border relative"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-            >
-              <span
-                className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
-                style={{ left: billing === "year" ? "calc(100% - 18px)" : "2px", background: "var(--accent)" }}
-              />
-            </button>
-            <span className="mono text-[11px]" style={{ color: billing === "year" ? "var(--t1)" : "var(--t3)" }}>annual</span>
+          {/* Billing toggle — pill buttons */}
+          <div className="sm:col-span-5 flex sm:justify-end items-center gap-2">
+            <div className="flex rounded-md border overflow-hidden" style={{ borderColor: "var(--border)" }} role="group" aria-label="Billing interval">
+              <button
+                onClick={() => setBilling("month")}
+                className="mono text-[11px] px-4 h-9 transition-colors"
+                style={billing === "month"
+                  ? { background: "var(--accent)", color: "var(--accent-fg)" }
+                  : { background: "var(--surface)", color: "var(--t2)" }}
+                aria-pressed={billing === "month"}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBilling("year")}
+                className="mono text-[11px] px-4 h-9 transition-colors"
+                style={billing === "year"
+                  ? { background: "var(--accent)", color: "var(--accent-fg)" }
+                  : { background: "var(--surface)", color: "var(--t2)" }}
+                aria-pressed={billing === "year"}
+              >
+                Annual
+              </button>
+            </div>
             <span className="mono text-[10px] tnum" style={{ color: "var(--accent)" }}>save ~20%</span>
           </div>
         </div>

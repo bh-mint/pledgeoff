@@ -266,13 +266,13 @@ export default async function ArticlePage({ params }: Props) {
               Share:
             </span>
             <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(`https://pledgeoff.com/blog/${slug}`)}`}
+              href={`https://x.com/intent/tweet?text=${encodeURIComponent(article.title)}&url=${encodeURIComponent(`https://pledgeoff.com/blog/${slug}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mono text-[11px] uppercase tracking-[0.06em] transition-colors hover:opacity-70"
               style={{ color: "var(--t3)" }}
             >
-              Twitter/X
+              Share on X
             </a>
             <a
               href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://pledgeoff.com/blog/${slug}`)}`}

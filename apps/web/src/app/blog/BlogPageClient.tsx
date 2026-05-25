@@ -121,7 +121,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                   <button
                     key={c.value}
                     onClick={() => handleTagChange(c.value)}
-                    className="mono text-[11px] rounded-full border h-7 px-3 inline-flex items-center gap-1.5 transition-all"
+                    className="mono text-[11px] rounded-full border h-8 px-3 inline-flex items-center gap-1.5 transition-all"
                     style={{
                       borderColor: isActive ? c.color : "var(--border)",
                       color: isActive ? c.color : "var(--t3)",
@@ -138,7 +138,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
               {activeTag !== "all" && (
                 <button
                   onClick={() => handleTagChange("all")}
-                  className="mono text-[11px] rounded-full border h-7 px-3 inline-flex items-center transition-colors"
+                  className="mono text-[11px] rounded-full border h-8 px-3 inline-flex items-center transition-colors"
                   style={{ borderColor: "var(--border)", color: "var(--t3)" }}
                 >
                   × clear
@@ -198,7 +198,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                 <button
                   key={value}
                   onClick={() => handleTagChange(value)}
-                  className="rounded-full border h-7 px-3 inline-flex items-center transition-all flex-shrink-0"
+                  className="rounded-full border h-8 px-3 inline-flex items-center transition-all flex-shrink-0"
                   style={
                     active
                       ? { borderColor: activeColor, background: `${activeColor}15`, color: "var(--t1)" }
@@ -219,7 +219,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
           onChange={(e) => { setQuery(e.target.value); setPage(1); }}
           placeholder="Search…"
           aria-label="Search articles"
-          className="mono text-[11px] h-7 px-3 rounded-full border bg-transparent outline-none w-28 focus:w-44 transition-all"
+          className="mono text-[11px] h-8 px-3 rounded-full border bg-transparent outline-none w-28 focus:w-44 transition-all"
           style={{ borderColor: "var(--border)", color: "var(--t1)" }}
         />
       </div>

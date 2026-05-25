@@ -320,7 +320,7 @@ export function NewIdeaClient({
                     setDesc(ex.desc);
                     setCat(ex.cat);
                   }}
-                  className="mono text-[10px] px-3 h-7 rounded border transition-all text-left truncate max-w-[240px]"
+                  className="mono text-[10px] px-3 h-9 rounded border transition-all text-left truncate max-w-[240px]"
                   style={{ borderColor: "var(--border)", color: "var(--t3)", background: "var(--surface)" }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = "var(--accent)";
@@ -353,7 +353,7 @@ export function NewIdeaClient({
                     key={c}
                     type="button"
                     onClick={() => setCat(c)}
-                    className="text-[13px] px-4 h-9 rounded-md border transition-all"
+                    className="text-[13px] px-4 h-10 rounded-md border transition-all"
                     style={{
                       borderColor: active ? "var(--accent)" : "var(--border)",
                       background: active

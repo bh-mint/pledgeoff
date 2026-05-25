@@ -659,7 +659,7 @@ export function SettingsClient({
                       {
                         priceId: ap.annualPriceId,
                         label: `${ap.label} — Annual`,
-                        price: `€${ap.annualEquivalentEur}/mo · €${ap.annualTotalEur}/yr · save 18%`,
+                        price: `€${ap.annualEquivalentEur}/mo · €${ap.annualTotalEur}/yr · save ~20%`,
                       },
                     ]).map((opt) => {
                       const isSelected = selectedPriceId === opt.priceId;
@@ -943,7 +943,7 @@ export function SettingsClient({
                         body: JSON.stringify({ [item.key]: next }),
                       });
                     }}
-                    className="relative w-9 h-5 rounded-full border shrink-0 mt-0.5"
+                    className="relative w-11 h-6 rounded-full border shrink-0 mt-0.5"
                     style={{
                       borderColor: "var(--border)",
                       background: notifState[item.key] ? "color-mix(in srgb, var(--accent) 15%, transparent)" : "var(--surface)",
