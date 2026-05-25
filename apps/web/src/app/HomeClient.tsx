@@ -87,6 +87,45 @@ const PREVIEW_POSTS = [
   { sub: "r/Entrepreneur", u: "u/bootstrapped_jan", txt: "spent 3 months building before talking to one customer. validation first, always" },
 ];
 
+function MobilePreviewCard() {
+  return (
+    <div
+      className="rounded-md border overflow-hidden w-full"
+      style={{
+        borderColor: "var(--border)",
+        background: "var(--surface)",
+        boxShadow: "0 20px 40px -16px rgba(0,0,0,0.4)",
+      }}
+    >
+      <div className="border-b px-4 h-8 flex items-center justify-between" style={{ borderColor: "var(--border)" }}>
+        <span className="mono text-[10px] text-(--t3)">AI code review tool · live verdict</span>
+        <span className="mono text-[9px]" style={{ color: "var(--validated)" }}>● GO</span>
+      </div>
+      <div className="px-4 py-3 flex items-center gap-4">
+        <div className="shrink-0">
+          <div className="display tnum font-semibold text-(--t1) leading-none" style={{ fontSize: 52 }}>
+            82
+          </div>
+          <div className="display text-[11px] mt-1" style={{ color: "var(--validated)" }}>VALIDATED</div>
+        </div>
+        <div className="flex-1 space-y-2 pt-1">
+          {PREVIEW_DIMENSIONS.slice(0, 2).map((d) => (
+            <div key={d.k}>
+              <div className="flex justify-between items-center mb-0.5">
+                <span className="text-[10px] text-(--t2)">{d.k}</span>
+                <span className="mono tnum text-[10px] text-(--t2)">{d.v}</span>
+              </div>
+              <div className="h-1 rounded-full" style={{ background: "var(--border)" }}>
+                <div className="h-1 rounded-full" style={{ width: `${d.v}%`, background: d.c }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PreviewCard() {
   return (
     <div
@@ -208,12 +247,19 @@ export function HomeClient() {
                 href="/v/561bc83d-00d8-4bf0-a874-9643fa8fbf62"
                 className="text-[12px] px-5 h-11 rounded-md border border-(--border) text-(--t1) flex items-center gap-2 hover:border-(--t3) transition-colors"
               >
-                See a live validation
+                See a live verdict →
               </Link>
-              <span className="mono text-[10px] text-(--t3) ml-1">free · 1 idea / mo</span>
             </div>
+            <p className="mt-3 mono text-[11px] text-(--t3)">
+              Sign in with Google — takes 10 seconds · no credit card
+            </p>
             <div className="mt-4">
               <LastValidatedBadge />
+            </div>
+
+            {/* Mobile preview — visible only below lg breakpoint */}
+            <div className="block lg:hidden mt-8">
+              <MobilePreviewCard />
             </div>
 
             <div className="mt-12 flex flex-wrap items-center gap-6 mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
@@ -495,54 +541,6 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── FREE TOOLS ── */}
-      <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
-        <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
-          Free tools
-        </p>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-10">
-          <h2 className="display text-[40px] font-black leading-none text-(--t1)">
-            Not ready to validate?
-            <br />
-            Start here.
-          </h2>
-          <p className="text-[14px] text-(--t2) leading-relaxed self-end">
-            Free tools to sharpen your thinking before you commit. No account required.
-          </p>
-        </div>
-
-        <Link
-          href="/tools/decision-clarity"
-          className="group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-(--surface) border border-(--border) rounded-md p-6 hover:border-(--t3) transition-colors"
-        >
-          <div className="flex items-start gap-5">
-            <div
-              className="shrink-0 w-10 h-10 rounded-md border flex items-center justify-center mono text-[11px] font-semibold"
-              style={{ borderColor: "var(--border)", background: "var(--canvas)", color: "var(--accent)" }}
-            >
-              DCT
-            </div>
-            <div>
-              <p className="display text-[15px] font-semibold text-(--t1) mb-1">
-                Decision Clarity Tool
-              </p>
-              <p className="text-[12px] text-(--t2) leading-relaxed max-w-120">
-                5 questions. 60 seconds. Find out if your idea is ready to build — or needs more thinking first.
-              </p>
-              <p className="mono text-[10px] text-(--t3) mt-2 uppercase tracking-widest">
-                Free · No account · 5 questions
-              </p>
-            </div>
-          </div>
-          <span
-            className="shrink-0 mono text-[12px] px-4 h-9 rounded-md border flex items-center gap-2 transition-colors"
-            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-          >
-            Try it free →
-          </span>
-        </Link>
-      </section>
-
       {/* ── PRICING PREVIEW ── */}
       <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
@@ -578,7 +576,7 @@ export function HomeClient() {
               href="/ideas/new"
               className="text-[12px] h-9 rounded-md border border-(--border) text-(--t2) flex items-center justify-center hover:border-(--t3) transition-colors"
             >
-              Start free
+              Start free →
             </Link>
           </div>
 
@@ -669,6 +667,52 @@ export function HomeClient() {
             Compare all plans — including Enterprise →
           </Link>
         </div>
+      </section>
+
+      {/* ── FREE TOOLS ── */}
+      <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
+        <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
+          Free tools
+        </p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-10">
+          <h2 className="display text-[40px] font-black leading-none text-(--t1)">
+            Want to explore first?
+          </h2>
+          <p className="text-[14px] text-(--t2) leading-relaxed self-end">
+            Free tools to sharpen your thinking before you commit. No account required.
+          </p>
+        </div>
+
+        <Link
+          href="/tools/decision-clarity"
+          className="group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-(--surface) border border-(--border) rounded-md p-6 hover:border-(--t3) transition-colors"
+        >
+          <div className="flex items-start gap-5">
+            <div
+              className="shrink-0 w-10 h-10 rounded-md border flex items-center justify-center mono text-[11px] font-semibold"
+              style={{ borderColor: "var(--border)", background: "var(--canvas)", color: "var(--accent)" }}
+            >
+              DCT
+            </div>
+            <div>
+              <p className="display text-[15px] font-semibold text-(--t1) mb-1">
+                Decision Clarity Tool
+              </p>
+              <p className="text-[12px] text-(--t2) leading-relaxed max-w-120">
+                5 questions. 60 seconds. Find out if your idea is ready to build — or needs more thinking first.
+              </p>
+              <p className="mono text-[10px] text-(--t3) mt-2 uppercase tracking-widest">
+                Free · No account · 5 questions
+              </p>
+            </div>
+          </div>
+          <span
+            className="shrink-0 mono text-[12px] px-4 h-9 rounded-md border flex items-center gap-2 transition-colors"
+            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+          >
+            Try it free →
+          </span>
+        </Link>
       </section>
 
       {/* ── FINAL CTA ── */}
