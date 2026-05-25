@@ -13,6 +13,7 @@ import { getUserPlan } from "@/server/billing/getUserPlan";
 import { OutcomeButton } from "@/components/OutcomeButton";
 import { ShareVerdictButton } from "@/components/ShareVerdictButton";
 import { OutcomeBanner } from "@/components/OutcomeBanner";
+import { RevalidateButton } from "@/components/RevalidateButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -85,6 +86,15 @@ export default async function IdeaPage({ params }: Props) {
   const isOlderThan30Days = daysOld >= 30;
   const showOutcomeBanner = isOlderThan30Days && !existingOutcome;
 
+  // Signal age: oldest fetchedAt among current signals
+  const oldestSignalFetchedAt = signals.length > 0
+    ? signals.reduce((oldest, s) => s.fetchedAt < oldest ? s.fetchedAt : oldest, signals[0].fetchedAt)
+    : null;
+  const signalAgeDays = oldestSignalFetchedAt
+    ? Math.floor((now.getTime() - new Date(oldestSignalFetchedAt).getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+  const showRevalidate = decision && signalAgeDays !== null && signalAgeDays >= 7;
+
   const { title, description, category } = parseIdeaText(idea.text);
 
   return (
@@ -123,6 +133,7 @@ export default async function IdeaPage({ params }: Props) {
             </div>
               <div className="flex items-center gap-2 flex-wrap">
                 {decision && <ShareVerdictButton ideaId={id} />}
+                {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
                 {isOlderThan30Days && (
                   <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
                 )}

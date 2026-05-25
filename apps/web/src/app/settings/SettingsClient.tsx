@@ -87,14 +87,24 @@ function formatDate(iso: string): string {
 
 const NOTIFICATION_ITEMS = [
   {
+    key: "accuracy_report",
+    label: "Monthly accuracy report",
+    desc: "How well your GO/KILL verdicts held up. Sent on the 2nd of each month.",
+  },
+  {
+    key: "queue_alerts",
+    label: "Decision queue alerts",
+    desc: "When a stale idea rises to the top of your decision queue.",
+  },
+  {
+    key: "weekly_digest",
+    label: "Weekly progress summary",
+    desc: "Mondays — what you validated, what you killed, what's launch-ready.",
+  },
+  {
     key: "goldmine",
     label: "Daily Goldmine digest",
     desc: "Sent every day at 09:00 UTC. The 12 niches with one-line previews.",
-  },
-  {
-    key: "weekly",
-    label: "Weekly progress summary",
-    desc: "Mondays — what you validated, what you killed, what's launch-ready.",
   },
   {
     key: "score",
@@ -129,6 +139,8 @@ export function SettingsClient({
   );
   const [githubConnected, setGithubConnected] = useState<boolean>(false);
   const [githubOrg, setGithubOrg] = useState<string | undefined>(undefined);
+  const [notifState, setNotifState] = useState<Record<string, boolean>>({});
+  const [exportState, setExportState] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -144,6 +156,16 @@ export function SettingsClient({
           setGithubConnected(true);
           setGithubOrg(json.data.githubOrg);
         }
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
+      const res = await fetch('/api/v1/notification-preferences');
+      if (res.ok) {
+        const json = await res.json() as { data: Record<string, boolean> };
+        setNotifState(json.data ?? {});
       }
     })();
   }, []);
@@ -168,11 +190,6 @@ export function SettingsClient({
     return billingInterval === 'annual' ? ap.annualPriceId : ap.monthlyPriceId;
   })();
   const [selectedPriceId, setSelectedPriceId] = useState(currentPriceId);
-  const [notifState, setNotifState] = useState<Record<string, boolean>>({
-    goldmine: false,
-    weekly: false,
-    score: false,
-  });
 
   const ideasLimit = PLAN_LIMITS[plan].verificationsPerMonth;
   const isUnlimited = ideasLimit === Infinity;
@@ -917,7 +934,15 @@ export function SettingsClient({
                     <div className="text-[12px] mt-1" style={{ color: "var(--t2)" }}>{item.desc}</div>
                   </div>
                   <button
-                    onClick={() => setNotifState((prev) => ({ ...prev, [item.key]: !prev[item.key] }))}
+                    onClick={() => {
+                      const next = !notifState[item.key];
+                      setNotifState((prev) => ({ ...prev, [item.key]: next }));
+                      void fetch('/api/v1/notification-preferences', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ [item.key]: next }),
+                      });
+                    }}
                     className="relative w-9 h-5 rounded-full border shrink-0 mt-0.5"
                     style={{
                       borderColor: "var(--border)",
@@ -936,7 +961,7 @@ export function SettingsClient({
               ))}
             </div>
             <p className="mono text-[10px] mt-4" style={{ color: "var(--t3)" }}>
-              Email delivery coming in a future update. Preferences are saved locally for now.
+              Preferences saved to your account instantly.
             </p>
           </div>
         )}
@@ -989,6 +1014,51 @@ export function SettingsClient({
             <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
               Irreversible actions. Proceed with care.
             </p>
+
+            {/* Data export */}
+            <div className="border rounded-md p-5 mb-4" style={{ borderColor: "var(--border)" }}>
+              <div className="display text-[15px] font-semibold mb-1 text-(--t1)">Export my data</div>
+              <p className="text-[12px] mb-4" style={{ color: "var(--t2)" }}>
+                Download a JSON file with all your ideas, decisions, signals, and profile data.
+              </p>
+              {exportState === "done" ? (
+                <span className="mono text-[11px]" style={{ color: "var(--validated)" }}>
+                  ✓ Download started
+                </span>
+              ) : exportState === "error" ? (
+                <span className="mono text-[11px]" style={{ color: "var(--kill)" }}>
+                  Export failed. Try again.
+                </span>
+              ) : (
+                <button
+                  disabled={exportState === "loading"}
+                  onClick={async () => {
+                    setExportState("loading");
+                    try {
+                      const res = await fetch('/api/v1/data-export', { method: 'POST' });
+                      if (!res.ok) { setExportState("error"); return; }
+                      const blob = await res.blob();
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      const cd = res.headers.get('Content-Disposition') ?? '';
+                      const match = /filename="([^"]+)"/.exec(cd);
+                      a.download = match?.[1] ?? 'pledgeoff-export.json';
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      setExportState("done");
+                      setTimeout(() => setExportState("idle"), 4000);
+                    } catch {
+                      setExportState("error");
+                    }
+                  }}
+                  className="mono text-[11px] h-9 px-4 rounded-md border transition-colors disabled:opacity-50"
+                  style={{ borderColor: "var(--border)", color: "var(--t2)", background: "var(--surface)" }}
+                >
+                  {exportState === "loading" ? "Preparing…" : "Export all data (JSON)"}
+                </button>
+              )}
+            </div>
 
             <div
               className="border rounded-md p-5"
