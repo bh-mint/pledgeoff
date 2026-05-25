@@ -67,31 +67,11 @@ const EVIDENCE_CARDS = [
   },
 ];
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "Killed an idea in 12 minutes that I'd have spent 4 months on. Paid for itself a thousand times.",
-    name: "Aria Lehmann",
-    handle: "@arialehmann · founder, Linecount",
-  },
-  {
-    quote:
-      "The Reddit evidence wall is the only validation tool I've ever forwarded to a co-founder unedited.",
-    name: "Marcus Chen",
-    handle: "@marcus.codes · ex-Stripe, building Folder",
-  },
-  {
-    quote:
-      "Score went from 71 to 89 after I narrowed the audience. I would have shipped to the wrong people.",
-    name: "Yuki Tanaka",
-    handle: "@yukibuilds · solo, $14k MRR",
-  },
-  {
-    quote:
-      "I run every client brief through this before quoting. Saves me from 3-month bad fits.",
-    name: "Priya Raghavan",
-    handle: "@priya.r · founder, Ninefold",
-  },
+const PRODUCT_STATS = [
+  { value: "< 90s", label: "Time to verdict", detail: "from idea text to GO / KILL / PIVOT" },
+  { value: "3", label: "Signal sources", detail: "Reddit · Hacker News · GitHub" },
+  { value: "4", label: "Scoring dimensions", detail: "demand · competition · feasibility · timing" },
+  { value: "100%", label: "Evidence traceable", detail: "every number links to its source" },
 ];
 
 const PREVIEW_DIMENSIONS = [
@@ -225,7 +205,7 @@ export function HomeClient() {
                 Validate your idea →
               </Link>
               <Link
-                href="/blog/the-fastest-way-to-kill-a-bad-idea-before-you-waste-months"
+                href="/v/561bc83d-00d8-4bf0-a874-9643fa8fbf62"
                 className="text-[12px] px-5 h-10 rounded-md border border-(--border) text-(--t1) flex items-center gap-2 hover:border-(--t3) transition-colors"
               >
                 See a live validation
@@ -446,34 +426,32 @@ export function HomeClient() {
         </div>
       </section>
 
-      {/* ── SOCIAL PROOF ── */}
+      {/* ── PRODUCT STATS ── */}
       <section className="max-w-330 mx-auto px-8 py-20 border-b border-(--border)">
         <div className="mb-12">
           <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-3">
-            What founders say
+            How it works
           </p>
           <h2 className="display text-[40px] font-black leading-none text-(--t1)">
-            From founders<br />who shipped.
+            Built for speed.<br />Backed by data.
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {TESTIMONIALS.map((t, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px border border-(--border) rounded-md overflow-hidden" style={{ background: "var(--border)" }}>
+          {PRODUCT_STATS.map((s, i) => (
             <div
               key={i}
-              className="bg-(--surface) border border-(--border) rounded-md p-6"
+              className="bg-(--bg) p-6 flex flex-col gap-2"
             >
-              <p className="text-[13px] text-(--t1) leading-relaxed mb-4">
-                &ldquo;{t.quote}&rdquo;
+              <p className="display text-[48px] font-black leading-none" style={{ color: "var(--accent)" }}>
+                {s.value}
               </p>
-              <div>
-                <p className="text-[12px] font-semibold text-(--t1)">
-                  {t.name}
-                </p>
-                <p className="mono text-[10px] text-(--t3) mt-0.5">
-                  {t.handle}
-                </p>
-              </div>
+              <p className="text-[13px] font-semibold text-(--t1)">
+                {s.label}
+              </p>
+              <p className="mono text-[10px] text-(--t3) leading-relaxed">
+                {s.detail}
+              </p>
             </div>
           ))}
         </div>
