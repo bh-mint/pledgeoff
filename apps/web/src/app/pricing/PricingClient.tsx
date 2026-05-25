@@ -422,7 +422,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                 { label: "4h dedicated SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--t2)" }}>✓</span>
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f.label}{f.soon && <SoonBadge />}</span>
                 </li>
               ))}
@@ -463,11 +463,11 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                 className="grid grid-cols-12 gap-3 px-6 py-3 mono text-[10px] uppercase tracking-[0.14em] border-b"
                 style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--t3)" }}
               >
-                <div className="col-span-3">Feature</div>
+                <div className="col-span-4">Feature</div>
                 <div className="col-span-2">Free</div>
                 <div className="col-span-2" style={{ color: "var(--accent)" }}>Founder</div>
                 <div className="col-span-2">Team</div>
-                <div className="col-span-3">Studio</div>
+                <div className="col-span-2">Studio</div>
               </div>
               {FEATURES.map((g) => (
                 <div key={g.group}>
@@ -479,13 +479,13 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                   </div>
                   {g.rows.map((r) => (
                     <div key={r.k} className="grid grid-cols-12 gap-3 px-6 py-3 border-b items-center" style={{ borderColor: "var(--border)" }}>
-                      <div className="col-span-3 text-[13px]" style={{ color: "var(--t1)" }}>
+                      <div className="col-span-4 text-[13px]" style={{ color: "var(--t1)" }}>
                         {r.k}{r.soon && <SoonBadge />}
                       </div>
                       <div className="col-span-2">{renderCell(r.f)}</div>
                       <div className="col-span-2">{renderCell(r.fo, true)}</div>
                       <div className="col-span-2">{renderCell(r.t)}</div>
-                      <div className="col-span-3">{renderCell(r.s)}</div>
+                      <div className="col-span-2">{renderCell(r.s)}</div>
                     </div>
                   ))}
                 </div>

@@ -23,7 +23,7 @@ const STEPS = [
   {
     num: "02",
     title: "We fetch real signals",
-    desc: "Reddit threads, GitHub repos, and community discussions — scraped in real time for your idea.",
+    desc: "Reddit threads, Hacker News, GitHub repos, and Dev.to discussions — scraped in real time for your idea.",
     tag: "scraping",
   },
   {
@@ -141,7 +141,8 @@ export function OnboardingClient() {
                       className="mono text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded"
                       style={{
                         color: "var(--t3)",
-                        background: "var(--border)",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
                       }}
                     >
                       {step.tag}

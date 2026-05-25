@@ -246,8 +246,8 @@ export default async function SharePage({ params }: Props) {
       <div className="border-t py-4 flex items-center justify-center" style={{ borderColor: "var(--border)" }}>
         <Link
           href="/"
-          className="mono text-[10px] transition-opacity hover:opacity-70"
-          style={{ color: "var(--t3)" }}
+          className="mono text-[11px] transition-opacity hover:opacity-70"
+          style={{ color: "var(--t2)" }}
         >
           Validated with PledgeOFF →
         </Link>

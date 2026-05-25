@@ -310,8 +310,8 @@ export function NewIdeaClient({
 
           {/* Examples — clickable demos */}
           <div className="mt-4">
-            <p className="mono text-[10px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--t3)" }}>
-              Try an example
+            <p className="mono text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--t2)" }}>
+              Try an example →
             </p>
             <div className="flex flex-wrap gap-2">
               {IDEA_EXAMPLES.map((ex) => (

@@ -768,9 +768,9 @@ export function SettingsClient({
                 </span>
               </div>
               {!isUnlimited && (
-                <div className="h-0.75 rounded-full" style={{ background: "var(--border)" }}>
+                <div className="h-1.5 rounded-full" style={{ background: "var(--border)" }}>
                   <div
-                    className="h-0.75 rounded-full transition-all"
+                    className="h-1.5 rounded-full transition-all"
                     style={{
                       width: `${usagePct * 100}%`,
                       background: usagePct >= 0.9 ? "var(--kill)" : usagePct >= 0.6 ? "var(--caution)" : "var(--accent)",

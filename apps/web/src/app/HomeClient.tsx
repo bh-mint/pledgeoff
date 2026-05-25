@@ -6,14 +6,14 @@ import { PRICING } from "@/lib/pricing.config";
 import { LastValidatedBadge } from "@/components/home/LastValidatedBadge";
 
 const TICKER_ITEMS = [
-  'r/SaaS          ·  "every B2B cold email tool does the same generic personalization"  ·  ↑418',
-  'GitHub          ·  2,341 open issues tagged "meeting transcription"',
-  'r/Entrepreneur  ·  "spent 3 months building before talking to one customer. mistake."  ·  ↑892',
-  'HN              ·  "AI code review" — 47 comments, 3 competing products launched this week',
-  'r/indiehackers  ·  "churn is killing me and I have no idea why people are leaving"  ·  ↑276',
-  'GitHub          ·  "stripe webhook" — 1,204 open issues across top SaaS repos',
-  'r/startups      ·  "built a Notion alternative, got 400 signups, 2 paying. why?"  ·  ↑341',
-  'HN              ·  "Show HN: I replaced Calendly for my team" — 312 upvotes',
+  { src: "r/SaaS",        txt: '"every B2B cold email tool does the same generic personalization"  ·  ↑418' },
+  { src: "GitHub",        txt: '2,341 open issues tagged "meeting transcription"' },
+  { src: "r/Entrepreneur", txt: '"spent 3 months building before talking to one customer. mistake."  ·  ↑892' },
+  { src: "HN",            txt: '"AI code review" — 47 comments, 3 competing products launched this week' },
+  { src: "r/indiehackers", txt: '"churn is killing me and I have no idea why people are leaving"  ·  ↑276' },
+  { src: "GitHub",        txt: '"stripe webhook" — 1,204 open issues across top SaaS repos' },
+  { src: "r/startups",    txt: '"built a Notion alternative, got 400 signups, 2 paying. why?"  ·  ↑341' },
+  { src: "HN",            txt: '"Show HN: I replaced Calendly for my team" — 312 upvotes' },
 ];
 
 const EVIDENCE_CARDS = [
@@ -294,9 +294,11 @@ export function HomeClient() {
             {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
               <div
                 key={i}
-                className="mono text-[11px] px-6 border-r whitespace-nowrap text-(--t2) border-(--border)"
+                className="mono text-[12px] px-6 border-r whitespace-nowrap text-(--t1) border-(--border)"
               >
-                <span style={{ color: "var(--accent)" }}>●</span> {item}
+                <span style={{ color: "var(--accent)" }}>●</span>{" "}
+                <span className="font-semibold">{item.src}</span>
+                {" · "}{item.txt}
               </div>
             ))}
           </div>
