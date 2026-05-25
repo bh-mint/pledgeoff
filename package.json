@@ -10,7 +10,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\" --ignore-path .gitignore"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/node": "^20",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "eslint": "^9",
