@@ -81,7 +81,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
           className="mono text-[11px] px-4 py-2 rounded border transition-colors hover:border-(--t2) disabled:opacity-50"
           style={{ borderColor: "var(--border)", color: "var(--t2)" }}
         >
-          {loading ? "Generating…" : "Generate Launch Kit →"}
+          {loading ? "Generating…" : "Generate GTM Brief →"}
         </button>
       </div>
     );

@@ -307,7 +307,7 @@ export default async function DashboardPage() {
             </Link>
             <nav className="hidden sm:flex items-center gap-7 text-[13px]" style={{ color: "var(--t2)" }}>
               <span style={{ color: "var(--t1)" }}>Dashboard</span>
-              <Link href="/ideas/new" className="transition-colors hover:text-(--t1)">Validator</Link>
+              <Link href="/ideas/new" className="transition-colors hover:text-(--t1)">Signal Verdict</Link>
               <Link href="/blog" className="transition-colors hover:text-(--t1)">Blog</Link>
             </nav>
           </div>

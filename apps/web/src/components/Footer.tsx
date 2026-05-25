@@ -22,7 +22,7 @@ const NAV_COLS = [
   {
     label: "Product",
     links: [
-      { href: "/ideas/new", text: "Validator" },
+      { href: "/ideas/new", text: "Signal Verdict" },
       { href: "/dashboard", text: "Dashboard" },
       { href: "/pricing", text: "Pricing" },
       { href: "/changelog", text: "Changelog" },

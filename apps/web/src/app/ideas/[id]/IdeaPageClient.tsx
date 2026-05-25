@@ -108,16 +108,16 @@ const OTTO_MESSAGE: Record<Verdict, (score: number | undefined) => string> = {
   PIVOT: (score) =>
     `Your idea scored PIVOT${score !== undefined ? ` with a ${score}/100` : ""}. The foundation is solid — there's a real pain in the market. The problem is the direction: the way you're approaching it now doesn't fit the current market. Run the 2 tools below to find where the real opportunity is, then adjust your direction and re-validate. If you get GO, all tools unlock automatically.`,
   KILL: (score) =>
-    `Your idea scored KILL${score !== undefined ? ` with a ${score}/100` : ""}. The data shows the market either doesn't exist at scale or is dominated by entrenched players you can't compete with right now. Before you move on, run Competitor Intelligence — understand exactly why, so you don't fall into the same trap with your next idea.`,
+    `Your idea scored KILL${score !== undefined ? ` with a ${score}/100` : ""}. The data shows the market either doesn't exist at scale or is dominated by entrenched players you can't compete with right now. Before you move on, run Competitive Landscape — understand exactly why, so you don't fall into the same trap with your next idea.`,
 };
 
 const TOOL_META: Record<ToolKey, { num: string; label: string; desc: string }> = {
-  simulate:    { num: "02", label: "Simulate Revenue",        desc: "TAM, 3 pricing scenarios, break-even" },
-  landing:     { num: "03", label: "Landing Page",            desc: "AI-generated headline, features, CTA" },
-  customers:   { num: "04", label: "Customer Intelligence",   desc: "Segments, pain points, real quotes" },
-  build:       { num: "05", label: "Engineering Stack",       desc: "Tech stack, libraries, GitHub gaps" },
-  competitors: { num: "06", label: "Competitor Intelligence", desc: "Who exists, how they position, where the gaps are" },
-  "launch-kit": { num: "08", label: "Launch Kit",             desc: "A/B headlines · email sequence · pricing recommendation" },
+  simulate:    { num: "02", label: "Revenue Model",           desc: "TAM, 3 pricing scenarios, break-even" },
+  landing:     { num: "03", label: "Page Brief",              desc: "AI-generated headline, features, CTA" },
+  customers:   { num: "04", label: "ICP Analysis",            desc: "Segments, pain points, real quotes" },
+  build:       { num: "05", label: "Build Spec",              desc: "Tech stack, libraries, GitHub gaps" },
+  competitors: { num: "06", label: "Competitive Landscape",   desc: "Who exists, how they position, where the gaps are" },
+  "launch-kit": { num: "08", label: "GTM Brief",              desc: "A/B headlines · email sequence · pricing recommendation" },
 };
 
 const LOCK_REASONS: Record<ToolKey, Record<"PIVOT" | "KILL", string>> = {

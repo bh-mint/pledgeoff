@@ -24,7 +24,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
     rows: [
       { k: "Validations / month",       f: "1",               fo: "20",             t: "Unlimited",        s: "Unlimited" },
       { k: "Signal sources",            f: "Reddit + GitHub", fo: "All 5 sources",  t: "All 5 sources",    s: "All + custom" },
-      { k: "Competitor Intelligence",   f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "Competitive Landscape",   f: "—",               fo: "✓",              t: "✓",                s: "✓" },
       { k: "PDF / JSON export",         f: "—",               fo: "✓",              t: "✓",                s: "✓ · white-label" },
     ],
   },
@@ -286,7 +286,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                   <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
                 </li>
               ))}
-              {["Competitor Intelligence", "PDF / JSON export"].map((f) => (
+              {["Competitive Landscape", "PDF / JSON export"].map((f) => (
                 <li key={f} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
                   <span className="text-[12px]" style={{ color: "var(--t3)" }}>{f}</span>
@@ -330,7 +330,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               {([
                 { label: "20 validations / month" },
                 { label: "All 5 signal sources" },
-                { label: "Competitor Intelligence" },
+                { label: "Competitive Landscape" },
                 { label: "PDF + JSON export" },
                 { label: "1-year idea history" },
                 { label: "5 Otto questions / mo" },
@@ -365,7 +365,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               {([
                 { label: "Unlimited validations" },
                 { label: "All 5 signal sources" },
-                { label: "Competitor Intelligence" },
+                { label: "Competitive Landscape" },
                 { label: "PDF + JSON export" },
                 { label: "Unlimited idea history" },
                 { label: "3 team seats" },
@@ -401,7 +401,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               {([
                 { label: "Unlimited validations" },
                 { label: "All sources + custom" },
-                { label: "Competitor Intelligence" },
+                { label: "Competitive Landscape" },
                 { label: "White-label reports", soon: true },
                 { label: "8 team seats" },
                 { label: "50 Otto questions / mo" },
