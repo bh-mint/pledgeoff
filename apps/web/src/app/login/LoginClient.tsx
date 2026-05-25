@@ -229,7 +229,7 @@ export function LoginClient() {
         ))}
       </div>
 
-      <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
+      <h1 id="login-heading" className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
         {mode === "signin" ? "Welcome back." : "Start validating."}
       </h1>
       <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
@@ -250,7 +250,7 @@ export function LoginClient() {
         </div>
       )}
 
-      <form onSubmit={handleEmailAuth} className="mt-6 space-y-3">
+      <form onSubmit={handleEmailAuth} aria-labelledby="login-heading" className="mt-6 space-y-3">
         <label className="block">
           <span className="mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>Email</span>
           <div

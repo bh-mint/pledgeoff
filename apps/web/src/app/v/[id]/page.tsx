@@ -139,6 +139,7 @@ export default async function SharePage({ params }: Props) {
               <div
                 className="display tnum font-semibold"
                 style={{ fontSize: "clamp(80px, 12vw, 160px)", lineHeight: 0.85, color: cfg.color }}
+                aria-label={`Score: ${score} out of 100`}
               >
                 {score}
               </div>
@@ -166,7 +167,16 @@ export default async function SharePage({ params }: Props) {
                   {decision.dimensions!.map((d) => {
                     const dimColor = d.score >= 75 ? "var(--validated)" : d.score >= 50 ? "var(--caution)" : "var(--kill)";
                     return (
-                      <div key={d.name} className="py-2 border-b" style={{ borderColor: "var(--border)" }}>
+                      <div
+                        key={d.name}
+                        className="py-2 border-b"
+                        style={{ borderColor: "var(--border)" }}
+                        role="meter"
+                        aria-valuenow={d.score}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label={d.name}
+                      >
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="text-[12px]" style={{ color: "var(--t1)" }}>{d.name}</div>
                           <div className="flex items-center gap-2">

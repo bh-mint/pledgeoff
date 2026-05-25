@@ -170,7 +170,7 @@ export function NewIdeaClient({
       {/* Loading overlay */}
       {status === "loading" && (
         <div className="relative flex-1 flex items-center justify-center px-4">
-          <div className="max-w-lg w-full">
+          <div className="max-w-lg w-full" role="status" aria-live="polite">
             <div className="mono text-[10px] uppercase tracking-[0.14em] mb-8" style={{ color: "var(--t3)" }}>
               {LOADING_MESSAGES[loadingStep].step} / {String(LOADING_MESSAGES.length).padStart(2, "0")} · analyzing
             </div>
@@ -252,6 +252,7 @@ export function NewIdeaClient({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="AI-powered meal planner that adapts to your gym schedule"
               aria-label="Idea title"
+              aria-required="true"
               className="w-full bg-transparent outline-none border-b pb-3 display text-[18px] sm:text-[22px] font-semibold tracking-tight"
               style={{
                 borderColor: title ? "var(--accent)" : "var(--border)",
@@ -285,6 +286,8 @@ export function NewIdeaClient({
               maxLength={1000}
               rows={3}
               placeholder="Who it's for, what it does, why it's different. Be specific — vague briefs validate poorly."
+              aria-label="Idea description"
+              aria-required="true"
               className="w-full bg-transparent outline-none border rounded-md p-4 text-[14px] leading-[1.6] resize-none"
               style={{ borderColor: "var(--border)", color: "var(--t1)" }}
             />

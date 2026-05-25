@@ -115,20 +115,23 @@ function renderCell(val: string, emphasize = false, soon = false) {
 
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
+  const id = `faq-${q.slice(0, 20).replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <div className="border-b" style={{ borderColor: "var(--border)" }}>
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-controls={id}
         className="w-full text-left py-5 flex items-center justify-between gap-4"
       >
         <span className="display text-[16px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
           {q}
         </span>
-        <span className="mono text-[14px] shrink-0" style={{ color: "var(--t3)" }}>
+        <span className="mono text-[14px] shrink-0" style={{ color: "var(--t3)" }} aria-hidden="true">
           {open ? "−" : "+"}
         </span>
       </button>
-      <div style={{ maxHeight: open ? 400 : 0, overflow: "hidden", transition: "max-height 400ms cubic-bezier(0.16,1,0.3,1)" }}>
+      <div id={id} style={{ maxHeight: open ? 400 : 0, overflow: "hidden", transition: "max-height 400ms cubic-bezier(0.16,1,0.3,1)" }}>
         <p className="text-[14px] leading-[1.65] pb-5 max-w-170" style={{ color: "var(--t2)" }}>{a}</p>
       </div>
     </div>

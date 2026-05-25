@@ -138,6 +138,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
               {activeTag !== "all" && (
                 <button
                   onClick={() => handleTagChange("all")}
+                  aria-label="Clear filter"
                   className="mono text-[11px] rounded-full border h-8 px-3 inline-flex items-center transition-colors"
                   style={{ borderColor: "var(--border)", color: "var(--t3)" }}
                 >

@@ -943,6 +943,9 @@ export function SettingsClient({
                         body: JSON.stringify({ [item.key]: next }),
                       });
                     }}
+                    role="switch"
+                    aria-checked={notifState[item.key] ?? false}
+                    aria-label={item.label}
                     className="relative w-11 h-6 rounded-full border shrink-0 mt-0.5"
                     style={{
                       borderColor: "var(--border)",

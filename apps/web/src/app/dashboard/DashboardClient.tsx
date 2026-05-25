@@ -247,6 +247,7 @@ export function DashboardClient({
           </span>
           <Link
             href="/ideas/new"
+            aria-keyshortcuts="n"
             className="mono text-[11px] px-3 h-8 rounded-md border inline-flex items-center gap-1.5 transition-colors hover:border-(--accent) hover:text-(--accent) shrink-0"
             style={{ borderColor: "var(--border)", color: "var(--t2)" }}
           >
@@ -296,6 +297,7 @@ export function DashboardClient({
               onChange={(e) => setSearch(e.target.value)}
               placeholder="search ideas…"
               aria-label="Search ideas"
+              aria-keyshortcuts="/"
               className="w-full sm:w-44 bg-transparent outline-none px-3 h-8 sm:h-7 text-[12px] rounded-md border"
               style={{ borderColor: "var(--border)", color: "var(--t1)" }}
             />

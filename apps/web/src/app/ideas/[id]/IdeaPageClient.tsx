@@ -447,7 +447,7 @@ export function IdeaPageClient({
             {/* Otto header */}
             <div className="flex flex-col items-center text-center gap-4 mb-8 pb-7 border-b"
               style={{ borderColor: "var(--border)" }}>
-              <div className="relative w-28 h-28 flex items-center justify-center">
+              <div className="relative w-28 h-28 flex items-center justify-center" aria-hidden="true">
                 <div className="absolute w-24 h-24 rounded-full otto-ring"
                   style={{ background: "var(--accent)", opacity: 0.08 }} />
                 <div className="absolute w-16 h-16 rounded-full otto-ring"
