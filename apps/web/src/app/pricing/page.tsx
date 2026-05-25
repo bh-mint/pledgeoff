@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PricingClient } from "./PricingClient";
 import { PRICING } from "@/lib/pricing.config";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
 
 export const metadata: Metadata = {
   title: { absolute: "Pricing — PledgeOFF" },
@@ -22,14 +23,36 @@ const jsonLd = {
   url: "https://pledgeoff.com/pricing",
 };
 
-export default function PricingPage() {
+async function getMostPopularPlan(): Promise<"founder" | "team" | "studio" | null> {
+  try {
+    const supabase = createSupabaseServiceClient();
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("plan")
+      .in("plan", ["founder", "team", "studio"])
+      .eq("status", "active");
+    if (!data || data.length === 0) return null;
+    const counts: Record<string, number> = {};
+    for (const row of data) {
+      counts[row.plan as string] = (counts[row.plan as string] ?? 0) + 1;
+    }
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+    return (top?.[0] as "founder" | "team" | "studio") ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function PricingPage() {
+  const popularPlan = await getMostPopularPlan();
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PricingClient />
+      <PricingClient popularPlan={popularPlan} />
     </>
   );
 }

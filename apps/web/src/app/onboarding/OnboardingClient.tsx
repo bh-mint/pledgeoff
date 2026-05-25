@@ -1,8 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/brand/Logo";
+
+const ROLES = [
+  { value: "indie", label: "Indie hacker", desc: "Solo builder validating side projects" },
+  { value: "pm", label: "Product Manager", desc: "Running validation for a team roadmap" },
+  { value: "agency", label: "Agency / Studio", desc: "Validating briefs for multiple clients" },
+] as const;
+
+type Role = (typeof ROLES)[number]["value"];
 
 const STEPS = [
   {
@@ -31,7 +40,18 @@ const STEPS = [
   },
 ];
 
+function saveRole(role: Role) {
+  try { localStorage.setItem("pledgeoff_role", role); } catch { /* ignore */ }
+}
+
 export function OnboardingClient() {
+  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+
+  function handleRoleSelect(role: Role) {
+    setSelectedRole(role);
+    saveRole(role);
+  }
+
   return (
     <div
       className="min-h-screen flex flex-col relative overflow-hidden"
@@ -136,6 +156,35 @@ export function OnboardingClient() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Role selector */}
+          <div className="mb-10">
+            <div className="mono text-[10px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>
+              Who are you building for?
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2">
+              {ROLES.map((r) => {
+                const active = selectedRole === r.value;
+                return (
+                  <button
+                    key={r.value}
+                    onClick={() => handleRoleSelect(r.value)}
+                    className="flex-1 text-left rounded-md border p-3 transition-all"
+                    style={{
+                      borderColor: active ? "var(--accent)" : "var(--border)",
+                      background: active ? "color-mix(in srgb, var(--accent) 8%, transparent)" : "var(--surface)",
+                    }}
+                  >
+                    <div className="flex items-center gap-2 mb-0.5">
+                      {active && <span className="mono text-[9px]" style={{ color: "var(--accent)" }}>●</span>}
+                      <span className="text-[13px] font-semibold" style={{ color: "var(--t1)" }}>{r.label}</span>
+                    </div>
+                    <p className="text-[11px]" style={{ color: "var(--t3)" }}>{r.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* CTA */}

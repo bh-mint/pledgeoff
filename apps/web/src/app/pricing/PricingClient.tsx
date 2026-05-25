@@ -79,6 +79,14 @@ const FAQ = [
     q: "What's the difference between Founder and Team?",
     a: "Founder gives you 20 validations/month and all signal sources — perfect for solo builders. Team removes the monthly cap, adds 3 seats, extra Otto AI questions, and early access to every new feature we ship.",
   },
+  {
+    q: "Is the verdict really accurate?",
+    a: "It depends on what you mean by accurate. PledgeOFF doesn't predict the future — it surfaces real signals from Reddit, GitHub, HN, and more to show what the market is saying right now. Every source is linked so you can verify. We track your outcomes over time: GO verdicts where founders built and it worked, KILL verdicts where they didn't build and saved months. The accuracy rate is visible in your settings.",
+  },
+  {
+    q: "What happens to my data?",
+    a: "Your idea text and validation results are stored in our EU-hosted database (Supabase, Frankfurt region). We don't sell your data, use it to train models, or share it with third parties — except the infrastructure providers listed in our Privacy Policy. You can export everything or delete your account at any time from Settings → Danger Zone.",
+  },
 ];
 
 function SoonBadge() {
@@ -194,7 +202,7 @@ function UpgradeButton({
   );
 }
 
-export function PricingClient() {
+export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team" | "studio" | null }) {
   const [billing, setBilling] = useState<"month" | "year">("month");
 
   const founderPrice = billing === "month" ? String(PRICING.founder.monthly.eur) : String(PRICING.founder.monthly.annual_equivalent);
@@ -305,7 +313,9 @@ export function PricingClient() {
             <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: "var(--accent)" }} />
             <div className="flex items-baseline justify-between mb-1">
               <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Founder</div>
-              <span className="mono text-[10px]" style={{ color: "var(--accent)" }}>● best value</span>
+              <span className="mono text-[10px]" style={{ color: "var(--accent)" }}>
+                {popularPlan === "founder" ? "● most popular" : "● best value"}
+              </span>
             </div>
             <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>solo builder</div>
             <div className="flex items-baseline gap-1">
@@ -336,8 +346,13 @@ export function PricingClient() {
 
           {/* Team */}
           <div className="p-6 border-b sm:border-b-0 sm:border-r flex flex-col" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-            <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Team</div>
-            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>unlimited + collaborate</div>
+            <div className="flex items-baseline justify-between">
+              <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Team</div>
+              {popularPlan === "team" && (
+                <span className="mono text-[10px]" style={{ color: "var(--validated)" }}>● most popular</span>
+              )}
+            </div>
+            <div className="text-[12px] mb-4 mt-1" style={{ color: "var(--t3)" }}>unlimited + collaborate</div>
             <div className="flex items-baseline gap-1">
               <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{teamPrice}</span>
             </div>
@@ -367,8 +382,13 @@ export function PricingClient() {
 
           {/* Studio */}
           <div className="p-6 flex flex-col" style={{ background: "var(--canvas)" }}>
-            <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Studio</div>
-            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>agencies & studios</div>
+            <div className="flex items-baseline justify-between">
+              <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Studio</div>
+              {popularPlan === "studio" && (
+                <span className="mono text-[10px]" style={{ color: "var(--t2)" }}>● most popular</span>
+              )}
+            </div>
+            <div className="text-[12px] mb-4 mt-1" style={{ color: "var(--t3)" }}>agencies & studios</div>
             <div className="flex items-baseline gap-1">
               <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{studioPrice}</span>
             </div>

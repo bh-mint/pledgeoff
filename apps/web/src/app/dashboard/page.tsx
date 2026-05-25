@@ -15,6 +15,7 @@ import { WeeklyDigestBanner } from "@/components/WeeklyDigestBanner";
 import type { Decision } from "@pledgeoff/core";
 import { logger } from "@pledgeoff/observability";
 import { StatNumber } from "@/components/StatNumber";
+import { RoleGreeting } from "@/components/RoleGreeting";
 
 export const metadata: Metadata = {
   title: { absolute: "Dashboard — PledgeOFF" },
@@ -423,6 +424,9 @@ export default async function DashboardPage() {
               </div>
             </div>
           )}
+
+          {/* Role-specific greeting — reads from localStorage set during onboarding */}
+          <RoleGreeting />
 
           {/* Weekly digest opt-in banner — dismissible */}
           {onboardingDone && <WeeklyDigestBanner />}

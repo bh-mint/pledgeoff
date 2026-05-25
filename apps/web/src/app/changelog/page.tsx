@@ -11,9 +11,37 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "3.2",
+    date: "May 2026",
+    tag: "IMPROVED",
+    items: [
+      "Dashboard: animated score count-up, today's highlight, keyboard shortcuts (N → new idea, / → search), weekly digest opt-in banner",
+      "Ideas page: re-validate button with score diff display (Score: 79 → 82 +3), tool group filter pills (All / Analysis / Execution / Intelligence), share verdict clipboard button",
+      "Ideas new: 3 clickable example ideas, upgrade CTA when validations exhausted, dynamic loading overlay with 6 rotating messages",
+      "Blog: search, article count on filter pills, mid-article CTA at 60% scroll, TOC accordion on mobile, highlight-to-tweet, per-article OG image",
+      "Settings: usage stats strip, notification preferences (5 email toggles), GDPR data export as JSON attachment",
+      "Homepage: ROI calculator on pricing page, 'Who this is for' profiles, 'Last validated X ago' live badge, animated floating signal cards",
+      "Accessibility: :focus-visible ring globally, aria-label on all major inputs, screen-reader utilities",
+    ],
+  },
+  {
+    version: "3.1",
+    date: "May 2026",
+    tag: "NEW",
+    items: [
+      "Launch Kit: generate a go-to-market brief for any validated idea — positioning statement, target audience, channel mix, and 30-day launch plan (Founder+)",
+      "Decision Queue: AI-ranked list of your ideas by strategic priority — updated nightly, with explanation per idea (Team+)",
+      "Engineering Intelligence: connect GitHub to unlock velocity metrics (cycle time, throughput, bottlenecks) and delivery estimates per idea (Team+)",
+      "Decision Audit Trail: full timeline of every verdict, re-validation, and outcome on an idea — PDF export for Studio+",
+      "Data Flywheel: report what happened after each verdict — GO/KILL/PIVOT outcomes feed into your accuracy score over time",
+      "Accuracy Report: monthly email with your personal GO / KILL accuracy rate vs. the platform average",
+      "Plan rename: Pro → Founder · Pro+ → Team · Agency → Studio — pricing and limits unchanged",
+    ],
+  },
+  {
     version: "3.0",
     date: "May 2026",
-    tag: "FEATURE",
+    tag: "NEW",
     items: [
       "Agency plan launched at €499/month (€399/month annual) — includes all Pro+ features plus white-label PDF exports, advanced team analytics, NET30 invoicing on request, and a full activity audit log",
       "Pricing updated across all tiers: Pro €149/month, Pro+ €249/month, Agency €499/month — annual plans available with up to 20% savings",
@@ -319,6 +347,9 @@ const RELEASES = [
 ];
 
 const TAG_COLORS: Record<string, string> = {
+  NEW:         "var(--validated)",
+  IMPROVED:    "var(--caution)",
+  FIXED:       "var(--t3)",
   UI:          "var(--accent)",
   DESIGN:      "var(--validated)",
   CONTENT:     "var(--caution)",

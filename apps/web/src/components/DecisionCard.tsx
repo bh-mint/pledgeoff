@@ -1,8 +1,46 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Decision } from "@pledgeoff/core";
 import { VerdictMark } from "@/components/brand/VerdictMark";
+
+function ScoreTooltip() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative inline-flex items-center self-end mb-3 ml-1">
+      <button
+        onClick={() => setOpen(!open)}
+        className="mono text-[10px] w-4 h-4 rounded-full border flex items-center justify-center transition-colors"
+        style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+        aria-label="What does this score mean?"
+      >
+        ?
+      </button>
+      {open && (
+        <div
+          className="absolute left-6 bottom-0 z-20 rounded-md border p-3 text-[12px] leading-[1.55] w-56"
+          style={{ background: "var(--surface)", borderColor: "var(--border)", color: "var(--t2)" }}
+        >
+          <strong style={{ color: "var(--t1)", display: "block", marginBottom: "4px" }}>How to read the score</strong>
+          75–100 → strong market signal, consider building<br />
+          50–74 → moderate signal, validate further<br />
+          0–49 → weak signal, market evidence is thin
+        </div>
+      )}
+    </div>
+  );
+}
 
 const VERDICT_CONFIG = {
   GO: {
@@ -107,15 +145,18 @@ export function DecisionCard({ decision, ideaId, categoryAvg }: DecisionCardProp
             transform: revealed ? "none" : "translateY(6px)",
           }}
         >
-          <div
-            className="display tnum font-semibold"
-            style={{
-              fontSize: "clamp(100px, 12vw, 200px)",
-              lineHeight: 0.85,
-              color: cfg.color,
-            }}
-          >
-            {displayScore}
+          <div className="flex items-end gap-1">
+            <div
+              className="display tnum font-semibold"
+              style={{
+                fontSize: "clamp(100px, 12vw, 200px)",
+                lineHeight: 0.85,
+                color: cfg.color,
+              }}
+            >
+              {displayScore}
+            </div>
+            <ScoreTooltip />
           </div>
           <div className="pb-2">
             <div className="flex items-center gap-3 mb-2">

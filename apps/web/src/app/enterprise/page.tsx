@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
+import { EnterpriseContactForm } from "./EnterpriseContactForm";
 
 export const metadata: Metadata = {
   title: { absolute: "Enterprise — PledgeOFF" },
@@ -86,7 +87,7 @@ export default function EnterprisePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
-                href="mailto:hello@pledgeoff.com?subject=Enterprise%20enquiry&body=Hi%2C%0A%0AWe%27re%20interested%20in%20PledgeOFF%20Enterprise.%0A%0ACompany%3A%20%0ATeam%20size%3A%20%0AUse%20case%3A%20"
+                href="#contact"
                 className="display text-[14px] font-semibold px-6 h-11 rounded-md inline-flex items-center transition-opacity hover:opacity-90"
                 style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
               >
@@ -183,32 +184,9 @@ export default function EnterprisePage() {
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-t pt-10" style={{ borderColor: "var(--border)" }}>
-            <div>
-              <div className="display text-[24px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
-                Ready to talk?
-              </div>
-              <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
-                We respond within 4 hours, weekdays. No sales call if you don&apos;t want one.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3 shrink-0">
-              <a
-                href="mailto:hello@pledgeoff.com?subject=Enterprise%20enquiry&body=Hi%2C%0A%0AWe%27re%20interested%20in%20PledgeOFF%20Enterprise.%0A%0ACompany%3A%20%0ATeam%20size%3A%20%0AUse%20case%3A%20"
-                className="display text-[14px] font-semibold px-6 h-11 rounded-md inline-flex items-center transition-opacity hover:opacity-90"
-                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-              >
-                Contact us →
-              </a>
-              <Link
-                href="/pricing"
-                className="mono text-[12px] px-6 h-11 rounded-md border inline-flex items-center"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                Compare all plans
-              </Link>
-            </div>
+          {/* Contact form */}
+          <div className="max-w-lg">
+            <EnterpriseContactForm />
           </div>
         </div>
 

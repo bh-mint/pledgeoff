@@ -223,6 +223,17 @@ export default async function SharePage({ params }: Props) {
         </div>
       </div>
 
+      {/* Branding strip */}
+      <div className="border-t py-4 flex items-center justify-center" style={{ borderColor: "var(--border)" }}>
+        <Link
+          href="/"
+          className="mono text-[10px] transition-opacity hover:opacity-70"
+          style={{ color: "var(--t3)" }}
+        >
+          Validated with PledgeOFF →
+        </Link>
+      </div>
+
       <FooterMicro />
     </div>
   );

@@ -15,6 +15,9 @@ const START_HERE_SLUGS = [
   "how-to-decide-when-to-quit-your-idea-and-move-on",
 ];
 
+// Updated weekly — slug of the most-read article this week
+const TRENDING_SLUG = "how-to-know-if-youre-building-for-a-real-problem";
+
 type Category = "all" | "idea-validation" | "product-decisions" | "founder";
 
 const CATEGORIES: { value: Category; label: string; color?: string }[] = [
@@ -239,6 +242,18 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                 <div className="flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-start gap-3">
                   <div className="sm:col-span-3 flex items-center gap-3 sm:block">
                     <div className="mono text-[10px]" style={{ color: "var(--accent)" }}>▎ FEATURED</div>
+                    {featured.slug === TRENDING_SLUG && (
+                      <span
+                        className="mono text-[9px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded inline-flex items-center gap-1 sm:mt-1"
+                        style={{
+                          color: "var(--caution)",
+                          background: "color-mix(in srgb, var(--caution) 12%, transparent)",
+                          border: "1px solid color-mix(in srgb, var(--caution) 25%, transparent)",
+                        }}
+                      >
+                        ▲ trending
+                      </span>
+                    )}
                     <div className="mono text-[10px] sm:mt-2" style={{ color: "var(--t3)" }}>
                       {formatDate(featured.publishedAt).toUpperCase()}
                     </div>
@@ -293,11 +308,25 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                         <span>→</span>
                       </div>
                     </div>
-                    <div
-                      className="sm:col-span-7 display text-[16px] sm:text-[18px] font-medium leading-snug"
-                      style={{ color: "var(--t1)" }}
-                    >
-                      {article.title}
+                    <div className="sm:col-span-7">
+                      <div
+                        className="display text-[16px] sm:text-[18px] font-medium leading-snug"
+                        style={{ color: "var(--t1)" }}
+                      >
+                        {article.title}
+                      </div>
+                      {article.slug === TRENDING_SLUG && (
+                        <span
+                          className="mono text-[9px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded inline-flex items-center gap-1 mt-1"
+                          style={{
+                            color: "var(--caution)",
+                            background: "color-mix(in srgb, var(--caution) 12%, transparent)",
+                            border: "1px solid color-mix(in srgb, var(--caution) 25%, transparent)",
+                          }}
+                        >
+                          ▲ trending this week
+                        </span>
+                      )}
                     </div>
                     <div className="hidden sm:block sm:col-span-1 mono text-[11px]" style={{ color: "var(--t3)" }}>
                       {article.readingTime} MIN
