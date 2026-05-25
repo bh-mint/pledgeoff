@@ -126,6 +126,7 @@ export default async function SettingsPage() {
 
         <SettingsClient
           email={user.email ?? ""}
+          provider={(user.app_metadata as { provider?: string } | undefined)?.provider ?? null}
           firstName={(profileResult.data as { first_name?: string | null } | null)?.first_name ?? null}
           lastName={(profileResult.data as { last_name?: string | null } | null)?.last_name ?? null}
           username={(profileResult.data as { username?: string | null } | null)?.username ?? null}

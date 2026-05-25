@@ -72,7 +72,7 @@ export function NewIdeaClient({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!valid) return;
+    if (!valid || validationsLeft === 0) return;
 
     setStatus("loading");
     setLoadingStep(0);
@@ -288,7 +288,7 @@ export function NewIdeaClient({
               placeholder="Who it's for, what it does, why it's different. Be specific — vague briefs validate poorly."
               aria-label="Idea description"
               aria-required="true"
-              className="w-full bg-transparent outline-none border rounded-md p-4 text-[14px] leading-[1.6] resize-none"
+              className="w-full bg-transparent outline-none border-b pb-3 text-[14px] leading-[1.6] resize-none"
               style={{ borderColor: "var(--border)", color: "var(--t1)" }}
             />
             <div className="mt-2 flex justify-between mono text-[10px]">
@@ -323,7 +323,7 @@ export function NewIdeaClient({
                     setDesc(ex.desc);
                     setCat(ex.cat);
                   }}
-                  className="mono text-[10px] px-3 h-9 rounded border transition-all text-left truncate max-w-[240px]"
+                  className="mono text-[10px] px-3 h-9 rounded border transition-all text-left max-w-[300px] whitespace-normal"
                   style={{ borderColor: "var(--border)", color: "var(--t3)", background: "var(--surface)" }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = "var(--accent)";
@@ -406,6 +406,7 @@ export function NewIdeaClient({
           {/* Upgrade CTA — shown when validations exhausted, directly above submit */}
           {validationsLeft === 0 && (
             <div
+              id="upgrade-banner"
               className="mt-10 rounded-md border px-4 py-3 flex items-center justify-between gap-4 flex-wrap"
               style={{ borderColor: "rgba(214,255,61,0.25)", background: "rgba(214,255,61,0.04)" }}
             >
@@ -426,7 +427,9 @@ export function NewIdeaClient({
           <div className={`flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 ${validationsLeft === 0 ? "mt-4" : "mt-10"}`}>
             <button
               type="submit"
-              disabled={!valid || status === "loading" || validationsLeft === 0}
+              disabled={!valid || status === "loading"}
+              aria-disabled={!valid || status === "loading" || validationsLeft === 0 ? true : undefined}
+              aria-describedby={validationsLeft === 0 ? "upgrade-banner" : undefined}
               className="display text-[14px] font-semibold px-6 h-12 rounded-md flex items-center justify-center gap-2 transition-all"
               style={{
                 background: valid && validationsLeft > 0 ? "var(--accent)" : "var(--surface)",

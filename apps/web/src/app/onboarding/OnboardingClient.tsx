@@ -71,12 +71,12 @@ export function OnboardingClient() {
         className="relative px-6 sm:px-10 h-14 flex items-center justify-between border-b"
         style={{ borderColor: "var(--border)" }}
       >
-        <div className="flex items-center gap-2" style={{ color: "var(--t1)" }}>
+        <Link href="/" className="flex items-center gap-2" style={{ color: "var(--t1)" }}>
           <Logo size={22} />
           <span className="display text-[15px] font-semibold tracking-tight">
             Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
           </span>
-        </div>
+        </Link>
         <div className="flex items-center gap-4">
           <ThemeToggle />
           <div className="w-px h-4" style={{ background: "var(--border)" }} />

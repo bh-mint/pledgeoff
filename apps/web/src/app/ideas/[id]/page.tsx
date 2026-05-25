@@ -119,6 +119,7 @@ export default async function IdeaPage({ params }: Props) {
         <div className="max-w-180">
           <Link
             href="/dashboard"
+            aria-label="Back to Dashboard"
             className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
           >
             ← Back to Dashboard
@@ -143,7 +144,8 @@ export default async function IdeaPage({ params }: Props) {
                 </span>
               )}
             </div>
-              <div className="flex items-center gap-2 flex-wrap">
+              {/* Desktop action buttons */}
+              <div className="hidden sm:flex items-center gap-2 flex-wrap">
                 {decision && <ShareVerdictButton ideaId={id} />}
                 {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
                 {isOlderThan30Days && (
@@ -151,6 +153,26 @@ export default async function IdeaPage({ params }: Props) {
                 )}
                 <ExportButtons ideaId={id} plan={plan} />
               </div>
+              {/* Mobile actions dropdown */}
+              <details className="sm:hidden relative">
+                <summary
+                  className="list-none mono text-[11px] h-9 px-3 rounded-md border cursor-pointer inline-flex items-center select-none"
+                  style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+                >
+                  ⋯ More
+                </summary>
+                <div
+                  className="absolute right-0 top-full mt-1 z-50 flex flex-col gap-1 rounded-md border p-2"
+                  style={{ borderColor: "var(--border)", background: "var(--canvas)", minWidth: "160px" }}
+                >
+                  {decision && <ShareVerdictButton ideaId={id} />}
+                  {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
+                  {isOlderThan30Days && (
+                    <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
+                  )}
+                  <ExportButtons ideaId={id} plan={plan} />
+                </div>
+              </details>
             </div>
             <h1 className="display text-[22px] font-semibold tracking-tight text-(--t1) leading-snug mb-3">
               {title}

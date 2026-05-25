@@ -149,9 +149,12 @@ function UpgradeButton({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
 
   async function handleClick() {
+    if (!priceId) { setUnavailable(true); return; }
     setLoading(true);
+    setUnavailable(false);
     try {
       const supabase = createSupabaseBrowserClient();
       const { data: sessionData } = await supabase.auth.getSession();
@@ -174,6 +177,8 @@ function UpgradeButton({
       const json = await res.json() as { data?: { url: string } };
       if (json.data?.url) {
         window.location.href = json.data.url;
+      } else {
+        setUnavailable(true);
       }
     } finally {
       setLoading(false);
@@ -182,26 +187,40 @@ function UpgradeButton({
 
   if (primary) {
     return (
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="display w-full h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
-        style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-      >
-        {loading ? "Redirecting…" : label}
-      </button>
+      <div className="w-full">
+        <button
+          onClick={handleClick}
+          disabled={loading}
+          className="display w-full h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
+          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+        >
+          {loading ? "Redirecting…" : label}
+        </button>
+        {unavailable && (
+          <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
+            Plan unavailable — contact support
+          </p>
+        )}
+      </div>
     );
   }
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors disabled:opacity-60"
-      style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-    >
-      {loading ? "Redirecting…" : label}
-    </button>
+    <div className="w-full">
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors disabled:opacity-60"
+        style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+      >
+        {loading ? "Redirecting…" : label}
+      </button>
+      {unavailable && (
+        <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
+          Plan unavailable — contact support
+        </p>
+      )}
+    </div>
   );
 }
 

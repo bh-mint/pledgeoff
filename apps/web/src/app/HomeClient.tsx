@@ -239,12 +239,14 @@ export function HomeClient() {
             <div className="mt-10 flex flex-wrap items-center gap-3">
               <Link
                 href="/ideas/new"
+                aria-label="Validate your idea"
                 className="display text-[13px] font-semibold px-5 h-11 rounded-md bg-(--accent) text-black flex items-center gap-2 hover:opacity-90 transition-opacity"
               >
                 Validate your idea →
               </Link>
               <Link
                 href="/v/561bc83d-00d8-4bf0-a874-9643fa8fbf62"
+                aria-label="See a live verdict"
                 className="text-[12px] px-5 h-11 rounded-md border border-(--border) text-(--t1) flex items-center gap-2 hover:border-(--t3) transition-colors"
               >
                 See a live verdict →

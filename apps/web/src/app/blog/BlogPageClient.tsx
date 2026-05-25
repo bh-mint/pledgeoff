@@ -129,7 +129,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                       fontWeight: isActive ? 600 : 400,
                     }}
                   >
-                    {isActive && <span className="text-[8px]">●</span>}
+                    {isActive && <span className="text-[8px]" aria-hidden="true">●</span>}
                     {c.label}
                     <span style={{ opacity: 0.6 }}>({count})</span>
                   </button>
@@ -150,9 +150,8 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
         </div>
       </section>
 
-      {/* Start here */}
-      {activeTag === "all" && !query && (
-        <section className="border-b" style={{ borderColor: "var(--border)" }}>
+      {/* Start here — always visible */}
+      <section className="border-b" style={{ borderColor: "var(--border)" }}>
           <div className="max-w-[1100px] mx-auto px-8 py-8">
             <div className="mono text-[10px] uppercase tracking-[0.1em] mb-4" style={{ color: "var(--t3)" }}>
               ▎ Start here — if it&apos;s your first time
@@ -182,7 +181,6 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
             </div>
           </div>
         </section>
-      )}
 
       {/* Sticky filter bar */}
       <section
@@ -206,7 +204,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                       : { borderColor: "var(--border)", color: "var(--t2)" }
                   }
                 >
-                  {active && <span className="mr-1 text-[8px]" style={{ color: activeColor }}>●</span>}
+                  {active && <span className="mr-1 text-[8px]" style={{ color: activeColor }} aria-hidden="true">●</span>}
                   {label}
                   <span className="ml-1.5 mono text-[10px]" style={{ color: "var(--t3)" }}>{count}</span>
                 </button>
@@ -252,7 +250,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                           border: "1px solid color-mix(in srgb, var(--caution) 25%, transparent)",
                         }}
                       >
-                        ▲ trending
+                        <span aria-hidden="true">▲ </span>trending
                       </span>
                     )}
                     <div className="mono text-[10px] sm:mt-2" style={{ color: "var(--t3)" }}>
@@ -325,7 +323,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                             border: "1px solid color-mix(in srgb, var(--caution) 25%, transparent)",
                           }}
                         >
-                          ▲ trending this week
+                          <span aria-hidden="true">▲ </span>trending this week
                         </span>
                       )}
                     </div>

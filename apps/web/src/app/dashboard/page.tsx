@@ -426,13 +426,13 @@ export default async function DashboardPage() {
           )}
 
           {/* Role-specific greeting — reads from localStorage set during onboarding */}
-          <RoleGreeting />
+          {rows.length > 0 && <RoleGreeting />}
 
           {/* Weekly digest opt-in banner — dismissible */}
           {onboardingDone && <WeeklyDigestBanner />}
 
-          {/* Onboarding checklist — hidden once all done */}
-          {!onboardingDone && (
+          {/* Onboarding checklist — hidden once all done or when no ideas yet */}
+          {!onboardingDone && rows.length > 0 && (
             <div
               className="rounded-md border p-5"
               style={{ borderColor: "var(--border)", background: "var(--surface)" }}

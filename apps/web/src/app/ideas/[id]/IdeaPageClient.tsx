@@ -267,11 +267,7 @@ function OttoSection({
 
   return (
     <div className="space-y-0">
-      <p className="text-[13px] leading-[1.65] mb-5" style={{ color: "var(--t2)" }}>
-        {message}
-      </p>
-
-      {/* Group filter pills */}
+      {/* Group filter pills — above the message */}
       <div className="flex flex-wrap gap-1.5 mb-6">
         {(Object.keys(TOOL_GROUP_LABELS) as ToolGroup[]).map((g) => (
           <button
@@ -287,6 +283,10 @@ function OttoSection({
           </button>
         ))}
       </div>
+
+      <p className="text-[13px] leading-[1.65] mb-5" style={{ color: "var(--t2)" }}>
+        {message}
+      </p>
 
       {/* Available tools — rendered inline */}
       {filteredAvailable.map((key) => (
@@ -425,9 +425,10 @@ export function IdeaPageClient({
       </div>
 
       {/* ── 3-column grid ── */}
+      {/* On mobile: DecisionCard → Signals → Otto (via CSS order). On xl: columns 1→2→3. */}
       <div className="grid xl:grid-cols-[420px_1fr_320px] gap-8 items-start">
 
-        {/* ── LEFT: Decision card (sticky) ── */}
+        {/* ── LEFT: Decision card (sticky) — order 1 always ── */}
         <div className="xl:sticky xl:top-6 xl:self-start">
           {decision ? (
             <>
@@ -441,9 +442,9 @@ export function IdeaPageClient({
           )}
         </div>
 
-        {/* ── MIDDLE: Otto + Intelligence Tools inline ── */}
+        {/* ── MIDDLE: Otto + Intelligence Tools — order 3 on mobile, 2 on xl ── */}
         {decision ? (
-          <div className="min-w-0">
+          <div className="min-w-0 order-3 xl:order-2">
             {/* Otto header */}
             <div className="flex flex-col items-center text-center gap-4 mb-8 pb-7 border-b"
               style={{ borderColor: "var(--border)" }}>
@@ -481,11 +482,11 @@ export function IdeaPageClient({
             />
           </div>
         ) : (
-          <div />
+          <div className="order-3 xl:order-2" />
         )}
 
-        {/* ── RIGHT: Signals ── */}
-        <div>
+        {/* ── RIGHT: Signals — order 2 on mobile, 3 on xl ── */}
+        <div className="order-2 xl:order-3">
           {decision && signals.length === 0 && (
             <>
               <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em] mb-4">

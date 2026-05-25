@@ -206,7 +206,7 @@ export function DashboardClient({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setTab("personal")}
-            className="mono text-[11px] px-3 h-8 rounded-md border transition-colors"
+            className="mono text-[11px] px-3 h-10 rounded-md border transition-colors"
             style={{
               background: tab === "personal" ? "var(--accent)" : "transparent",
               color: tab === "personal" ? "var(--accent-fg)" : "var(--t2)",
@@ -218,7 +218,7 @@ export function DashboardClient({
           {showTeamTab && (
             <button
               onClick={() => setTab("team")}
-              className="mono text-[11px] px-3 h-8 rounded-md border transition-colors"
+              className="mono text-[11px] px-3 h-10 rounded-md border transition-colors"
               style={{
                 background: tab === "team" ? "var(--accent)" : "transparent",
                 color: tab === "team" ? "var(--accent-fg)" : "var(--t2)",
@@ -230,7 +230,7 @@ export function DashboardClient({
           )}
           <button
             onClick={() => setTab("queue")}
-            className="mono text-[11px] px-3 h-8 rounded-md border transition-colors"
+            className="mono text-[11px] px-3 h-10 rounded-md border transition-colors"
             style={{
               background: tab === "queue" ? "var(--accent)" : "transparent",
               color: tab === "queue" ? "var(--accent-fg)" : "var(--t2)",

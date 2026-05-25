@@ -23,6 +23,7 @@ type AvailablePlan = {
 
 interface SettingsClientProps {
   email: string;
+  provider?: string | null;
   firstName: string | null;
   lastName: string | null;
   username: string | null;
@@ -115,6 +116,7 @@ const NOTIFICATION_ITEMS = [
 
 export function SettingsClient({
   email,
+  provider,
   firstName,
   lastName,
   username,
@@ -326,6 +328,7 @@ export function SettingsClient({
             <button
               key={s.id}
               onClick={() => setSection(s.id)}
+              aria-current={active ? "page" : undefined}
               className="mono text-[10px] whitespace-nowrap px-3 py-1.5 rounded-md shrink-0 transition-colors"
               style={{
                 background: active ? "var(--accent)" : "var(--surface)",
@@ -354,10 +357,13 @@ export function SettingsClient({
               <button
                 key={s.id}
                 onClick={() => setSection(s.id)}
-                className="text-left text-[13px] py-2.5 border-b flex items-center justify-between transition-colors"
+                aria-current={active ? "page" : undefined}
+                className="text-left text-[13px] py-2.5 border-b flex items-center justify-between transition-all rounded-sm"
                 style={{
                   borderColor: "var(--border)",
                   color: active ? "var(--t1)" : "var(--t2)",
+                  background: active ? "color-mix(in srgb, var(--accent) 8%, transparent)" : "transparent",
+                  paddingLeft: active ? "12px" : "8px",
                 }}
               >
                 {s.label}
@@ -423,6 +429,7 @@ export function SettingsClient({
                     value={first}
                     onChange={(e) => { setFirst(e.target.value); setSaveStatus("idle"); }}
                     placeholder="First name"
+                    autoComplete="given-name"
                     className="w-full bg-(--canvas) border rounded-md px-3 h-9 text-[13px] text-(--t1) outline-none focus:border-(--accent) transition-colors"
                     style={{ borderColor: "var(--border)" }}
                   />
@@ -437,6 +444,7 @@ export function SettingsClient({
                     value={last}
                     onChange={(e) => { setLast(e.target.value); setSaveStatus("idle"); }}
                     placeholder="Last name"
+                    autoComplete="family-name"
                     className="w-full bg-(--canvas) border rounded-md px-3 h-9 text-[13px] text-(--t1) outline-none focus:border-(--accent) transition-colors"
                     style={{ borderColor: "var(--border)" }}
                   />
@@ -453,6 +461,7 @@ export function SettingsClient({
                       value={uname}
                       onChange={(e) => { setUname(e.target.value.toLowerCase()); setSaveStatus("idle"); }}
                       placeholder="your_handle"
+                      autoComplete="username"
                       className="flex-1 bg-(--canvas) border rounded-r-md px-3 h-9 text-[13px] text-(--t1) outline-none focus:border-(--accent) transition-colors"
                       style={{ borderColor: "var(--border)" }}
                     />
@@ -469,7 +478,7 @@ export function SettingsClient({
                 <button
                   onClick={handleSave}
                   disabled={saveStatus === "saving" || !first.trim()}
-                  className="mono text-[11px] h-8 px-4 rounded-md border transition-colors disabled:opacity-50"
+                  className="mono text-[11px] h-10 px-4 rounded-md border transition-colors disabled:opacity-50"
                   style={{
                     borderColor: saveStatus === "saved" ? "var(--validated)" : "var(--border)",
                     color: saveStatus === "saved" ? "var(--validated)" : "var(--t2)",
@@ -487,6 +496,7 @@ export function SettingsClient({
                     value={company}
                     onChange={(e) => { setCompany(e.target.value); setSaveStatus("idle"); }}
                     placeholder="Your company name (used in PDF reports)"
+                    autoComplete="organization"
                     className="w-full bg-(--canvas) border rounded-md px-3 h-9 text-[13px] text-(--t1) outline-none focus:border-(--accent) transition-colors"
                     style={{ borderColor: "var(--border)" }}
                   />
@@ -501,7 +511,11 @@ export function SettingsClient({
                 <div className="col-span-3 mono text-[10px] uppercase tracking-[0.12em] pt-0.5" style={{ color: "var(--t3)" }}>Email</div>
                 <div className="col-span-9">
                   <div className="text-[13px] text-(--t1)">{email}</div>
-                  <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>Managed by Google — change in your Google account.</div>
+                  <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>
+                    {provider === "google"
+                      ? "Managed by Google — change in your Google account."
+                      : "Contact support to change your email."}
+                  </div>
                 </div>
               </div>
 
@@ -848,7 +862,7 @@ export function SettingsClient({
                     <button
                       onClick={() => setSeatExtra((n) => Math.max(0, n - 1))}
                       disabled={seatExtra === 0}
-                      className="w-8 h-8 rounded-md border mono text-[16px] flex items-center justify-center transition-colors disabled:opacity-30"
+                      className="w-10 h-10 rounded-md border mono text-[16px] flex items-center justify-center transition-colors disabled:opacity-30"
                       style={{ borderColor: "var(--border)", color: "var(--t2)" }}
                     >
                       −
@@ -857,7 +871,7 @@ export function SettingsClient({
                     <button
                       onClick={() => setSeatExtra((n) => Math.min(97, n + 1))}
                       disabled={seatExtra >= 97}
-                      className="w-8 h-8 rounded-md border mono text-[16px] flex items-center justify-center transition-colors disabled:opacity-30"
+                      className="w-10 h-10 rounded-md border mono text-[16px] flex items-center justify-center transition-colors disabled:opacity-30"
                       style={{ borderColor: "var(--border)", color: "var(--t2)" }}
                     >
                       +
