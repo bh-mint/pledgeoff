@@ -44,12 +44,21 @@ function saveRole(role: Role) {
   try { localStorage.setItem("pledgeoff_role", role); } catch { /* ignore */ }
 }
 
+function persistRoleToDb(role: Role) {
+  void fetch("/api/v1/profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role }),
+  });
+}
+
 export function OnboardingClient() {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
 
   function handleRoleSelect(role: Role) {
     setSelectedRole(role);
     saveRole(role);
+    persistRoleToDb(role);
   }
 
   return (

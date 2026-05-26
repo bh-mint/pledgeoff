@@ -7,13 +7,15 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json();
-  const firstName = typeof body.first_name === "string" ? body.first_name.trim() : null;
-  const lastName = typeof body.last_name === "string" ? body.last_name.trim() : null;
+  const body = await req.json() as Record<string, unknown>;
+  const hasFirstName = "first_name" in body;
+  const firstName = hasFirstName && typeof body.first_name === "string" ? body.first_name.trim() : undefined;
+  const lastName = typeof body.last_name === "string" ? body.last_name.trim() : undefined;
   const username = typeof body.username === "string" ? body.username.trim().toLowerCase() : undefined;
   const companyName = typeof body.company_name === "string" ? body.company_name.trim() : undefined;
+  const role = typeof body.role === "string" ? body.role : undefined;
 
-  if (!firstName) {
+  if (hasFirstName && !firstName) {
     return NextResponse.json({ error: "first_name is required" }, { status: 400 });
   }
 
@@ -24,13 +26,22 @@ export async function PATCH(req: NextRequest) {
     );
   }
 
+  if (role !== undefined && !["indie", "pm", "agency"].includes(role)) {
+    return NextResponse.json({ error: "Invalid role value" }, { status: 400 });
+  }
+
   const updatePayload: Record<string, string | null> = {
-    first_name: firstName,
-    last_name: lastName || null,
     updated_at: new Date().toISOString(),
   };
+  if (firstName !== undefined) updatePayload.first_name = firstName;
+  if (lastName !== undefined) updatePayload.last_name = lastName || null;
   if (username !== undefined) updatePayload.username = username || null;
   if (companyName !== undefined) updatePayload.company_name = companyName || null;
+  if (role !== undefined) updatePayload.role = role;
+
+  if (Object.keys(updatePayload).length === 1) {
+    return NextResponse.json({ ok: true });
+  }
 
   const { error } = await supabase
     .from("profiles")
