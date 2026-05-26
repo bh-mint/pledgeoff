@@ -79,8 +79,8 @@ export function DashboardClient({
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date");
   const searchRef = useRef<HTMLInputElement>(null);
-  const initialTab = (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "queue") ? "queue" as const : "personal" as const;
-  const [tab, setTab] = useState<"personal" | "team" | "queue">(initialTab);
+  const initialTab = (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "priority") ? "priority" as const : "all" as const;
+  const [tab, setTab] = useState<"all" | "team" | "priority">(initialTab);
   const [verdictFilter, setVerdictFilter] = useState<string>("all");
   const [memberFilter, setMemberFilter] = useState<string>("all");
   const searchParams = useSearchParams();
@@ -202,15 +202,15 @@ export function DashboardClient({
       <div className="flex items-center justify-between mb-4 gap-3">
         <div className="flex items-center gap-1">
           <button
-            onClick={() => setTab("personal")}
+            onClick={() => setTab("all")}
             className="mono text-[11px] px-3 h-10 rounded-md border transition-colors"
             style={{
-              background: tab === "personal" ? "var(--accent)" : "transparent",
-              color: tab === "personal" ? "var(--accent-fg)" : "var(--t2)",
-              borderColor: tab === "personal" ? "var(--accent)" : "var(--border)",
+              background: tab === "all" ? "var(--accent)" : "transparent",
+              color: tab === "all" ? "var(--accent-fg)" : "var(--t2)",
+              borderColor: tab === "all" ? "var(--accent)" : "var(--border)",
             }}
           >
-            Personal
+            All
           </button>
           {showTeamTab && (
             <button
@@ -226,15 +226,15 @@ export function DashboardClient({
             </button>
           )}
           <button
-            onClick={() => setTab("queue")}
+            onClick={() => setTab("priority")}
             className="mono text-[11px] px-3 h-10 rounded-md border transition-colors"
             style={{
-              background: tab === "queue" ? "var(--accent)" : "transparent",
-              color: tab === "queue" ? "var(--accent-fg)" : "var(--t2)",
-              borderColor: tab === "queue" ? "var(--accent)" : "var(--border)",
+              background: tab === "priority" ? "var(--accent)" : "transparent",
+              color: tab === "priority" ? "var(--accent-fg)" : "var(--t2)",
+              borderColor: tab === "priority" ? "var(--accent)" : "var(--border)",
             }}
           >
-            Queue
+            Priority
           </button>
         </div>
 
@@ -262,8 +262,8 @@ export function DashboardClient({
         </div>
       </div>
 
-      {/* ── Personal tab ── */}
-      {tab === "personal" && (
+      {/* ── All tab ── */}
+      {tab === "all" && (
         <div
           className="rounded-md border"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
@@ -763,8 +763,8 @@ export function DashboardClient({
         </>
       )}
 
-      {/* ── Queue tab ── */}
-      {tab === "queue" && (
+      {/* ── Priority tab ── */}
+      {tab === "priority" && (
         plan === "free" ? (
           <div className="border rounded-md p-8 text-center" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
             <p className="display text-[18px] font-semibold text-(--t1) mb-2">Decision Queue</p>

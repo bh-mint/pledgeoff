@@ -9,9 +9,10 @@ import { ProfileButton } from "@/components/ProfileButton";
 interface AppNavProps {
   email: string;
   initials: string;
+  planLimitRemaining?: number | null;
 }
 
-export function AppNav({ email, initials }: AppNavProps) {
+export function AppNav({ email, initials, planLimitRemaining }: AppNavProps) {
   const pathname = usePathname();
 
   const links = [
@@ -63,6 +64,18 @@ export function AppNav({ email, initials }: AppNavProps) {
         </div>
 
         <div className="flex items-center">
+          {planLimitRemaining !== null && planLimitRemaining !== undefined && (
+            <Link
+              href="/ideas/new"
+              className="hidden md:inline-flex items-center mono text-[10px] px-2.5 h-7 rounded-md border mr-3 transition-colors hover:border-(--caution) hover:text-(--caution)"
+              style={{
+                borderColor: planLimitRemaining === 0 ? "color-mix(in srgb, var(--caution) 50%, transparent)" : "var(--border)",
+                color: planLimitRemaining === 0 ? "var(--caution)" : "var(--t3)",
+              }}
+            >
+              {planLimitRemaining === 0 ? "0 left" : `${planLimitRemaining} left`}
+            </Link>
+          )}
           <div className="hidden md:flex items-center gap-2 mr-4">
             <span
               className="pulse-dot w-1.5 h-1.5 rounded-full inline-block"

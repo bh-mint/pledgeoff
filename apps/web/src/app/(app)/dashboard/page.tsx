@@ -11,7 +11,6 @@ import { GoldmineFeed } from "@/components/GoldmineFeed";
 import { getGoldmineData } from "@/server/goldmine/getGoldmineData";
 import { WeeklyDigestBanner } from "@/components/WeeklyDigestBanner";
 import type { Decision } from "@pledgeoff/core";
-import { StatNumber } from "@/components/StatNumber";
 import { RoleGreeting } from "@/components/RoleGreeting";
 
 export const metadata: Metadata = {
@@ -28,36 +27,6 @@ function computeScore(decision: Decision | null | undefined): number | null {
   }
   return Math.round(decision.confidence * 100);
 }
-
-function Spark({
-  data,
-  w = 56,
-  h = 20,
-  color = "var(--accent)",
-}: {
-  data: number[];
-  w?: number;
-  h?: number;
-  color?: string;
-}) {
-  if (data.length < 2) return null;
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min || 1;
-  const d = data
-    .map((v, i) => {
-      const x = ((i / (data.length - 1)) * w).toFixed(1);
-      const y = ((1 - (v - min) / range) * h).toFixed(1);
-      return `${i === 0 ? "M" : "L"}${x} ${y}`;
-    })
-    .join(" ");
-  return (
-    <svg width={w} height={h}>
-      <path d={d} stroke={color} strokeWidth="1.25" fill="none" />
-    </svg>
-  );
-}
-
 
 
 export default async function DashboardPage() {
@@ -92,45 +61,7 @@ export default async function DashboardPage() {
     tools: row.tools,
   }));
 
-  // ── Stats ──
   const withDecision = rows.filter((r) => r.decision);
-  const scores = withDecision.map((r) => computeScore(r.decision)!);
-  const avgScore =
-    scores.length > 0
-      ? Math.round(scores.reduce((s, v) => s + v, 0) / scores.length)
-      : null;
-  const killed = rows.filter((r) => r.decision?.verdict === "KILL").length;
-
-  const firstGoRow = [...rows]
-    .reverse()
-    .find((r) => r.decision?.verdict === "GO");
-  const daysToFirstGo = firstGoRow
-    ? Math.max(
-        1,
-        Math.round(
-          (new Date(firstGoRow.decision!.createdAt).getTime() -
-            new Date(user.created_at).getTime()) /
-            86_400_000
-        )
-      )
-    : null;
-
-  // Sparkline data (last 10, oldest first)
-  const sorted = withDecision
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date(a.idea.createdAt).getTime() -
-        new Date(b.idea.createdAt).getTime()
-    )
-    .slice(-10);
-
-  const sparkValidated = sorted.map((_, i) => i + 1);
-  const sparkScores = sorted.map((r) => computeScore(r.decision)!);
-  const sparkKilled = rows
-    .filter((r) => r.decision?.verdict === "KILL")
-    .map((_, i) => i + 1)
-    .slice(-10);
 
   // Onboarding checklist — shows until all 3 steps are done
   const hasIdea = ideas.length > 0;
@@ -143,18 +74,6 @@ export default async function DashboardPage() {
     { label: "Get a verdict", href: "/ideas/new", done: hasVerdict },
     { label: "Run a deep tool (Simulate, Audience, Blueprint…)", href: hasVerdict ? `/ideas/${rows.find((r) => r.decision)?.idea.id}` : "/ideas/new", done: hasDeepTool },
   ];
-
-  // Pipeline — dynamic status based on top GO idea's tool completions
-  const pipelineRow = rows.find((r) => r.decision?.verdict === "GO");
-  const pt = pipelineRow?.tools;
-  const pipelineSteps = [
-    { k: "Validate",  done: !!pipelineRow, active: false },
-    { k: "Simulate",  done: !!pt?.simulate, active: !!pipelineRow && !pt?.simulate },
-    { k: "Landing",   done: !!pt?.landing, active: !!pt?.simulate && !pt?.landing },
-    { k: "Customers", done: !!pt?.customers, active: !!pt?.landing && !pt?.customers },
-    { k: "Build",     done: !!pt?.build, active: !!pt?.customers && !pt?.build },
-  ];
-  const stepsLeft = pipelineSteps.filter((s) => !s.done).length;
 
   // Table rows
   const tableRows: TableRow[] = rows.map(({ idea, decision, tools }) => {
@@ -253,66 +172,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
-      {/* Stats bar */}
-      <div className="border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-360 mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-          {/* Ideas validated */}
-          <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
-            <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
-              ideas validated
-            </div>
-            <div className="flex items-baseline justify-between mt-2">
-              <StatNumber value={withDecision.length} className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
-              <Spark data={sparkValidated} color="var(--accent)" />
-            </div>
-            <div className="mono text-[10px] tnum mt-2 text-(--validated)">
-              {withDecision.length > 0 ? `+${withDecision.length} total` : "start validating"}
-            </div>
-          </div>
-
-          {/* Average score */}
-          <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
-            <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
-              average score
-            </div>
-            <div className="flex items-baseline justify-between mt-2">
-              <StatNumber value={avgScore} fallback="—" className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
-              <Spark data={sparkScores} color="var(--validated)" />
-            </div>
-            <div className="mono text-[10px] tnum mt-2 text-(--validated)">
-              {avgScore ? `out of 100` : "no data yet"}
-            </div>
-          </div>
-
-          {/* Killed early */}
-          <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
-            <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
-              ideas killed early
-            </div>
-            <div className="flex items-baseline justify-between mt-2">
-              <StatNumber value={killed} className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
-              <Spark data={sparkKilled} color="var(--kill)" />
-            </div>
-            <div className="mono text-[10px] tnum mt-2 text-(--t2)">
-              {killed > 0 ? `${killed} idea${killed !== 1 ? "s" : ""} saved from being built` : "none yet"}
-            </div>
-          </div>
-
-          {/* Days to first GO */}
-          <div className="border-l pl-4" style={{ borderColor: "var(--border)" }}>
-            <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
-              days · first launch-ready
-            </div>
-            <div className="flex items-baseline justify-between mt-2">
-              <StatNumber value={daysToFirstGo} fallback="—" className="display text-[36px] tnum font-semibold leading-none text-(--t1)" />
-            </div>
-            <div className="mono text-[10px] tnum mt-2 text-(--validated)">
-              {daysToFirstGo ? "avg on PledgeOFF: 23d" : "no GO verdict yet"}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main grid */}
       <div className="max-w-360 mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-12 gap-6">
         {/* LEFT — pipeline + table */}
@@ -402,71 +261,7 @@ export default async function DashboardPage() {
             </div>
           )}
 
-          {/* Pipeline */}
-          {rows.length > 0 && (
-            <div
-              className="border rounded-md p-6"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-            >
-              <div className="flex items-baseline justify-between mb-5">
-                <div className="flex-1 min-w-0 pr-4">
-                  <div className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3)">
-                    your top idea · launch-ready progress
-                  </div>
-                  <h2 className="display text-[18px] font-semibold tracking-tight mt-1.5 text-(--t1) truncate">
-                    {pipelineRow?.idea.text ?? rows[0].idea.text}
-                  </h2>
-                </div>
-                <div className="text-right shrink-0">
-                  <div
-                    className="display text-[28px] tnum font-semibold leading-none"
-                    style={{ color: "var(--validated)" }}
-                  >
-                    {stepsLeft}
-                  </div>
-                  <div className="mono text-[10px] mt-1 text-(--t3)">
-                    steps from launch-ready
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                {pipelineSteps.map((s, i) => (
-                  <div key={s.k}>
-                    <div
-                      className="h-0.75 rounded-full"
-                      style={{
-                        background: s.done
-                          ? "var(--validated)"
-                          : s.active
-                          ? "var(--accent)"
-                          : "var(--border)",
-                      }}
-                    />
-                    <div className="mt-2 flex items-baseline gap-1.5">
-                      <span className="mono text-[10px] tnum text-(--t3)">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      <span
-                        className={`display text-[13px] ${s.done || s.active ? "font-semibold" : ""}`}
-                        style={{
-                          color: s.done
-                            ? "var(--t1)"
-                            : s.active
-                            ? "var(--accent)"
-                            : "var(--t3)",
-                        }}
-                      >
-                        {s.k}
-                      </span>
-                    </div>
-                    <div className="mono text-[10px] mt-1 text-(--t3)">
-                      {s.done ? "complete" : s.active ? "in progress" : "pending"}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+
 
           {/* Validations table */}
           <DashboardClient
