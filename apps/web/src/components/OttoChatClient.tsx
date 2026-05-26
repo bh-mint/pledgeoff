@@ -127,7 +127,7 @@ export default function OttoChatClient({
       </div>
 
       {/* Messages */}
-      <div className="flex flex-col gap-4 px-5 py-5 max-h-[420px] overflow-y-auto" style={{ background: 'var(--bg)' }}>
+      <div className="flex flex-col gap-4 px-5 py-5 max-h-105 overflow-y-auto" style={{ background: 'var(--bg)' }}>
         {messages.length === 0 && (
           <p className="text-[13px] leading-relaxed" style={{ color: 'var(--t3)' }}>
             Ask me anything about your idea — strategy, competition, go-to-market, what to build first.

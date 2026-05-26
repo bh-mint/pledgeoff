@@ -212,7 +212,7 @@ export function NewIdeaClient({
           {/* Context toggle — only shown for paid users with a team */}
           {teamId && teamName && (
             <div className="flex items-center gap-2 mb-8">
-              <span className="mono text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>
+              <span className="mono text-[10px] uppercase tracking-widest" style={{ color: "var(--t3)" }}>
                 Context
               </span>
               <div className="flex rounded-md border overflow-hidden" style={{ borderColor: "var(--border)" }}>
@@ -309,7 +309,7 @@ export function NewIdeaClient({
 
           {/* Examples — clickable demos */}
           <div className="mt-4">
-            <p className="mono text-[11px] uppercase tracking-[0.1em] mb-2" style={{ color: "var(--t2)" }}>
+            <p className="mono text-[11px] uppercase tracking-widest mb-2" style={{ color: "var(--t2)" }}>
               Try an example →
             </p>
             <div className="flex flex-wrap gap-2">
@@ -322,7 +322,7 @@ export function NewIdeaClient({
                     setDesc(ex.desc);
                     setCat(ex.cat);
                   }}
-                  className="mono text-[10px] px-3 h-9 rounded border transition-all text-left max-w-[300px] whitespace-normal"
+                  className="mono text-[10px] px-3 h-9 rounded border transition-all text-left max-w-75 whitespace-normal"
                   style={{ borderColor: "var(--border)", color: "var(--t3)", background: "var(--surface)" }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = "var(--accent)";
