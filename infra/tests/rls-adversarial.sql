@@ -42,12 +42,12 @@ VALUES (
   'reddit', 'https://reddit.com/r/test/1', 'Test signal', 'Positive discussion', 'positive', now()
 ) ON CONFLICT DO NOTHING;
 
-INSERT INTO decisions (id, idea_id, verdict, reasoning, confidence, signal_ids, created_at)
+INSERT INTO decisions (id, idea_id, verdict, reasoning, confidence, signal_ids, score, created_at)
 VALUES (
   '30000000-0000-0000-0000-000000000001',
   '10000000-0000-0000-0000-000000000001',
   'GO', 'Looks promising.', 0.900,
-  ARRAY['20000000-0000-0000-0000-000000000001']::UUID[], now()
+  ARRAY['20000000-0000-0000-0000-000000000001']::UUID[], 73, now()
 ) ON CONFLICT DO NOTHING;
 
 INSERT INTO feedback (id, idea_id, decision_id, user_id, vote, created_at)
