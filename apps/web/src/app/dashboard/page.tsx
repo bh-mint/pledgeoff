@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth-server";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { getUserPlan } from "@/server/billing/getUserPlan";
+import { getDashboardData } from "@/server/dashboard/getDashboardData";
 import { DashboardClient, type TableRow, type TeamFeedRow } from "./DashboardClient";
 import { ProfileButton } from "@/components/ProfileButton";
 import { Logo } from "@/components/brand/Logo";
@@ -13,7 +14,6 @@ import { GoldmineFeed } from "@/components/GoldmineFeed";
 import { getGoldmineData } from "@/server/goldmine/getGoldmineData";
 import { WeeklyDigestBanner } from "@/components/WeeklyDigestBanner";
 import type { Decision } from "@pledgeoff/core";
-import { logger } from "@pledgeoff/observability";
 import { StatNumber } from "@/components/StatNumber";
 import { RoleGreeting } from "@/components/RoleGreeting";
 
@@ -69,60 +69,31 @@ export default async function DashboardPage() {
   const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", user.id).single();
   const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || user.email?.split("@")[0] || "—";
 
-  const [ideasResult, plan, teamResult] = await Promise.all([
-    container._repos.ideaRepo.findByUserId(user.id),
+  const [{ ideas: rawIdeas, outcomes: rawOutcomes }, plan, teamResult] = await Promise.all([
+    getDashboardData(user.id),
     getUserPlan(user.id),
     container._repos.teamRepo.findByMemberId(user.id),
   ]);
+
   const isPaidPlan = plan !== "free";
   const team = teamResult.isOk() ? teamResult.value : null;
-  const goldmine = await getGoldmineData(plan);
-  if (ideasResult.isErr()) {
-    logger.error({ traceId: "dashboard", userId: user.id, error: String(ideasResult.error), outcome: "error" as const }, "dashboard: ideaRepo.findByUserId failed");
-  }
-  const ideas = ideasResult.isOk() ? ideasResult.value : [];
-
-
-  const [decisionResults, simulateResults, landingResults, customerResults, buildResults, outcomesResult] = await Promise.all([
-    Promise.all(ideas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))),
-    Promise.all(ideas.map((idea) => container._repos.simulationRepo.findByIdeaId(idea.id))),
-    Promise.all(ideas.map((idea) => container._repos.landingPageRepo.findByIdeaId(idea.id))),
-    Promise.all(ideas.map((idea) => container._repos.customerAnalysisRepo.findByIdeaId(idea.id))),
-    Promise.all(ideas.map((idea) => container._repos.buildAnalysisRepo.findByIdeaId(idea.id))),
-    container._repos.decisionOutcomeRepo.findByUser(user.id),
-  ]);
+  const goldmineData = await getGoldmineData(plan);
+  // Alias for compatibility with the rest of the page (stats, onboarding, team feed)
+  const ideas = rawIdeas;
 
   const outcomeMap = new Map<string, string>();
-  if (outcomesResult.isOk()) {
-    for (const o of outcomesResult.value) {
-      outcomeMap.set(o.ideaId, o.outcomeType);
-    }
+  for (const o of rawOutcomes) {
+    outcomeMap.set(o.ideaId, o.outcomeType);
   }
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const failedDecisions = decisionResults.filter((r) => r.isErr()).length;
-  if (failedDecisions > 0) {
-    logger.error({ traceId: "dashboard", userId: user.id, failedDecisions, outcome: "error" as const }, "dashboard: decisionRepo failures");
-  }
-
-  const rows = ideas
-    .map((idea, i) => ({
-      idea,
-      decision: decisionResults[i].isOk() ? decisionResults[i].value : null,
-      tools: {
-        simulate: !!(simulateResults[i].isOk() && simulateResults[i].value),
-        landing: !!(landingResults[i].isOk() && landingResults[i].value),
-        customers: !!(customerResults[i].isOk() && customerResults[i].value),
-        build: !!(buildResults[i].isOk() && buildResults[i].value),
-      },
-    }))
-    .sort(
-      (a, b) =>
-        new Date(b.idea.createdAt).getTime() -
-        new Date(a.idea.createdAt).getTime()
-    );
+  const rows = rawIdeas.map((row) => ({
+    idea: { id: row.id, userId: row.userId, text: row.text, niche: row.niche, createdAt: row.createdAt },
+    decision: row.decision,
+    tools: row.tools,
+  }));
 
   // ── Stats ──
   const withDecision = rows.filter((r) => r.decision);
@@ -615,7 +586,7 @@ export default async function DashboardPage() {
                 Pro+
               </span>
             </div>
-            <GoldmineFeed niches={goldmine.data} locked={goldmine.locked} />
+            <GoldmineFeed niches={goldmineData.data} locked={goldmineData.locked} />
           </div>
         </div>
       </div>

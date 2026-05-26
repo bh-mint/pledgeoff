@@ -6,6 +6,10 @@ import { requireCronAuth } from '@/lib/cron-auth';
 
 export const maxDuration = 60;
 
+// Max concurrent LLM calls per invocation — keeps latency under 60s even
+// with a large user base and avoids hammering the LLM provider.
+const CONCURRENCY = 5;
+
 // Vercel Cron: daily at 02:30 UTC — re-scores all users' idea queues.
 // Sends email alert when a priority score shifts >20% for any idea.
 export async function GET(req: Request): Promise<Response> {
@@ -15,7 +19,6 @@ export async function GET(req: Request): Promise<Response> {
   const traceId = crypto.randomUUID();
   const supabase = createSupabaseServiceClient();
 
-  // Fetch all distinct user_ids that have at least one idea
   const { data: rows, error } = await supabase
     .from('ideas')
     .select('user_id')
@@ -34,30 +37,38 @@ export async function GET(req: Request): Promise<Response> {
   const resendKey = process.env.RESEND_API_KEY;
   const disableEmail = process.env.DISABLE_EMAIL === 'true';
 
-  for (const userId of userIds) {
-    const result = await container.updateDecisionQueueUseCase.execute({ userId, traceId });
-    if (result.isErr()) {
-      errors.push(`user ${userId}: ${result.error.message}`);
-      logger.error({ traceId, userId, error: result.error.message }, 'update-queue: user processing failed');
-      continue;
-    }
+  // Process users in parallel batches of CONCURRENCY to stay within the
+  // 60s Vercel function timeout while still being faster than pure serial.
+  for (let i = 0; i < userIds.length; i += CONCURRENCY) {
+    const batch = userIds.slice(i, i + CONCURRENCY);
 
-    usersProcessed++;
-    totalSignificantChanges += result.value.significantChanges;
+    await Promise.allSettled(
+      batch.map(async (userId) => {
+        const result = await container.updateDecisionQueueUseCase.execute({ userId, traceId });
+        if (result.isErr()) {
+          errors.push(`user ${userId}: ${result.error.message}`);
+          logger.error({ traceId, userId, error: result.error.message }, 'update-queue: user processing failed');
+          return;
+        }
 
-    if (result.value.significantChanges > 0 && resendKey && !disableEmail) {
-      const { data: userData } = await supabase.auth.admin.getUserById(userId);
-      const email = userData?.user?.email;
-      if (email) {
-        await sendQueueAlertEmail(resendKey, {
-          to: email,
-          significantChanges: result.value.significantChanges,
-          traceId,
-        }).catch((e: unknown) => {
-          logger.error({ traceId, userId, error: String(e) }, 'update-queue: alert email failed');
-        });
-      }
-    }
+        usersProcessed++;
+        totalSignificantChanges += result.value.significantChanges;
+
+        if (result.value.significantChanges > 0 && resendKey && !disableEmail) {
+          const { data: userData } = await supabase.auth.admin.getUserById(userId);
+          const email = userData?.user?.email;
+          if (email) {
+            await sendQueueAlertEmail(resendKey, {
+              to: email,
+              significantChanges: result.value.significantChanges,
+              traceId,
+            }).catch((e: unknown) => {
+              logger.error({ traceId, userId, error: String(e) }, 'update-queue: alert email failed');
+            });
+          }
+        }
+      }),
+    );
   }
 
   logger.info({ traceId, usersProcessed, totalSignificantChanges, errors }, 'update-queue: completed');

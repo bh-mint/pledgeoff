@@ -1,25 +1,28 @@
+import { unstable_cache } from 'next/cache';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { logger } from '@pledgeoff/observability';
+import { isAtLeastPlan, PLAN } from '@pledgeoff/core';
 import { NICHE_LABELS, type Niche } from '@/lib/niche-classifier';
 import type { GoldmineNiche } from '@/app/api/v1/goldmine/route';
+import type { Plan } from '@pledgeoff/core';
 
-export async function getGoldmineData(plan: string): Promise<{ data: GoldmineNiche[]; locked: boolean }> {
-  if (plan === 'free' || plan === 'founder') {
-    return { data: [], locked: true };
-  }
-
-  try {
+// Runs the full-table cross-user query once and caches for 1 hour.
+// All paid-plan users share the same cached result — avoids a full
+// table scan on every dashboard render.
+const fetchGoldmineNiches = unstable_cache(
+  async (): Promise<GoldmineNiche[]> => {
     const supabase = createSupabaseServiceClient();
 
     const { data: rows, error } = await supabase
       .from('ideas')
       .select('niche, decisions(verdict, created_at)')
       .neq('niche', 'other')
+      .limit(2000)
       .returns<{ niche: string; decisions: { verdict: string; created_at: string }[] }[]>();
 
     if (error) {
       logger.error({ traceId: 'goldmine', error: error.message, outcome: 'error' }, 'getGoldmineData: DB query failed');
-      return { data: [], locked: false };
+      return [];
     }
 
     const now = Date.now();
@@ -64,7 +67,20 @@ export async function getGoldmineData(plan: string): Promise<{ data: GoldmineNic
     }
 
     results.sort((a, b) => b.heatScore - a.heatScore);
-    return { data: results.slice(0, 8), locked: false };
+    return results.slice(0, 8);
+  },
+  ['goldmine-niches'],
+  { revalidate: 3600 },
+);
+
+export async function getGoldmineData(plan: Plan | string): Promise<{ data: GoldmineNiche[]; locked: boolean }> {
+  if (!isAtLeastPlan(plan as Plan, PLAN.TEAM)) {
+    return { data: [], locked: true };
+  }
+
+  try {
+    const data = await fetchGoldmineNiches();
+    return { data, locked: false };
   } catch (e) {
     logger.error({ traceId: 'goldmine', error: String(e), outcome: 'error' }, 'getGoldmineData: unexpected error');
     return { data: [], locked: false };
