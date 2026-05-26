@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import type { QueueItem } from "@pledgeoff/core";
 
 const VERDICT_COLOR: Record<string, string> = {
@@ -32,9 +32,7 @@ export function DecisionQueueView() {
   useEffect(() => {
     async function load() {
       try {
-        const supabase = createSupabaseBrowserClient();
-        const { data: session } = await supabase.auth.getSession();
-        const token = session.session?.access_token;
+        const token = await getAuthToken();
         const res = await fetch("/api/v1/queue", {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });

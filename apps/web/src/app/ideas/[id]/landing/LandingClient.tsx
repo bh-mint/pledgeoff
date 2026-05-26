@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { LandingPage } from "@pledgeoff/core";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 
 interface Props {
   ideaId: string;
@@ -60,12 +60,11 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setError("Not authenticated."); setLoading(false); return; }
+      const token = await getAuthToken();
+      if (!token) { setError("Not authenticated."); setLoading(false); return; }
       const res = await fetch(`/api/v1/ideas/${ideaId}/landing`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

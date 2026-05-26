@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import type { Team, TeamMembership, SubscriptionStatus } from "@pledgeoff/core";
 
@@ -31,12 +31,11 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
   const seatsIncluded = PLAN_LIMITS[plan].seatsIncluded;
 
   const fetchTeam = useCallback(async () => {
-    const supabase = createSupabaseBrowserClient();
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) return;
+    const token = await getAuthToken();
+    if (!token) return;
 
     const res = await fetch("/api/v1/teams", {
-      headers: { Authorization: `Bearer ${session.session.access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
       const json = await res.json() as { data: TeamData };
@@ -66,13 +65,12 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
           href="/settings"
           onClick={async (e) => {
             e.preventDefault();
-            const { createSupabaseBrowserClient: createClient } = await import("@/lib/supabase/client");
-            const supabase = createClient();
-            const { data: session } = await supabase.auth.getSession();
-            if (!session.session) return;
+            const { getAuthToken: getToken } = await import("@/lib/auth-client");
+            const token = await getToken();
+            if (!token) return;
             const res = await fetch("/api/v1/billing/portal", {
               method: "POST",
-              headers: { Authorization: `Bearer ${session.session.access_token}` },
+              headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
               const json = await res.json() as { data: { url: string } };
@@ -92,15 +90,14 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
     setInviteState("loading");
     setInviteError("");
 
-    const supabase = createSupabaseBrowserClient();
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) return;
+    const token = await getAuthToken();
+    if (!token) return;
 
     const res = await fetch("/api/v1/teams/invite", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.session.access_token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ email: inviteEmail }),
     });
@@ -122,13 +119,12 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
   const handleLeave = async () => {
     if (!confirm('Are you sure you want to leave this team?')) return;
     setLeaving(true);
-    const supabase = createSupabaseBrowserClient();
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) { setLeaving(false); return; }
+    const token = await getAuthToken();
+    if (!token) { setLeaving(false); return; }
 
     await fetch('/api/v1/teams/leave', {
       method: 'DELETE',
-      headers: { Authorization: `Bearer ${session.session.access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     setLeaving(false);
@@ -138,15 +134,14 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
   const handleUpdateTeamName = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setTeamNameState("loading");
-    const supabase = createSupabaseBrowserClient();
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) return;
+    const token = await getAuthToken();
+    if (!token) return;
 
     const res = await fetch("/api/v1/teams", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.session.access_token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ name: teamName }),
     });
@@ -164,13 +159,12 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
 
   const handleRemove = async (membershipId: string) => {
     setRemovingId(membershipId);
-    const supabase = createSupabaseBrowserClient();
-    const { data: session } = await supabase.auth.getSession();
-    if (!session.session) { setRemovingId(null); return; }
+    const token = await getAuthToken();
+    if (!token) { setRemovingId(null); return; }
 
     await fetch(`/api/v1/teams/members/${membershipId}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${session.session.access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     setRemovingId(null);

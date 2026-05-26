@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import type { Plan, SubscriptionStatus } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import { TeamSection } from "./TeamSection";
@@ -145,12 +145,11 @@ export function SettingsClient({
   const [exportState, setExportState] = useState<"idle" | "loading" | "done" | "error">("idle");
 
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
     void (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) return;
+      const token = await getAuthToken();
+      if (!token) return;
       const res = await fetch('/api/v1/engineering/snapshot', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         const json = await res.json() as { data: { githubOrg: string } | null };
@@ -230,15 +229,9 @@ export function SettingsClient({
     router.push("/");
   };
 
-  const getToken = async () => {
-    const supabase = createSupabaseBrowserClient();
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token;
-  };
-
   const handleChangePlan = async (priceId: string) => {
     setBillingAction("loading");
-    const token = await getToken();
+    const token = await getAuthToken();
     const res = await fetch("/api/v1/billing/change-plan", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -255,7 +248,7 @@ export function SettingsClient({
   const handleCancel = async () => {
     setBillingAction("loading");
     setCancelConfirm(false);
-    const token = await getToken();
+    const token = await getAuthToken();
     const res = await fetch("/api/v1/billing/cancel", {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -270,7 +263,7 @@ export function SettingsClient({
 
   const handleReactivate = async () => {
     setBillingAction("loading");
-    const token = await getToken();
+    const token = await getAuthToken();
     const res = await fetch("/api/v1/billing/reactivate", {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : {},
@@ -285,7 +278,7 @@ export function SettingsClient({
 
   const handleCheckout = async (priceId: string) => {
     setBillingAction("loading");
-    const token = await getToken();
+    const token = await getAuthToken();
     const res = await fetch("/api/v1/billing/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -301,9 +294,7 @@ export function SettingsClient({
 
   const handleUpdateSeats = async () => {
     setSeatState("loading");
-    const supabase = createSupabaseBrowserClient();
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
+    const token = await getAuthToken();
     const res = await fetch("/api/v1/billing/seats", {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -810,7 +801,7 @@ export function SettingsClient({
                     onClick={async () => {
                       if (invoiceState === "sent") return;
                       setInvoiceState("loading");
-                      const token = await getToken();
+                      const token = await getAuthToken();
                       const res = await fetch("/api/v1/billing/request-invoice", {
                         method: "POST",
                         headers: token ? { Authorization: `Bearer ${token}` } : {},

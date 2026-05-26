@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { VerdictMark } from "@/components/brand/VerdictMark";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import { TeamAnalytics } from "@/components/TeamAnalytics";
 import { DecisionQueueView } from "./DecisionQueueView";
 import type { Plan } from "@pledgeoff/core";
@@ -104,12 +104,11 @@ export function DashboardClient({
     if (quickText.trim().length < 10) return;
     setQuickStatus("loading");
     setQuickError("");
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { router.push("/login"); return; }
+    const token = await getAuthToken();
+    if (!token) { router.push("/login"); return; }
     const res = await fetch("/api/v1/ideas", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ text: quickText.trim() }),
     });
     const json = await res.json();
@@ -149,9 +148,7 @@ export function DashboardClient({
   const handleReact = useCallback(async (ideaId: string, reaction: "agree" | "disagree") => {
     const current = reactionState[ideaId];
     const newReaction = current?.myReaction === reaction ? null : reaction;
-    const supabase = createSupabaseBrowserClient();
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
+    const token = await getAuthToken();
     const res = await fetch(`/api/v1/ideas/${ideaId}/reactions`, {
       method: "PUT",
       headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },

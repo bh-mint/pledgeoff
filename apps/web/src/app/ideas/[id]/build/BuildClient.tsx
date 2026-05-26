@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { BuildAnalysis, TechComponent } from "@pledgeoff/core";
 import { MIN_GITHUB_SIGNALS } from "@pledgeoff/core";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
 interface Props {
@@ -38,12 +38,11 @@ export function BuildClient({ ideaId, initialAnalysis }: Props) {
     setLoading(true);
     setError(null);
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setError("Not authenticated."); setLoading(false); return; }
+      const token = await getAuthToken();
+      if (!token) { setError("Not authenticated."); setLoading(false); return; }
       const res = await fetch(`/api/v1/ideas/${ideaId}/build`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

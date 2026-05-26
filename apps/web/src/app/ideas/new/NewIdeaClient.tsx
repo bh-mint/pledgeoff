@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -78,9 +78,8 @@ export function NewIdeaClient({
     setLoadingStep(0);
     setErrorMsg("");
 
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    const token = await getAuthToken();
+    if (!token) {
       router.push("/login");
       return;
     }
@@ -96,7 +95,7 @@ export function NewIdeaClient({
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(body),
     });

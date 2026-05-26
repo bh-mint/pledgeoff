@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { getAuthToken } from "@/lib/auth-client";
 
 type ApiKey = {
   id: string;
@@ -31,7 +32,7 @@ export function ApiKeySection() {
   useEffect(() => {
     let active = true;
     async function load() {
-      const token = await getToken();
+      const token = await getAuthToken() ?? "";
       const res = await fetch("/api/v1/api-keys", { headers: { Authorization: `Bearer ${token}` } });
       if (!active) return;
       if (res.ok) {
@@ -50,13 +51,6 @@ export function ApiKeySection() {
     setLoading(true);
   }
 
-  async function getToken(): Promise<string> {
-    const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
-    const supabase = createSupabaseBrowserClient();
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token ?? "";
-  }
-
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!newKeyName.trim()) return;
@@ -66,7 +60,7 @@ export function ApiKeySection() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${await getToken()}`,
+        Authorization: `Bearer ${await getAuthToken() ?? ""}`,
       },
       body: JSON.stringify({ name: newKeyName.trim() }),
     });
@@ -85,7 +79,7 @@ export function ApiKeySection() {
     setRevoking(id);
     const res = await fetch(`/api/v1/api-keys/${id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${await getToken()}` },
+      headers: { Authorization: `Bearer ${await getAuthToken() ?? ""}` },
     });
     if (res.ok) {
       setKeys((prev) => prev.map((k) => k.id === id ? { ...k, revokedAt: new Date().toISOString() } : k));

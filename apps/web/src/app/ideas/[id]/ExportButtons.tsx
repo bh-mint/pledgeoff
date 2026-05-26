@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import type { Plan } from "@pledgeoff/core";
 
 interface Props {
@@ -16,12 +16,11 @@ export function ExportButtons({ ideaId, plan }: Props) {
   async function downloadJson() {
     setJsonLoading(true);
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const token = await getAuthToken();
+      if (!token) return;
 
       const res = await fetch(`/api/v1/ideas/${ideaId}/export`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
 
@@ -40,12 +39,11 @@ export function ExportButtons({ ideaId, plan }: Props) {
   async function downloadPdf() {
     setPdfLoading(true);
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      const token = await getAuthToken();
+      if (!token) return;
 
       const res = await fetch(`/api/v1/ideas/${ideaId}/pdf`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) return;
 

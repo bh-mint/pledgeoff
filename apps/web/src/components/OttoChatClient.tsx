@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { getAuthToken } from '@/lib/auth-client';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -50,12 +50,6 @@ export default function OttoChatClient({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  async function getToken(): Promise<string | null> {
-    const supabase = createSupabaseBrowserClient();
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token ?? null;
-  }
-
   async function handleSend() {
     const msg = input.trim();
     if (!msg || loading) return;
@@ -66,7 +60,7 @@ export default function OttoChatClient({
     const userMsg: Message = { role: 'user', content: msg, createdAt: new Date().toISOString() };
     setMessages((prev) => [...prev, userMsg]);
 
-    const token = await getToken();
+    const token = await getAuthToken();
     const res = await fetch('/api/v1/otto/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -94,7 +88,7 @@ export default function OttoChatClient({
 
   async function handleBuyPack(count: 10 | 25 | 60 | 150) {
     setBuyLoading(true);
-    const token = await getToken();
+    const token = await getAuthToken();
     const res = await fetch('/api/v1/billing/otto-pack', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

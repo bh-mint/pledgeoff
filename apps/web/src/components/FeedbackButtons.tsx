@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 
 interface FeedbackButtonsProps {
   ideaId: string;
@@ -18,15 +18,14 @@ export function FeedbackButtons({ ideaId, decisionId }: FeedbackButtonsProps) {
   const [loading, setLoading] = useState(false);
 
   async function submitFeedback(v: Vote, c?: string) {
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    const token = await getAuthToken();
+    if (!token) return;
 
     await fetch("/api/v1/feedback", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         ideaId,

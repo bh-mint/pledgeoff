@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import type { DecisionTimeline, DecisionTimelineEntry } from "@pledgeoff/core";
 
 type Plan = "free" | "founder" | "team" | "studio" | "enterprise";
@@ -63,12 +63,11 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
 
   useEffect(() => {
     async function load() {
-      const supabase = createSupabaseBrowserClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { setLoading(false); return; }
+      const token = await getAuthToken();
+      if (!token) { setLoading(false); return; }
 
       const res = await fetch(`/api/v1/ideas/${ideaId}/audit-trail`, {
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         const json = await res.json() as { data: DecisionTimeline };
@@ -81,12 +80,11 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
 
   async function handleExportPdf() {
     setExportLoading(true);
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { setExportLoading(false); return; }
+    const token = await getAuthToken();
+    if (!token) { setExportLoading(false); return; }
 
     const res = await fetch(`/api/v1/ideas/${ideaId}/audit-trail/pdf`, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
       const blob = await res.blob();

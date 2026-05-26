@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import { PreLoginNav } from "@/components/PreLoginNav";
 import { Footer } from "@/components/Footer";
 import { PRICING } from "@/lib/pricing.config";
@@ -156,9 +156,7 @@ function UpgradeButton({
     setLoading(true);
     setUnavailable(false);
     try {
-      const supabase = createSupabaseBrowserClient();
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
+      const token = await getAuthToken();
 
       const res = await fetch("/api/v1/billing/checkout", {
         method: "POST",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import type { CompetitorAnalysis } from "@pledgeoff/core";
 import { InfoTooltip } from "@/components/InfoTooltip";
 
@@ -21,13 +21,12 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
     setLoading(true);
     setError(null);
 
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { setError("Not authenticated"); setLoading(false); return; }
+    const token = await getAuthToken();
+    if (!token) { setError("Not authenticated"); setLoading(false); return; }
 
     const res = await fetch(`/api/v1/ideas/${ideaId}/competitors`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!res.ok) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 
 interface RevalidateResult {
   oldScore: number | null;
@@ -26,9 +26,8 @@ export function RevalidateButton({ ideaId, signalAgedays, onDone }: Props) {
     setState("loading");
     setError(null);
 
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
+    const token = await getAuthToken();
+    if (!token) {
       setState("error");
       setError("Not authenticated");
       return;
@@ -36,7 +35,7 @@ export function RevalidateButton({ ideaId, signalAgedays, onDone }: Props) {
 
     const res = await fetch(`/api/v1/ideas/${ideaId}/revalidate`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     if (!res.ok) {

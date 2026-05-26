@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 
 export function AcceptInviteClient({ token }: { token: string }) {
   const router = useRouter();
@@ -11,10 +11,9 @@ export function AcceptInviteClient({ token }: { token: string }) {
 
   useEffect(() => {
     async function run() {
-      const supabase = createSupabaseBrowserClient();
-      const { data } = await supabase.auth.getSession();
+      const authToken = await getAuthToken();
 
-      if (!data.session) {
+      if (!authToken) {
         setStatus("login");
         return;
       }
@@ -25,7 +24,7 @@ export function AcceptInviteClient({ token }: { token: string }) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${data.session.access_token}`,
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({ token }),
         });

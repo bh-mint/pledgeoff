@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import type { LaunchKit } from "@pledgeoff/core";
 
 interface Props {
@@ -38,13 +38,12 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
 
   async function generate() {
     setLoading(true);
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { setLoading(false); return; }
+    const token = await getAuthToken();
+    if (!token) { setLoading(false); return; }
 
     const res = await fetch(`/api/v1/ideas/${ideaId}/launch-kit`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
       const json = await res.json() as { data: LaunchKit };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getAuthToken } from "@/lib/auth-client";
 import { DecisionCard } from "@/components/DecisionCard";
 import { ValidatingLoader } from "@/components/ValidatingLoader";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
@@ -362,12 +362,11 @@ export function IdeaPageClient({
   const polling = !decision && polls < MAX_POLLS;
 
   const fetchLatest = useCallback(async () => {
-    const supabase = createSupabaseBrowserClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
+    const token = await getAuthToken();
+    if (!token) return;
 
     const res = await fetch(`/api/v1/ideas/${idea.id}`, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return;
 
