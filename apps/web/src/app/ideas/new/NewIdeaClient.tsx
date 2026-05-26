@@ -8,9 +8,9 @@ import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const LOADING_MESSAGES = [
-  { step: "01", text: "Scanning Reddit communities…" },
-  { step: "02", text: "Fetching Hacker News discussions…" },
-  { step: "03", text: "Analyzing GitHub signals…" },
+  { step: "01", text: "Scanning Hacker News discussions…" },
+  { step: "02", text: "Fetching GitHub signals…" },
+  { step: "03", text: "Searching Dev.to & web sources…" },
   { step: "04", text: "Cross-referencing live data points…" },
   { step: "05", text: "Calculating GO / KILL / PIVOT score…" },
   { step: "06", text: "Finalizing verdict…" },
@@ -191,7 +191,7 @@ export function NewIdeaClient({
               />
             </div>
             <div className="mt-4 mono text-[10px]" style={{ color: "var(--t3)" }}>
-              Reddit · Hacker News · GitHub · under 60s
+              Hacker News · GitHub · Dev.to · under 60s
             </div>
           </div>
         </div>
@@ -383,11 +383,10 @@ export function NewIdeaClient({
                 style={{ background: "var(--accent)" }}
               />
               <span className="text-[12px]" style={{ color: "var(--t2)" }}>
-                We&apos;ll scrape{" "}
-                <span style={{ color: "var(--t1)" }}>Reddit</span>,{" "}
-                <span style={{ color: "var(--t1)" }}>Google Trends</span>, and
-                analyze{" "}
-                <span style={{ color: "var(--t1)" }}>competitors</span>.
+                We&apos;ll scan{" "}
+                <span style={{ color: "var(--t1)" }}>Hacker News</span>,{" "}
+                <span style={{ color: "var(--t1)" }}>GitHub</span>, and{" "}
+                <span style={{ color: "var(--t1)" }}>Dev.to</span> for real signals.
               </span>
             </div>
             <span

@@ -177,7 +177,7 @@ function buildContainer() {
   const llmClient =
     llmProvider === 'anthropic'
       ? new AnthropicLLMAdapter(requireEnv('ANTHROPIC_API_KEY'), process.env.ANTHROPIC_MODEL, usageLogger)
-      : new GroqLLMAdapter(requireEnv('GROQ_API_KEY'));
+      : new GroqLLMAdapter(requireEnv('GROQ_API_KEY'), undefined, usageLogger);
 
   const createIdeaUseCase = new CreateIdeaUseCase(ideaRepo, eventBus);
   const fetchSignalsUseCase = new FetchSignalsUseCase(
@@ -215,6 +215,9 @@ function buildContainer() {
   const reactToIdeaUseCase = new ReactToIdeaUseCase(ideaReactionRepo);
   const ottoConversationRepo = new SupabaseOttoConversationRepository(supabase);
   // Otto always uses Anthropic Haiku regardless of LLM_PROVIDER
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error('[container] ANTHROPIC_API_KEY is not set — Otto will be unavailable (503 on all /api/v1/otto/chat requests)');
+  }
   const ottoLLMClient = process.env.ANTHROPIC_API_KEY
     ? new AnthropicLLMAdapter(process.env.ANTHROPIC_API_KEY, 'claude-haiku-4-5-20251001', usageLogger)
     : llmClient;

@@ -90,7 +90,7 @@ const RELEASES = [
       "Ask Otto — AI Co-Founder chat on every validated idea: ask strategy, competition, go-to-market, or what to build first",
       "Otto remembers the full conversation per idea — close the page and come back later, the context is preserved",
       "Pro plan includes 3 Otto questions/month; Pro+ includes 10/month — included quota resets on the 1st of every month",
-      "Buy more questions anytime with one-time packs: 1 question (€4), 3 (€10), 5 (€15), 10 (€25) — questions never expire and work across all your ideas",
+      "Buy more questions anytime with one-time packs: 10 questions (€15), 25 (€30), 60 (€60), 150 (€120) — questions never expire and work across all your ideas",
       "Balance display shows included remaining and extra questions separately — always know exactly what you have",
       "Free users see the Otto panel locked with a direct upgrade prompt",
     ],

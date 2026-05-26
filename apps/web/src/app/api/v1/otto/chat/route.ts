@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { container } from '@/lib/container';
 import { logger } from '@pledgeoff/observability';
 import { resolveUserId } from '@/lib/api-auth';
-import { OttoInsufficientQuestionsError } from '@pledgeoff/core';
+import { OttoInsufficientQuestionsError, OttoUnavailableError } from '@pledgeoff/core';
 
 const OttoChatSchema = z.object({
   ideaId: z.string().uuid(),
@@ -49,6 +49,9 @@ export async function POST(req: NextRequest) {
     const error = result.error;
     if (error instanceof OttoInsufficientQuestionsError) {
       return NextResponse.json({ error: { code: 'OTTO_NO_QUESTIONS', message: error.message } }, { status: 402, headers: { 'X-Trace-Id': traceId } });
+    }
+    if (error instanceof OttoUnavailableError) {
+      return NextResponse.json({ error: { code: 'OTTO_UNAVAILABLE' } }, { status: 503, headers: { 'X-Trace-Id': traceId } });
     }
     logger.error({ traceId, userId, error: String(error) }, 'Otto chat failed');
     return NextResponse.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });

@@ -1,7 +1,7 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, IUsageLogger } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -155,12 +155,17 @@ const LLMLaunchKitResponseSchemaG = z.object({
 
 const TIMEOUT_MS = 30_000;
 
+// Groq pricing per 1M tokens (llama-3.3-70b-versatile)
+const GROQ_COST_PER_M_INPUT = 0.59;
+const GROQ_COST_PER_M_OUTPUT = 0.79;
+
 export class GroqLLMAdapter implements ILLMClient {
   private readonly client: Groq;
 
   constructor(
     apiKey: string,
     private readonly model = 'llama-3.3-70b-versatile',
+    private readonly usageLogger?: IUsageLogger,
   ) {
     this.client = new Groq({ apiKey, timeout: TIMEOUT_MS });
   }
@@ -393,7 +398,22 @@ export class GroqLLMAdapter implements ILLMClient {
         return err(new LLMClientError(`LLM response schema invalid: ${validated.error.message}`));
       }
 
-      log.info({ traceId, target: 'groq', operation, latencyMs: Date.now() - start, outcome: 'success' }, 'LLM call succeeded');
+      const inputTokens = completion.usage?.prompt_tokens ?? 0;
+      const outputTokens = completion.usage?.completion_tokens ?? 0;
+      log.info({ traceId, target: 'groq', operation, latencyMs: Date.now() - start, outcome: 'success', inputTokens, outputTokens }, 'LLM call succeeded');
+      if (this.usageLogger) {
+        void this.usageLogger.log({
+          model: this.model,
+          provider: 'groq',
+          feature: operation,
+          inputTokens,
+          outputTokens,
+          cacheReadTokens: 0,
+          cacheWriteTokens: 0,
+          costUsd: (inputTokens * GROQ_COST_PER_M_INPUT + outputTokens * GROQ_COST_PER_M_OUTPUT) / 1_000_000,
+          traceId,
+        });
+      }
       return ok(validated.data);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'unknown error';

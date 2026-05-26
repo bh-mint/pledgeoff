@@ -28,10 +28,10 @@ type Props = {
 };
 
 const PACK_OPTIONS = [
-  { count: 1, price: '€4', label: '1 question' },
-  { count: 3, price: '€10', label: '3 questions' },
-  { count: 5, price: '€15', label: '5 questions' },
-  { count: 10, price: '€25', label: '10 questions' },
+  { count: 10, price: '€15', label: '10 questions' },
+  { count: 25, price: '€30', label: '25 questions' },
+  { count: 60, price: '€60', label: '60 questions' },
+  { count: 150, price: '€120', label: '150 questions' },
 ] as const;
 
 export default function OttoChatClient({
@@ -92,7 +92,7 @@ export default function OttoChatClient({
     setLoading(false);
   }
 
-  async function handleBuyPack(count: 1 | 3 | 5 | 10) {
+  async function handleBuyPack(count: 10 | 25 | 60 | 150) {
     setBuyLoading(true);
     const token = await getToken();
     const res = await fetch('/api/v1/billing/otto-pack', {

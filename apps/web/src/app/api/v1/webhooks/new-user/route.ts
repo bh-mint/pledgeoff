@@ -1,4 +1,5 @@
 import { logger } from "@pledgeoff/observability";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
 
 interface NewUserPayload {
   type: "INSERT";
@@ -60,7 +61,7 @@ function buildWelcomeEmail(email: string, name?: string): string {
       PledgeOFF validates your startup ideas against real signals from Reddit and GitHub — and gives you a <strong style="color:#f5f5f5;">GO / KILL / PIVOT</strong> verdict in under 60 seconds.
     </p>
     <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
-      You get <strong style="color:#f5f5f5;">3 free validations</strong> to start. No card required.
+      You get <strong style="color:#f5f5f5;">1 free validation per month</strong> to start. No card required.
     </p>
     <a href="https://pledgeoff.com/ideas/new" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;letter-spacing:-0.01em;">
       Validate your first idea →
@@ -100,6 +101,22 @@ export async function POST(req: Request) {
   if (process.env.DISABLE_EMAIL === 'true') {
     logger.info({ traceId, target: "resend" }, "Welcome email disabled via DISABLE_EMAIL flag");
     return Response.json({ ok: true, skipped: true });
+  }
+
+  // Idempotency guard — Supabase retries webhooks; prevent duplicate welcome emails.
+  // Service role bypasses RLS on processed_events, so this is safe.
+  const supabase = createSupabaseServiceClient();
+  const idempotencyKey = id; // user UUID is unique per new-user webhook
+  const { error: idempotencyError } = await supabase
+    .from('processed_events')
+    .insert({ event_id: idempotencyKey });
+  if (idempotencyError) {
+    // Duplicate key = already processed → skip silently
+    if (idempotencyError.code === '23505') {
+      logger.info({ traceId }, "Welcome email already sent — skipping duplicate webhook");
+      return Response.json({ ok: true, skipped: true });
+    }
+    logger.error({ traceId, error: idempotencyError.message }, "Failed to insert idempotency key");
   }
 
   const resendKey = process.env.RESEND_API_KEY;
