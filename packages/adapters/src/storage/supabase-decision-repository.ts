@@ -1,7 +1,7 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Decision, Dimension } from '@pledgeoff/core';
-import { DecisionRepositoryError, type IDecisionRepository } from '@pledgeoff/core';
+import { DecisionRepositoryError, decisionFromPersistence, type IDecisionRepository } from '@pledgeoff/core';
 
 type DecisionRow = {
   id: string;
@@ -16,17 +16,17 @@ type DecisionRow = {
 };
 
 function rowToDecision(row: DecisionRow): Decision {
-  return {
+  return decisionFromPersistence({
     id: row.id,
     ideaId: row.idea_id,
-    verdict: row.verdict as Decision['verdict'],
+    verdict: row.verdict,
     reasoning: row.reasoning,
     confidence: Number(row.confidence),
-    score: row.score ?? undefined,
+    score: row.score,
     signalIds: row.signal_ids ?? [],
     dimensions: row.dimensions ?? undefined,
     createdAt: row.created_at,
-  };
+  });
 }
 
 export class SupabaseDecisionRepository implements IDecisionRepository {

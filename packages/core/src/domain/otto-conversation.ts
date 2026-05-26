@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { InvalidDomainDataError } from './errors';
 
 export const OttoMessageRoleSchema = z.enum(['user', 'assistant']);
 export type OttoMessageRole = z.infer<typeof OttoMessageRoleSchema>;
@@ -36,6 +37,14 @@ export function appendMessage(
   };
   const messages = [...conversation.messages, message].slice(-MAX_CONVERSATION_MESSAGES);
   return { ...conversation, messages, updatedAt: new Date().toISOString() };
+}
+
+export function ottoConversationFromPersistence(data: unknown): OttoConversation {
+  const result = OttoConversationSchema.safeParse(data);
+  if (!result.success) {
+    throw new InvalidDomainDataError('OttoConversation', result.error.message);
+  }
+  return result.data;
 }
 
 export function createOttoConversation(userId: string, ideaId: string): OttoConversation {

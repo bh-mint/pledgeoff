@@ -1,7 +1,7 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { OttoConversation, OttoMessage } from '@pledgeoff/core';
-import { OttoConversationRepositoryError, MAX_CONVERSATION_MESSAGES, type IOttoConversationRepository } from '@pledgeoff/core';
+import { OttoConversationRepositoryError, MAX_CONVERSATION_MESSAGES, ottoConversationFromPersistence, type IOttoConversationRepository } from '@pledgeoff/core';
 
 type OttoConversationRow = {
   id: string;
@@ -13,14 +13,14 @@ type OttoConversationRow = {
 };
 
 function rowToConversation(row: OttoConversationRow): OttoConversation {
-  return {
+  return ottoConversationFromPersistence({
     id: row.id,
     userId: row.user_id,
     ideaId: row.idea_id,
     messages: row.messages ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-  };
+  });
 }
 
 export class SupabaseOttoConversationRepository implements IOttoConversationRepository {

@@ -1,4 +1,5 @@
 // Domain entities
+export * from './domain/errors';
 export * from './domain/idea';
 export * from './domain/subscription';
 export * from './domain/plan';

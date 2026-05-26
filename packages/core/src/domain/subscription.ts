@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { InvalidDomainDataError } from './errors';
 
 export const PlanSchema = z.enum(['free', 'founder', 'team', 'studio', 'enterprise']);
 export type Plan = z.infer<typeof PlanSchema>;
@@ -77,4 +78,12 @@ export function effectiveSeats(sub: Subscription): number {
 
 export function isStudioOrHigher(plan: Plan): boolean {
   return plan === 'studio' || plan === 'enterprise';
+}
+
+export function subscriptionFromPersistence(data: unknown): Subscription {
+  const result = SubscriptionSchema.safeParse(data);
+  if (!result.success) {
+    throw new InvalidDomainDataError('Subscription', result.error.message);
+  }
+  return result.data;
 }

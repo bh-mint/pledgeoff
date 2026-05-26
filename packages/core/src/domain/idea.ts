@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Result, ok, err } from 'neverthrow';
+import { InvalidDomainDataError } from './errors';
 
 export const NICHES = [
   'ai_ml', 'dev_tools', 'saas_b2b', 'fintech', 'ecommerce',
@@ -56,4 +57,12 @@ export function createIdea(input: {
     niche: input.niche ?? 'other',
     createdAt: new Date().toISOString(),
   });
+}
+
+export function ideaFromPersistence(data: unknown): Idea {
+  const result = IdeaSchema.safeParse(data);
+  if (!result.success) {
+    throw new InvalidDomainDataError('Idea', result.error.message);
+  }
+  return result.data;
 }

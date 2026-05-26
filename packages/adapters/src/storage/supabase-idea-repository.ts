@@ -1,7 +1,7 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Idea } from '@pledgeoff/core';
-import { IdeaRepositoryError, type IIdeaRepository } from '@pledgeoff/core';
+import { IdeaRepositoryError, ideaFromPersistence, type IIdeaRepository } from '@pledgeoff/core';
 
 type IdeaRow = {
   id: string;
@@ -13,14 +13,14 @@ type IdeaRow = {
 };
 
 function rowToIdea(row: IdeaRow): Idea {
-  return {
+  return ideaFromPersistence({
     id: row.id,
     userId: row.user_id,
-    teamId: row.team_id ?? undefined,
+    teamId: row.team_id ?? null,
     text: row.text,
-    niche: (row.niche ?? 'other') as Idea['niche'],
+    niche: row.niche ?? 'other',
     createdAt: row.created_at,
-  };
+  });
 }
 
 export class SupabaseIdeaRepository implements IIdeaRepository {

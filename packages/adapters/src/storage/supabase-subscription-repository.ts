@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Subscription } from '@pledgeoff/core';
 import {
   SubscriptionRepositoryError,
+  subscriptionFromPersistence,
   type ISubscriptionRepository,
   type SubscriptionUpsertInput,
   type SubscriptionSeatUpdateInput,
@@ -28,13 +29,13 @@ type SubscriptionRow = {
 };
 
 function rowToSubscription(row: SubscriptionRow): Subscription {
-  return {
+  return subscriptionFromPersistence({
     id: row.id,
     userId: row.user_id,
     stripeCustomerId: row.stripe_customer_id,
     stripeSubscriptionId: row.stripe_subscription_id,
-    plan: row.plan as Subscription['plan'],
-    status: row.status as Subscription['status'],
+    plan: row.plan,
+    status: row.status,
     currentPeriodEnd: row.current_period_end,
     extraSeats: row.extra_seats ?? 0,
     stripeExtraSeatItemId: row.stripe_extra_seat_item_id ?? null,
@@ -44,7 +45,7 @@ function rowToSubscription(row: SubscriptionRow): Subscription {
     ottoPurchased: row.otto_purchased ?? 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-  };
+  });
 }
 
 export class SupabaseSubscriptionRepository implements ISubscriptionRepository {

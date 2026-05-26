@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { Result, ok, err } from 'neverthrow';
+import { InvalidDomainDataError } from './errors';
 
 export const VerdictSchema = z.enum(['GO', 'KILL', 'PIVOT']);
 export type Verdict = z.infer<typeof VerdictSchema>;
@@ -48,3 +49,18 @@ export function computeScore(dimensions?: Dimension[]): number | undefined {
   if (!dimensions?.length) return undefined;
   return Math.round(dimensions.reduce((sum, d) => sum + d.weight * d.score, 0));
 }
+
+// Stricter schema for reading from DB: score is required (NOT NULL after migration DB-1).
+const DecisionPersistenceSchema = DecisionSchema.extend({
+  score: z.number().int().min(0).max(100),
+});
+
+export function decisionFromPersistence(data: unknown): Decision {
+  const result = DecisionPersistenceSchema.safeParse(data);
+  if (!result.success) {
+    throw new InvalidDomainDataError('Decision', result.error.message);
+  }
+  return result.data;
+}
+
+export { InvalidDomainDataError };
