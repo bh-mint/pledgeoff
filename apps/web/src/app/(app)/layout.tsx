@@ -30,7 +30,8 @@ export default async function AppLayout({
       return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
     }).length;
     const remaining = limit - ideasThisMonth;
-    if (remaining <= 3) planLimitRemaining = Math.max(0, remaining);
+    const threshold = limit <= 1 ? 0 : 3;
+    if (remaining <= threshold) planLimitRemaining = Math.max(0, remaining);
   }
 
   return (
