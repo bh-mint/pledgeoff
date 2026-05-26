@@ -3,7 +3,6 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Subscription } from '@pledgeoff/core';
 import {
   SubscriptionRepositoryError,
-  PLAN_LIMITS,
   type ISubscriptionRepository,
   type SubscriptionUpsertInput,
   type SubscriptionSeatUpdateInput,
@@ -181,29 +180,16 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
   }
 
   async deductOttoQuestion(userId: string): Promise<Result<void, SubscriptionRepositoryError>> {
-    const subResult = await this.findByUserId(userId);
-    if (subResult.isErr()) return err(subResult.error);
-    const sub = subResult.value;
-    if (!sub) return err(new SubscriptionRepositoryError('Subscription not found'));
-
-    // Deduct from included first, then purchased
-    const updatePayload: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    const includedLimitForPlan = PLAN_LIMITS[sub.plan]?.ottoQuestionsPerMonth ?? 0;
-
-    if (sub.ottoIncludedUsed < includedLimitForPlan) {
-      updatePayload.otto_included_used = sub.ottoIncludedUsed + 1;
-    } else if (sub.ottoPurchased > 0) {
-      updatePayload.otto_purchased = sub.ottoPurchased - 1;
-    } else {
-      return err(new SubscriptionRepositoryError('No Otto questions remaining'));
-    }
-
-    const { error } = await this.client
-      .from('subscriptions')
-      .update(updatePayload)
-      .eq('user_id', userId);
+    // Uses the deduct_otto_question SQL function which holds a row-level lock
+    // for the full transaction, eliminating the SELECT-then-UPDATE race condition.
+    const { data, error } = await this.client
+      .rpc('deduct_otto_question', { p_user_id: userId });
 
     if (error) return err(new SubscriptionRepositoryError(error.message));
+
+    if (data === 'not_found') return err(new SubscriptionRepositoryError('Subscription not found'));
+    if (data === 'no_balance') return err(new SubscriptionRepositoryError('No Otto questions remaining'));
+
     return ok(undefined);
   }
 

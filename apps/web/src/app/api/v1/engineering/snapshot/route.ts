@@ -1,6 +1,7 @@
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { getUserPlan } from '@/server/billing/getUserPlan';
+import { isAtLeastPlan, PLAN } from '@pledgeoff/core';
 
 export const maxDuration = 10;
 
@@ -16,7 +17,7 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   const plan = await getUserPlan(userId);
-  if (plan === 'free' || plan === 'founder') {
+  if (!isAtLeastPlan(plan, PLAN.TEAM)) {
     return Response.json(
       { error: { code: 'PLAN_REQUIRED', message: 'Team plan or higher required' } },
       { status: 403, headers: { 'X-Trace-Id': traceId } },

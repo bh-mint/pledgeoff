@@ -1,7 +1,7 @@
 import { resolveUserId } from '@/lib/api-auth';
 import { container } from '@/lib/container';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
-import { effectivePlan } from '@pledgeoff/core';
+import { effectivePlan, isAtLeastPlan, PLAN } from '@pledgeoff/core';
 import { logger } from '@pledgeoff/observability';
 
 export async function POST(req: Request): Promise<Response> {
@@ -19,7 +19,7 @@ export async function POST(req: Request): Promise<Response> {
   const sub = subResult.isOk() ? subResult.value : null;
   const plan = sub ? effectivePlan(sub) : 'free';
 
-  if (plan !== 'studio' && plan !== 'enterprise') {
+  if (!isAtLeastPlan(plan, PLAN.STUDIO)) {
     return Response.json(
       { error: { code: 'PLAN_REQUIRED', message: 'Invoice billing is available for Studio plan only' } },
       { status: 403, headers: { 'X-Trace-Id': traceId } },

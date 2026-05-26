@@ -2,6 +2,7 @@ import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { resolveUserId } from '@/lib/api-auth';
 import { getUserPlan } from '@/server/billing/getUserPlan';
 import { logger } from '@pledgeoff/observability';
+import { isAtLeastPlan, PLAN } from '@pledgeoff/core';
 import { NICHE_LABELS, type Niche } from '@/lib/niche-classifier';
 
 export const revalidate = 300; // cache 5 minutes
@@ -30,7 +31,7 @@ export async function GET(req: Request) {
   if (!userId) return unauthorizedResponse(traceId);
 
   const plan = await getUserPlan(userId);
-  if (plan === 'free' || plan === 'founder') {
+  if (!isAtLeastPlan(plan, PLAN.TEAM)) {
     return Response.json({ data: [], locked: true }, { status: 200, headers: { 'X-Trace-Id': traceId } });
   }
 

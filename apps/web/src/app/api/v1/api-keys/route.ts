@@ -6,6 +6,8 @@ import { logger } from '@pledgeoff/observability';
 import {
   ApiKeyNameInvalidError,
   ApiKeyLimitReachedError,
+  isAtLeastPlan,
+  PLAN,
 } from '@pledgeoff/core';
 
 function unauthorized(traceId: string) {
@@ -29,7 +31,7 @@ export async function GET(req: Request) {
   if (!userId) return unauthorized(traceId);
 
   const plan = await getUserPlan(userId);
-  if (plan !== 'team' && plan !== 'studio' && plan !== 'enterprise') {
+  if (!isAtLeastPlan(plan, PLAN.TEAM)) {
     return forbidden(traceId, 'API access requires Pro+ or Agency plan');
   }
 
@@ -61,7 +63,7 @@ export async function POST(req: Request) {
   if (!userId) return unauthorized(traceId);
 
   const plan = await getUserPlan(userId);
-  if (plan !== 'team' && plan !== 'studio' && plan !== 'enterprise') {
+  if (!isAtLeastPlan(plan, PLAN.TEAM)) {
     return forbidden(traceId, 'API access requires Pro+ or Agency plan');
   }
 

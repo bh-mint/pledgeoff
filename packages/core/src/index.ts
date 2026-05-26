@@ -1,6 +1,7 @@
 // Domain entities
 export * from './domain/idea';
 export * from './domain/subscription';
+export * from './domain/plan';
 export * from './domain/team';
 export * from './domain/signal';
 export * from './domain/decision';

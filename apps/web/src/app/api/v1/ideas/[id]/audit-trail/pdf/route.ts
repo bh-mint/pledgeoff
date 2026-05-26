@@ -4,6 +4,7 @@ import { createSupabaseAuthClient } from '@/lib/supabase/server';
 import { getUserPlan } from '@/server/billing/getUserPlan';
 import { container } from '@/lib/container';
 import { logger } from '@pledgeoff/observability';
+import { isAtLeastPlan, PLAN } from '@pledgeoff/core';
 import { AuditTrailPDF } from '@/components/pdf/AuditTrailPDF';
 
 export async function GET(
@@ -18,7 +19,7 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const plan = await getUserPlan(user.id);
-  if (plan !== 'studio' && plan !== 'enterprise') {
+  if (!isAtLeastPlan(plan, PLAN.STUDIO)) {
     return NextResponse.json({ error: 'Studio plan required' }, { status: 403 });
   }
 
