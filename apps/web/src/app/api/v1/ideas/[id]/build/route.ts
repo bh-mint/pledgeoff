@@ -2,6 +2,7 @@ export const maxDuration = 60;
 
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
+import { checkAiRateLimit } from '@/lib/rate-limiter';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -37,6 +38,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const ideaResult = await container._repos.ideaRepo.findById(ideaId);
   if (ideaResult.isErr() || !ideaResult.value || ideaResult.value.userId !== userId) {
     return Response.json({ error: { code: 'NOT_FOUND' } }, { status: 404, headers: { 'X-Trace-Id': traceId } });
+  }
+
+  const aiLimit = await checkAiRateLimit(userId);
+  if (!aiLimit.allowed) {
+    void container.auditLog.log({ userId, action: 'rate_limited', resourceType: 'idea', resourceId: ideaId, traceId });
+    return Response.json(
+      { error: { code: 'RATE_LIMITED' } },
+      { status: 429, headers: { 'X-Trace-Id': traceId, 'Retry-After': String(Math.ceil(aiLimit.retryAfterMs / 1000)) } },
+    );
   }
 
   const result = await container.analyzeBuildUseCase.execute({

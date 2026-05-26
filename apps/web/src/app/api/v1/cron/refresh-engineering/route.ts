@@ -1,18 +1,14 @@
 import { container } from '@/lib/container';
 import { logger } from '@pledgeoff/observability';
+import { requireCronAuth } from '@/lib/cron-auth';
 
 export const maxDuration = 60;
 
 export async function GET(req: Request): Promise<Response> {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 
-  const secret = process.env.CRON_SECRET;
-  if (!secret) {
-    return Response.json({ error: { code: 'MISCONFIGURED' } }, { status: 500 });
-  }
-  if (req.headers.get('authorization') !== `Bearer ${secret}`) {
-    return Response.json({ error: { code: 'UNAUTHORIZED' } }, { status: 401 });
-  }
+  const auth = requireCronAuth(req);
+  if (!auth.ok) return Response.json({ error: auth.body }, { status: auth.status });
 
   const result = await container.refreshEngineeringSnapshotUseCase.execute({ traceId });
   if (result.isErr()) {

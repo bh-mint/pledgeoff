@@ -73,12 +73,13 @@ export async function POST(req: Request) {
   }
 
   // Rate limiting
-  const rateLimit = checkRateLimit(userId);
+  const rateLimit = await checkRateLimit(userId);
   if (!rateLimit.allowed) {
     logger.warn(
       { traceId, userId, action: 'create_idea', outcome: 'error', errorCode: 'RATE_LIMITED' },
       'Rate limit exceeded',
     );
+    void container.auditLog.log({ userId, action: 'rate_limited', resourceType: 'idea', resourceId: '', traceId });
     return Response.json(
       { error: { code: 'RATE_LIMITED', message: 'Too many requests. Try again later.' } },
       {

@@ -55,7 +55,7 @@ describe('POST /api/v1/ideas', () => {
     vi.clearAllMocks();
     mockResolveUserId.mockResolvedValue(TEST_USER_ID);
     mockGetUserPlan.mockResolvedValue('free');
-    mockCheckRateLimit.mockReturnValue({ allowed: true });
+    mockCheckRateLimit.mockResolvedValue({ allowed: true });
     mockIdeaRepo.countThisMonth.mockResolvedValue(ok(0));
     mockIdempotencyStore.hasBeenProcessed.mockResolvedValue(ok(false));
     mockIdempotencyStore.markAsProcessed.mockResolvedValue(ok(undefined));
@@ -109,7 +109,7 @@ describe('POST /api/v1/ideas', () => {
   });
 
   it('returns 429 when rate limited', async () => {
-    mockCheckRateLimit.mockReturnValue({ allowed: false, retryAfterMs: 5000 });
+    mockCheckRateLimit.mockResolvedValue({ allowed: false, retryAfterMs: 5000 });
 
     const { POST } = await import('../ideas/route');
     const res = await POST(makeRequest({ text: VALID_IDEA_TEXT }));

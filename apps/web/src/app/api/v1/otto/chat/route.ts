@@ -4,6 +4,7 @@ import { container } from '@/lib/container';
 import { logger } from '@pledgeoff/observability';
 import { resolveUserId } from '@/lib/api-auth';
 import { OttoInsufficientQuestionsError, OttoUnavailableError } from '@pledgeoff/core';
+import { checkAiRateLimit } from '@/lib/rate-limiter';
 
 const OttoChatSchema = z.object({
   ideaId: z.string().uuid(),
@@ -32,6 +33,15 @@ export async function POST(req: NextRequest) {
   const parsed = OttoChatSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: { code: 'VALIDATION_FAILED', details: parsed.error.flatten() } }, { status: 400, headers: { 'X-Trace-Id': traceId } });
+  }
+
+  const aiLimit = await checkAiRateLimit(userId);
+  if (!aiLimit.allowed) {
+    void container.auditLog.log({ userId, action: 'rate_limited', resourceType: 'idea', resourceId: parsed.data.ideaId, traceId });
+    return NextResponse.json(
+      { error: { code: 'RATE_LIMITED' } },
+      { status: 429, headers: { 'X-Trace-Id': traceId, 'Retry-After': String(Math.ceil(aiLimit.retryAfterMs / 1000)) } },
+    );
   }
 
   const result = await container.askOttoUseCase.execute({

@@ -1,5 +1,6 @@
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
+import { checkAiRateLimit } from '@/lib/rate-limiter';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -28,6 +29,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const userId = await resolveUserIdFromRequest(req);
   if (!userId) {
     return Response.json({ error: { code: 'UNAUTHENTICATED' } }, { status: 401, headers: { 'X-Trace-Id': traceId } });
+  }
+
+  const aiLimit = await checkAiRateLimit(userId);
+  if (!aiLimit.allowed) {
+    void container.auditLog.log({ userId, action: 'rate_limited', resourceType: 'idea', resourceId: ideaId, traceId });
+    return Response.json(
+      { error: { code: 'RATE_LIMITED' } },
+      { status: 429, headers: { 'X-Trace-Id': traceId, 'Retry-After': String(Math.ceil(aiLimit.retryAfterMs / 1000)) } },
+    );
   }
 
   const result = await container.generateLaunchKitUseCase.execute({ ideaId, userId, traceId });

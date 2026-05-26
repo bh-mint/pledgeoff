@@ -9,7 +9,8 @@ export type AuditAction =
   | 'plan_changed'
   | 'subscription_cancelled'
   | 'subscription_reactivated'
-  | 'invoice_requested';
+  | 'invoice_requested'
+  | 'rate_limited';
 
 export type AuditEntry = {
   readonly userId: string;

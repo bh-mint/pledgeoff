@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
+import { checkAiRateLimit } from '@/lib/rate-limiter';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -27,6 +28,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json(
       { error: { code: 'NOT_FOUND', message: 'Idea not found' } },
       { status: 404, headers: { 'X-Trace-Id': traceId } },
+    );
+  }
+
+  const aiLimit = await checkAiRateLimit(userId);
+  if (!aiLimit.allowed) {
+    void container.auditLog.log({ userId, action: 'rate_limited', resourceType: 'idea', resourceId: id, traceId });
+    return NextResponse.json(
+      { error: { code: 'RATE_LIMITED' } },
+      { status: 429, headers: { 'X-Trace-Id': traceId, 'Retry-After': String(Math.ceil(aiLimit.retryAfterMs / 1000)) } },
     );
   }
 

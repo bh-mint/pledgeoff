@@ -2,20 +2,15 @@ import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { logger } from '@pledgeoff/observability';
 import { container } from '@/lib/container';
 import { sendQueueAlertEmail } from '@pledgeoff/adapters';
+import { requireCronAuth } from '@/lib/cron-auth';
 
 export const maxDuration = 60;
 
 // Vercel Cron: daily at 02:30 UTC — re-scores all users' idea queues.
 // Sends email alert when a priority score shifts >20% for any idea.
 export async function GET(req: Request): Promise<Response> {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    logger.error({ traceId: crypto.randomUUID() }, 'CRON_SECRET not set — refusing to execute cron');
-    return Response.json({ error: 'Server misconfiguration' }, { status: 503 });
-  }
-  if (req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const auth = requireCronAuth(req);
+  if (!auth.ok) return Response.json({ error: auth.body }, { status: auth.status });
 
   const traceId = crypto.randomUUID();
   const supabase = createSupabaseServiceClient();
