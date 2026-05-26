@@ -35,7 +35,7 @@ vi.mock('@pledgeoff/observability', () => ({
 }));
 vi.mock('@/lib/container', () => ({
   container: {
-    _repos: { decisionOutcomeRepo: mockDecisionOutcomeRepo },
+    _unsafeRepos: { decisionOutcomeRepo: mockDecisionOutcomeRepo },
     getDecisionQueueUseCase: mockGetDecisionQueueUseCase,
     recordOutcomeUseCase: mockRecordOutcomeUseCase,
     getDecisionTimelineUseCase: mockGetDecisionTimelineUseCase,

@@ -58,7 +58,7 @@ export default async function FlywheelPage({ searchParams }: Props) {
     ? (rawPeriod as Period)
     : 'all';
 
-  const allOutcomesResult = await container._repos.decisionOutcomeRepo.findAll();
+  const allOutcomesResult = await container._unsafeRepos.decisionOutcomeRepo.findAll();
   const allOutcomes = allOutcomesResult.isOk() ? allOutcomesResult.value : [];
 
   const since = periodToDate(period);

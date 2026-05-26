@@ -15,7 +15,7 @@ export default async function SettingsLayout({
 
   const [plan, ideasResult] = await Promise.all([
     getUserPlan(user.id),
-    container._repos.ideaRepo.findByUserId(user.id),
+    container._unsafeRepos.ideaRepo.findByUserId(user.id),
   ]);
 
   const ideas = ideasResult.isOk() ? ideasResult.value : [];

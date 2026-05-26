@@ -367,7 +367,8 @@ function buildContainer() {
     recordOutcomeUseCase,
     getFlywheelStatsUseCase,
     getUsersAccuracyReportUseCase,
-    _repos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo, decisionOutcomeRepo },
+    /** @deprecated Direct repo access bypasses use-case layer. Migrate callers to dedicated use cases. */
+    _unsafeRepos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo, decisionOutcomeRepo },
   };
 }
 

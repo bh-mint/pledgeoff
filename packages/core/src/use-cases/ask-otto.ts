@@ -67,6 +67,11 @@ export class AskOttoUseCase {
 
     const conversation = convResult.value ?? createOttoConversation(input.userId, input.ideaId);
 
+    // Deduct before LLM — credit is consumed regardless of LLM outcome.
+    // If LLM fails after this point, credit is intentionally lost (prevents credit farming via retries).
+    const deductResult = await this.subscriptionRepo.deductOttoQuestion(input.userId);
+    if (deductResult.isErr()) return err(new OttoRepositoryError('Failed to deduct question'));
+
     const llmResult = await this.llmClient.chatWithOtto({
       ideaText: input.ideaText,
       verdict: input.verdict,
@@ -87,9 +92,6 @@ export class AskOttoUseCase {
 
     const saveResult = await this.ottoConversationRepo.save(withReply);
     if (saveResult.isErr()) return err(new OttoRepositoryError('Failed to save conversation'));
-
-    const deductResult = await this.subscriptionRepo.deductOttoQuestion(input.userId);
-    if (deductResult.isErr()) return err(new OttoRepositoryError('Failed to deduct question'));
 
     const freshSubResult = await this.subscriptionRepo.findByUserId(input.userId);
     const freshSub = freshSubResult.isOk() && freshSubResult.value ? freshSubResult.value : sub;

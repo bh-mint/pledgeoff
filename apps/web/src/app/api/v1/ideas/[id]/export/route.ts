@@ -11,7 +11,7 @@ export async function GET(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const ideaResult = await container._repos.ideaRepo.findById(id);
+  const ideaResult = await container._unsafeRepos.ideaRepo.findById(id);
   if (ideaResult.isErr() || !ideaResult.value) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -22,13 +22,13 @@ export async function GET(
 
   const [decisionResult, signalsResult, simulationResult, landingResult, customersResult, buildResult, competitorsResult] =
     await Promise.all([
-      container._repos.decisionRepo.findByIdeaId(id),
-      container._repos.signalRepo.findByIdeaId(id),
-      container._repos.simulationRepo.findByIdeaId(id),
-      container._repos.landingPageRepo.findByIdeaId(id),
-      container._repos.customerAnalysisRepo.findByIdeaId(id),
-      container._repos.buildAnalysisRepo.findByIdeaId(id),
-      container._repos.competitorAnalysisRepo.findByIdeaId(id),
+      container._unsafeRepos.decisionRepo.findByIdeaId(id),
+      container._unsafeRepos.signalRepo.findByIdeaId(id),
+      container._unsafeRepos.simulationRepo.findByIdeaId(id),
+      container._unsafeRepos.landingPageRepo.findByIdeaId(id),
+      container._unsafeRepos.customerAnalysisRepo.findByIdeaId(id),
+      container._unsafeRepos.buildAnalysisRepo.findByIdeaId(id),
+      container._unsafeRepos.competitorAnalysisRepo.findByIdeaId(id),
     ]);
 
   const payload = {

@@ -24,7 +24,7 @@ export async function GET(
     return NextResponse.json({ error: 'Studio plan required' }, { status: 403 });
   }
 
-  const ideaResult = await container._repos.ideaRepo.findById(id);
+  const ideaResult = await container._unsafeRepos.ideaRepo.findById(id);
   if (ideaResult.isErr() || !ideaResult.value) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
@@ -37,9 +37,9 @@ export async function GET(
   const { data: profile } = await svc.from('profiles').select('first_name, last_name').eq('id', user.id).single();
 
   const [decisionResult, signalsResult, simulationResult] = await Promise.all([
-    container._repos.decisionRepo.findByIdeaId(id),
-    container._repos.signalRepo.findByIdeaId(id),
-    container._repos.simulationRepo.findByIdeaId(id),
+    container._unsafeRepos.decisionRepo.findByIdeaId(id),
+    container._unsafeRepos.signalRepo.findByIdeaId(id),
+    container._unsafeRepos.simulationRepo.findByIdeaId(id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;

@@ -38,7 +38,7 @@ export default async function DashboardPage() {
   const [{ ideas: rawIdeas, outcomes: rawOutcomes }, plan, teamResult] = await Promise.all([
     getDashboardData(user.id),
     getUserPlan(user.id),
-    container._repos.teamRepo.findByMemberId(user.id),
+    container._unsafeRepos.teamRepo.findByMemberId(user.id),
   ]);
 
   const isPaidPlan = plan !== "free";
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
     teamName = team.name;
     teamId = team.id;
 
-    const membershipsResult = await container._repos.teamRepo.findMembershipsByTeamId(team.id);
+    const membershipsResult = await container._unsafeRepos.teamRepo.findMembershipsByTeamId(team.id);
     const memberships = membershipsResult.isOk() ? membershipsResult.value : [];
     const activeMemberships = memberships.filter((m) => m.status === "active");
 
@@ -128,14 +128,14 @@ export default async function DashboardPage() {
 
     const allMemberIds = [...new Set([team.ownerId, ...memberUserIds.filter((id): id is string => id !== null)])];
 
-    const teamIdeasResult = await container._repos.ideaRepo.findByUserIds(allMemberIds);
+    const teamIdeasResult = await container._unsafeRepos.ideaRepo.findByUserIds(allMemberIds);
     if (teamIdeasResult.isOk()) {
       const teamIdeas = teamIdeasResult.value;
       const teamIdeaIds = teamIdeas.map((idea) => idea.id);
 
       const [teamDecisions, reactionsResult] = await Promise.all([
-        Promise.all(teamIdeas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))),
-        container._repos.ideaReactionRepo.findByIdeaIds(teamIdeaIds),
+        Promise.all(teamIdeas.map((idea) => container._unsafeRepos.decisionRepo.findByIdeaId(idea.id))),
+        container._unsafeRepos.ideaReactionRepo.findByIdeaIds(teamIdeaIds),
       ]);
 
       const allReactions = reactionsResult.isOk() ? reactionsResult.value : [];

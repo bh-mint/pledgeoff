@@ -27,8 +27,8 @@ function computeScore(decision: Decision): number {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const [ideaResult, decisionResult] = await Promise.all([
-    container._repos.ideaRepo.findById(id),
-    container._repos.decisionRepo.findByIdeaId(id),
+    container._unsafeRepos.ideaRepo.findById(id),
+    container._unsafeRepos.decisionRepo.findByIdeaId(id),
   ]);
   const idea = ideaResult.isOk() ? ideaResult.value : null;
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -66,8 +66,8 @@ export default async function SharePage({ params }: Props) {
   const { id } = await params;
 
   const [ideaResult, decisionResult] = await Promise.all([
-    container._repos.ideaRepo.findById(id),
-    container._repos.decisionRepo.findByIdeaId(id),
+    container._unsafeRepos.ideaRepo.findById(id),
+    container._unsafeRepos.decisionRepo.findByIdeaId(id),
   ]);
 
   const idea = ideaResult.isOk() ? ideaResult.value : null;

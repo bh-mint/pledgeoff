@@ -13,8 +13,8 @@ export default async function IdeaLayout({ children, params }: Props) {
   const user = await requireUser();
 
   const [ideaResult, decisionResult] = await Promise.all([
-    container._repos.ideaRepo.findById(id),
-    container._repos.decisionRepo.findByIdeaId(id),
+    container._unsafeRepos.ideaRepo.findById(id),
+    container._unsafeRepos.decisionRepo.findByIdeaId(id),
   ]);
 
   const idea = ideaResult.isOk() ? ideaResult.value : null;

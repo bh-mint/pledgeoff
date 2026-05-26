@@ -23,7 +23,7 @@ export async function GET(req: Request) {
   const userId = await resolveUserIdFromRequest(req);
   if (!userId) return unauthorizedResponse(traceId);
 
-  const result = await container._repos.ideaRepo.findByUserId(userId);
+  const result = await container._unsafeRepos.ideaRepo.findByUserId(userId);
   if (result.isErr()) {
     return Response.json(
       { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
 
   const ideas = result.value;
   const decisions = await Promise.all(
-    ideas.map((idea) => container._repos.decisionRepo.findByIdeaId(idea.id))
+    ideas.map((idea) => container._unsafeRepos.decisionRepo.findByIdeaId(idea.id))
   );
 
   const data = ideas.map((idea, i) => ({
@@ -95,7 +95,7 @@ export async function POST(req: Request) {
   // Idempotency-Key
   const idempotencyKey = req.headers.get('idempotency-key');
   if (idempotencyKey) {
-    const alreadyProcessed = await container._repos.idempotencyStore.hasBeenProcessed(idempotencyKey);
+    const alreadyProcessed = await container._unsafeRepos.idempotencyStore.hasBeenProcessed(idempotencyKey);
     if (alreadyProcessed.isOk() && alreadyProcessed.value) {
       return Response.json(
         { error: { code: 'ALREADY_PROCESSED', message: 'This request was already processed.' } },
@@ -148,7 +148,7 @@ export async function POST(req: Request) {
 
   // Mark idempotency key as processed
   if (idempotencyKey) {
-    await container._repos.idempotencyStore.markAsProcessed(idempotencyKey);
+    await container._unsafeRepos.idempotencyStore.markAsProcessed(idempotencyKey);
   }
 
   const idea = result.value;

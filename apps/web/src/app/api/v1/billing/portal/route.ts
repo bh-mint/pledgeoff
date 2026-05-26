@@ -19,7 +19,7 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const subResult = await container._repos.subscriptionRepo.findByUserId(userId);
+  const subResult = await container._unsafeRepos.subscriptionRepo.findByUserId(userId);
   const stripeCustomerId = subResult.isOk() ? subResult.value?.stripeCustomerId : null;
 
   if (!stripeCustomerId) {

@@ -22,7 +22,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!userId) return unauthorizedResponse(traceId);
 
   // Validate that the idea exists and that the reacting user shares a team with the idea owner
-  const ideaResult = await container._repos.ideaRepo.findById(ideaId);
+  const ideaResult = await container._unsafeRepos.ideaRepo.findById(ideaId);
   if (ideaResult.isErr()) {
     return Response.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }
@@ -32,7 +32,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   // Check that reacting user is in a team
-  const userTeamResult = await container._repos.teamRepo.findByMemberId(userId);
+  const userTeamResult = await container._unsafeRepos.teamRepo.findByMemberId(userId);
   if (userTeamResult.isErr()) {
     return Response.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }
@@ -45,7 +45,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   // Check that the idea author is in the same team
-  const authorTeamResult = await container._repos.teamRepo.findByMemberId(idea.userId);
+  const authorTeamResult = await container._unsafeRepos.teamRepo.findByMemberId(idea.userId);
   const authorIsInTeam =
     (authorTeamResult.isOk() && authorTeamResult.value?.id === userTeam.id) ||
     idea.userId === userTeam.ownerId ||
@@ -76,7 +76,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   // Return updated counts
-  const reactionsResult = await container._repos.ideaReactionRepo.findByIdeaIds([ideaId]);
+  const reactionsResult = await container._unsafeRepos.ideaReactionRepo.findByIdeaIds([ideaId]);
   const reactions = reactionsResult.isOk() ? reactionsResult.value : [];
   const agree = reactions.filter((r) => r.reaction === 'agree').length;
   const disagree = reactions.filter((r) => r.reaction === 'disagree').length;
@@ -95,7 +95,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const userId = await resolveUserId(req.headers.get('authorization'));
   if (!userId) return unauthorizedResponse(traceId);
 
-  const reactionsResult = await container._repos.ideaReactionRepo.findByIdeaIds([ideaId]);
+  const reactionsResult = await container._unsafeRepos.ideaReactionRepo.findByIdeaIds([ideaId]);
   if (reactionsResult.isErr()) {
     return Response.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }

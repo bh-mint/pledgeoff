@@ -166,13 +166,16 @@ describe('AskOttoUseCase', () => {
     }
   });
 
-  it('does not deduct question when LLM fails', async () => {
+  it('deducts question before LLM call — credit consumed even when LLM fails', async () => {
     const { ottoRepo, subRepo, llm } = makeRepos();
     vi.mocked(llm.chatWithOtto).mockResolvedValueOnce(err(new LLMClientError('timeout')));
     const useCase = new AskOttoUseCase(ottoRepo, subRepo, llm);
 
-    await useCase.execute(makeInput());
+    const result = await useCase.execute(makeInput());
 
-    expect(subRepo.deductOttoQuestion).not.toHaveBeenCalled();
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(OttoUnavailableError);
+    // Credit is consumed before LLM — prevents gaming the system via retries
+    expect(subRepo.deductOttoQuestion).toHaveBeenCalledWith('user-1');
   });
 });

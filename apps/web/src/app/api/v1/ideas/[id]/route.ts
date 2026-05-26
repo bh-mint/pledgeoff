@@ -25,7 +25,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     );
   }
 
-  const ideaResult = await container._repos.ideaRepo.findById(id);
+  const ideaResult = await container._unsafeRepos.ideaRepo.findById(id);
   if (ideaResult.isErr()) {
     return Response.json(
       { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
@@ -50,8 +50,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   const [decisionResult, signalsResult] = await Promise.all([
-    container._repos.decisionRepo.findByIdeaId(id),
-    container._repos.signalRepo.findByIdeaId(id),
+    container._unsafeRepos.decisionRepo.findByIdeaId(id),
+    container._unsafeRepos.signalRepo.findByIdeaId(id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;

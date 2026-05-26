@@ -6,7 +6,7 @@ export type { Plan } from "@pledgeoff/core";
 
 // Single source of truth for plan resolution. Always use this — never read subscriptions inline.
 export async function getUserPlan(userId: string): Promise<Plan> {
-  const result = await container._repos.subscriptionRepo.findByUserId(userId);
+  const result = await container._unsafeRepos.subscriptionRepo.findByUserId(userId);
 
   if (result.isErr()) {
     logger.error(

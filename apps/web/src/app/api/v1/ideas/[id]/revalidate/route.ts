@@ -15,7 +15,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     );
   }
 
-  const ideaResult = await container._repos.ideaRepo.findById(id);
+  const ideaResult = await container._unsafeRepos.ideaRepo.findById(id);
   if (ideaResult.isErr() || !ideaResult.value) {
     return NextResponse.json(
       { error: { code: 'NOT_FOUND', message: 'Idea not found' } },
@@ -41,7 +41,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   // Capture current score before re-validation
-  const prevDecisionResult = await container._repos.decisionRepo.findByIdeaId(id);
+  const prevDecisionResult = await container._unsafeRepos.decisionRepo.findByIdeaId(id);
   const prevDecision = prevDecisionResult.isOk() ? prevDecisionResult.value : null;
   const oldScore = prevDecision?.score ?? null;
   const oldVerdict = prevDecision?.verdict ?? null;

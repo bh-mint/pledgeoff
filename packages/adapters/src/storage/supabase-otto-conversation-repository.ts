@@ -1,7 +1,7 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { OttoConversation, OttoMessage } from '@pledgeoff/core';
-import { OttoConversationRepositoryError, type IOttoConversationRepository } from '@pledgeoff/core';
+import { OttoConversationRepositoryError, MAX_CONVERSATION_MESSAGES, type IOttoConversationRepository } from '@pledgeoff/core';
 
 type OttoConversationRow = {
   id: string;
@@ -46,7 +46,7 @@ export class SupabaseOttoConversationRepository implements IOttoConversationRepo
         id: conversation.id,
         user_id: conversation.userId,
         idea_id: conversation.ideaId,
-        messages: conversation.messages,
+        messages: conversation.messages.slice(-MAX_CONVERSATION_MESSAGES),
         created_at: conversation.createdAt,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id,idea_id' })

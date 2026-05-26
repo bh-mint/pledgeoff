@@ -14,9 +14,9 @@ export default async function NewIdeaPage() {
   const user = await requireUser();
 
   const [ideasResult, plan, teamResult] = await Promise.all([
-    container._repos.ideaRepo.findByUserId(user.id),
+    container._unsafeRepos.ideaRepo.findByUserId(user.id),
     getUserPlan(user.id),
-    container._repos.teamRepo.findByMemberId(user.id),
+    container._unsafeRepos.teamRepo.findByMemberId(user.id),
   ]);
 
   const limit = PLAN_LIMITS[plan].verificationsPerMonth;

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-server";
 import { getUserPlan } from "@/server/billing/getUserPlan";
-import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { effectivePlan } from "@pledgeoff/core";
 import { BillingClient } from "./BillingClient";
@@ -15,11 +14,9 @@ export const metadata: Metadata = {
 
 export default async function BillingPage() {
   const user = await requireUser();
-  const supabase = createSupabaseServiceClient();
-
   const [ideasResult, subResult] = await Promise.all([
-    container._repos.ideaRepo.findByUserId(user.id),
-    container._repos.subscriptionRepo.findByUserId(user.id),
+    container._unsafeRepos.ideaRepo.findByUserId(user.id),
+    container._unsafeRepos.subscriptionRepo.findByUserId(user.id),
   ]);
 
   const ideas = ideasResult.isOk() ? ideasResult.value : [];

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default async function TeamPage() {
   const user = await requireUser();
-  const subResult = await container._repos.subscriptionRepo.findByUserId(
+  const subResult = await container._unsafeRepos.subscriptionRepo.findByUserId(
     user.id,
   );
   const sub = subResult.isOk() ? subResult.value : null;

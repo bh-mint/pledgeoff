@@ -43,7 +43,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const { print: autoPrint } = await searchParams;
   const user = await requireUser();
 
-  const ideaResult = await container._repos.ideaRepo.findById(id);
+  const ideaResult = await container._unsafeRepos.ideaRepo.findById(id);
   if (ideaResult.isErr()) {
     logger.error({ traceId: "report", ideaId: id, error: String(ideaResult.error), outcome: "error" as const }, "report: ideaRepo.findById failed");
     throw new Error("Failed to load idea");
@@ -62,12 +62,12 @@ export default async function ReportPage({ params, searchParams }: Props) {
     competitorsResult,
     profileResult,
   ] = await Promise.all([
-    container._repos.decisionRepo.findByIdeaId(id),
-    container._repos.signalRepo.findByIdeaId(id),
-    container._repos.simulationRepo.findByIdeaId(id),
-    container._repos.customerAnalysisRepo.findByIdeaId(id),
-    container._repos.buildAnalysisRepo.findByIdeaId(id),
-    container._repos.competitorAnalysisRepo.findByIdeaId(id),
+    container._unsafeRepos.decisionRepo.findByIdeaId(id),
+    container._unsafeRepos.signalRepo.findByIdeaId(id),
+    container._unsafeRepos.simulationRepo.findByIdeaId(id),
+    container._unsafeRepos.customerAnalysisRepo.findByIdeaId(id),
+    container._unsafeRepos.buildAnalysisRepo.findByIdeaId(id),
+    container._unsafeRepos.competitorAnalysisRepo.findByIdeaId(id),
     supabase.from("profiles").select("first_name, last_name, company_name").eq("id", user.id).single(),
   ]);
 
