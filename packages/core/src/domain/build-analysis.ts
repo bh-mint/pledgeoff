@@ -27,6 +27,9 @@ export const TechGapSchema = z.object({
 });
 export type TechGap = z.infer<typeof TechGapSchema>;
 
+export const ConfidenceTierSchema = z.enum(['HIGH', 'MEDIUM', 'LOW']);
+export type ConfidenceTier = z.infer<typeof ConfidenceTierSchema>;
+
 export const BuildAnalysisSchema = z.object({
   id: z.string().uuid(),
   ideaId: z.string().uuid(),
@@ -34,6 +37,21 @@ export const BuildAnalysisSchema = z.object({
   stack: z.array(TechComponentSchema).min(1).max(8),
   gaps: z.array(TechGapSchema).min(0).max(5),
   signalCount: z.number().int().nonnegative(),
+  confidenceTier: ConfidenceTierSchema.optional(),
   createdAt: z.string().datetime(),
 });
 export type BuildAnalysis = z.infer<typeof BuildAnalysisSchema>;
+
+export function computeConfidenceTier(stack: TechComponent[], signalTexts: string[]): ConfidenceTier {
+  if (stack.length === 0 || signalTexts.length === 0) return 'LOW';
+  const corpus = signalTexts.join(' ').toLowerCase();
+  const matched = stack.filter((component) => {
+    const nameMatch = corpus.includes(component.name.toLowerCase());
+    const libMatch = component.libraries.some((lib) => corpus.includes(lib.name.toLowerCase()));
+    return nameMatch || libMatch;
+  });
+  const ratio = matched.length / stack.length;
+  if (ratio >= 0.5) return 'HIGH';
+  if (ratio > 0) return 'MEDIUM';
+  return 'LOW';
+}

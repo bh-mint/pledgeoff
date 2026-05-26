@@ -201,7 +201,7 @@ function buildContainer() {
   );
   const recordFeedbackUseCase = new RecordFeedbackUseCase(feedbackRepo);
   const simulateRevenueUseCase = new SimulateRevenueUseCase(simulationRepo, signalRepo, llmClient);
-  const generateLandingUseCase = new GenerateLandingUseCase(landingPageRepo, llmClient);
+  const generateLandingUseCase = new GenerateLandingUseCase(landingPageRepo, llmClient, signalRepo);
   const analyzeCustomersUseCase = new AnalyzeCustomersUseCase(customerAnalysisRepo, signalRepo, llmClient);
   const analyzeBuildUseCase = new AnalyzeBuildUseCase(buildAnalysisRepo, signalRepo, llmClient);
   const analyzeCompetitorsUseCase = new AnalyzeCompetitorsUseCase(competitorAnalysisRepo, signalRepo, llmClient);

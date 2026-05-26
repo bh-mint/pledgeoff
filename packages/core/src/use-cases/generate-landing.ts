@@ -2,6 +2,9 @@ import { Result, err, ok } from 'neverthrow';
 import type { LandingPage } from '../domain/landing-page';
 import type { ILandingPageRepository, LandingPageRepositoryError } from '../ports/landing-page-repository';
 import type { ILLMClient, LLMClientError } from '../ports/llm-client';
+import type { ISignalRepository } from '../ports/signal-repository';
+
+const TOP_SIGNALS_FOR_LANDING = 5;
 
 export interface GenerateLandingInput {
   readonly ideaId: string;
@@ -17,6 +20,7 @@ export class GenerateLandingUseCase {
   constructor(
     private readonly landingPageRepo: ILandingPageRepository,
     private readonly llmClient: ILLMClient,
+    private readonly signalRepo?: ISignalRepository,
   ) {}
 
   async execute(input: GenerateLandingInput): Promise<Result<LandingPage, GenerateLandingError>> {
@@ -24,9 +28,16 @@ export class GenerateLandingUseCase {
     if (existing.isErr()) return err(existing.error);
     if (existing.value) return ok(existing.value);
 
+    let signals: import('../domain/signal').Signal[] = [];
+    if (this.signalRepo) {
+      const signalsResult = await this.signalRepo.findByIdeaId(input.ideaId);
+      if (signalsResult.isOk()) signals = signalsResult.value.slice(0, TOP_SIGNALS_FOR_LANDING);
+    }
+
     const llmResult = await this.llmClient.generateLanding({
       ideaText: input.ideaText,
       reasoning: input.reasoning,
+      signals,
       traceId: input.traceId,
     });
     if (llmResult.isErr()) return err(llmResult.error);

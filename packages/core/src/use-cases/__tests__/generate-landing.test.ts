@@ -5,10 +5,32 @@ import { LLMClientError } from '../../ports/llm-client';
 import { LandingPageRepositoryError } from '../../ports/landing-page-repository';
 import type { ILandingPageRepository } from '../../ports/landing-page-repository';
 import type { ILLMClient, LLMLandingResponse } from '../../ports/llm-client';
+import type { ISignalRepository } from '../../ports/signal-repository';
 import type { LandingPage } from '../../domain/landing-page';
+import type { Signal } from '../../domain/signal';
 
 const ideaId = crypto.randomUUID();
 const userId = crypto.randomUUID();
+
+const makeSignal = (): Signal => ({
+  id: crypto.randomUUID(),
+  ideaId,
+  source: 'hn',
+  url: 'https://news.ycombinator.com/item?id=123',
+  title: 'Founders want better validation tools',
+  summary: 'Many founders struggle with validating ideas before building',
+  sentiment: 'positive',
+  fetchedAt: new Date().toISOString(),
+});
+
+function makeSignalRepo(signals: Signal[] = [makeSignal()]): ISignalRepository {
+  return {
+    upsertMany: vi.fn(),
+    findByIdeaId: vi.fn().mockResolvedValue(ok(signals)),
+    findTopByEmbedding: vi.fn(),
+    saveEmbeddings: vi.fn().mockResolvedValue(ok(undefined)),
+  };
+}
 
 const llmResponse: LLMLandingResponse = {
   headline: 'Validate your startup idea in 15 seconds',
@@ -47,7 +69,7 @@ const baseInput = {
 
 describe('GenerateLandingUseCase', () => {
   it('generates and persists a landing page', async () => {
-    const useCase = new GenerateLandingUseCase(makeLandingRepo(), makeLLMClient());
+    const useCase = new GenerateLandingUseCase(makeLandingRepo(), makeLLMClient(), makeSignalRepo());
     const result = await useCase.execute(baseInput);
 
     expect(result.isOk()).toBe(true);
@@ -104,5 +126,29 @@ describe('GenerateLandingUseCase', () => {
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) expect(result.error).toBeInstanceOf(LandingPageRepositoryError);
+  });
+
+  it('passes top 5 signals to LLM when signalRepo is provided', async () => {
+    const signals = Array.from({ length: 8 }, makeSignal);
+    const llm = makeLLMClient();
+    const useCase = new GenerateLandingUseCase(makeLandingRepo(), llm, makeSignalRepo(signals));
+
+    await useCase.execute(baseInput);
+
+    expect(llm.generateLanding).toHaveBeenCalledWith(
+      expect.objectContaining({ signals: expect.arrayContaining([]) }),
+    );
+    const callArgs = vi.mocked(llm.generateLanding).mock.calls[0]?.[0];
+    expect(callArgs?.signals?.length).toBeLessThanOrEqual(5);
+  });
+
+  it('calls LLM without signals when signalRepo is not provided', async () => {
+    const llm = makeLLMClient();
+    const useCase = new GenerateLandingUseCase(makeLandingRepo(), llm);
+
+    await useCase.execute(baseInput);
+
+    const callArgs = vi.mocked(llm.generateLanding).mock.calls[0]?.[0];
+    expect(callArgs?.signals).toEqual([]);
   });
 });

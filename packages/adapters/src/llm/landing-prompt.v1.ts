@@ -1,13 +1,19 @@
+import type { Signal } from '@pledgeoff/core';
+
 export const LANDING_PROMPT_VERSION = 'landingPrompt.v1' as const;
 
-export function buildLandingPrompt(ideaText: string, reasoning: string): string {
+export function buildLandingPrompt(ideaText: string, reasoning: string, signals: Signal[] = []): string {
+  const signalContext = signals.length > 0
+    ? `\n\nMARKET SIGNALS (top ${signals.length} — use the language and pain points from these in your copy):\n${signals.map((s, i) => `[${i + 1}] "${s.title}" — ${s.summary.slice(0, 150)}`).join('\n')}`
+    : '';
+
   return `You are a conversion copywriter specializing in SaaS landing pages. Generate landing page copy for a validated startup idea.
 
 IDEA:
 ${ideaText}
 
 VALIDATION REASONING:
-${reasoning}
+${reasoning}${signalContext}
 
 Respond ONLY with a valid JSON object matching this exact schema:
 {

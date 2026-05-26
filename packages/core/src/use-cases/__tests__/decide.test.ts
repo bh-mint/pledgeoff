@@ -3,6 +3,7 @@ import { ok, err } from 'neverthrow';
 import { DecideUseCase } from '../decide';
 import { LLMClientError } from '../../ports/llm-client';
 import { SignalRepositoryError } from '../../ports/signal-repository';
+import { InvalidDecisionError } from '../../domain/decision';
 import type { ISignalRepository } from '../../ports/signal-repository';
 import type { IDecisionRepository } from '../../ports/decision-repository';
 import type { ILLMClient, LLMDecisionResponse } from '../../ports/llm-client';
@@ -131,6 +132,61 @@ describe('DecideUseCase', () => {
     expect(result.isErr()).toBe(true);
     if (result.isErr()) {
       expect(result.error).toBeInstanceOf(SignalRepositoryError);
+    }
+  });
+
+  it('returns InvalidDecisionError when dimensions are missing expected names', async () => {
+    const badDimensions = [
+      { name: 'Wrong Dim 1', weight: 0.5, score: 70 },
+      { name: 'Wrong Dim 2', weight: 0.5, score: 60 },
+    ];
+    const llm = makeLLMClient({ ...llmResponse, dimensions: badDimensions });
+    const useCase = new DecideUseCase(
+      makeSignalRepo(), makeDecisionRepo(), llm, makeEventBus(), makeIdempotencyStore(false),
+    );
+
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) expect(result.error).toBeInstanceOf(InvalidDecisionError);
+  });
+
+  it('returns InvalidDecisionError when dimension weights do not sum to 1', async () => {
+    const badDimensions = [
+      { name: 'Market Demand', weight: 0.60, score: 80 },
+      { name: 'Competition',   weight: 0.60, score: 70 },
+      { name: 'Feasibility',   weight: 0.20, score: 75 },
+      { name: 'Timing',        weight: 0.15, score: 65 },
+    ];
+    const llm = makeLLMClient({ ...llmResponse, dimensions: badDimensions });
+    const useCase = new DecideUseCase(
+      makeSignalRepo(), makeDecisionRepo(), llm, makeEventBus(), makeIdempotencyStore(false),
+    );
+
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) expect(result.error).toBeInstanceOf(InvalidDecisionError);
+  });
+
+  it('accepts valid dimensions and computes score', async () => {
+    const goodDimensions = [
+      { name: 'Market Demand', weight: 0.40, score: 80 },
+      { name: 'Competition',   weight: 0.25, score: 70 },
+      { name: 'Feasibility',   weight: 0.20, score: 90 },
+      { name: 'Timing',        weight: 0.15, score: 75 },
+    ];
+    const llm = makeLLMClient({ ...llmResponse, dimensions: goodDimensions });
+    const useCase = new DecideUseCase(
+      makeSignalRepo(), makeDecisionRepo(), llm, makeEventBus(), makeIdempotencyStore(false),
+    );
+
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) {
+      expect(result.value.score).toBeDefined();
+      expect(result.value.dimensions).toHaveLength(4);
     }
   });
 

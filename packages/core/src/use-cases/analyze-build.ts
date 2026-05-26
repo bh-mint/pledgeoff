@@ -1,10 +1,12 @@
 import { Result, err, ok } from 'neverthrow';
 import type { BuildAnalysis } from '../domain/build-analysis';
+import { computeConfidenceTier } from '../domain/build-analysis';
 import type { IBuildAnalysisRepository, BuildAnalysisRepositoryError } from '../ports/build-analysis-repository';
 import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository';
 import type { ILLMClient, LLMClientError } from '../ports/llm-client';
 
 export const MIN_GITHUB_SIGNALS = 3;
+const MAX_SIGNALS_FOR_LLM = 12;
 
 export interface AnalyzeBuildInput {
   readonly ideaId: string;
@@ -30,8 +32,9 @@ export class AnalyzeBuildUseCase {
     const signalsResult = await this.signalRepo.findByIdeaId(input.ideaId);
     if (signalsResult.isErr()) return err(signalsResult.error);
 
-    const signals = signalsResult.value;
-    const githubSignals = signals.filter((s) => s.source === 'github');
+    const allSignals = signalsResult.value;
+    const githubSignals = allSignals.filter((s) => s.source === 'github');
+    const signals = allSignals.slice(0, MAX_SIGNALS_FOR_LLM);
 
     const llmResult = await this.llmClient.analyzeBuild({
       ideaText: input.ideaText,
@@ -40,6 +43,9 @@ export class AnalyzeBuildUseCase {
     });
     if (llmResult.isErr()) return err(llmResult.error);
 
+    const signalTexts = allSignals.map((s) => `${s.title} ${s.summary}`);
+    const confidenceTier = computeConfidenceTier(llmResult.value.stack, signalTexts);
+
     const analysis: BuildAnalysis = {
       id: crypto.randomUUID(),
       ideaId: input.ideaId,
@@ -47,6 +53,7 @@ export class AnalyzeBuildUseCase {
       stack: llmResult.value.stack,
       gaps: llmResult.value.gaps,
       signalCount: githubSignals.length,
+      confidenceTier,
       createdAt: new Date().toISOString(),
     };
 

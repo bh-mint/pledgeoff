@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { BuildAnalysis, TechComponent, TechGap } from '@pledgeoff/core';
+import type { BuildAnalysis, TechComponent, TechGap, ConfidenceTier } from '@pledgeoff/core';
 import { BuildAnalysisRepositoryError, type IBuildAnalysisRepository } from '@pledgeoff/core';
 
 type BuildAnalysisRow = {
@@ -10,6 +10,7 @@ type BuildAnalysisRow = {
   stack: TechComponent[];
   gaps: TechGap[];
   signal_count: number;
+  confidence_tier: ConfidenceTier | null;
   created_at: string;
 };
 
@@ -21,6 +22,7 @@ function rowToAnalysis(row: BuildAnalysisRow): BuildAnalysis {
     stack: row.stack,
     gaps: row.gaps,
     signalCount: row.signal_count,
+    confidenceTier: row.confidence_tier ?? undefined,
     createdAt: row.created_at,
   };
 }
@@ -38,6 +40,7 @@ export class SupabaseBuildAnalysisRepository implements IBuildAnalysisRepository
         stack: analysis.stack,
         gaps: analysis.gaps,
         signal_count: analysis.signalCount,
+        confidence_tier: analysis.confidenceTier ?? null,
         created_at: analysis.createdAt,
       })
       .select()

@@ -1,6 +1,7 @@
 import type { Signal } from '@pledgeoff/core';
 
 export const BUILD_PROMPT_VERSION = 'buildPrompt.v1' as const;
+export const ANALYZE_BUILD_MAX_TOKENS = 4096;
 
 export function buildBuildPrompt(ideaText: string, signals: Signal[]): string {
   const githubSignals = signals.filter((s) => s.source === 'github');

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Result, ok, err } from 'neverthrow';
 
 export const VerdictSchema = z.enum(['GO', 'KILL', 'PIVOT']);
 export type Verdict = z.infer<typeof VerdictSchema>;
@@ -22,9 +23,28 @@ export const DecisionSchema = z.object({
   createdAt: z.string().datetime(),
 });
 
+export type Decision = z.infer<typeof DecisionSchema>;
+
+export class InvalidDecisionError extends Error {
+  readonly code = 'INVALID_DECISION' as const;
+}
+
+const EXPECTED_DIMENSIONS = ['Market Demand', 'Competition', 'Feasibility', 'Timing'] as const;
+
+export function validateDimensions(dimensions: Dimension[]): Result<Dimension[], InvalidDecisionError> {
+  const names = new Set(dimensions.map((d) => d.name));
+  const missing = EXPECTED_DIMENSIONS.filter((n) => !names.has(n));
+  if (missing.length > 0) {
+    return err(new InvalidDecisionError(`Missing dimensions: ${missing.join(', ')}`));
+  }
+  const weightSum = dimensions.reduce((sum, d) => sum + d.weight, 0);
+  if (Math.abs(weightSum - 1.0) > 0.05) {
+    return err(new InvalidDecisionError(`Dimension weights sum to ${weightSum.toFixed(2)}, expected 1.0`));
+  }
+  return ok(dimensions);
+}
+
 export function computeScore(dimensions?: Dimension[]): number | undefined {
   if (!dimensions?.length) return undefined;
   return Math.round(dimensions.reduce((sum, d) => sum + d.weight * d.score, 0));
 }
-
-export type Decision = z.infer<typeof DecisionSchema>;

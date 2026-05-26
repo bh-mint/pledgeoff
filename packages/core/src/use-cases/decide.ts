@@ -1,6 +1,6 @@
 import { Result, err, ok } from 'neverthrow';
 import type { Decision } from '../domain/decision';
-import { computeScore } from '../domain/decision';
+import { computeScore, validateDimensions, InvalidDecisionError } from '../domain/decision';
 import type { IDecisionRepository, DecisionRepositoryError } from '../ports/decision-repository';
 import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository';
 import type { ILLMClient, LLMClientError } from '../ports/llm-client';
@@ -22,7 +22,8 @@ export type DecideError =
   | LLMClientError
   | DecisionRepositoryError
   | EventBusError
-  | IdempotencyStoreError;
+  | IdempotencyStoreError
+  | InvalidDecisionError;
 
 export class DecideUseCase {
   constructor(
@@ -69,6 +70,11 @@ export class DecideUseCase {
     if (llmResult.isErr()) return err(llmResult.error);
 
     const dims = llmResult.value.dimensions;
+    if (dims?.length) {
+      const validationResult = validateDimensions(dims);
+      if (validationResult.isErr()) return err(validationResult.error);
+    }
+
     const decision: Decision = {
       id: crypto.randomUUID(),
       ideaId: input.ideaId,

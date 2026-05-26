@@ -37,6 +37,7 @@ export interface LLMSimulationResponse {
 export interface LLMLandingRequest {
   readonly ideaText: string;
   readonly reasoning: string;
+  readonly signals?: Signal[];
   readonly traceId: string;
 }
 

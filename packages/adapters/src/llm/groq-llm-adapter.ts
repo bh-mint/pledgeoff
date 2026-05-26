@@ -8,7 +8,7 @@ import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
 import { buildSimulationPrompt, SIMULATION_PROMPT_VERSION } from './simulation-prompt.v1';
 import { buildLandingPrompt, LANDING_PROMPT_VERSION } from './landing-prompt.v1';
 import { buildCustomerPrompt, CUSTOMER_PROMPT_VERSION } from './customer-prompt.v1';
-import { buildBuildPrompt, BUILD_PROMPT_VERSION } from './build-prompt.v1';
+import { buildBuildPrompt, BUILD_PROMPT_VERSION, ANALYZE_BUILD_MAX_TOKENS } from './build-prompt.v1';
 import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './search-queries-prompt.v1';
 import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
 import { buildRelevancePrompt, RELEVANCE_PROMPT_VERSION } from './relevance-prompt.v1';
@@ -256,7 +256,7 @@ export class GroqLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('groq.generate-landing', async (span) => {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
-        buildLandingPrompt(request.ideaText, request.reasoning),
+        buildLandingPrompt(request.ideaText, request.reasoning, request.signals),
         `You are a conversion copywriter using prompt version ${LANDING_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMLandingResponseSchema,
         'generateLanding',
@@ -302,7 +302,7 @@ export class GroqLLMAdapter implements ILLMClient {
         LLMBuildResponseSchema,
         'analyzeBuild',
         request.traceId,
-        4096,
+        ANALYZE_BUILD_MAX_TOKENS,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
