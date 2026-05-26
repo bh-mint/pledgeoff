@@ -42,6 +42,7 @@ function makeIdeaRepo(idea: Idea | null = makeIdea()): IIdeaRepository {
     findById: vi.fn().mockResolvedValue(ok(idea)),
     findByUserId: vi.fn(),
     findByUserIds: vi.fn(),
+    findByUserIdPaginated: vi.fn(),
     countThisMonth: vi.fn(),
   };
 }

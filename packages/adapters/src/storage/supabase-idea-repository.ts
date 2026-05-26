@@ -1,7 +1,7 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Idea } from '@pledgeoff/core';
-import { IdeaRepositoryError, ideaFromPersistence, type IIdeaRepository } from '@pledgeoff/core';
+import type { Idea, IdeasPage } from '@pledgeoff/core';
+import { IdeaRepositoryError, IDEAS_PAGE_MAX_LIMIT, ideaFromPersistence, type IIdeaRepository } from '@pledgeoff/core';
 
 type IdeaRow = {
   id: string;
@@ -78,6 +78,31 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
 
     if (error) return err(new IdeaRepositoryError(error.message));
     return ok((data ?? []).map(rowToIdea));
+  }
+
+  async findByUserIdPaginated(userId: string, limit: number, cursor?: string): Promise<Result<IdeasPage, IdeaRepositoryError>> {
+    const safeLimit = Math.min(Math.max(1, limit), IDEAS_PAGE_MAX_LIMIT);
+    // Fetch one extra to determine hasMore
+    let query = this.client
+      .from('ideas')
+      .select()
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(safeLimit + 1);
+
+    if (cursor) {
+      query = query.lt('created_at', cursor);
+    }
+
+    const { data, error } = await query.returns<IdeaRow[]>();
+    if (error) return err(new IdeaRepositoryError(error.message));
+
+    const rows = data ?? [];
+    const hasMore = rows.length > safeLimit;
+    const items = rows.slice(0, safeLimit).map(rowToIdea);
+    const nextCursor = hasMore ? (items[items.length - 1]?.createdAt ?? null) : null;
+
+    return ok({ ideas: items, hasMore, nextCursor });
   }
 
   async countThisMonth(userId: string): Promise<Result<number, IdeaRepositoryError>> {

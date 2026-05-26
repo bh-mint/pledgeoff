@@ -8,6 +8,7 @@ const mockCheckRateLimit = vi.fn();
 const mockCreateIdeaUseCase = { execute: vi.fn() };
 const mockIdeaRepo = {
   findByUserId: vi.fn(),
+  findByUserIdPaginated: vi.fn(),
   countThisMonth: vi.fn(),
 };
 const mockDecisionRepo = { findByIdeaId: vi.fn() };
@@ -181,7 +182,7 @@ describe('GET /api/v1/ideas', () => {
     const ideas = [
       { id: 'id-1', userId: TEST_USER_ID, text: 'First idea text here ok', createdAt: new Date().toISOString() },
     ];
-    mockIdeaRepo.findByUserId.mockResolvedValue(ok(ideas));
+    mockIdeaRepo.findByUserIdPaginated.mockResolvedValue(ok({ ideas, hasMore: false, nextCursor: null }));
     mockDecisionRepo.findByIdeaId.mockResolvedValue(ok(null));
 
     const { GET } = await import('../ideas/route');
@@ -195,10 +196,11 @@ describe('GET /api/v1/ideas', () => {
     expect(Array.isArray(body.data)).toBe(true);
     expect(body.data).toHaveLength(1);
     expect(body.data[0].id).toBe('id-1');
+    expect(body.meta).toEqual({ hasMore: false, nextCursor: null });
   });
 
   it('returns 500 when repo fails', async () => {
-    mockIdeaRepo.findByUserId.mockResolvedValue(err(new IdeaRepositoryError('DB error')));
+    mockIdeaRepo.findByUserIdPaginated.mockResolvedValue(err(new IdeaRepositoryError('DB error')));
 
     const { GET } = await import('../ideas/route');
     const req = new Request('http://localhost/api/v1/ideas', {

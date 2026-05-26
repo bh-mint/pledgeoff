@@ -64,6 +64,7 @@ function makeDeps(opts: {
     findById: vi.fn(),
     findByUserId: vi.fn(),
     findByUserIds: vi.fn().mockResolvedValue(ok(ideas)),
+    findByUserIdPaginated: vi.fn(),
     countThisMonth: vi.fn(),
   };
 

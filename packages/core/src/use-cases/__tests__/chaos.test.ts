@@ -77,6 +77,7 @@ const mockIdeaRepo: IIdeaRepository = {
   findById: async () => ok(null),
   findByUserId: async () => ok([]),
   findByUserIds: async () => ok([]),
+  findByUserIdPaginated: async () => ok({ ideas: [], hasMore: false, nextCursor: null }),
   countThisMonth: async () => ok(0),
 };
 

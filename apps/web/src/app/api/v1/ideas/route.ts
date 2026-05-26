@@ -23,7 +23,12 @@ export async function GET(req: Request) {
   const userId = await resolveUserIdFromRequest(req);
   if (!userId) return unauthorizedResponse(traceId);
 
-  const result = await container._unsafeRepos.ideaRepo.findByUserId(userId);
+  const url = new URL(req.url);
+  const limitParam = url.searchParams.get('limit');
+  const cursor = url.searchParams.get('cursor') ?? undefined;
+  const limit = Math.min(Math.max(1, parseInt(limitParam ?? '20', 10) || 20), 100);
+
+  const result = await container._unsafeRepos.ideaRepo.findByUserIdPaginated(userId, limit, cursor);
   if (result.isErr()) {
     return Response.json(
       { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
@@ -31,7 +36,7 @@ export async function GET(req: Request) {
     );
   }
 
-  const ideas = result.value;
+  const { ideas, hasMore, nextCursor } = result.value;
   const decisions = await Promise.all(
     ideas.map((idea) => container._unsafeRepos.decisionRepo.findByIdeaId(idea.id))
   );
@@ -41,7 +46,10 @@ export async function GET(req: Request) {
     decision: decisions[i].isOk() ? decisions[i].value : null,
   }));
 
-  return Response.json({ data }, { status: 200, headers: { 'X-Trace-Id': traceId } });
+  return Response.json(
+    { data, meta: { hasMore, nextCursor } },
+    { status: 200, headers: { 'X-Trace-Id': traceId } },
+  );
 }
 
 export async function POST(req: Request) {
