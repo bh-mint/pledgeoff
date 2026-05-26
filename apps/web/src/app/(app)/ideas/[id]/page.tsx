@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
-import { Nav } from "@/components/Nav";
 import { IdeaPageClient } from "./IdeaPageClient";
 import { FooterMicro } from "@/components/FooterMicro";
 import { formatDate } from "@/lib/mdx-utils";
@@ -111,8 +110,7 @@ export default async function IdeaPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-(--canvas)">
-      <Nav loggedIn={true} />
-      {showOutcomeBanner && <OutcomeBanner ideaId={id} daysOld={daysOld} />}
+{showOutcomeBanner && <OutcomeBanner ideaId={id} daysOld={daysOld} />}
 
       <div className="max-w-360 mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Back + Idea header — narrow */}

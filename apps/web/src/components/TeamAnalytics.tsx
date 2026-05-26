@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
-import type { TeamFeedRow } from '@/app/dashboard/DashboardClient';
+import type { TeamFeedRow } from '@/app/(app)/dashboard/DashboardClient';
 import type { Plan } from '@pledgeoff/core';
 
 type Props = {

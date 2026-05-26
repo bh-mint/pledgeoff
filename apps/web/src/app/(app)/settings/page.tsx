@@ -4,7 +4,6 @@ import { effectivePlan } from "@pledgeoff/core";
 import { requireUser } from "@/lib/auth-server";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
-import { Nav } from "@/components/Nav";
 import { SettingsClient } from "./SettingsClient";
 
 export const dynamic = "force-dynamic";
@@ -114,8 +113,6 @@ export default async function SettingsPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
-      <Nav loggedIn={true} />
-
       <div className="max-w-275 mx-auto px-4 sm:px-10 py-8 sm:py-12">
         <Link
           href="/dashboard"

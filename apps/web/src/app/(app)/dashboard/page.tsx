@@ -6,9 +6,6 @@ import { container } from "@/lib/container";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { getDashboardData } from "@/server/dashboard/getDashboardData";
 import { DashboardClient, type TableRow, type TeamFeedRow } from "./DashboardClient";
-import { ProfileButton } from "@/components/ProfileButton";
-import { Logo } from "@/components/brand/Logo";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { FooterMicro } from "@/components/FooterMicro";
 import { GoldmineFeed } from "@/components/GoldmineFeed";
 import { getGoldmineData } from "@/server/goldmine/getGoldmineData";
@@ -254,48 +251,8 @@ export default async function DashboardPage() {
     }
   }
 
-  const userInitials = (user.email ?? "?")
-    .split("@")[0]
-    .slice(0, 2)
-    .toUpperCase();
-
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
-      {/* Dashboard nav */}
-      <div className="border-b sticky top-0 z-50" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
-        <div className="max-w-360 mx-auto px-4 sm:px-10 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-8 sm:gap-10">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2"
-              style={{ color: "var(--t1)" }}
-              aria-label="PledgeOFF home"
-            >
-              <Logo size={22} />
-              <span className="display text-[15px] font-semibold tracking-tight">
-                Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-              </span>
-            </Link>
-            <nav className="hidden sm:flex items-center gap-7 text-[13px]" style={{ color: "var(--t2)" }}>
-              <span style={{ color: "var(--t1)" }}>Dashboard</span>
-              <Link href="/ideas/new" className="transition-colors hover:text-(--t1)">Signal Verdict</Link>
-              <Link href="/blog" className="transition-colors hover:text-(--t1)">Blog</Link>
-            </nav>
-          </div>
-          <div className="flex items-center">
-            <div className="hidden sm:flex items-center gap-2 mr-4">
-              <span className="w-1.5 h-1.5 rounded-full pulse-dot" style={{ background: "var(--accent)" }} />
-              <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>live</span>
-            </div>
-            <div className="w-px h-4 mx-4 hidden sm:block" style={{ background: "var(--border)" }} />
-            <div className="hidden sm:block mr-3">
-              <ThemeToggle />
-            </div>
-            <ProfileButton email={user.email ?? ""} initials={userInitials} />
-          </div>
-        </div>
-      </div>
-
       {/* Stats bar */}
       <div className="border-b" style={{ borderColor: "var(--border)" }}>
         <div className="max-w-360 mx-auto px-4 sm:px-10 py-6 sm:py-10 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
