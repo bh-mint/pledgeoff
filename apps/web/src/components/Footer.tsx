@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CookiePreferencesButton } from "@/components/CookiePreferencesButton";
 
 function IconX() {
   return (
@@ -41,6 +42,7 @@ const NAV_COLS = [
     links: [
       { href: "/privacy", text: "Privacy" },
       { href: "/terms", text: "Terms" },
+      { href: "/privacy#s8", text: "Cookies" },
     ],
   },
 ];
@@ -97,12 +99,36 @@ export function Footer() {
         ))}
       </div>
 
-      {/* Copyright row */}
+      {/* Legal + copyright row */}
       <div className="border-t" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 py-5 flex items-center justify-between">
-          <span className="mono text-[12px]" style={{ color: "var(--t3)" }}>
-            © 2026 PledgeOFF. All rights reserved.
-          </span>
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+              © 2026 S.C. PledgeOFF S.R.L. · CUI [TBD] · All rights reserved.
+            </span>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mono text-[10px]" style={{ color: "var(--t3)" }}>
+              <a
+                href="https://anpc.ro/ce-este-sal/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity underline underline-offset-2"
+              >
+                ANPC — Soluționarea alternativă a litigiilor
+              </a>
+              <span aria-hidden="true">·</span>
+              <a
+                href="https://ec.europa.eu/consumers/odr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity underline underline-offset-2"
+              >
+                SOL — Online Dispute Resolution
+              </a>
+              <span aria-hidden="true">·</span>
+              <CookiePreferencesButton />
+            </div>
+          </div>
+
           <div className="flex items-center gap-1">
             <a
               href="https://x.com/pledgeoffhq"

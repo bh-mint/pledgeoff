@@ -55,6 +55,13 @@ export class StripeAdapter {
         metadata: { userId: input.userId },
         subscription_data: { metadata: { userId: input.userId } },
         allow_promotion_codes: true,
+        consent_collection: { terms_of_service: 'required' },
+        custom_text: {
+          terms_of_service_acceptance: {
+            message:
+              'By completing this purchase you expressly request immediate access to the digital service and acknowledge that you waive your 14-day right of withdrawal under EU Directive 2011/83/EU Art. 16(m). A voluntary 7-day money-back guarantee applies — email hello@pledgeoff.com.',
+          },
+        },
       };
 
       if (input.stripeCustomerId) {
@@ -265,6 +272,13 @@ export class StripeAdapter {
           userId: input.userId,
           ottoPackQuestions: String(input.questionCount),
           type: 'otto_pack',
+        },
+        consent_collection: { terms_of_service: 'required' },
+        custom_text: {
+          terms_of_service_acceptance: {
+            message:
+              'By completing this purchase you expressly request immediate access to the digital service and acknowledge that you waive your 14-day right of withdrawal under EU Directive 2011/83/EU Art. 16(m). A voluntary 7-day money-back guarantee applies — email hello@pledgeoff.com.',
+          },
         },
       };
 

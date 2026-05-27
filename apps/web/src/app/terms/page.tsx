@@ -16,15 +16,16 @@ const TERMS_TOC = [
   { id: "s2", label: "02 · Description" },
   { id: "s3", label: "03 · Registration" },
   { id: "s4", label: "04 · Plans & billing" },
-  { id: "s5", label: "05 · Free trial" },
-  { id: "s6", label: "06 · Cancellation" },
-  { id: "s7", label: "07 · Refunds" },
-  { id: "s8", label: "08 · Acceptable use" },
-  { id: "s9", label: "09 · AI disclaimer" },
-  { id: "s10", label: "10 · User content" },
-  { id: "s11", label: "11 · IP" },
-  { id: "s12", label: "12 · Liability" },
-  { id: "s13", label: "13 · Governing law" },
+  { id: "s5", label: "05 · Acceptable use" },
+  { id: "s6", label: "06 · User content" },
+  { id: "s7", label: "07 · IP" },
+  { id: "s8", label: "08 · Liability" },
+  { id: "s9", label: "09 · Third-party services" },
+  { id: "s10", label: "10 · Availability" },
+  { id: "s11", label: "11 · Termination" },
+  { id: "s12", label: "12 · Governing law" },
+  { id: "s13", label: "13 · General provisions" },
+  { id: "s14", label: "14 · Dispute resolution" },
 ];
 
 export default function TermsPage() {
@@ -48,11 +49,11 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <div className="mt-1.5 flex items-center gap-3 mono text-[10px]" style={{ color: "var(--t3)" }}>
-            <span>UPDATED · APR 12 2026</span>
+            <span>UPDATED · MAY 27 2026</span>
             <span>·</span>
-            <span>EFFECTIVE · MAY 1 2026</span>
+            <span>EFFECTIVE · MAY 27 2026</span>
             <span>·</span>
-            <span>VERSION 3.1</span>
+            <span>VERSION 4.0</span>
           </div>
         </div>
       </section>
@@ -100,8 +101,9 @@ export default function TermsPage() {
             <p>
               These Terms apply to all visitors, users, and any other parties who
               access or use the Service. References to &quot;PledgeOFF&quot;,
-              &quot;we&quot;, &quot;us&quot;, or &quot;our&quot; refer to the operator
-              of pledgeoff.com.
+              &quot;we&quot;, &quot;us&quot;, or &quot;our&quot; refer to{" "}
+              <strong>S.C. PledgeOFF S.R.L.</strong>, the operator of pledgeoff.com,
+              registered in Romania (CUI to be updated upon registration).
             </p>
             <p>
               If you are accepting these Terms on behalf of a company or other legal
@@ -185,68 +187,103 @@ export default function TermsPage() {
           <Section id="s4" title="4. Subscription plans and billing">
             <Subsection title="4.1 Plans">
               <p>PledgeOFF offers the following plans:</p>
-              <ul>
-                <li>
-                  <strong>Free</strong> — 3 idea validations per calendar month at no
-                  charge, with access to Reddit and Google Trends signals.
-                </li>
-                <li>
-                  <strong>Pro</strong> — unlimited validations, all signal sources,
-                  competitor matrix, revenue simulator, and AI co-founder mode, billed
-                  at €19.99/month.
-                </li>
-                <li>
-                  <strong>Agency</strong> — everything in Pro, 5 seats, white-label
-                  PDF reports, and API access, billed at €99/month. Subject to a
-                  separate Agency Agreement.
-                </li>
-              </ul>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Plan</th>
+                    <th>Monthly</th>
+                    <th>Annual (per month)</th>
+                    <th>Key limits</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Free</strong></td>
+                    <td>€0</td>
+                    <td>€0</td>
+                    <td>1 Signal Verdict / month</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Founder</strong></td>
+                    <td>€49</td>
+                    <td>€39 (€468/yr)</td>
+                    <td>20 verdicts / month · 1 seat · 5 Otto questions</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Team</strong></td>
+                    <td>€99</td>
+                    <td>€79 (€948/yr)</td>
+                    <td>Unlimited verdicts · 3 seats · 15 Otto questions</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Studio</strong></td>
+                    <td>€349</td>
+                    <td>€279 (€3,348/yr)</td>
+                    <td>Unlimited · 8 seats · 50 Otto questions · PDF export</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Enterprise</strong></td>
+                    <td>from €1,199</td>
+                    <td>Negotiated</td>
+                    <td>Unlimited · 25 seats · custom · dedicated support</td>
+                  </tr>
+                </tbody>
+              </table>
               <p>
-                Features and prices are subject to change. We will give at least 30
-                days&apos; notice of any price increase to existing subscribers.
+                The Free plan is permanent and requires no credit card. It is designed
+                to let you evaluate the Service before committing to a paid plan.
+              </p>
+              <p>
+                Features and prices may change. We will give at least 30 days&apos; notice
+                of any price increase to existing subscribers.
               </p>
             </Subsection>
 
-            <Subsection title="4.2 Free trial">
+            <Subsection title="4.2 Billing cycle">
               <p>
-                New Pro subscribers receive a 7-day free trial. No credit card is
-                required to start the trial. If you do not cancel before the trial ends,
-                your chosen payment method will be charged the applicable monthly fee.
+                Paid plans are billed in advance on a monthly or annual cycle, beginning
+                on the date you first subscribe. All prices are in Euros (EUR) and
+                exclude VAT. Applicable VAT is calculated and added at checkout based on
+                your country of residence.
               </p>
             </Subsection>
 
-            <Subsection title="4.3 Billing cycle">
+            <Subsection title="4.3 Cancellation">
               <p>
-                Paid plans are billed monthly, in advance, on the date you first
-                subscribed. All amounts are in Euros (EUR) and exclusive of any
-                applicable taxes unless otherwise stated.
-              </p>
-            </Subsection>
-
-            <Subsection title="4.4 Cancellation">
-              <p>
-                You may cancel your subscription at any time from your dashboard.
+                You may cancel your subscription at any time from Settings → Billing.
                 Cancellation takes effect at the end of the current billing period; you
                 retain full access until then. No partial refunds are issued for unused
-                days in a billing period.
+                days in a billing period, except as provided in §4.4 below.
               </p>
             </Subsection>
 
-            <Subsection title="4.5 Refunds">
+            <Subsection title="4.4 Refunds and right of withdrawal">
               <p>
-                We offer a full refund within 7 days of first payment if you are
-                dissatisfied with the Service. Refund requests must be submitted to{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>. After 7
-                days, all payments are final and non-refundable.
+                <strong>EU statutory right of withdrawal:</strong> By completing a
+                purchase, you expressly consent to the immediate supply of the Service
+                and acknowledge that you thereby waive your 14-day statutory right of
+                withdrawal under EU Directive 2011/83/EU, Article 16(m), as the digital
+                service is made available to you immediately upon payment.
+              </p>
+              <p>
+                <strong>7-day money-back guarantee:</strong> Independently of the above,
+                and as a goodwill commitment to our customers, we offer a full refund
+                within 7 days of your first payment on any paid plan, no questions asked.
+                To request a refund, email{" "}
+                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> with the
+                subject line <em>&quot;Refund request&quot;</em>. We will process it
+                within 2 business days. After the 7-day window, all payments are final.
               </p>
             </Subsection>
 
-            <Subsection title="4.6 Failed payments">
+            <Subsection title="4.5 Failed payments">
               <p>
-                If a payment fails, we will retry the charge up to three times over a
-                7-day period. If the payment remains outstanding after this period, your
-                subscription will be downgraded to the Free plan and access to paid
-                features will be suspended until payment is resolved.
+                If a payment fails, we will notify you by email and retry the charge.
+                If the payment remains outstanding after a 24-hour grace period, your
+                subscription will be moved to a past-due state. After 7 days past due,
+                your account will be downgraded to the Free plan until payment is
+                resolved. To reactivate, update your payment method in Settings →
+                Billing.
               </p>
             </Subsection>
           </Section>
@@ -496,27 +533,19 @@ export default function TermsPage() {
 
           <Section id="s12" title="12. Governing law and disputes">
             <p>
-              These Terms are governed by and construed in accordance with the laws of
-              the European Union, supplemented by the national laws of the jurisdiction
-              in which PledgeOFF is established, without regard to its conflict of law
-              principles.
+              These Terms are governed by and construed in accordance with the laws of{" "}
+              <strong>Romania</strong>, without regard to its conflict of law principles.
+              Where applicable, EU consumer protection legislation supplements these Terms
+              and prevails in the event of any conflict.
             </p>
             <p>
               Any dispute arising out of or in connection with these Terms that cannot
               be resolved amicably shall be submitted to the exclusive jurisdiction of
-              the competent courts in the place of PledgeOFF&apos;s establishment.
+              the competent courts in Romania.
             </p>
             <p>
-              If you are a consumer in the EU, you may also use the European
-              Commission&apos;s{" "}
-              <a
-                href="https://ec.europa.eu/consumers/odr"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Online Dispute Resolution (ODR) platform
-              </a>
-              .
+              Nothing in this clause affects any rights you may have as a consumer under
+              the laws of your country of residence.
             </p>
           </Section>
 
@@ -562,6 +591,47 @@ export default function TermsPage() {
                 <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
               </p>
             </Subsection>
+          </Section>
+
+          <Section id="s14" title="14. Consumer dispute resolution">
+            <p>
+              If you are a consumer and have a complaint about the Service that we
+              cannot resolve directly, you have the following options:
+            </p>
+            <ul>
+              <li>
+                <strong>Romania — ANPC</strong> (Autoritatea Națională pentru Protecția
+                Consumatorilor):{" "}
+                <a
+                  href="https://anpc.ro/ce-este-sal/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  anpc.ro/ce-este-sal
+                </a>{" "}
+                — alternative dispute resolution for Romanian consumers.
+              </li>
+              <li>
+                <strong>EU — Online Dispute Resolution (SOL/ODR):</strong>{" "}
+                <a
+                  href="https://ec.europa.eu/consumers/odr/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  ec.europa.eu/consumers/odr
+                </a>{" "}
+                — EU platform for resolving disputes with online traders.
+              </li>
+              <li>
+                <strong>Direct:</strong>{" "}
+                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> — we aim
+                to resolve all complaints within 5 business days.
+              </li>
+            </ul>
+            <p>
+              Our email for dispute resolution purposes is:{" "}
+              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
+            </p>
           </Section>
 
           <div className="mt-12 pt-8 border-t border-(--border)">

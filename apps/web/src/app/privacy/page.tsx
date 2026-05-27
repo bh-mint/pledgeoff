@@ -26,6 +26,7 @@ const PRIVACY_TOC = [
   { id: "s12", label: "12 · Third-party links" },
   { id: "s13", label: "13 · Changes" },
   { id: "s14", label: "14 · Contact" },
+  { id: "s15", label: "15 · International privacy rights" },
 ];
 
 export default function PrivacyPage() {
@@ -49,11 +50,11 @@ export default function PrivacyPage() {
             Privacy Policy
           </h1>
           <div className="mt-1.5 flex items-center gap-3 mono text-[10px]" style={{ color: "var(--t3)" }}>
-            <span>UPDATED · APR 12 2026</span>
+            <span>UPDATED · MAY 27 2026</span>
             <span>·</span>
-            <span>EFFECTIVE · MAY 1 2026</span>
+            <span>EFFECTIVE · MAY 27 2026</span>
             <span>·</span>
-            <span>VERSION 2.4</span>
+            <span>VERSION 3.0</span>
           </div>
         </div>
       </section>
@@ -93,15 +94,20 @@ export default function PrivacyPage() {
 
           <Section id="s1" title="1. Who we are">
             <p>
-              PledgeOFF (&quot;PledgeOFF&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is a Decision Intelligence
-              Platform that helps founders validate product ideas using live market signals.
+              <strong>S.C. PledgeOFF S.R.L.</strong> (&quot;PledgeOFF&quot;, &quot;we&quot;,
+              &quot;us&quot;, or &quot;our&quot;) is a Decision Intelligence Platform
+              that helps founders validate product ideas using live market signals.
+              We are registered in Romania (CUI to be updated upon registration; registered
+              address to be updated upon registration).
             </p>
             <p>
               We operate the website and application at{" "}
               <a href="https://pledgeoff.com">pledgeoff.com</a>.
             </p>
             <p>
-              For any privacy-related enquiries, contact us at{" "}
+              As the <strong>data controller</strong> under GDPR, we are responsible for
+              how your personal data is collected, used, and protected. For any
+              privacy-related enquiries, contact us at{" "}
               <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
             </p>
           </Section>
@@ -356,6 +362,36 @@ export default function PrivacyPage() {
                   <td>IP address (in transit only, not stored by Cloudflare for us)</td>
                   <td>Global</td>
                 </tr>
+                <tr>
+                  <td>
+                    <a href="https://stripe.com/ie/privacy" target="_blank" rel="noopener noreferrer">
+                      Stripe
+                    </a>
+                  </td>
+                  <td>Payment processing and billing</td>
+                  <td>Email address, billing country, payment metadata (card data handled directly by Stripe — we never see it)</td>
+                  <td>IE / US (Stripe Payments Europe Ltd)</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">
+                      Anthropic
+                    </a>
+                  </td>
+                  <td>LLM inference for Otto AI assistant (Claude Haiku / Sonnet)</td>
+                  <td>Conversation messages sent to Otto (no idea submissions)</td>
+                  <td>US</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="https://brave.com/privacy/browser/" target="_blank" rel="noopener noreferrer">
+                      Brave Search
+                    </a>
+                  </td>
+                  <td>Signal fetching — web search for market signals</td>
+                  <td>Search query derived from your idea text (anonymised, no account linkage)</td>
+                  <td>US</td>
+                </tr>
               </tbody>
             </table>
             <p>
@@ -483,9 +519,10 @@ export default function PrivacyPage() {
                 </li>
               </ul>
               <p>
-                You can withdraw or change your consent at any time by clearing your
-                browser cookies for <code>pledgeoff.com</code>. The banner will
-                reappear on your next visit.
+                You can withdraw or change your consent at any time by clicking
+                the <strong>Cookie preferences</strong> link in the page footer,
+                or by clearing your browser cookies for <code>pledgeoff.com</code>.
+                After resetting, the banner will reappear so you can make a new choice.
               </p>
               <p>
                 You can also opt out of Google Analytics across all websites using the{" "}
@@ -542,13 +579,29 @@ export default function PrivacyPage() {
               <li>
                 <strong>Right to lodge a complaint</strong> — you have the right to
                 lodge a complaint with your national data protection supervisory
-                authority. In Ireland: the{" "}
+                authority. In Romania:{" "}
+                <a
+                  href="https://www.anspdcp.ro"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  ANSPDCP (Autoritatea Națională de Supraveghere)
+                </a>
+                . In Ireland:{" "}
                 <a
                   href="https://www.dataprotection.ie"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Data Protection Commission
+                </a>
+                . In the UK:{" "}
+                <a
+                  href="https://ico.org.uk"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Information Commissioner&apos;s Office (ICO)
                 </a>
                 . In Germany: your state&apos;s{" "}
                 <a
@@ -642,6 +695,125 @@ export default function PrivacyPage() {
               <br />
               Website:{" "}
               <a href="https://pledgeoff.com">https://pledgeoff.com</a>
+            </p>
+          </Section>
+
+          <Section id="s15" title="15. International privacy rights">
+            <p>
+              Depending on where you are located, you may have additional rights under
+              applicable local law. The rights described in §9 (GDPR) apply to EEA and
+              UK residents. This section addresses additional or equivalent rights for
+              residents of other jurisdictions.
+            </p>
+
+            <Subsection title="15.1 United Kingdom (UK GDPR)">
+              <p>
+                UK residents are protected by the UK GDPR (as retained in UK law by the
+                Data Protection Act 2018). Your rights are substantively equivalent to
+                those described in §9. The competent supervisory authority is the{" "}
+                <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">
+                  Information Commissioner&apos;s Office (ICO)
+                </a>
+                .
+              </p>
+            </Subsection>
+
+            <Subsection title="15.2 California (CCPA / CPRA)">
+              <p>
+                California residents have additional rights under the California Consumer
+                Privacy Act (CCPA) as amended by the CPRA:
+              </p>
+              <ul>
+                <li>
+                  <strong>Right to Know</strong> — you may request disclosure of the
+                  categories and specific pieces of personal information we collect, use,
+                  disclose, or sell.
+                </li>
+                <li>
+                  <strong>Right to Delete</strong> — you may request deletion of your
+                  personal information, subject to certain exceptions.
+                </li>
+                <li>
+                  <strong>Right to Correct</strong> — you may request correction of
+                  inaccurate personal information.
+                </li>
+                <li>
+                  <strong>Right to Opt Out of Sale or Sharing</strong> — we do{" "}
+                  <strong>not</strong> sell or share personal information for
+                  cross-context behavioural advertising.
+                </li>
+                <li>
+                  <strong>Right to Non-Discrimination</strong> — we will not
+                  discriminate against you for exercising any CCPA rights.
+                </li>
+              </ul>
+              <p>
+                To exercise these rights, email{" "}
+                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> with
+                subject &quot;CCPA Privacy Request&quot;. We respond within 45 days.
+              </p>
+            </Subsection>
+
+            <Subsection title="15.3 Canada (PIPEDA / Law 25)">
+              <p>
+                Canadian residents are protected by the Personal Information Protection
+                and Electronic Documents Act (PIPEDA), and residents of Québec by Law
+                25. You have the right to access, correct, and withdraw consent for the
+                processing of your personal information. Contact{" "}
+                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> to
+                exercise these rights. You may also lodge a complaint with the{" "}
+                <a
+                  href="https://www.priv.gc.ca"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Office of the Privacy Commissioner of Canada
+                </a>
+                .
+              </p>
+            </Subsection>
+
+            <Subsection title="15.4 Brazil (LGPD)">
+              <p>
+                Brazilian residents are protected by the Lei Geral de Proteção de Dados
+                (LGPD — Law 13.709/2018). Your rights include access, correction,
+                anonymisation, deletion, portability, and information about third-party
+                sharing. Contact{" "}
+                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> to
+                exercise these rights. The competent authority is the{" "}
+                <a
+                  href="https://www.gov.br/anpd"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Autoridade Nacional de Proteção de Dados (ANPD)
+                </a>
+                .
+              </p>
+            </Subsection>
+
+            <Subsection title="15.5 Australia (Privacy Act 1988)">
+              <p>
+                Australian residents are protected by the Privacy Act 1988 (Cth) and the
+                Australian Privacy Principles (APPs). You have the right to access and
+                correct personal information we hold about you. Contact{" "}
+                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> to
+                exercise these rights. You may also lodge a complaint with the{" "}
+                <a
+                  href="https://www.oaic.gov.au"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Office of the Australian Information Commissioner (OAIC)
+                </a>
+                .
+              </p>
+            </Subsection>
+
+            <p>
+              For any jurisdiction not listed above, the rights and processes described
+              in §9 apply as a baseline. We are committed to honouring privacy rights
+              regardless of where you are located.
             </p>
           </Section>
 
