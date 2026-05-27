@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 import { getAuthToken } from '@/lib/auth-client';
@@ -31,30 +31,42 @@ export function CheckoutModal({ priceId, isOpen, onClose }: CheckoutModalProps) 
     return json.data.clientSecret;
   }, [priceId]);
 
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-6 px-4"
       role="dialog"
       aria-modal="true"
       aria-label="Checkout"
     >
-      {/* backdrop */}
+      {/* backdrop — covers scroll container too */}
       <div
-        className="absolute inset-0"
+        className="fixed inset-0"
         style={{ background: 'rgba(0,0,0,0.6)' }}
         onClick={onClose}
       />
 
-      {/* panel */}
+      {/* panel — relative so it sits above backdrop; flex column so header is fixed and body scrolls */}
       <div
-        className="relative z-10 w-full max-w-xl mx-4 rounded-xl overflow-hidden"
-        style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+        className="relative z-10 w-full max-w-xl rounded-xl flex flex-col my-auto"
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          maxHeight: 'calc(100vh - 3rem)',
+        }}
       >
-        {/* header */}
+        {/* header — never scrolls */}
         <div
-          className="flex items-center justify-between px-5 py-4"
+          className="flex items-center justify-between px-5 py-4 shrink-0"
           style={{ borderBottom: '1px solid var(--border)' }}
         >
           <span className="mono text-[11px] tracking-widest uppercase" style={{ color: 'var(--t2)' }}>
@@ -74,8 +86,8 @@ export function CheckoutModal({ priceId, isOpen, onClose }: CheckoutModalProps) 
           </button>
         </div>
 
-        {/* Stripe Embedded Checkout */}
-        <div className="p-1">
+        {/* body — scrolls when Stripe form is taller than available space */}
+        <div className="overflow-y-auto flex-1 p-1">
           <EmbeddedCheckoutProvider
             stripe={stripePromise}
             options={{ fetchClientSecret }}
