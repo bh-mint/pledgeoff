@@ -1,0 +1,362 @@
+"use client";
+
+import { useState } from "react";
+import { SimulateClient } from "./simulate/SimulateClient";
+import { LandingClient } from "./landing/LandingClient";
+import { CustomersClient } from "./customers/CustomersClient";
+import { BuildClient } from "./build/BuildClient";
+import { CompetitorsClient } from "./competitors/CompetitorsClient";
+import { LaunchKitClient } from "./launch-kit/LaunchKitClient";
+import type { Signal, Simulation, LandingPage, CustomerAnalysis, BuildAnalysis, CompetitorAnalysis, LaunchKit } from "@pledgeoff/core";
+
+export type Verdict = "GO" | "KILL" | "PIVOT";
+export type ToolKey = "simulate" | "landing" | "customers" | "build" | "competitors" | "launch-kit";
+type StageTab = "understand" | "plan" | "launch";
+
+const STAGE_LABELS: Record<StageTab, string> = {
+  understand: "Understand",
+  plan:       "Plan",
+  launch:     "Launch",
+};
+
+const STAGE_TOOLS: Record<StageTab, ToolKey[]> = {
+  understand: ["customers", "competitors"],
+  plan:       ["simulate", "build"],
+  launch:     ["landing", "launch-kit"],
+};
+
+const VERDICT_GUIDE: Record<Verdict, (score: number | undefined) => string> = {
+  GO: (score) =>
+    `Your idea scored GO${score !== undefined ? ` with a ${score}/100` : ""}. The data confirms the pain is real and the market isn't oversaturated. You have a green light — now build smart. Work through the three stages below: Understand who's in the market, Plan what to build and how much you can make, then Launch with a tested playbook.`,
+  PIVOT: (score) =>
+    `Your idea scored PIVOT${score !== undefined ? ` with a ${score}/100` : ""}. The foundation is solid — there's a real pain in the market. The problem is the direction: the way you're approaching it now doesn't fit the current market. Start with Understand — map the customer and competition, refine your angle, then re-validate. Plan and Launch unlock when you get a GO.`,
+  KILL: (score) =>
+    `Your idea scored KILL${score !== undefined ? ` with a ${score}/100` : ""}. The data shows the market either doesn't exist at scale or is dominated by entrenched players you can't compete with right now. Run Competitive Landscape to understand exactly why, so you don't fall into the same trap with your next idea.`,
+};
+
+const TOOL_META: Record<ToolKey, { num: string; label: string; desc: string }> = {
+  simulate:     { num: "02", label: "Revenue Model",          desc: "TAM, 3 pricing scenarios, break-even" },
+  landing:      { num: "03", label: "Page Brief",             desc: "AI-generated headline, features, CTA" },
+  customers:    { num: "04", label: "ICP Analysis",           desc: "Segments, pain points, real quotes" },
+  build:        { num: "05", label: "Build Spec",             desc: "Tech stack, libraries, GitHub gaps" },
+  competitors:  { num: "06", label: "Competitive Landscape",  desc: "Who exists, how they position, where the gaps are" },
+  "launch-kit": { num: "08", label: "GTM Brief",              desc: "A/B headlines · email sequence · pricing recommendation" },
+};
+
+const LOCK_REASONS: Record<ToolKey, Record<"PIVOT" | "KILL", string>> = {
+  simulate:     { PIVOT: "Don't model revenue for a direction you're about to change. Lock the pivot first.", KILL: "No point projecting revenue for an idea you won't build." },
+  landing:      { PIVOT: "You'd be writing copy for an idea that needs to change. Wasted effort.", KILL: "No point writing copy for an idea you won't launch." },
+  customers:    { PIVOT: "", KILL: "No point defining a customer profile for a market that doesn't exist at scale." },
+  build:        { PIVOT: "Your tech stack depends on what you're building. Lock the direction first.", KILL: "No point planning architecture for something that won't be built." },
+  competitors:  { PIVOT: "", KILL: "" },
+  "launch-kit": { PIVOT: "Generate the launch kit after you lock the new direction and get a GO.", KILL: "No point building a launch kit for an idea you won't launch." },
+};
+
+// ── Signals section ──────────────────────────────────────────────
+
+const SENTIMENT_DOT: Record<Signal["sentiment"], string> = {
+  positive: "bg-(--validated)",
+  negative: "bg-(--kill)",
+  neutral:  "bg-(--t3)",
+};
+
+const SENTIMENT_LABEL: Record<Signal["sentiment"], string> = {
+  positive: "Positive",
+  negative: "Negative",
+  neutral:  "Neutral",
+};
+
+const SOURCE_ICON: Record<string, React.ReactNode> = {
+  hn: (
+    <svg width="11" height="11" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+      <rect width="14" height="14" rx="2" fill="currentColor" opacity="0.85"/>
+      <text x="7" y="10.5" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white" fontFamily="monospace">Y</text>
+    </svg>
+  ),
+  github: (
+    <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
+    </svg>
+  ),
+  reddit: (
+    <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M20 10c0-5.52-4.48-10-10-10S0 4.48 0 10c0 5.51 4.48 10 10 10s10-4.49 10-10zm-13.5 1c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5zm6.5 3.5c-.69.69-1.8 1-3 1s-2.31-.31-3-1a.5.5 0 01.71-.71c.5.5 1.37.71 2.29.71s1.79-.21 2.29-.71a.5.5 0 01.71.71zM14 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5zm1.5-4.5a1 1 0 100 2 1 1 0 000-2zm-11 1a1 1 0 100 2 1 1 0 000-2zm3.65-3.77C7.19 3.51 6 4.31 6 5.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5c0-.42-.17-.8-.44-1.09l1.43-.99-.79-.18z" />
+    </svg>
+  ),
+  producthunt: (
+    <svg width="11" height="11" viewBox="0 0 40 40" fill="currentColor" aria-hidden="true">
+      <circle cx="20" cy="20" r="20" fill="#DA552F"/>
+      <path d="M22 14h-6v12h3v-4h3a4 4 0 000-8zm0 5h-3v-2h3a1 1 0 010 2z" fill="white"/>
+    </svg>
+  ),
+  google: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+  ),
+  devto: (
+    <svg width="11" height="11" viewBox="0 0 100 100" fill="currentColor" aria-hidden="true">
+      <rect width="100" height="100" rx="12" fill="#0A0A0A"/>
+      <text x="50" y="68" textAnchor="middle" fontSize="42" fontWeight="bold" fill="white" fontFamily="monospace">DEV</text>
+    </svg>
+  ),
+  brave: (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 2L3 7v5c0 5.25 3.75 10.14 9 11.25C17.25 22.14 21 17.25 21 12V7L12 2z" fill="#FB542B"/>
+    </svg>
+  ),
+};
+
+const SOURCE_NAME: Record<string, string> = {
+  hn: "Hacker News",
+  github: "GitHub",
+  reddit: "Reddit",
+  producthunt: "Product Hunt",
+  google: "Google / Reddit",
+  devto: "Dev.to",
+  brave: "Reddit (Brave)",
+};
+
+function SignalsSection({ signals, bySource }: { signals: Signal[]; bySource: Record<string, Signal[]> }) {
+  if (signals.length === 0) {
+    return (
+      <div>
+        <p className="mono text-[10px] text-(--t3) uppercase tracking-widest mb-4">
+          Evidence wall · 0 signals
+        </p>
+        <div className="rounded border px-4 py-5 text-[12px] text-(--t3) leading-relaxed"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          No market signals found for this idea. The verdict is based on
+          general AI knowledge — not live data. Try refining your description.
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div>
+      <p className="mono text-[10px] text-(--t3) uppercase tracking-widest mb-4">
+        Evidence wall · {signals.length} signal{signals.length !== 1 ? "s" : ""}
+      </p>
+      <div className="space-y-5">
+        {Object.entries(bySource).map(([source, items]) => (
+          <div key={source}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-(--t3)">{SOURCE_ICON[source]}</span>
+              <span className="mono text-[10px] text-(--t3) uppercase tracking-widest">
+                {SOURCE_NAME[source] ?? source} · {items.length}
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {items.map((signal) => (
+                <a key={signal.id} href={signal.url} target="_blank" rel="noopener noreferrer"
+                  className="block rounded border px-3 py-2.5 hover:border-(--accent) transition-colors group"
+                  style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${SENTIMENT_DOT[signal.sentiment]}`} />
+                    <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+                      {SENTIMENT_LABEL[signal.sentiment]}
+                    </span>
+                  </div>
+                  <p className="text-[12px] text-(--t1) font-medium leading-snug group-hover:text-(--accent) transition-colors line-clamp-2">
+                    {signal.title}
+                  </p>
+                  <p className="mono text-[10px] mt-2 text-right" style={{ color: "var(--accent)" }}>
+                    View ↗
+                  </p>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Tool section helpers ─────────────────────────────────────────
+
+function ToolSection({ toolKey, done, children }: { toolKey: ToolKey; done: boolean; children: React.ReactNode }) {
+  const meta = TOOL_META[toolKey];
+  return (
+    <div className="pt-6 border-t" style={{ borderColor: "var(--border)" }}>
+      <div className="flex items-center gap-3 mb-4">
+        <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{meta.num}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-semibold leading-snug" style={{ color: "var(--t1)" }}>{meta.label}</p>
+          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>{meta.desc}</p>
+        </div>
+        {done && (
+          <span className="mono text-[9px] px-1.5 py-0.5 rounded flex-shrink-0"
+            style={{ background: "rgba(125,214,107,0.12)", color: "var(--validated)", border: "1px solid rgba(125,214,107,0.3)" }}>
+            ✓ done
+          </span>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function LockedToolRow({ toolKey, verdict }: { toolKey: ToolKey; verdict: Verdict }) {
+  const meta = TOOL_META[toolKey];
+  const lockKey = verdict === "PIVOT" ? "PIVOT" : "KILL";
+  const reason = LOCK_REASONS[toolKey]?.[lockKey] ?? "";
+  return (
+    <div className="pt-6 border-t" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded border px-3 py-2.5"
+        style={{ borderColor: "var(--border)", background: "var(--surface)", opacity: 0.45 }}>
+        <div className="flex items-center gap-3 mb-1">
+          <span className="mono text-[10px] w-5 flex-shrink-0" style={{ color: "var(--t3)" }}>{meta.num}</span>
+          <p className="flex-1 text-[12px] font-medium leading-snug" style={{ color: "var(--t1)" }}>{meta.label}</p>
+          <span className="mono text-[9px] px-1.5 py-0.5 rounded border flex-shrink-0"
+            style={verdict === "PIVOT"
+              ? { borderColor: "rgba(232,179,65,0.35)", color: "var(--caution)", background: "rgba(232,179,65,0.08)" }
+              : { borderColor: "var(--border)", color: "var(--t3)" }}>
+            {verdict === "PIVOT" ? "after pivot" : "unavailable"}
+          </span>
+        </div>
+        {reason && (
+          <p className="mono text-[10px] ml-8 leading-[1.55]" style={{ color: "var(--t3)" }}>
+            ↳ {reason}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Helpers ──────────────────────────────────────────────────────
+
+function getVisibleTabs(verdict: Verdict, override: boolean): StageTab[] {
+  if (verdict === "KILL" && !override) return ["understand"];
+  return ["understand", "plan", "launch"];
+}
+
+function getLockedTools(verdict: Verdict, tab: StageTab, override: boolean): ToolKey[] {
+  if (override || verdict === "GO") return [];
+  if (verdict === "PIVOT" && (tab === "plan" || tab === "launch")) return STAGE_TOOLS[tab];
+  if (verdict === "KILL" && tab === "understand") return ["customers"];
+  return [];
+}
+
+// ── StageTabs ────────────────────────────────────────────────────
+
+export interface StageTabsProps {
+  verdict: Verdict;
+  score: number | undefined;
+  ideaId: string;
+  signals: Signal[];
+  bySource: Record<string, Signal[]>;
+  isDone: Record<ToolKey, boolean>;
+  initialSimulation: Simulation | null;
+  initialLanding: LandingPage | null;
+  initialCustomers: CustomerAnalysis | null;
+  initialBuild: BuildAnalysis | null;
+  initialCompetitors: CompetitorAnalysis | null;
+  initialLaunchKit: LaunchKit | null;
+}
+
+export function StageTabs({
+  verdict, score, ideaId, signals, bySource, isDone,
+  initialSimulation, initialLanding, initialCustomers,
+  initialBuild, initialCompetitors, initialLaunchKit,
+}: StageTabsProps) {
+  const [activeTab, setActiveTab] = useState<StageTab>("understand");
+  const [override, setOverride] = useState(false);
+
+  const visibleTabs = getVisibleTabs(verdict, override);
+  const lockedInTab = getLockedTools(verdict, activeTab, override);
+  const availableInTab = STAGE_TOOLS[activeTab].filter((k) => !lockedInTab.includes(k));
+
+  function renderToolContent(key: ToolKey): React.ReactNode {
+    switch (key) {
+      case "simulate":    return <SimulateClient    ideaId={ideaId} initialSimulation={initialSimulation} />;
+      case "landing":     return <LandingClient     ideaId={ideaId} initialLanding={initialLanding} />;
+      case "customers":   return <CustomersClient   ideaId={ideaId} initialAnalysis={initialCustomers} />;
+      case "build":       return <BuildClient       ideaId={ideaId} initialAnalysis={initialBuild} />;
+      case "competitors": return <CompetitorsClient ideaId={ideaId} initialAnalysis={initialCompetitors} />;
+      case "launch-kit":  return <LaunchKitClient   ideaId={ideaId} initialKit={initialLaunchKit} />;
+    }
+  }
+
+  const showPivotBanner =
+    !override && verdict === "PIVOT" && (activeTab === "plan" || activeTab === "launch");
+
+  return (
+    <div>
+      <p className="text-[13px] leading-[1.65] mb-6" style={{ color: "var(--t2)" }}>
+        {VERDICT_GUIDE[verdict](score)}
+      </p>
+
+      <div className="flex border-b mb-6" style={{ borderColor: "var(--border)" }}>
+        {visibleTabs.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className="mono text-[11px] px-4 py-2.5 border-b-2 -mb-px transition-colors"
+            style={activeTab === tab
+              ? { borderColor: "var(--accent)", color: "var(--accent)" }
+              : { borderColor: "transparent", color: "var(--t3)" }}
+          >
+            {STAGE_LABELS[tab]}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-0">
+        {activeTab === "understand" && (
+          <>
+            <SignalsSection signals={signals} bySource={bySource} />
+            {availableInTab.map((key) => (
+              <ToolSection key={key} toolKey={key} done={isDone[key]}>
+                {renderToolContent(key)}
+              </ToolSection>
+            ))}
+            {lockedInTab.map((key) => (
+              <LockedToolRow key={key} toolKey={key} verdict={verdict} />
+            ))}
+          </>
+        )}
+
+        {(activeTab === "plan" || activeTab === "launch") && (
+          <>
+            {showPivotBanner && (
+              <div className="rounded border px-4 py-3 mb-4 text-[12px] leading-relaxed"
+                style={{ borderColor: "rgba(232,179,65,0.3)", background: "rgba(232,179,65,0.05)", color: "var(--caution)" }}>
+                Lock in your new direction first. Re-validate and get a GO — then these tools unlock.
+              </div>
+            )}
+            {availableInTab.map((key) => (
+              <ToolSection key={key} toolKey={key} done={isDone[key]}>
+                {renderToolContent(key)}
+              </ToolSection>
+            ))}
+            {lockedInTab.map((key) => (
+              <LockedToolRow key={key} toolKey={key} verdict={verdict} />
+            ))}
+          </>
+        )}
+
+        {(verdict === "PIVOT" || verdict === "KILL") && (
+          <div className="pt-6">
+            <button
+              onClick={() => {
+                setOverride((v) => !v);
+                if (verdict === "KILL") setActiveTab("understand");
+              }}
+              className="mono text-[10px] transition-colors"
+              style={{ color: override ? "var(--validated)" : "var(--t3)" }}
+            >
+              {override
+                ? "← Back to recommended view"
+                : "Ignore recommendations — run all tools →"}
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
