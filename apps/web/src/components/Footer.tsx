@@ -27,6 +27,7 @@ const NAV_COLS = [
       { href: "/dashboard", text: "Dashboard" },
       { href: "/pricing", text: "Pricing" },
       { href: "/changelog", text: "Changelog" },
+      { href: "/api-docs", text: "API docs" },
     ],
   },
   {
@@ -34,15 +35,28 @@ const NAV_COLS = [
     links: [
       { href: "/about", text: "About" },
       { href: "/blog", text: "Blog" },
-      { href: "mailto:contact@pledgeoff.com", text: "Contact", external: true },
+      { href: "/enterprise", text: "Enterprise" },
+      { href: "mailto:affiliate@pledgeoff.com", text: "Affiliate program", external: true },
+    ],
+  },
+  {
+    label: "Support",
+    links: [
+      { href: "mailto:contact@pledgeoff.com", text: "Contact us", external: true },
+      { href: "mailto:support@pledgeoff.com", text: "Customer support", external: true },
+      { href: "mailto:billing@pledgeoff.com", text: "Billing & invoices", external: true },
+      { href: "mailto:partnerships@pledgeoff.com", text: "Partnerships", external: true },
+      { href: "mailto:security@pledgeoff.com", text: "Security", external: true },
     ],
   },
   {
     label: "Legal",
     links: [
-      { href: "/privacy", text: "Privacy" },
-      { href: "/terms", text: "Terms" },
-      { href: "/privacy#s8", text: "Cookies" },
+      { href: "/privacy", text: "Privacy policy" },
+      { href: "/terms", text: "Terms of service" },
+      { href: "/privacy#s8", text: "Cookie policy" },
+      { href: "https://anpc.ro/ce-este-sal/", text: "ANPC — SAL", external: true },
+      { href: "https://www.anspdcp.ro", text: "ANSPDCP", external: true },
     ],
   },
 ];
@@ -51,9 +65,9 @@ export function Footer() {
   return (
     <footer className="border-t mt-auto" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
       {/* Main grid */}
-      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 pt-10 pb-8 grid grid-cols-1 sm:grid-cols-12 gap-8">
+      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 pt-10 pb-8 grid grid-cols-2 sm:grid-cols-12 gap-8">
         {/* Col 1 — brand */}
-        <div className="sm:col-span-4 sm:pr-8">
+        <div className="col-span-2 sm:col-span-4 sm:pr-8">
           <div className="flex items-center gap-2" style={{ color: "var(--t1)" }}>
             <Logo size={20} />
             <span className="display text-[15px] font-semibold tracking-tight">
@@ -70,7 +84,7 @@ export function Footer() {
 
         {/* Nav cols */}
         {NAV_COLS.map((col) => (
-          <div key={col.label} className="sm:col-span-2">
+          <div key={col.label} className="sm:col-span-2 xl:col-span-2">
             <div className="mono text-[11px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>
               {col.label}
             </div>
@@ -114,6 +128,15 @@ export function Footer() {
                 className="hover:opacity-80 transition-opacity underline underline-offset-2"
               >
                 ANPC — Soluționarea alternativă a litigiilor
+              </a>
+              <span aria-hidden="true">·</span>
+              <a
+                href="https://www.anspdcp.ro"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:opacity-80 transition-opacity underline underline-offset-2"
+              >
+                ANSPDCP — Supravegherea datelor personale
               </a>
               <span aria-hidden="true">·</span>
               <a
