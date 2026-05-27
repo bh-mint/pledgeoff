@@ -56,6 +56,7 @@ const NAV_COLS = [
       { href: "/terms", text: "Terms of service" },
       { href: "/privacy#s8", text: "Cookie policy" },
       { href: "https://anpc.ro/ce-este-sal/", text: "ANPC — SAL", external: true },
+      { href: "https://ec.europa.eu/consumers/odr/", text: "SOL — ODR", external: true },
       { href: "https://www.anspdcp.ro", text: "ANSPDCP", external: true },
     ],
   },
@@ -127,7 +128,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 className="hover:opacity-80 transition-opacity underline underline-offset-2"
               >
-                ANPC — Soluționarea alternativă a litigiilor
+                ANPC — Alternative Dispute Resolution
               </a>
               <span aria-hidden="true">·</span>
               <a
@@ -136,7 +137,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 className="hover:opacity-80 transition-opacity underline underline-offset-2"
               >
-                ANSPDCP — Supravegherea datelor personale
+                ANSPDCP — National Supervisory Authority for Personal Data Processing
               </a>
               <span aria-hidden="true">·</span>
               <a
