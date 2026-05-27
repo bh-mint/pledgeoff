@@ -582,7 +582,7 @@ export function HomeClient() {
               href="/ideas/new"
               className="text-[12px] h-9 rounded-md border border-(--border) text-(--t2) flex items-center justify-center hover:border-(--t3) transition-colors"
             >
-              Start free →
+              Validate free →
             </Link>
           </div>
 
@@ -602,10 +602,10 @@ export function HomeClient() {
               <li>Forecast + Audience + Blueprint</li>
             </ul>
             <Link
-              href="/login?mode=signup"
+              href="/pricing"
               className="text-[12px] h-9 rounded-md border border-(--border) text-(--t2) flex items-center justify-center hover:border-(--t3) transition-colors"
             >
-              Start free →
+              Get Founder →
             </Link>
           </div>
 
@@ -636,11 +636,11 @@ export function HomeClient() {
               <li>Otto AI Co-Founder (15q)</li>
             </ul>
             <Link
-              href="/login?mode=signup"
+              href="/pricing"
               className="display text-[12px] font-semibold h-9 rounded-md flex items-center justify-center transition-opacity hover:opacity-90"
               style={{ background: "var(--accent)", color: "#000" }}
             >
-              Start free →
+              Get Team →
             </Link>
           </div>
 
@@ -660,10 +660,10 @@ export function HomeClient() {
               <li>Audit Trail + API access</li>
             </ul>
             <Link
-              href="/login?mode=signup"
+              href="/pricing"
               className="text-[12px] h-9 rounded-md border border-(--border) text-(--t2) flex items-center justify-center hover:border-(--t3) transition-colors"
             >
-              Start free →
+              Get Studio →
             </Link>
           </div>
         </div>
