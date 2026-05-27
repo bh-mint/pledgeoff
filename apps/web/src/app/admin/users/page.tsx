@@ -3,10 +3,11 @@ import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
-  free:     { label: 'Free',     color: 'var(--t3)' },
-  pro:      { label: 'Pro',      color: '#60a5fa' },
-  pro_plus: { label: 'Pro+',     color: 'var(--accent)' },
-  agency:   { label: 'Agency',   color: 'var(--validated)' },
+  free:       { label: 'Free',       color: 'var(--t3)' },
+  founder:    { label: 'Founder',    color: '#60a5fa' },
+  team:       { label: 'Team',       color: 'var(--accent)' },
+  studio:     { label: 'Studio',     color: 'var(--validated)' },
+  enterprise: { label: 'Enterprise', color: 'var(--caution)' },
 };
 
 const STATUS_COLOR: Record<string, string> = {
