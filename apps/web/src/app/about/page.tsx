@@ -116,7 +116,7 @@ export default function AboutPage() {
             {[
               { label: "General", email: "contact@pledgeoff.com" },
               { label: "Partnerships & affiliate", email: "partnerships@pledgeoff.com" },
-              { label: "Press", email: "hello@pledgeoff.com" },
+              { label: "Press", email: "contact@pledgeoff.com" },
             ].map(({ label, email }) => (
               <div key={email} className="flex items-center gap-4">
                 <span className="mono text-[11px] w-40" style={{ color: "var(--t3)" }}>{label}</span>

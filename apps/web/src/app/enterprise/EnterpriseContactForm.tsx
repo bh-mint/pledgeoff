@@ -113,7 +113,7 @@ export function EnterpriseContactForm() {
 
       {status === "error" && (
         <p className="mono text-[11px]" style={{ color: "var(--kill)" }}>
-          Something went wrong. Email us directly at hello@pledgeoff.com
+          Something went wrong. Email us directly at contact@pledgeoff.com
         </p>
       )}
 

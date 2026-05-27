@@ -65,7 +65,7 @@ export async function POST(req: Request): Promise<Response> {
         headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           from: 'PledgeOFF Billing <billing@pledgeoff.com>',
-          to: ['hello@pledgeoff.com'],
+          to: ['billing@pledgeoff.com'],
           subject: `[Invoice Request] ${displayName}${companyName ? ` — ${companyName}` : ''} — Studio`,
           html: notificationHtml,
           reply_to: userEmail,

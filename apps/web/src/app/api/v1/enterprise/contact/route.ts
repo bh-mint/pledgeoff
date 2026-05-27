@@ -28,7 +28,7 @@ export async function POST(req: Request): Promise<Response> {
         },
         body: JSON.stringify({
           from: "PledgeOFF <noreply@pledgeoff.com>",
-          to: ["hello@pledgeoff.com"],
+          to: ["partnerships@pledgeoff.com"],
           subject: `Enterprise enquiry — ${name} (${companySize})`,
           html: `<p><strong>Name:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Team size:</strong> ${companySize}</p>`,
           reply_to: email,

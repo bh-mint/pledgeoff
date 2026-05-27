@@ -170,7 +170,7 @@ export default function TermsPage() {
               </ul>
               <p>
                 You must notify us immediately at{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> if you
+                <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a> if you
                 become aware of any unauthorised use of your account.
               </p>
             </Subsection>
@@ -270,7 +270,7 @@ export default function TermsPage() {
                 and as a goodwill commitment to our customers, we offer a full refund
                 within 7 days of your first payment on any paid plan, no questions asked.
                 To request a refund, email{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> with the
+                <a href="mailto:billing@pledgeoff.com">billing@pledgeoff.com</a> with the
                 subject line <em>&quot;Refund request&quot;</em>. We will process it
                 within 2 business days. After the 7-day window, all payments are final.
               </p>
@@ -498,7 +498,7 @@ export default function TermsPage() {
               <p>
                 You may terminate your account at any time by deleting your account
                 from the settings page or by emailing{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>. Upon
+                <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a>. Upon
                 termination, your access to the Service will cease and your data will
                 be deleted in accordance with our{" "}
                 <Link href="/privacy">Privacy Policy</Link>.
@@ -588,7 +588,7 @@ export default function TermsPage() {
             <Subsection title="13.5 Contact">
               <p>
                 For any questions about these Terms, contact us at{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
+                <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a>.
               </p>
             </Subsection>
           </Section>
@@ -624,13 +624,13 @@ export default function TermsPage() {
               </li>
               <li>
                 <strong>Direct:</strong>{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> — we aim
+                <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a> — we aim
                 to resolve all complaints within 5 business days.
               </li>
             </ul>
             <p>
               Our email for dispute resolution purposes is:{" "}
-              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
+              <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a>.
             </p>
           </Section>
 

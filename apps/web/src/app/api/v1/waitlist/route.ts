@@ -64,7 +64,7 @@ async function sendConfirmationEmail(email: string, traceId: string) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "PledgeOFF <hello@pledgeoff.com>",
+        from: "PledgeOFF <noreply@pledgeoff.com>",
         to: email,
         subject: "You're on the list.",
         html: `
