@@ -16,56 +16,53 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { email } = await requireAdminServer();
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--canvas)', color: 'var(--t1)' }}>
-      {/* Sidebar */}
-      <aside style={{
-        width: 220,
-        borderRight: '1px solid var(--border)',
-        background: 'var(--surface)',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '24px 0',
-        flexShrink: 0,
-      }}>
-        <div style={{ padding: '0 20px 20px', borderBottom: '1px solid var(--border)', marginBottom: 12 }}>
-          <div style={{ fontFamily: 'var(--font-display, "Inter Tight")', fontWeight: 700, fontSize: 15, letterSpacing: '-0.04em', color: 'var(--t1)' }}>
+    <div className="flex min-h-screen" style={{ background: 'var(--canvas)', color: 'var(--t1)' }}>
+      <aside
+        className="flex flex-col shrink-0 py-6"
+        style={{ width: 220, borderRight: '1px solid var(--border)', background: 'var(--surface)' }}
+      >
+        <div
+          className="px-5 pb-5 mb-3"
+          style={{ borderBottom: '1px solid var(--border)' }}
+        >
+          <div
+            className="font-bold text-[15px] tracking-[-0.04em]"
+            style={{ fontFamily: 'var(--font-display, "Inter Tight")', color: 'var(--t1)' }}
+          >
             PledgeOFF <span style={{ color: 'var(--accent)' }}>Admin</span>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--t3)', fontFamily: 'monospace', marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div
+            className="font-mono text-[11px] mt-1 overflow-hidden text-ellipsis whitespace-nowrap"
+            style={{ color: 'var(--t3)' }}
+          >
             {email}
           </div>
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '0 8px' }}>
+        <nav className="flex flex-col gap-0.5 px-2">
           {NAV.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              style={{
-                display: 'block',
-                padding: '8px 12px',
-                borderRadius: 6,
-                fontSize: 13,
-                color: 'var(--t2)',
-                textDecoration: 'none',
-                fontWeight: 500,
-              }}
-              className="admin-nav-link"
+              className="admin-nav-link block px-3 py-2 rounded-md text-[13px] font-medium no-underline transition-colors"
+              style={{ color: 'var(--t2)' }}
             >
               {label}
             </Link>
           ))}
         </nav>
 
-        <div style={{ marginTop: 'auto', padding: '16px 20px', borderTop: '1px solid var(--border)' }}>
-          <Link href="/dashboard" style={{ fontSize: 12, color: 'var(--t3)', textDecoration: 'none' }}>
+        <div
+          className="mt-auto px-5 pt-4"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          <Link href="/dashboard" className="text-[12px] no-underline" style={{ color: 'var(--t3)' }}>
             ← Back to app
           </Link>
         </div>
       </aside>
 
-      {/* Main */}
-      <main style={{ flex: 1, padding: '32px 40px', overflowY: 'auto' }}>
+      <main className="flex-1 py-8 px-10 overflow-y-auto">
         {children}
       </main>
 
