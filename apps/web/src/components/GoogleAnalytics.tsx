@@ -2,21 +2,18 @@
 
 import Script from "next/script";
 import { useEffect, useState } from "react";
-
-const CONSENT_KEY = "cookie_consent";
-const CONSENT_EVENT = "pledgeoff:cookie_consent";
+import { getPreferences, CONSENT_EVENT, type CookiePreferences } from "@/lib/cookie-consent";
 
 export function GoogleAnalytics({ gaId }: { gaId: string }) {
   const [consented, setConsented] = useState(() => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem(CONSENT_KEY) === "accepted";
+    return getPreferences()?.analytics === true;
   });
 
   useEffect(() => {
     const handler = (e: Event) => {
-      if ((e as CustomEvent<string>).detail === "accepted") {
-        setConsented(true);
-      }
+      const prefs = (e as CustomEvent<CookiePreferences>).detail;
+      setConsented(prefs.analytics === true);
     };
     window.addEventListener(CONSENT_EVENT, handler);
     return () => window.removeEventListener(CONSENT_EVENT, handler);
