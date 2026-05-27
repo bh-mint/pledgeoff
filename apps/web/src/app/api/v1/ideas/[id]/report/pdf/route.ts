@@ -53,7 +53,7 @@ export async function GET(
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="audit-trail-${ideaId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.pdf"`,
+        'Content-Disposition': `attachment; filename="report-${ideaId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.pdf"`,
         'X-Trace-Id': traceId,
       },
     });

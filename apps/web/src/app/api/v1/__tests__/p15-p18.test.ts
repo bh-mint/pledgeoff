@@ -1,7 +1,7 @@
 /**
  * Integration tests for P15–P18 API routes:
  *   P15 — GET /api/v1/queue
- *   P17 — GET /api/v1/ideas/[id]/audit-trail
+ *   P17 — GET /api/v1/ideas/[id]/report
  *   P18 — POST /api/v1/ideas/[id]/outcome
  *   P18 — GET  /api/v1/ideas/[id]/outcome
  */
@@ -44,7 +44,7 @@ vi.mock('@/lib/container', () => ({
 
 // Static imports — Vitest resolves [id] path correctly at build time
 import { GET as getQueue } from '../queue/route';
-import { GET as getAuditTrail } from '../ideas/[id]/audit-trail/route';
+import { GET as getAuditTrail } from '../ideas/[id]/report/route';
 import { POST as postOutcome, GET as getOutcome } from '../ideas/[id]/outcome/route';
 
 const TEST_USER_ID = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -93,9 +93,9 @@ describe('GET /api/v1/queue', () => {
   });
 });
 
-// ── P17: GET /api/v1/ideas/[id]/audit-trail ──────────────────────────────────
+// ── P17: GET /api/v1/ideas/[id]/report ───────────────────────────────────────
 
-describe('GET /api/v1/ideas/[id]/audit-trail', () => {
+describe('GET /api/v1/ideas/[id]/report', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolveUserId.mockResolvedValue(TEST_USER_ID);
@@ -104,7 +104,7 @@ describe('GET /api/v1/ideas/[id]/audit-trail', () => {
   it('returns 401 when not authenticated', async () => {
     mockResolveUserId.mockResolvedValue(null);
     const res = await getAuditTrail(
-      new Request(`http://localhost/api/v1/ideas/${IDEA_ID}/audit-trail`),
+      new Request(`http://localhost/api/v1/ideas/${IDEA_ID}/report`),
       ID_PARAMS,
     );
     expect(res.status).toBe(401);
@@ -114,7 +114,7 @@ describe('GET /api/v1/ideas/[id]/audit-trail', () => {
     const timeline = { ideaId: IDEA_ID, decisions: [], signals: [] };
     mockGetDecisionTimelineUseCase.execute.mockResolvedValue(ok(timeline));
     const res = await getAuditTrail(
-      new Request(`http://localhost/api/v1/ideas/${IDEA_ID}/audit-trail`),
+      new Request(`http://localhost/api/v1/ideas/${IDEA_ID}/report`),
       ID_PARAMS,
     );
     expect(res.status).toBe(200);
@@ -125,7 +125,7 @@ describe('GET /api/v1/ideas/[id]/audit-trail', () => {
   it('returns 404 when idea not found', async () => {
     mockGetDecisionTimelineUseCase.execute.mockResolvedValue(err(new Error('Not found')));
     const res = await getAuditTrail(
-      new Request(`http://localhost/api/v1/ideas/${IDEA_ID}/audit-trail`),
+      new Request(`http://localhost/api/v1/ideas/${IDEA_ID}/report`),
       ID_PARAMS,
     );
     expect(res.status).toBe(404);
@@ -134,7 +134,7 @@ describe('GET /api/v1/ideas/[id]/audit-trail', () => {
   it('returns 500 on non-not-found error', async () => {
     mockGetDecisionTimelineUseCase.execute.mockResolvedValue(err(new Error('db timeout')));
     const res = await getAuditTrail(
-      new Request(`http://localhost/api/v1/ideas/${IDEA_ID}/audit-trail`),
+      new Request(`http://localhost/api/v1/ideas/${IDEA_ID}/report`),
       ID_PARAMS,
     );
     expect(res.status).toBe(500);

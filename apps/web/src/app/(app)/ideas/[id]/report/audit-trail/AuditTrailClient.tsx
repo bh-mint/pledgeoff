@@ -66,7 +66,7 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
       const token = await getAuthToken();
       if (!token) { setLoading(false); return; }
 
-      const res = await fetch(`/api/v1/ideas/${ideaId}/report`, {
+      const res = await fetch(`/api/v1/ideas/${ideaId}/audit-trail`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -83,7 +83,7 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
     const token = await getAuthToken();
     if (!token) { setExportLoading(false); return; }
 
-    const res = await fetch(`/api/v1/ideas/${ideaId}/report/pdf`, {
+    const res = await fetch(`/api/v1/ideas/${ideaId}/audit-trail/pdf`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (res.ok) {
@@ -91,7 +91,7 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `report-${ideaId.slice(0, 8)}.pdf`;
+      a.download = `audit-trail-${ideaId.slice(0, 8)}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     }
