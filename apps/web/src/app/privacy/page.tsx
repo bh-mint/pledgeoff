@@ -88,7 +88,7 @@ export default function PrivacyPage() {
               We collect your email and the ideas you submit. We use them to run the service and send you
               account emails. We don&apos;t sell your data. You can delete everything anytime from{" "}
               <Link href="/settings">Settings</Link>. Questions?{" "}
-              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
+              <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a>.
             </p>
           </div>
 
@@ -106,9 +106,11 @@ export default function PrivacyPage() {
             </p>
             <p>
               As the <strong>data controller</strong> under GDPR, we are responsible for
-              how your personal data is collected, used, and protected. For any
-              privacy-related enquiries, contact us at{" "}
-              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
+              how your personal data is collected, used, and protected. For privacy
+              and data subject requests, contact us at{" "}
+              <a href="mailto:privacy@pledgeoff.com">privacy@pledgeoff.com</a>. For
+              general enquiries:{" "}
+              <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a>.
             </p>
           </Section>
 
@@ -419,7 +421,7 @@ export default function PrivacyPage() {
             </ul>
             <p>
               You can request a copy of the relevant transfer safeguards by emailing{" "}
-              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>.
+              <a href="mailto:legal@pledgeoff.com">legal@pledgeoff.com</a>.
             </p>
           </Section>
 
@@ -616,7 +618,7 @@ export default function PrivacyPage() {
             </ul>
             <p>
               To exercise any of these rights, email us at{" "}
-              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> with the
+              <a href="mailto:privacy@pledgeoff.com">privacy@pledgeoff.com</a> with the
               subject line &quot;Privacy Request — [your right]&quot;. We will respond within
               30 days. We may need to verify your identity before fulfilling the
               request.
@@ -628,7 +630,7 @@ export default function PrivacyPage() {
               PledgeOFF is not directed at children under the age of 16. We do not
               knowingly collect personal data from anyone under 16. If you believe we
               have inadvertently collected such data, please contact us at{" "}
-              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> and we will
+              <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a> and we will
               delete it promptly.
             </p>
           </Section>
@@ -691,7 +693,7 @@ export default function PrivacyPage() {
               <strong>PledgeOFF</strong>
               <br />
               Email:{" "}
-              <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a>
+              <a href="mailto:contact@pledgeoff.com">contact@pledgeoff.com</a>
               <br />
               Website:{" "}
               <a href="https://pledgeoff.com">https://pledgeoff.com</a>
@@ -749,7 +751,7 @@ export default function PrivacyPage() {
               </ul>
               <p>
                 To exercise these rights, email{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> with
+                <a href="mailto:privacy@pledgeoff.com">privacy@pledgeoff.com</a> with
                 subject &quot;CCPA Privacy Request&quot;. We respond within 45 days.
               </p>
             </Subsection>
@@ -760,7 +762,7 @@ export default function PrivacyPage() {
                 and Electronic Documents Act (PIPEDA), and residents of Québec by Law
                 25. You have the right to access, correct, and withdraw consent for the
                 processing of your personal information. Contact{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> to
+                <a href="mailto:privacy@pledgeoff.com">privacy@pledgeoff.com</a> to
                 exercise these rights. You may also lodge a complaint with the{" "}
                 <a
                   href="https://www.priv.gc.ca"
@@ -779,7 +781,7 @@ export default function PrivacyPage() {
                 (LGPD — Law 13.709/2018). Your rights include access, correction,
                 anonymisation, deletion, portability, and information about third-party
                 sharing. Contact{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> to
+                <a href="mailto:privacy@pledgeoff.com">privacy@pledgeoff.com</a> to
                 exercise these rights. The competent authority is the{" "}
                 <a
                   href="https://www.gov.br/anpd"
@@ -797,7 +799,7 @@ export default function PrivacyPage() {
                 Australian residents are protected by the Privacy Act 1988 (Cth) and the
                 Australian Privacy Principles (APPs). You have the right to access and
                 correct personal information we hold about you. Contact{" "}
-                <a href="mailto:hello@pledgeoff.com">hello@pledgeoff.com</a> to
+                <a href="mailto:privacy@pledgeoff.com">privacy@pledgeoff.com</a> to
                 exercise these rights. You may also lodge a complaint with the{" "}
                 <a
                   href="https://www.oaic.gov.au"
