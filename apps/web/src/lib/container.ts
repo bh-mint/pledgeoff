@@ -201,7 +201,7 @@ class AppContainer {
   // ── lazy use-cases ─────────────────────────────────────────────────────────
   private _createIdeaUseCase?: CreateIdeaUseCase;
   get createIdeaUseCase(): CreateIdeaUseCase {
-    return (this._createIdeaUseCase ??= new CreateIdeaUseCase(this.ideaRepo, this._eventBus));
+    return (this._createIdeaUseCase ??= new CreateIdeaUseCase(this.ideaRepo));
   }
 
   private _fetchSignalsUseCase?: FetchSignalsUseCase;

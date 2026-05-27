@@ -44,6 +44,25 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
     return ok(rowToIdea(data));
   }
 
+  async saveWithEvent(
+    idea: Idea,
+    event: { eventId: string; eventType: string; payload: unknown },
+  ): Promise<Result<Idea, IdeaRepositoryError>> {
+    const { error } = await this.client.rpc('create_idea_with_event', {
+      p_idea_id:       idea.id,
+      p_user_id:       idea.userId,
+      p_team_id:       idea.teamId ?? null,
+      p_text:          idea.text,
+      p_niche:         idea.niche ?? 'other',
+      p_created_at:    idea.createdAt,
+      p_event_id:      event.eventId,
+      p_event_type:    event.eventType,
+      p_event_payload: event.payload,
+    });
+    if (error) return err(new IdeaRepositoryError(error.message));
+    return ok(idea);
+  }
+
   async findById(id: string): Promise<Result<Idea | null, IdeaRepositoryError>> {
     const { data, error } = await this.client
       .from('ideas')

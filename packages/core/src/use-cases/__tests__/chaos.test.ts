@@ -18,7 +18,6 @@ import { IdeaRepositoryError } from '../../ports/idea-repository';
 import { DecisionOutcomeRepositoryError } from '../../ports/decision-outcome-repository';
 import { DecisionRepositoryError } from '../../ports/decision-repository';
 import { DecisionQueueRepositoryError } from '../../ports/decision-queue-repository';
-import type { IEventBus } from '../../ports/event-bus';
 import type { IIdeaRepository } from '../../ports/idea-repository';
 import type { IDecisionRepository } from '../../ports/decision-repository';
 import type { IDecisionQueueRepository } from '../../ports/decision-queue-repository';
@@ -67,13 +66,9 @@ const mockDecisionRepo: IDecisionRepository = {
   findAllByIdeaId: async () => ok([]),
 };
 
-const mockEventBus: IEventBus = {
-  publish: async () => ok(undefined as void),
-  subscribe: () => {},
-};
-
 const mockIdeaRepo: IIdeaRepository = {
   save: async (idea) => ok(idea),
+  saveWithEvent: async (idea) => ok(idea),
   findById: async () => ok(null),
   findByUserId: async () => ok([]),
   findByUserIds: async () => ok([]),
@@ -84,38 +79,28 @@ const mockIdeaRepo: IIdeaRepository = {
 // ── CreateIdeaUseCase ───────────────────────────────────────────────────────
 
 describe('chaos: CreateIdeaUseCase', () => {
-  it('returns err when repo.save returns error', async () => {
+  it('returns err when repo.saveWithEvent returns error', async () => {
     const uc = new CreateIdeaUseCase(
-      { ...mockIdeaRepo, save: async () => err(new IdeaRepositoryError('disk full')) },
-      mockEventBus,
+      { ...mockIdeaRepo, saveWithEvent: async () => err(new IdeaRepositoryError('disk full')) },
     );
     const result = await uc.execute({ userId: crypto.randomUUID(), text: 'An idea long enough', traceId: 'trace' });
     expect(result.isErr()).toBe(true);
   });
 
   it('rejects idea with empty text', async () => {
-    const uc = new CreateIdeaUseCase(
-      mockIdeaRepo,
-      mockEventBus,
-    );
+    const uc = new CreateIdeaUseCase(mockIdeaRepo);
     const result = await uc.execute({ userId: crypto.randomUUID(), text: '', traceId: 'trace' });
     expect(result.isErr()).toBe(true);
   });
 
   it('rejects idea with whitespace-only text', async () => {
-    const uc = new CreateIdeaUseCase(
-      mockIdeaRepo,
-      mockEventBus,
-    );
+    const uc = new CreateIdeaUseCase(mockIdeaRepo);
     const result = await uc.execute({ userId: crypto.randomUUID(), text: '     ', traceId: 'trace' });
     expect(result.isErr()).toBe(true);
   });
 
   it('handles 2000-char idea text without throwing', async () => {
-    const uc = new CreateIdeaUseCase(
-      mockIdeaRepo,
-      mockEventBus,
-    );
+    const uc = new CreateIdeaUseCase(mockIdeaRepo);
     const text = 'A'.repeat(2000);
     const result = await uc.execute({ userId: crypto.randomUUID(), text, traceId: 'trace' });
     expect(result.isOk()).toBe(true);
@@ -124,8 +109,7 @@ describe('chaos: CreateIdeaUseCase', () => {
   it('concurrent saves do not corrupt each other', async () => {
     const saved: string[] = [];
     const uc = new CreateIdeaUseCase(
-      { ...mockIdeaRepo, save: async (idea) => { saved.push(idea.id); return ok(idea); } },
-      mockEventBus,
+      { ...mockIdeaRepo, saveWithEvent: async (idea) => { saved.push(idea.id); return ok(idea); } },
     );
     const userId = crypto.randomUUID();
     await Promise.all(

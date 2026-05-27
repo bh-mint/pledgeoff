@@ -58,6 +58,7 @@ function makeDeps(opts: {
 
   const ideaRepo: IIdeaRepository = {
     save: vi.fn(),
+    saveWithEvent: vi.fn().mockImplementation((i) => Promise.resolve(ok(i))),
     findById: vi.fn(),
     findByUserId: vi.fn().mockResolvedValue(ok(ideas)),
     findByUserIds: vi.fn(),

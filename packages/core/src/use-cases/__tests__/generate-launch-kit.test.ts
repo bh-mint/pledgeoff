@@ -42,6 +42,7 @@ const mockLlmResponse: LLMLaunchKitResponse = {
 function makeIdeaRepo(idea: Idea | null = mockIdea): IIdeaRepository {
   return {
     save: vi.fn(),
+    saveWithEvent: vi.fn().mockImplementation((i) => Promise.resolve(ok(i))),
     findById: vi.fn().mockResolvedValue(ok(idea)),
     findByUserId: vi.fn(),
     findByUserIds: vi.fn(),
