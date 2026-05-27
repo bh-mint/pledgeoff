@@ -9,10 +9,11 @@ import { ProfileButton } from "@/components/ProfileButton";
 interface AppNavProps {
   email: string;
   initials: string;
+  avatarUrl?: string | null;
   planLimitRemaining?: number | null;
 }
 
-export function AppNav({ email, initials, planLimitRemaining }: AppNavProps) {
+export function AppNav({ email, initials, avatarUrl, planLimitRemaining }: AppNavProps) {
   const pathname = usePathname();
 
   const links = [
@@ -92,7 +93,7 @@ export function AppNav({ email, initials, planLimitRemaining }: AppNavProps) {
           <div className="hidden md:block mr-3">
             <ThemeToggle />
           </div>
-          <ProfileButton email={email} initials={initials} />
+          <ProfileButton email={email} initials={initials} avatarUrl={avatarUrl} />
         </div>
       </div>
     </nav>

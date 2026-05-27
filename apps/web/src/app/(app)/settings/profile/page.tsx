@@ -18,7 +18,7 @@ export default async function ProfilePage() {
   const [profileResult, plan] = await Promise.all([
     supabase
       .from("profiles")
-      .select("first_name, last_name, username, company_name")
+      .select("first_name, last_name, username, company_name, avatar_url")
       .eq("id", user.id)
       .single(),
     getUserPlan(user.id),
@@ -29,6 +29,7 @@ export default async function ProfilePage() {
     last_name?: string | null;
     username?: string | null;
     company_name?: string | null;
+    avatar_url?: string | null;
   } | null;
 
   return (
@@ -42,6 +43,7 @@ export default async function ProfilePage() {
       lastName={profile?.last_name ?? null}
       username={profile?.username ?? null}
       companyName={profile?.company_name ?? null}
+      avatarUrl={profile?.avatar_url ?? null}
       plan={plan}
     />
   );

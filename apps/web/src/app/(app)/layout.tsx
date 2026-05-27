@@ -3,6 +3,7 @@ import { AppNav } from "@/components/AppNav";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { container } from "@/lib/container";
 import { PLAN_LIMITS } from "@pledgeoff/core";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
 
 export default async function AppLayout({
   children,
@@ -10,15 +11,32 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser();
-  const initials = (user.email ?? "?")
-    .split("@")[0]
-    .slice(0, 2)
-    .toUpperCase();
 
-  const [plan, ideasResult] = await Promise.all([
+  const supabase = createSupabaseServiceClient();
+  const [plan, ideasResult, profileResult] = await Promise.all([
     getUserPlan(user.id),
     container.ideaRepo.findByUserId(user.id),
+    supabase
+      .from("profiles")
+      .select("first_name, last_name, avatar_url")
+      .eq("id", user.id)
+      .single(),
   ]);
+
+  const profile = profileResult.data as {
+    first_name?: string | null;
+    last_name?: string | null;
+    avatar_url?: string | null;
+  } | null;
+
+  const fullName = [profile?.first_name, profile?.last_name]
+    .filter(Boolean)
+    .join(" ");
+  const initials = (fullName || (user.email ?? "?"))
+    .split(/[\s@]/)
+    .slice(0, 2)
+    .map((s) => s[0]?.toUpperCase() ?? "")
+    .join("");
 
   const limit = PLAN_LIMITS[plan].verificationsPerMonth;
   let planLimitRemaining: number | null = null;
@@ -39,6 +57,7 @@ export default async function AppLayout({
       <AppNav
         email={user.email ?? ""}
         initials={initials}
+        avatarUrl={profile?.avatar_url ?? null}
         planLimitRemaining={planLimitRemaining}
       />
       {children}

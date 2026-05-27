@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     '@pledgeoff/observability',
     '@pledgeoff/eventbus',
   ],
+  // sharp native binary must be included explicitly for Vercel deployments
+  outputFileTracingIncludes: {
+    '/api/v1/profile/avatar': ['./node_modules/sharp/**/*'],
+  },
 };
 
 export default withSentryConfig(nextConfig, {

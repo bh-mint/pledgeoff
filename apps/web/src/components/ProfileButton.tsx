@@ -8,9 +8,10 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 interface ProfileButtonProps {
   email: string;
   initials: string;
+  avatarUrl?: string | null;
 }
 
-export function ProfileButton({ email, initials }: ProfileButtonProps) {
+export function ProfileButton({ email, initials, avatarUrl }: ProfileButtonProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -35,10 +36,20 @@ export function ProfileButton({ email, initials }: ProfileButtonProps) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-7 h-7 rounded-full border display text-[11px] font-semibold flex items-center justify-center text-(--t1) hover:border-(--t2) transition-colors"
+        className="w-7 h-7 rounded-full border overflow-hidden display text-[11px] font-semibold flex items-center justify-center text-(--t1) hover:border-(--t2) transition-colors"
         style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+        aria-label="Account menu"
       >
-        {initials}
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt={initials}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          initials
+        )}
       </button>
 
       {open && (

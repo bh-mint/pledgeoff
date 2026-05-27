@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Plan } from "@pledgeoff/core";
+import { AvatarUpload } from "@/components/AvatarUpload";
 
 type Props = {
   email: string;
@@ -11,6 +12,7 @@ type Props = {
   lastName: string | null;
   username: string | null;
   companyName: string | null;
+  avatarUrl: string | null;
   plan: Plan;
 };
 
@@ -37,12 +39,14 @@ export function ProfileClient({
   lastName,
   username,
   companyName,
+  avatarUrl,
   plan,
 }: Props) {
   const [first, setFirst] = useState(firstName ?? "");
   const [last, setLast] = useState(lastName ?? "");
   const [uname, setUname] = useState(username ?? "");
   const [company, setCompany] = useState(companyName ?? "");
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(avatarUrl);
   const [saveStatus, setSaveStatus] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -91,19 +95,14 @@ export function ProfileClient({
         Your identity. Kept minimal on purpose.
       </p>
 
-      {/* Avatar + name summary */}
-      <div className="flex items-center gap-4 mb-8">
-        <div
-          className="w-14 h-14 rounded-full border display text-[18px] font-semibold flex items-center justify-center shrink-0"
-          style={{
-            borderColor: "var(--border)",
-            background: "var(--surface)",
-            color: "var(--t1)",
-          }}
-        >
-          {initials}
-        </div>
-        <div>
+      {/* Avatar upload */}
+      <div className="mb-8">
+        <AvatarUpload
+          initials={initials}
+          currentAvatarUrl={currentAvatarUrl}
+          onUploaded={(url) => setCurrentAvatarUrl(url)}
+        />
+        <div className="mt-3">
           <div className="text-[13px] text-(--t1)">{fullName ?? email}</div>
           {uname && (
             <div
