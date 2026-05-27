@@ -93,7 +93,7 @@ export function LaunchClient() {
           </div>
 
           <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.1em]">
-            Free tier · no credit card · 3 validations included
+            Free tier · no credit card · 1 validation / month
           </p>
         </div>
       </section>

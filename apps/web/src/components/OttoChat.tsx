@@ -31,14 +31,14 @@ export default async function OttoChat({ userId, ideaId, ideaText, verdict, reas
         </div>
         <p className="text-[14px] mb-5 leading-relaxed" style={{ color: 'var(--t2)' }}>
           Ask Otto anything about your idea — strategy, competition, what to build first.
-          Available on Pro and Pro+.
+          Available on Founder and above.
         </p>
         <a
           href="/settings?tab=billing"
           className="inline-block px-5 py-2.5 rounded-lg text-[13px] font-medium mono"
           style={{ background: 'var(--accent)', color: 'var(--accent-fg)' }}
         >
-          Upgrade to Pro →
+          Upgrade to Founder →
         </a>
       </div>
     );

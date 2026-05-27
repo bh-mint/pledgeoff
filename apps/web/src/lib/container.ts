@@ -469,10 +469,10 @@ class AppContainer {
     if (stripeSecretKey) {
       const requiredStripeEnvs = [
         'STRIPE_WEBHOOK_SECRET',
-        'STRIPE_PRO_MONTHLY_PRICE_ID',
-        'STRIPE_PRO_ANNUAL_PRICE_ID',
-        'STRIPE_PRO_PLUS_MONTHLY_PRICE_ID',
-        'STRIPE_PRO_PLUS_ANNUAL_PRICE_ID',
+        'STRIPE_FOUNDER_MONTHLY_PRICE_ID',
+        'STRIPE_FOUNDER_ANNUAL_PRICE_ID',
+        'STRIPE_TEAM_MONTHLY_PRICE_ID',
+        'STRIPE_TEAM_ANNUAL_PRICE_ID',
       ] as const;
       for (const name of requiredStripeEnvs) {
         if (!process.env[name]) {

@@ -10,12 +10,12 @@ import { PRICING } from "@/lib/pricing.config";
 import { ROICalculator } from "@/components/pricing/ROICalculator";
 import { CheckoutModal } from "@/components/CheckoutModal";
 
-const PRO_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID ?? "";
-const PRO_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID ?? "";
-const PRO_PLUS_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PLUS_MONTHLY_PRICE_ID ?? "";
-const PRO_PLUS_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PLUS_ANNUAL_PRICE_ID ?? "";
-const AGENCY_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_AGENCY_MONTHLY_PRICE_ID ?? "";
-const AGENCY_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_AGENCY_ANNUAL_PRICE_ID ?? "";
+const FOUNDER_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_FOUNDER_MONTHLY_PRICE_ID ?? "";
+const FOUNDER_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_FOUNDER_ANNUAL_PRICE_ID ?? "";
+const TEAM_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_TEAM_MONTHLY_PRICE_ID ?? "";
+const TEAM_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_TEAM_ANNUAL_PRICE_ID ?? "";
+const STUDIO_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_STUDIO_MONTHLY_PRICE_ID ?? "";
+const STUDIO_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_STUDIO_ANNUAL_PRICE_ID ?? "";
 
 type FeatureRow = { k: string; f: string; fo: string; t: string; s: string; soon?: boolean };
 
@@ -70,7 +70,7 @@ const FAQ = [
   },
   {
     q: "Do you offer refunds?",
-    a: "30-day full refund, no questions. After 30 days we'll prorate the remaining time on request.",
+    a: "7-day full refund on your first payment, no questions asked. Email billing@pledgeoff.com — done.",
   },
   {
     q: "What's the catch on Free?",
@@ -143,10 +143,12 @@ function UpgradeButton({
   priceId,
   label,
   primary = false,
+  variant,
 }: {
   priceId: string;
   label: string;
   primary?: boolean;
+  variant?: "text";
 }) {
   const router = useRouter();
   const [unavailable, setUnavailable] = useState(false);
@@ -165,13 +167,28 @@ function UpgradeButton({
     setModalOpen(true);
   }
 
+  if (variant === "text") {
+    return (
+      <>
+        <button
+          onClick={handleClick}
+          className="mono text-[11px] transition-opacity hover:opacity-70"
+          style={{ color: "var(--t2)" }}
+        >
+          {label}
+        </button>
+        <CheckoutModal priceId={priceId} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      </>
+    );
+  }
+
   if (primary) {
     return (
       <>
-        <div className="w-full">
+        <div className="w-full sm:w-auto">
           <button
             onClick={handleClick}
-            className="display w-full h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity"
+            className="display w-full sm:w-auto px-6 h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity"
             style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
           >
             {label}
@@ -213,15 +230,15 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
 
   const founderPrice = billing === "month" ? String(PRICING.founder.monthly.eur) : String(PRICING.founder.monthly.annual_equivalent);
   const founderSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.founder.monthly.annual_total}/yr`;
-  const founderPriceId = billing === "month" ? PRO_MONTHLY_PRICE_ID : PRO_ANNUAL_PRICE_ID;
+  const founderPriceId = billing === "month" ? FOUNDER_MONTHLY_PRICE_ID : FOUNDER_ANNUAL_PRICE_ID;
 
   const teamPrice = billing === "month" ? String(PRICING.team.monthly.eur) : String(PRICING.team.monthly.annual_equivalent);
   const teamSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.team.monthly.annual_total}/yr`;
-  const teamPriceId = billing === "month" ? PRO_PLUS_MONTHLY_PRICE_ID : PRO_PLUS_ANNUAL_PRICE_ID;
+  const teamPriceId = billing === "month" ? TEAM_MONTHLY_PRICE_ID : TEAM_ANNUAL_PRICE_ID;
 
   const studioPrice = billing === "month" ? String(PRICING.studio.monthly.eur) : String(PRICING.studio.monthly.annual_equivalent);
   const studioSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.studio.monthly.annual_total}/yr`;
-  const studioPriceId = billing === "month" ? AGENCY_MONTHLY_PRICE_ID : AGENCY_ANNUAL_PRICE_ID;
+  const studioPriceId = billing === "month" ? STUDIO_MONTHLY_PRICE_ID : STUDIO_ANNUAL_PRICE_ID;
 
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
@@ -340,7 +357,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{founderSub}</div>
             <div className="mb-5">
               <UpgradeButton priceId={founderPriceId} label="Upgrade to Founder" primary />
-              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
+              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
               {([
@@ -375,7 +392,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{teamSub}</div>
             <div className="mb-5">
               <UpgradeButton priceId={teamPriceId} label="Upgrade to Team" primary />
-              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
+              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
               {([
@@ -411,7 +428,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{studioSub}</div>
             <div className="mb-5">
               <UpgradeButton priceId={studioPriceId} label="Upgrade to Studio" />
-              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 30-day refund</div>
+              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
             </div>
             <ul className="space-y-2 flex-1">
               {([
@@ -517,24 +534,69 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
 
         {/* Final CTA */}
         <div
-          className="mt-16 mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between border-t pt-10 gap-6 sm:gap-0"
+          className="mt-16 mb-10 border-t pt-10"
           style={{ borderColor: "var(--border)" }}
         >
-          <div>
-            <div className="display text-[28px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
-              Ready when you are.
+          <div className="display text-[28px] font-semibold tracking-tight mb-1" style={{ color: "var(--t1)" }}>
+            Ready when you are.
+          </div>
+          <div className="mono text-[11px] mb-8" style={{ color: "var(--t3)" }}>
+            still on Free?{" "}
+            <Link href="/dashboard" className="transition-colors" style={{ color: "var(--t1)" }}>
+              back to dashboard →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Founder mini-card */}
+            <div
+              className="relative rounded-md p-5 flex flex-col gap-3"
+              style={{ background: "var(--surface)", border: "1px solid var(--accent)" }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-md" style={{ background: "var(--accent)" }} />
+              <div>
+                <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>Founder</div>
+                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>solo builder</div>
+              </div>
+              <div className="display text-[28px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>
+                €{founderPrice}<span className="text-[13px] font-normal ml-1" style={{ color: "var(--t3)" }}>/mo</span>
+              </div>
+              <UpgradeButton priceId={founderPriceId} label="Upgrade to Founder →" primary />
             </div>
-            <div className="mono text-[11px] mt-2" style={{ color: "var(--t3)" }}>
-              still on Free?{" "}
-              <Link href="/dashboard" className="transition-colors" style={{ color: "var(--t1)" }}>
-                back to dashboard →
-              </Link>
+
+            {/* Team mini-card */}
+            <div
+              className="rounded-md p-5 flex flex-col gap-3"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+            >
+              <div>
+                <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>Team</div>
+                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>unlimited + collaborate</div>
+              </div>
+              <div className="display text-[28px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>
+                €{teamPrice}<span className="text-[13px] font-normal ml-1" style={{ color: "var(--t3)" }}>/mo</span>
+              </div>
+              <UpgradeButton priceId={teamPriceId} label="Upgrade to Team →" />
+            </div>
+
+            {/* Studio mini-card */}
+            <div
+              className="rounded-md p-5 flex flex-col gap-3"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+            >
+              <div>
+                <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>Studio</div>
+                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>agencies &amp; studios</div>
+              </div>
+              <div className="display text-[28px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>
+                €{studioPrice}<span className="text-[13px] font-normal ml-1" style={{ color: "var(--t3)" }}>/mo</span>
+              </div>
+              <UpgradeButton priceId={studioPriceId} label="Upgrade to Studio →" />
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <UpgradeButton priceId={founderPriceId} label={`Founder · €${founderPrice}/mo →`} primary />
-            <UpgradeButton priceId={teamPriceId} label={`Team · €${teamPrice}/mo →`} />
-            <UpgradeButton priceId={studioPriceId} label={`Studio · €${studioPrice}/mo →`} />
+
+          <div className="mono text-[10px] mt-4" style={{ color: "var(--t3)" }}>
+            cancel anytime · 7-day refund on first payment
           </div>
         </div>
       </div>

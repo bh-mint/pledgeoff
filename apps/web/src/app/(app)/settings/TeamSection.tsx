@@ -58,7 +58,7 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
           Team access suspended
         </p>
         <p style={{ margin: "0 0 16px", fontSize: 13, color: "#aaa", lineHeight: 1.6 }}>
-          Your Pro subscription payment failed. Team features are locked until the payment is resolved.
+          Your subscription payment failed. Team features are locked until the payment is resolved.
           If not resolved within 24 hours, your account will be downgraded to the Free plan.
         </p>
         <a

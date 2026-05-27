@@ -46,8 +46,8 @@ export default async function BillingPage() {
       monthlyEur: 49,
       annualEquivalentEur: 39,
       annualTotalEur: 468,
-      monthlyPriceId: process.env.STRIPE_PRO_MONTHLY_PRICE_ID ?? "",
-      annualPriceId: process.env.STRIPE_PRO_ANNUAL_PRICE_ID ?? "",
+      monthlyPriceId: process.env.STRIPE_FOUNDER_MONTHLY_PRICE_ID ?? "",
+      annualPriceId: process.env.STRIPE_FOUNDER_ANNUAL_PRICE_ID ?? "",
     },
     {
       id: "team" as const,
@@ -55,8 +55,8 @@ export default async function BillingPage() {
       monthlyEur: 99,
       annualEquivalentEur: 79,
       annualTotalEur: 948,
-      monthlyPriceId: process.env.STRIPE_PRO_PLUS_MONTHLY_PRICE_ID ?? "",
-      annualPriceId: process.env.STRIPE_PRO_PLUS_ANNUAL_PRICE_ID ?? "",
+      monthlyPriceId: process.env.STRIPE_TEAM_MONTHLY_PRICE_ID ?? "",
+      annualPriceId: process.env.STRIPE_TEAM_ANNUAL_PRICE_ID ?? "",
     },
     {
       id: "studio" as const,
@@ -64,8 +64,8 @@ export default async function BillingPage() {
       monthlyEur: 349,
       annualEquivalentEur: 279,
       annualTotalEur: 3348,
-      monthlyPriceId: process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID ?? "",
-      annualPriceId: process.env.STRIPE_AGENCY_ANNUAL_PRICE_ID ?? "",
+      monthlyPriceId: process.env.STRIPE_STUDIO_MONTHLY_PRICE_ID ?? "",
+      annualPriceId: process.env.STRIPE_STUDIO_ANNUAL_PRICE_ID ?? "",
     },
   ];
 

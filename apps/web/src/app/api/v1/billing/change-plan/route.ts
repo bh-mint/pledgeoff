@@ -3,10 +3,12 @@ import { resolveUserId } from '@/lib/api-auth';
 import { container } from '@/lib/container';
 
 const ALLOWED_PRICE_IDS = [
-  process.env.STRIPE_PRO_MONTHLY_PRICE_ID,
-  process.env.STRIPE_PRO_ANNUAL_PRICE_ID,
-  process.env.STRIPE_PRO_PLUS_MONTHLY_PRICE_ID,
-  process.env.STRIPE_PRO_PLUS_ANNUAL_PRICE_ID,
+  process.env.STRIPE_FOUNDER_MONTHLY_PRICE_ID,
+  process.env.STRIPE_FOUNDER_ANNUAL_PRICE_ID,
+  process.env.STRIPE_TEAM_MONTHLY_PRICE_ID,
+  process.env.STRIPE_TEAM_ANNUAL_PRICE_ID,
+  process.env.STRIPE_STUDIO_MONTHLY_PRICE_ID,
+  process.env.STRIPE_STUDIO_ANNUAL_PRICE_ID,
 ].filter(Boolean) as string[];
 
 const Schema = z.object({ priceId: z.string().min(1) });

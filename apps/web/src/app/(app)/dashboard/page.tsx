@@ -335,7 +335,7 @@ export default async function DashboardPage() {
                 className="mono text-[9px] uppercase tracking-[0.1em] px-2 py-0.5 rounded"
                 style={{ background: "color-mix(in srgb, var(--validated) 10%, transparent)", color: "var(--validated)", border: "1px solid color-mix(in srgb, var(--validated) 25%, transparent)" }}
               >
-                Pro+
+                Team
               </span>
             </div>
             <SignalFeed niches={signalFeedData.data} locked={signalFeedData.locked} />
@@ -356,7 +356,7 @@ export default async function DashboardPage() {
             href="/pricing"
             className="mono text-[10px] text-(--t3) hover:text-(--t2) transition-colors"
           >
-            upgrade to Pro →
+            upgrade to Founder →
           </Link>
         )}
       </div>

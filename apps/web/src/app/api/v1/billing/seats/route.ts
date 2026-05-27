@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { container } from '@/lib/container';
 import { resolveUserId } from '@/lib/api-auth';
 import { logger } from '@pledgeoff/observability';
-import { TeamSeatsPlanError, TeamSeatsQuantityError } from '@pledgeoff/core';
+import { TeamSeatsPlanError, TeamSeatsQuantityError, PLAN_LIMITS, effectivePlan } from '@pledgeoff/core';
 
 const SeatsRequestSchema = z.object({
   extraSeats: z.number().int().min(0).max(97),
@@ -52,9 +52,14 @@ export async function POST(req: Request) {
     return Response.json({ error: { code: 'NO_STRIPE_SUBSCRIPTION' } }, { status: 422, headers: { 'X-Trace-Id': traceId } });
   }
 
-  const extraSeatPriceId = process.env.STRIPE_EXTRA_SEAT_PRICE_ID;
+  const plan = effectivePlan(subscription);
+  const extraSeatPriceId = plan === 'studio'
+    ? process.env.STRIPE_STUDIO_EXTRA_SEAT_PRICE_ID
+    : process.env.STRIPE_EXTRA_SEAT_PRICE_ID;
+
   if (!extraSeatPriceId) {
-    logger.error({ traceId, userId }, 'STRIPE_EXTRA_SEAT_PRICE_ID not configured');
+    const envVar = plan === 'studio' ? 'STRIPE_STUDIO_EXTRA_SEAT_PRICE_ID' : 'STRIPE_EXTRA_SEAT_PRICE_ID';
+    logger.error({ traceId, userId, plan }, `${envVar} not configured`);
     return Response.json({ error: { code: 'SERVER_MISCONFIGURATION' } }, { status: 503, headers: { 'X-Trace-Id': traceId } });
   }
 
@@ -82,14 +87,15 @@ export async function POST(req: Request) {
     userId,
     action: 'seat_addon_updated',
     resourceType: 'subscription',
-    metadata: { extraSeats, stripeItemId: stripeResult.value.itemId },
+    metadata: { extraSeats, plan, stripeItemId: stripeResult.value.itemId },
     traceId,
   });
 
+  const baseSeats = PLAN_LIMITS[plan].seatsIncluded;
   return Response.json({
     data: {
       extraSeats,
-      totalSeats: 3 + extraSeats,
+      totalSeats: baseSeats + extraSeats,
       stripeItemId: stripeResult.value.itemId,
     },
   }, { status: 200, headers: { 'X-Trace-Id': traceId } });

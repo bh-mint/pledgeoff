@@ -562,8 +562,11 @@ export function BillingClient({
         </div>
       )}
 
-      {/* Seat add-ons — Team only */}
-      {plan === "team" && (
+      {/* Seat add-ons — Team and Studio */}
+      {(plan === "team" || plan === "studio") && (() => {
+        const baseSeats = plan === "team" ? 3 : 8;
+        const seatPrice = plan === "team" ? 12 : 20;
+        return (
         <div
           className="border rounded-md p-5"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
@@ -572,10 +575,10 @@ export function BillingClient({
             className="mono text-[10px] uppercase tracking-[0.12em] mb-1"
             style={{ color: "var(--t3)" }}
           >
-            Team seats
+            {plan === "team" ? "Team" : "Studio"} seats
           </div>
           <p className="text-[12px] mb-5" style={{ color: "var(--t2)" }}>
-            Team includes 3 seats. Add extra seats at €12/seat/month, billed to
+            {plan === "team" ? "Team" : "Studio"} includes {baseSeats} seats. Add extra seats at €{seatPrice}/seat/month, billed to
             your subscription.
           </p>
 
@@ -583,7 +586,7 @@ export function BillingClient({
             <div className="flex-1 flex items-center gap-3">
               <div className="text-center">
                 <div className="mono text-[22px] font-semibold text-(--t1)">
-                  {3 + seatExtra}
+                  {baseSeats + seatExtra}
                 </div>
                 <div
                   className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5"
@@ -594,7 +597,7 @@ export function BillingClient({
               </div>
               <div className="text-(--t3) text-[18px]">=</div>
               <div className="text-center">
-                <div className="mono text-[16px] text-(--t2)">3</div>
+                <div className="mono text-[16px] text-(--t2)">{baseSeats}</div>
                 <div
                   className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5"
                   style={{ color: "var(--t3)" }}
@@ -649,9 +652,9 @@ export function BillingClient({
             <div>
               {seatExtra > 0 ? (
                 <span className="mono text-[12px] text-(--t2)">
-                  {seatExtra} × €12 ={" "}
+                  {seatExtra} × €{seatPrice} ={" "}
                   <span className="text-(--t1) font-semibold">
-                    €{seatExtra * 12}/month
+                    €{seatExtra * seatPrice}/month
                   </span>{" "}
                   added to your subscription
                 </span>
@@ -660,7 +663,7 @@ export function BillingClient({
                   className="mono text-[12px]"
                   style={{ color: "var(--t3)" }}
                 >
-                  No extra seats — only the 3 included ones.
+                  No extra seats — only the {baseSeats} included ones.
                 </span>
               )}
             </div>
@@ -691,7 +694,8 @@ export function BillingClient({
             </button>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {checkoutPriceId && (
         <CheckoutModal

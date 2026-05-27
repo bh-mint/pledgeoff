@@ -112,7 +112,7 @@ export default function EnterprisePage() {
               What Enterprise includes.
             </h2>
             <p className="text-[13px] mb-10" style={{ color: "var(--t2)" }}>
-              Everything in Agency, plus the infrastructure your organisation demands.
+              Everything in Studio, plus the infrastructure your organisation demands.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-px border rounded-md overflow-hidden" style={{ borderColor: "var(--border)", background: "var(--border)" }}>
@@ -170,7 +170,7 @@ export default function EnterprisePage() {
                 <div className="border rounded-md p-4" style={{ borderColor: "var(--border)" }}>
                   <div className="mono text-[10px] uppercase tracking-[0.1em] mb-1" style={{ color: "var(--t3)" }}>starts at</div>
                   <div className="display text-[28px] font-semibold" style={{ color: "var(--t1)" }}>€499<span className="text-[14px] font-normal" style={{ color: "var(--t3)" }}>/mo</span></div>
-                  <div className="mono text-[11px] mt-1" style={{ color: "var(--t3)" }}>Agency plan · self-serve · up to 10 seats</div>
+                  <div className="mono text-[11px] mt-1" style={{ color: "var(--t3)" }}>Studio plan · self-serve · up to 10 seats</div>
                 </div>
                 <div
                   className="border rounded-md p-4"

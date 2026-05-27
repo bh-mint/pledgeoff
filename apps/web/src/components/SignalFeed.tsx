@@ -67,7 +67,7 @@ export function SignalFeed({ niches, locked }: Props) {
         </div>
         {/* Lock overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-          <span className="mono text-[10px] uppercase tracking-[0.1em] text-(--t3)">Pro+ required</span>
+          <span className="mono text-[10px] uppercase tracking-[0.1em] text-(--t3)">Team+ required</span>
           <Link
             href="/pricing"
             className="mono text-[11px] font-semibold px-3 py-1.5 rounded transition-colors"

@@ -5,7 +5,7 @@ import { effectivePlan, type Subscription } from '../domain/subscription';
 
 export class TeamSeatsPlanError extends Error {
   readonly code = 'TEAM_SEATS_PLAN_ERROR';
-  constructor() { super('Seat add-ons require an active Team subscription'); }
+  constructor() { super('Seat add-ons require an active Team or Studio subscription'); }
 }
 
 export class TeamSeatsQuantityError extends Error {
@@ -49,7 +49,8 @@ export class UpdateTeamSeatsUseCase {
     if (subResult.isErr()) return err(subResult.error);
 
     const sub = subResult.value;
-    if (!sub || effectivePlan(sub) !== 'team') {
+    const plan = sub ? effectivePlan(sub) : null;
+    if (!sub || (plan !== 'team' && plan !== 'studio')) {
       return err(new TeamSeatsPlanError());
     }
 

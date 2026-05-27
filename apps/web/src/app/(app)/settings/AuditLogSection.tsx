@@ -67,7 +67,7 @@ export function AuditLogSection({ entries }: { entries: AuditRow[] }) {
           className="mono text-[10px] px-2 py-1 rounded"
           style={{ background: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)', border: '1px solid color-mix(in srgb, var(--accent) 25%, transparent)' }}
         >
-          Agency
+          Studio
         </span>
       </div>
 

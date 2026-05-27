@@ -5,16 +5,16 @@ import { container } from '@/lib/container';
 
 // Map Stripe price IDs → plan names
 function priceIdToPlan(priceId: string): Plan {
-  const monthly = process.env.STRIPE_PRO_MONTHLY_PRICE_ID;
-  const annual = process.env.STRIPE_PRO_ANNUAL_PRICE_ID;
-  const plusMonthly = process.env.STRIPE_PRO_PLUS_MONTHLY_PRICE_ID;
-  const plusAnnual = process.env.STRIPE_PRO_PLUS_ANNUAL_PRICE_ID;
-  const agencyMonthly = process.env.STRIPE_AGENCY_MONTHLY_PRICE_ID;
-  const agencyAnnual = process.env.STRIPE_AGENCY_ANNUAL_PRICE_ID;
+  const founderMonthly = process.env.STRIPE_FOUNDER_MONTHLY_PRICE_ID;
+  const founderAnnual = process.env.STRIPE_FOUNDER_ANNUAL_PRICE_ID;
+  const teamMonthly = process.env.STRIPE_TEAM_MONTHLY_PRICE_ID;
+  const teamAnnual = process.env.STRIPE_TEAM_ANNUAL_PRICE_ID;
+  const studioMonthly = process.env.STRIPE_STUDIO_MONTHLY_PRICE_ID;
+  const studioAnnual = process.env.STRIPE_STUDIO_ANNUAL_PRICE_ID;
 
-  if (priceId === agencyMonthly || priceId === agencyAnnual) return 'studio';
-  if (priceId === plusMonthly || priceId === plusAnnual) return 'team';
-  if (priceId === monthly || priceId === annual) return 'founder';
+  if (priceId === studioMonthly || priceId === studioAnnual) return 'studio';
+  if (priceId === teamMonthly || priceId === teamAnnual) return 'team';
+  if (priceId === founderMonthly || priceId === founderAnnual) return 'founder';
 
   throw new Error(`Unknown Stripe priceId: ${priceId}. Update STRIPE_*_PRICE_ID env vars.`);
 }

@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
   const plan = await getUserPlan(userId);
   if (!isAtLeastPlan(plan, PLAN.TEAM)) {
-    return forbidden(traceId, 'API access requires Pro+ or Agency plan');
+    return forbidden(traceId, 'API access requires Team or Studio plan');
   }
 
   const result = await container.listApiKeysUseCase.execute({ userId, traceId });
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
 
   const plan = await getUserPlan(userId);
   if (!isAtLeastPlan(plan, PLAN.TEAM)) {
-    return forbidden(traceId, 'API access requires Pro+ or Agency plan');
+    return forbidden(traceId, 'API access requires Team or Studio plan');
   }
 
   const body = await req.json();

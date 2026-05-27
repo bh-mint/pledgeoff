@@ -323,7 +323,7 @@ export default function TermsPage() {
               </li>
               <li>
                 Resell, sublicense, or otherwise commercialise the Service without our
-                prior written consent (except as permitted by an Agency plan).
+                prior written consent (except as permitted by a Studio plan).
               </li>
               <li>
                 Violate any applicable local, national, or international law or
