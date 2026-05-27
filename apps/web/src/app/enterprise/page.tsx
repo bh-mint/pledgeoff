@@ -74,7 +74,7 @@ export default function EnterprisePage() {
 
         {/* Hero */}
         <div className="border-b" style={{ borderColor: "var(--border)" }}>
-          <div className="max-w-300 mx-auto px-4 sm:px-8 py-10 sm:py-20">
+          <div className="max-w-360 mx-auto px-4 sm:px-10 py-10 sm:py-20">
             <div className="mono text-[10px] uppercase tracking-[0.14em] mb-4" style={{ color: "var(--t3)" }}>
               enterprise
             </div>
@@ -104,7 +104,7 @@ export default function EnterprisePage() {
           </div>
         </div>
 
-        <div className="max-w-300 mx-auto px-4 sm:px-8 py-12 sm:py-20">
+        <div className="max-w-360 mx-auto px-4 sm:px-10 py-12 sm:py-20">
 
           {/* What's included */}
           <div className="mb-16 sm:mb-24">

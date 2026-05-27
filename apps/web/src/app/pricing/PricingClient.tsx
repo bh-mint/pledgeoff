@@ -243,7 +243,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
 
       {/* Hero */}
       <div className="border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-300 mx-auto px-4 sm:px-8 py-10 sm:py-16 flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-end gap-6">
+        <div className="max-w-360 mx-auto px-4 sm:px-10 py-10 sm:py-16 flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-end gap-6">
           <div className="sm:col-span-7">
             <div className="mono text-[10px] uppercase tracking-[0.14em] mb-4" style={{ color: "var(--t3)" }}>
               upgrade
@@ -287,7 +287,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
         </div>
       </div>
 
-      <div className="max-w-300 mx-auto px-4 sm:px-8 py-8 sm:py-12">
+      <div className="max-w-360 mx-auto px-4 sm:px-10 py-8 sm:py-12">
         {/* Plans — 4 columns */}
         <div className="grid grid-cols-1 sm:grid-cols-4 border rounded-md overflow-hidden" style={{ borderColor: "var(--border)" }}>
 

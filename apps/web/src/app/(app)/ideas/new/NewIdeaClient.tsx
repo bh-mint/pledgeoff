@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { getAuthToken } from "@/lib/auth-client";
-import { Logo } from "@/components/brand/Logo";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const LOADING_MESSAGES = [
   { step: "01", text: "Scanning Hacker News discussions…" },
@@ -134,38 +131,6 @@ export function NewIdeaClient({
         }}
       />
 
-      {/* Minimal top bar */}
-      <div className="relative px-4 sm:px-10 py-4 sm:py-6 flex items-center justify-between">
-        <div className="flex items-center gap-4 sm:gap-6">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-(--t1)"
-            aria-label="PledgeOFF home"
-          >
-            <Logo size={22} />
-            <span className="display text-[15px] font-semibold tracking-tight">
-              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-            </span>
-          </Link>
-          <Link
-            href="/dashboard"
-            className="mono text-[11px] transition-colors"
-            style={{ color: "var(--t3)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--t1)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--t3)")}
-          >
-            ← Dashboard
-          </Link>
-        </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <div className="w-px h-4" style={{ background: "var(--border)" }} />
-          <span className="mono text-[10px] sm:text-[11px] text-(--t3)">
-            {validationsLeft} left
-          </span>
-        </div>
-      </div>
-
       {/* Loading overlay */}
       {status === "loading" && (
         <div className="relative flex-1 flex items-center justify-center px-4">
@@ -202,11 +167,16 @@ export function NewIdeaClient({
         className={`relative flex-1 flex items-start${status === "loading" ? " hidden" : ""}`}
       >
         <div className="max-w-360 w-full mx-auto px-4 sm:px-10 py-8 sm:py-12">
-          <div
-            className="mono text-[10px] uppercase tracking-[0.14em] mb-4"
-            style={{ color: "var(--t3)" }}
-          >
-            step 01 · signal verdict
+          <div className="flex items-center justify-between mb-4">
+            <div
+              className="mono text-[10px] uppercase tracking-[0.14em]"
+              style={{ color: "var(--t3)" }}
+            >
+              step 01 · signal verdict
+            </div>
+            <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+              {validationsLeft} validations left
+            </span>
           </div>
 
           {/* Context toggle — only shown for paid users with a team */}
