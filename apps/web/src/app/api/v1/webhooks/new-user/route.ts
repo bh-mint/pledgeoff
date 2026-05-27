@@ -119,6 +119,12 @@ export async function POST(req: Request) {
     logger.error({ traceId, error: idempotencyError.message }, "Failed to insert idempotency key");
   }
 
+  // Mark when welcome email was dispatched — idempotency check above guarantees at-most-once.
+  void supabase
+    .from('profiles')
+    .update({ welcome_email_sent_at: new Date().toISOString() })
+    .eq('id', id);
+
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) {
     logger.error({ traceId, target: "resend" }, "RESEND_API_KEY not set");
