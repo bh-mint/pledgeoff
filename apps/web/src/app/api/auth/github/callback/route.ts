@@ -16,11 +16,11 @@ export async function GET(req: Request): Promise<Response> {
 
   if (errorParam) {
     logger.warn({ traceId, errorParam }, 'GitHub OAuth denied by user');
-    return Response.redirect(`${appUrl}/settings?github=denied`, 302);
+    return Response.redirect(`${appUrl}/settings/integrations?github=denied`, 302);
   }
 
   if (!code || !state) {
-    return Response.redirect(`${appUrl}/settings?github=error`, 302);
+    return Response.redirect(`${appUrl}/settings/integrations?github=error`, 302);
   }
 
   // CSRF state verification
@@ -28,7 +28,7 @@ export async function GET(req: Request): Promise<Response> {
   const stateCookie = cookieStore.get('github_oauth_state');
   if (!stateCookie || stateCookie.value !== state) {
     logger.warn({ traceId }, 'GitHub OAuth state mismatch — possible CSRF');
-    return Response.redirect(`${appUrl}/settings?github=error`, 302);
+    return Response.redirect(`${appUrl}/settings/integrations?github=error`, 302);
   }
 
   // Resolve user from session cookie (this is a browser redirect, not API call)
@@ -50,7 +50,7 @@ export async function GET(req: Request): Promise<Response> {
   const clientSecret = process.env.GITHUB_OAUTH_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
     logger.error({ traceId }, 'GitHub OAuth env vars missing');
-    return Response.redirect(`${appUrl}/settings?github=error`, 302);
+    return Response.redirect(`${appUrl}/settings/integrations?github=error`, 302);
   }
 
   const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
@@ -61,13 +61,13 @@ export async function GET(req: Request): Promise<Response> {
 
   if (!tokenRes.ok) {
     logger.error({ traceId, status: tokenRes.status }, 'GitHub token exchange failed');
-    return Response.redirect(`${appUrl}/settings?github=error`, 302);
+    return Response.redirect(`${appUrl}/settings/integrations?github=error`, 302);
   }
 
   const tokenData = await tokenRes.json() as { access_token?: string; error?: string };
   if (!tokenData.access_token) {
     logger.error({ traceId, ghError: tokenData.error }, 'GitHub token exchange returned no token');
-    return Response.redirect(`${appUrl}/settings?github=error`, 302);
+    return Response.redirect(`${appUrl}/settings/integrations?github=error`, 302);
   }
 
   // Fetch authenticated user's login to use as orgOrUser
@@ -80,7 +80,7 @@ export async function GET(req: Request): Promise<Response> {
 
   if (!userRes.ok) {
     logger.error({ traceId, status: userRes.status }, 'GitHub /user fetch failed after token exchange');
-    return Response.redirect(`${appUrl}/settings?github=error`, 302);
+    return Response.redirect(`${appUrl}/settings/integrations?github=error`, 302);
   }
 
   const ghUser = await userRes.json() as { login: string };
@@ -94,13 +94,13 @@ export async function GET(req: Request): Promise<Response> {
 
   if (result.isErr()) {
     logger.error({ traceId, userId, error: result.error.message }, 'ConnectGitHubUseCase failed');
-    return Response.redirect(`${appUrl}/settings?github=error`, 302);
+    return Response.redirect(`${appUrl}/settings/integrations?github=error`, 302);
   }
 
   logger.info({ traceId, userId, githubOrg: ghUser.login }, 'GitHub connected successfully');
 
-  // Clear state cookie and redirect to settings
-  const response = Response.redirect(`${appUrl}/settings?github=connected`, 302);
+  // Clear state cookie and redirect to integrations
+  const response = Response.redirect(`${appUrl}/settings/integrations?github=connected`, 302);
   response.headers.set(
     'Set-Cookie',
     'github_oauth_state=; Path=/; HttpOnly; Max-Age=0',

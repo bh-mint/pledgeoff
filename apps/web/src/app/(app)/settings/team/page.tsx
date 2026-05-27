@@ -27,7 +27,7 @@ export default async function TeamPage() {
         Team
       </h1>
       <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
-        Invite colleagues to validate ideas together.
+        Manage who has access to your PledgeOFF workspace. Everyone on the team can submit ideas and see decisions.
         {plan === "free" &&
           " Upgrade to Founder for solo use, Team for 3 seats, Studio for 8."}
       </p>

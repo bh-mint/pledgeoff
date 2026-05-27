@@ -40,7 +40,7 @@ export function IntegrationsClient({ githubParam }: Props) {
         Integrations
       </h1>
       <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
-        Connect external tools to enhance your decision intelligence.
+        Connect your existing tools so PledgeOFF can give you context-aware decisions — not just generic advice.
       </p>
 
       {githubParam === "connected" && (

@@ -9,12 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function DeveloperPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ github?: string }>;
-}) {
+export default async function DeveloperPage() {
   await requireUser();
-  const params = await searchParams;
-  return <DeveloperClient githubParam={params.github ?? null} />;
+  return <DeveloperClient />;
 }

@@ -33,8 +33,8 @@ export function GitHubConnectCard({ isConnected, githubOrg, onDisconnect }: Prop
           </h3>
           <p className="mt-1 text-sm" style={{ color: 'var(--t2)' }}>
             {isConnected
-              ? `Connected as ${githubOrg}. Velocity metrics refresh daily.`
-              : 'Connect your GitHub account to get personalized delivery estimates based on your team\'s actual velocity.'}
+              ? `Connected as ${githubOrg}. Delivery estimates are based on your team's actual cycle time, refreshed daily.`
+              : 'When you validate an idea, PledgeOFF estimates how long it would take your team to ship — based on your real PR cycle time, not generic benchmarks.'}
           </p>
         </div>
         <span
@@ -78,9 +78,9 @@ export function GitHubConnectCard({ isConnected, githubOrg, onDisconnect }: Prop
           <p className="text-xs font-medium" style={{ color: 'var(--t2)' }}>After connecting you get:</p>
           <ul className="space-y-1.5">
             {[
-              'Delivery estimates based on your team\'s actual cycle time',
-              'Velocity metrics: PRs merged, review lag, avg story size',
-              'Engineering bottlenecks surfaced automatically per idea',
+              'Delivery estimates per idea — based on your team\'s real cycle time, not industry averages',
+              'Velocity metrics: PRs merged per week, review lag, avg story size',
+              'Engineering bottlenecks surfaced automatically for each GO decision',
             ].map((benefit) => (
               <li key={benefit} className="flex items-start gap-2 text-xs" style={{ color: 'var(--t3)' }}>
                 <span className="mt-px shrink-0" style={{ color: 'var(--validated)' }}>✓</span>

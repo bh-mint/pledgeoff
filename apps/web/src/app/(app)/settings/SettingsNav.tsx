@@ -10,6 +10,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/settings/profile", label: "Account" },
   { href: "/settings/billing", label: "Billing" },
   { href: "/settings/team", label: "Team" },
+  { href: "/settings/integrations", label: "Integrations" },
   { href: "/settings/audit-log", label: "Activity", studioOnly: true },
   { href: "/settings/developer", label: "Developer" },
   { href: "/settings/data", label: "Danger zone" },
