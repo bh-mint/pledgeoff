@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/brand/Logo";
+import { FooterMicro } from "@/components/FooterMicro";
 
 const ROLES = [
   { value: "indie", label: "Indie hacker", desc: "Solo builder validating side projects" },
@@ -62,6 +63,7 @@ export function OnboardingClient() {
   }
 
   return (
+    <>
     <div
       className="min-h-screen flex flex-col relative overflow-hidden"
       style={{ background: "var(--canvas)" }}
@@ -224,5 +226,7 @@ export function OnboardingClient() {
         </div>
       </div>
     </div>
+    <FooterMicro />
+    </>
   );
 }

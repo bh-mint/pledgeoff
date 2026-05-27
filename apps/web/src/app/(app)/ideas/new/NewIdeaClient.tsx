@@ -201,7 +201,7 @@ export function NewIdeaClient({
         onSubmit={handleSubmit}
         className={`relative flex-1 flex items-start${status === "loading" ? " hidden" : ""}`}
       >
-        <div className="max-w-190 w-full mx-auto px-4 sm:px-10 py-8 sm:py-12">
+        <div className="max-w-360 w-full mx-auto px-4 sm:px-10 py-8 sm:py-12">
           <div
             className="mono text-[10px] uppercase tracking-[0.14em] mb-4"
             style={{ color: "var(--t3)" }}

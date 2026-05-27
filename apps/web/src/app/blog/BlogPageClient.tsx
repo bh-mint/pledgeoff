@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { formatDate } from "@/lib/mdx-utils";
 import type { ArticleFrontmatter } from "@/lib/mdx";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
 const ARTICLES_PER_PAGE = 9;
@@ -71,7 +71,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
   return (
     <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-      <PreLoginNav />
+      <PublicNav />
 
       {/* Hero */}
       <section className="border-b" style={{ borderColor: "var(--border)" }}>

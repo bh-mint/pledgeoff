@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -39,7 +39,7 @@ export default function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
       />
       <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-        <PreLoginNav />
+        <PublicNav />
 
         <main className="max-w-2xl mx-auto px-6 pt-20 pb-32">
           {/* Label */}

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { DecisionClarityClient } from "./DecisionClarityClient";
 
@@ -34,7 +34,7 @@ export default function DecisionClarityPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PreLoginNav />
+      <PublicNav />
       <main
         className="min-h-screen flex flex-col items-center px-4 py-16"
         style={{ background: "var(--canvas)" }}

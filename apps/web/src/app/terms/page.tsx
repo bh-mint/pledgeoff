@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalTOC } from "@/components/LegalTOC";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ const TERMS_TOC = [
 export default function TermsPage() {
   return (
     <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-      <PreLoginNav extraLink={{ href: "/privacy", label: "Privacy" }} />
+      <PublicNav extraLink={{ href: "/privacy", label: "Privacy" }} />
 
       {/* Heading band — sticky below PreLoginNav */}
       <section

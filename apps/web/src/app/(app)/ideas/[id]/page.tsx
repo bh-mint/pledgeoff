@@ -4,7 +4,6 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
 import { IdeaPageClient } from "./IdeaPageClient";
-import { FooterMicro } from "@/components/FooterMicro";
 import { formatDate } from "@/lib/mdx-utils";
 import { ExportButtons } from "./ExportButtons";
 import { getUserPlan } from "@/server/billing/getUserPlan";
@@ -112,17 +111,16 @@ export default async function IdeaPage({ params }: Props) {
 {showOutcomeBanner && <OutcomeBanner ideaId={id} daysOld={daysOld} />}
 
       <div className="max-w-360 mx-auto px-4 sm:px-8 py-8 sm:py-12">
-        {/* Back + Idea header — narrow */}
-        <div className="max-w-180">
-          <Link
-            href="/dashboard"
-            aria-label="Back to Dashboard"
-            className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
-          >
-            ← Back to Dashboard
-          </Link>
+        {/* Back + Idea header */}
+        <Link
+          href="/dashboard"
+          aria-label="Back to Dashboard"
+          className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
+        >
+          ← Back to Dashboard
+        </Link>
 
-          <div className="mb-10 pb-10 border-b border-(--border)">
+        <div className="mb-10 pb-10 border-b border-(--border)">
             <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-3">
               <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
@@ -179,7 +177,6 @@ export default async function IdeaPage({ params }: Props) {
                 {description}
               </p>
             )}
-          </div>
         </div>
 
         {/* Decision + Signals — two-column */}
@@ -198,7 +195,6 @@ export default async function IdeaPage({ params }: Props) {
         />
 
       </div>
-      <FooterMicro />
     </div>
   );
 }

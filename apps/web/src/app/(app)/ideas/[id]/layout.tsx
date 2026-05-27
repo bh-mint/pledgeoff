@@ -2,6 +2,7 @@ import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
 import OttoChat from "@/components/OttoChat";
 import { OttoPanel } from "@/components/OttoPanel";
+import { FooterMicro } from "@/components/FooterMicro";
 
 interface Props {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ export default async function IdeaLayout({ children, params }: Props) {
           />
         </OttoPanel>
       )}
+      <FooterMicro />
     </>
   );
 }

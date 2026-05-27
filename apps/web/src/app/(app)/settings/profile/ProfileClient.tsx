@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Plan } from "@pledgeoff/core";
 import { AvatarUpload } from "@/components/AvatarUpload";
+import { NotificationsClient } from "../notifications/NotificationsClient";
 
 type Props = {
   email: string;
@@ -344,6 +345,11 @@ export function ProfileClient({
             )}
           </div>
         </div>
+      </div>
+
+      {/* Notifications — merged section */}
+      <div className="mt-10 pt-10 border-t" style={{ borderColor: "var(--border)" }}>
+        <NotificationsClient />
       </div>
     </div>
   );

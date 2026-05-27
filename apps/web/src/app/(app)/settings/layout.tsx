@@ -4,6 +4,7 @@ import { getUserPlan } from "@/server/billing/getUserPlan";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { SettingsNav } from "./SettingsNav";
+import { FooterMicro } from "@/components/FooterMicro";
 
 export default async function SettingsLayout({
   children,
@@ -52,8 +53,9 @@ export default async function SettingsLayout({
     (outcomesCountResult as { count: number | null }).count ?? 0;
 
   return (
+    <>
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
-      <div className="max-w-275 mx-auto px-4 sm:px-10 py-8 sm:py-12">
+      <div className="max-w-360 mx-auto px-4 sm:px-10 py-8 sm:py-12">
         <Link
           href="/dashboard"
           className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
@@ -64,7 +66,7 @@ export default async function SettingsLayout({
         <div className="grid grid-cols-12 gap-10 mt-6">
           <SettingsNav plan={plan} />
 
-          <main className="col-span-12 md:col-span-9 max-w-170">
+          <main className="col-span-12 md:col-span-9">
             {/* Usage strip */}
             <div
               className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2.5 rounded-md border mb-6 mono text-[11px]"
@@ -97,5 +99,7 @@ export default async function SettingsLayout({
         </div>
       </div>
     </div>
+    <FooterMicro />
+    </>
   );
 }

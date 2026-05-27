@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { EnterpriseContactForm } from "./EnterpriseContactForm";
 
@@ -70,7 +70,7 @@ export default function EnterprisePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
-        <PreLoginNav />
+        <PublicNav />
 
         {/* Hero */}
         <div className="border-b" style={{ borderColor: "var(--border)" }}>

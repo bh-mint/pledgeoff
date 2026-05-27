@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { PHBanner } from "@/components/PHBanner";
 import { PRICING } from "@/lib/pricing.config";
@@ -203,7 +203,7 @@ export function HomeClient() {
   return (
     <div className="min-h-screen bg-(--canvas)">
       <PHBanner />
-      <Nav />
+      <PublicNav />
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden border-b border-(--border)">

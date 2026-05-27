@@ -1,13 +1,5 @@
-import type { Metadata } from "next";
-import { requireUser } from "@/lib/auth-server";
-import { NotificationsClient } from "./NotificationsClient";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: { absolute: "Notifications — PledgeOFF" },
-  robots: { index: false, follow: false },
-};
-
-export default async function NotificationsPage() {
-  await requireUser();
-  return <NotificationsClient />;
+export default function NotificationsPage() {
+  redirect("/settings/profile");
 }

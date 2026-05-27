@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
 const STEPS = [
@@ -44,7 +44,7 @@ const TESTIMONIALS = [
 export function LaunchClient() {
   return (
     <div className="min-h-screen bg-(--canvas)">
-      <Nav />
+      <PublicNav />
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden border-b border-(--border)">

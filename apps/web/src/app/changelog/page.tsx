@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -364,7 +364,7 @@ const TAG_COLORS: Record<string, string> = {
 export default function ChangelogPage() {
   return (
     <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-      <PreLoginNav />
+      <PublicNav />
 
       {/* Heading — sticky below PreLoginNav */}
       <section

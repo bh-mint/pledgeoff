@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAuthToken } from "@/lib/auth-client";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { PRICING } from "@/lib/pricing.config";
 import { ROICalculator } from "@/components/pricing/ROICalculator";
@@ -239,7 +239,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
 
   return (
     <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
-      <PreLoginNav />
+      <PublicNav />
 
       {/* Hero */}
       <div className="border-b" style={{ borderColor: "var(--border)" }}>

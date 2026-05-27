@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getAllArticles, CLUSTER_META } from "@/lib/mdx";
 import { formatDate } from "@/lib/mdx-utils";
 import { ArticleCTAButton } from "@/components/blog/ArticleCTAButton";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
 const TAG = "idea-validation" as const;
@@ -59,7 +59,7 @@ export default function IdeaValidationPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-        <PreLoginNav extraLink={{ href: "/blog", label: "← All articles" }} />
+        <PublicNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
         <div className="max-w-2xl mx-auto px-6 pt-14 pb-24">
 

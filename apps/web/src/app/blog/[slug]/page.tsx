@@ -12,7 +12,7 @@ import { ArticleCTAButton } from "@/components/blog/ArticleCTAButton";
 import { ArticleFeedback } from "@/components/blog/ArticleFeedback";
 import { MidArticleCTA } from "@/components/blog/MidArticleCTA";
 import { HighlightToTweet } from "@/components/blog/HighlightToTweet";
-import { PreLoginNav } from "@/components/PreLoginNav";
+import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
 interface Props {
@@ -124,7 +124,7 @@ export default async function ArticlePage({ params }: Props) {
       <ArticleViewTracker slug={slug} tag={article.tag} />
 
       <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
-        <PreLoginNav extraLink={{ href: "/blog", label: "← All articles" }} />
+        <PublicNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
         {/* Article */}
         <article className="max-w-2xl mx-auto px-6 pt-16 pb-24">
