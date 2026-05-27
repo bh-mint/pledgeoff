@@ -53,13 +53,10 @@ export async function POST(req: Request) {
   }
 
   const plan = effectivePlan(subscription);
-  const extraSeatPriceId = plan === 'studio'
-    ? process.env.STRIPE_STUDIO_EXTRA_SEAT_PRICE_ID
-    : process.env.STRIPE_EXTRA_SEAT_PRICE_ID;
+  const extraSeatPriceId = process.env.STRIPE_EXTRA_SEAT_PRICE_ID;
 
   if (!extraSeatPriceId) {
-    const envVar = plan === 'studio' ? 'STRIPE_STUDIO_EXTRA_SEAT_PRICE_ID' : 'STRIPE_EXTRA_SEAT_PRICE_ID';
-    logger.error({ traceId, userId, plan }, `${envVar} not configured`);
+    logger.error({ traceId, userId, plan }, 'STRIPE_EXTRA_SEAT_PRICE_ID not configured');
     return Response.json({ error: { code: 'SERVER_MISCONFIGURATION' } }, { status: 503, headers: { 'X-Trace-Id': traceId } });
   }
 

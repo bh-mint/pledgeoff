@@ -565,7 +565,7 @@ export function BillingClient({
       {/* Seat add-ons — Team and Studio */}
       {(plan === "team" || plan === "studio") && (() => {
         const baseSeats = plan === "team" ? 3 : 8;
-        const seatPrice = plan === "team" ? 12 : 20;
+        const seatPrice = 20;
         return (
         <div
           className="border rounded-md p-5"
