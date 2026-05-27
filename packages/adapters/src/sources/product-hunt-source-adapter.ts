@@ -58,6 +58,7 @@ function scoreSentiment(votes: number): Signal['sentiment'] {
   return 'neutral';
 }
 
+// TODO: wire in container.ts when Product Hunt API access is approved (requires OAuth app approval).
 export class ProductHuntSourceAdapter implements ISourceAdapter {
   readonly sourceName = 'producthunt';
 

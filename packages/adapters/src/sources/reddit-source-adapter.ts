@@ -30,6 +30,7 @@ function scoreSentiment(score: number): Signal['sentiment'] {
 
 const CACHE_TTL_SECONDS = 3600;
 
+// TODO: wire in container.ts when Reddit OAuth app is registered (requires Reddit API approval).
 export class RedditSourceAdapter implements ISourceAdapter {
   readonly sourceName = 'reddit';
 
