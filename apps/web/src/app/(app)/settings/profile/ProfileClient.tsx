@@ -15,6 +15,8 @@ type Props = {
   companyName: string | null;
   avatarUrl: string | null;
   plan: Plan;
+  marketingEmailsConsent: boolean;
+  marketingEmailsConsentedAt: string | null;
 };
 
 const PLAN_LABELS: Record<Plan, string> = {
@@ -42,6 +44,8 @@ export function ProfileClient({
   companyName,
   avatarUrl,
   plan,
+  marketingEmailsConsent,
+  marketingEmailsConsentedAt,
 }: Props) {
   const [first, setFirst] = useState(firstName ?? "");
   const [last, setLast] = useState(lastName ?? "");
@@ -349,7 +353,10 @@ export function ProfileClient({
 
       {/* Notifications — merged section */}
       <div className="mt-10 pt-10 border-t" style={{ borderColor: "var(--border)" }}>
-        <NotificationsClient />
+        <NotificationsClient
+          marketingEmailsConsent={marketingEmailsConsent}
+          marketingEmailsConsentedAt={marketingEmailsConsentedAt}
+        />
       </div>
     </div>
   );

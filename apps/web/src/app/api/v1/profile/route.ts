@@ -14,6 +14,7 @@ export async function PATCH(req: NextRequest) {
   const username = typeof body.username === "string" ? body.username.trim().toLowerCase() : undefined;
   const companyName = typeof body.company_name === "string" ? body.company_name.trim() : undefined;
   const role = typeof body.role === "string" ? body.role : undefined;
+  const marketingEmailsConsent = typeof body.marketing_emails_consent === "boolean" ? body.marketing_emails_consent : undefined;
 
   if (hasFirstName && !firstName) {
     return NextResponse.json({ error: "first_name is required" }, { status: 400 });
@@ -30,14 +31,19 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Invalid role value" }, { status: 400 });
   }
 
-  const updatePayload: Record<string, string | null> = {
-    updated_at: new Date().toISOString(),
+  const now = new Date().toISOString();
+  const updatePayload: Record<string, string | boolean | null> = {
+    updated_at: now,
   };
   if (firstName !== undefined) updatePayload.first_name = firstName;
   if (lastName !== undefined) updatePayload.last_name = lastName || null;
   if (username !== undefined) updatePayload.username = username || null;
   if (companyName !== undefined) updatePayload.company_name = companyName || null;
   if (role !== undefined) updatePayload.role = role;
+  if (marketingEmailsConsent !== undefined) {
+    updatePayload.marketing_emails_consent = marketingEmailsConsent;
+    updatePayload.marketing_emails_consented_at = marketingEmailsConsent ? now : null;
+  }
 
   if (Object.keys(updatePayload).length === 1) {
     return NextResponse.json({ ok: true });

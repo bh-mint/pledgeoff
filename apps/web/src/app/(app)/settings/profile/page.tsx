@@ -18,7 +18,7 @@ export default async function ProfilePage() {
   const [profileResult, plan] = await Promise.all([
     supabase
       .from("profiles")
-      .select("first_name, last_name, username, company_name, avatar_url")
+      .select("first_name, last_name, username, company_name, avatar_url, marketing_emails_consent, marketing_emails_consented_at")
       .eq("id", user.id)
       .single(),
     getUserPlan(user.id),
@@ -30,6 +30,8 @@ export default async function ProfilePage() {
     username?: string | null;
     company_name?: string | null;
     avatar_url?: string | null;
+    marketing_emails_consent?: boolean | null;
+    marketing_emails_consented_at?: string | null;
   } | null;
 
   return (
@@ -45,6 +47,8 @@ export default async function ProfilePage() {
       companyName={profile?.company_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
       plan={plan}
+      marketingEmailsConsent={profile?.marketing_emails_consent ?? false}
+      marketingEmailsConsentedAt={profile?.marketing_emails_consented_at ?? null}
     />
   );
 }
