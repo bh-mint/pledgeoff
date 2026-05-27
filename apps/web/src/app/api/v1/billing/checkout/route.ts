@@ -5,6 +5,7 @@ import { container } from '@/lib/container';
 
 const CheckoutRequestSchema = z.object({
   priceId: z.string().min(1),
+  embedded: z.boolean().optional().default(false),
 });
 
 export async function POST(req: Request) {
@@ -49,6 +50,37 @@ export async function POST(req: Request) {
   const stripeCustomerId = subResult.isOk() ? subResult.value?.stripeCustomerId : null;
 
   const origin = req.headers.get('origin') ?? 'https://pledgeoff.com';
+
+  void container.auditLog.log({
+    userId,
+    action: 'checkout_initiated',
+    resourceType: 'subscription',
+    metadata: { priceId: parsed.data.priceId, embedded: parsed.data.embedded },
+    traceId,
+  });
+
+  if (parsed.data.embedded) {
+    const sessionResult = await container.stripeAdapter.createEmbeddedCheckoutSession({
+      userId,
+      userEmail,
+      priceId: parsed.data.priceId,
+      returnUrl: `${origin}/dashboard?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+      stripeCustomerId,
+    });
+
+    if (sessionResult.isErr()) {
+      return Response.json(
+        { error: { code: 'STRIPE_ERROR', message: 'Failed to create checkout session' } },
+        { status: 502, headers: { 'X-Trace-Id': traceId } },
+      );
+    }
+
+    return Response.json(
+      { data: { clientSecret: sessionResult.value.clientSecret } },
+      { status: 200, headers: { 'X-Trace-Id': traceId } },
+    );
+  }
+
   const sessionResult = await container.stripeAdapter.createCheckoutSession({
     userId,
     userEmail: userEmail,
@@ -64,14 +96,6 @@ export async function POST(req: Request) {
       { status: 502, headers: { 'X-Trace-Id': traceId } },
     );
   }
-
-  void container.auditLog.log({
-    userId,
-    action: 'checkout_initiated',
-    resourceType: 'subscription',
-    metadata: { priceId: parsed.data.priceId },
-    traceId,
-  });
 
   return Response.json(
     { data: { url: sessionResult.value.url } },

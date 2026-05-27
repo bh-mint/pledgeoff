@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getAuthToken } from "@/lib/auth-client";
 import type { Plan, SubscriptionStatus } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
+import { CheckoutModal } from "@/components/CheckoutModal";
 
 type AvailablePlan = {
   id: "founder" | "team" | "studio" | "enterprise";
@@ -82,6 +83,7 @@ export function BillingClient({
     initialCancelAtPeriodEnd,
   );
   const [modifyOpen, setModifyOpen] = useState(false);
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
 
   const handleChangePlan = async (priceId: string) => {
     setBillingAction("loading");
@@ -133,23 +135,8 @@ export function BillingClient({
     }
   };
 
-  const handleCheckout = async (priceId: string) => {
-    setBillingAction("loading");
-    const token = await getAuthToken();
-    const res = await fetch("/api/v1/billing/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ priceId }),
-    });
-    if (res.ok) {
-      const { data } = (await res.json()) as { data: { url: string } };
-      router.push(data.url);
-    } else {
-      setBillingAction("error");
-    }
+  const handleCheckout = (priceId: string) => {
+    setCheckoutPriceId(priceId);
   };
 
   const handleUpdateSeats = async () => {
@@ -704,6 +691,14 @@ export function BillingClient({
             </button>
           </div>
         </div>
+      )}
+
+      {checkoutPriceId && (
+        <CheckoutModal
+          priceId={checkoutPriceId}
+          isOpen={true}
+          onClose={() => setCheckoutPriceId(null)}
+        />
       )}
     </div>
   );

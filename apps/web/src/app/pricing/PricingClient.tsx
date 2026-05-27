@@ -8,6 +8,7 @@ import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { PRICING } from "@/lib/pricing.config";
 import { ROICalculator } from "@/components/pricing/ROICalculator";
+import { CheckoutModal } from "@/components/CheckoutModal";
 
 const PRO_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID ?? "";
 const PRO_ANNUAL_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL_PRICE_ID ?? "";
@@ -148,51 +149,53 @@ function UpgradeButton({
   primary?: boolean;
 }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   async function handleClick() {
     if (!priceId) { setUnavailable(true); return; }
-    setLoading(true);
     setUnavailable(false);
-    try {
-      const token = await getAuthToken();
 
-      const res = await fetch("/api/v1/billing/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ priceId }),
-      });
-
-      if (res.status === 401) {
-        router.push("/login?next=/pricing");
-        return;
-      }
-
-      const json = await res.json() as { data?: { url: string } };
-      if (json.data?.url) {
-        window.location.href = json.data.url;
-      } else {
-        setUnavailable(true);
-      }
-    } finally {
-      setLoading(false);
+    const token = await getAuthToken();
+    if (!token) {
+      router.push("/login?next=/pricing");
+      return;
     }
+
+    setModalOpen(true);
   }
 
   if (primary) {
     return (
+      <>
+        <div className="w-full">
+          <button
+            onClick={handleClick}
+            className="display w-full h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity"
+            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+          >
+            {label}
+          </button>
+          {unavailable && (
+            <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
+              Plan unavailable — contact support
+            </p>
+          )}
+        </div>
+        <CheckoutModal priceId={priceId} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      </>
+    );
+  }
+
+  return (
+    <>
       <div className="w-full">
         <button
           onClick={handleClick}
-          disabled={loading}
-          className="display w-full h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
-          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+          className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
+          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
         >
-          {loading ? "Redirecting…" : label}
+          {label}
         </button>
         {unavailable && (
           <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
@@ -200,25 +203,8 @@ function UpgradeButton({
           </p>
         )}
       </div>
-    );
-  }
-
-  return (
-    <div className="w-full">
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors disabled:opacity-60"
-        style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-      >
-        {loading ? "Redirecting…" : label}
-      </button>
-      {unavailable && (
-        <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
-          Plan unavailable — contact support
-        </p>
-      )}
-    </div>
+      <CheckoutModal priceId={priceId} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+    </>
   );
 }
 

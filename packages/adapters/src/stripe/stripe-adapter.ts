@@ -25,6 +25,19 @@ export type CheckoutSession = {
   url: string;
 };
 
+export type EmbeddedCheckoutSession = {
+  id: string;
+  clientSecret: string;
+};
+
+export type CreateEmbeddedCheckoutSessionInput = {
+  userId: string;
+  userEmail: string;
+  priceId: string;
+  returnUrl: string;
+  stripeCustomerId?: string | null;
+};
+
 export type StripeSubscriptionData = {
   stripeCustomerId: string;
   stripeSubscriptionId: string;
@@ -81,6 +94,46 @@ export class StripeAdapter {
       return ok({ id: session.id, url: session.url });
     } catch (e) {
       return err(new StripeAdapterError('Failed to create checkout session', e));
+    }
+  }
+
+  async createEmbeddedCheckoutSession(
+    input: CreateEmbeddedCheckoutSessionInput,
+  ): Promise<Result<EmbeddedCheckoutSession, StripeAdapterError>> {
+    try {
+      const params: Stripe.Checkout.SessionCreateParams = {
+        ui_mode: 'embedded_page',
+        mode: 'subscription',
+        line_items: [{ price: input.priceId, quantity: 1 }],
+        return_url: input.returnUrl,
+        client_reference_id: input.userId,
+        metadata: { userId: input.userId },
+        subscription_data: { metadata: { userId: input.userId } },
+        allow_promotion_codes: true,
+        consent_collection: { terms_of_service: 'required' },
+        custom_text: {
+          terms_of_service_acceptance: {
+            message:
+              'By completing this purchase you expressly request immediate access to the digital service and acknowledge that you waive your 14-day right of withdrawal under EU Directive 2011/83/EU Art. 16(m). A voluntary 7-day money-back guarantee applies — email support@pledgeoff.com.',
+          },
+        },
+      };
+
+      if (input.stripeCustomerId) {
+        params.customer = input.stripeCustomerId;
+      } else {
+        const customer = await this.stripe.customers.create({
+          email: input.userEmail,
+          metadata: { userId: input.userId },
+        });
+        params.customer = customer.id;
+      }
+
+      const session = await this.stripe.checkout.sessions.create(params);
+      if (!session.client_secret) return err(new StripeAdapterError('Embedded checkout session has no client_secret'));
+      return ok({ id: session.id, clientSecret: session.client_secret });
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to create embedded checkout session', e));
     }
   }
 
