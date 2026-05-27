@@ -7,8 +7,8 @@ import { getUserPlan } from "@/server/billing/getUserPlan";
 import { getDashboardData } from "@/server/dashboard/getDashboardData";
 import { DashboardClient, type TableRow, type TeamFeedRow } from "./DashboardClient";
 import { FooterMicro } from "@/components/FooterMicro";
-import { GoldmineFeed } from "@/components/GoldmineFeed";
-import { getGoldmineData } from "@/server/goldmine/getGoldmineData";
+import { SignalFeed } from "@/components/SignalFeed";
+import { getSignalFeedData } from "@/server/signal-feed/getSignalFeedData";
 import { WeeklyDigestBanner } from "@/components/WeeklyDigestBanner";
 import type { Decision } from "@pledgeoff/core";
 import { RoleGreeting } from "@/components/RoleGreeting";
@@ -43,7 +43,7 @@ export default async function DashboardPage() {
 
   const isPaidPlan = plan !== "free";
   const team = teamResult.isOk() ? teamResult.value : null;
-  const goldmineData = await getGoldmineData(plan);
+  const signalFeedData = await getSignalFeedData(plan);
   // Alias for compatibility with the rest of the page (stats, onboarding, team feed)
   const ideas = rawIdeas;
 
@@ -316,7 +316,7 @@ export default async function DashboardPage() {
             );
           })()}
 
-          {/* Goldmine */}
+          {/* Signal Feed */}
           <div
             className="border rounded-md overflow-hidden"
             style={{ borderColor: "var(--border)", background: "var(--surface)" }}
@@ -328,7 +328,7 @@ export default async function DashboardPage() {
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--validated)" }} />
                 <span className="display text-[13px] font-semibold tracking-tight text-(--t1)">
-                  Goldmine
+                  Signal Feed
                 </span>
               </div>
               <span
@@ -338,7 +338,7 @@ export default async function DashboardPage() {
                 Pro+
               </span>
             </div>
-            <GoldmineFeed niches={goldmineData.data} locked={goldmineData.locked} />
+            <SignalFeed niches={signalFeedData.data} locked={signalFeedData.locked} />
           </div>
         </div>
       </div>

@@ -7,7 +7,7 @@ import { NICHE_LABELS, type Niche } from '@/lib/niche-classifier';
 
 export const revalidate = 300; // cache 5 minutes
 
-export type GoldmineNiche = {
+export type SignalFeedNiche = {
   niche: Niche;
   label: string;
   totalIdeas: number;
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
       .returns<{ niche: string; decisions: { verdict: string; created_at: string }[] }[]>();
 
     if (error) {
-      logger.error({ traceId, error: error.message, outcome: 'error' }, 'goldmine: DB query failed');
+      logger.error({ traceId, error: error.message, outcome: 'error' }, 'signal-feed: DB query failed');
       return Response.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
     }
 
@@ -80,7 +80,7 @@ export async function GET(req: Request) {
       }
     }
 
-    const results: GoldmineNiche[] = [];
+    const results: SignalFeedNiche[] = [];
 
     for (const [niche, stats] of nicheMap.entries()) {
       const heatScore =
@@ -104,7 +104,7 @@ export async function GET(req: Request) {
       { status: 200, headers: { 'X-Trace-Id': traceId } },
     );
   } catch (e) {
-    logger.error({ traceId, error: String(e), outcome: 'error' }, 'goldmine: unexpected error');
+    logger.error({ traceId, error: String(e), outcome: 'error' }, 'signal-feed: unexpected error');
     return Response.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }
 }

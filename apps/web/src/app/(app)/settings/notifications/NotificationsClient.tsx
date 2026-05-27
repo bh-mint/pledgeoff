@@ -19,8 +19,8 @@ const NOTIFICATION_ITEMS = [
     desc: "Mondays — what you validated, what you killed, what's launch-ready.",
   },
   {
-    key: "goldmine",
-    label: "Daily Goldmine digest",
+    key: "signal_feed",
+    label: "Daily Signal Feed digest",
     desc: "Sent every day at 09:00 UTC. The 12 niches with one-line previews.",
   },
   {

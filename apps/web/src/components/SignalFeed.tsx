@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import type { GoldmineNiche } from '@/app/api/v1/goldmine/route';
+import type { SignalFeedNiche } from '@/app/api/v1/signal-feed/route';
 
 type Props = {
-  niches: GoldmineNiche[];
+  niches: SignalFeedNiche[];
   locked: boolean;
 };
 
@@ -44,7 +44,7 @@ function HeatBar({ score, max }: { score: number; max: number }) {
   );
 }
 
-export function GoldmineFeed({ niches, locked }: Props) {
+export function SignalFeed({ niches, locked }: Props) {
   if (locked) {
     return (
       <div className="relative overflow-hidden">

@@ -65,7 +65,7 @@ const RELEASES = [
     date: "May 2026",
     tag: "FEATURE",
     items: [
-      "Niche Goldmine (Pro+): a live feed of trending startup niches ranked by heat score — 15 categories, continuously updated from real market signals, with sparklines showing momentum over the last 7 days",
+      "Signal Feed (Pro+): a live feed of trending startup niches ranked by heat score — 15 categories, continuously updated from real market signals, with sparklines showing momentum over the last 7 days",
       "Decision log filters: filter your dashboard by GO, KILL, or PIVOT verdict — counts shown on each chip so you see the breakdown instantly",
       "Team PDF export (Agency): generate a white-label PDF report for any validated idea — covers the verdict, score breakdown, signals, and all intelligence tools run on the idea",
       "Advanced team analytics (Agency): verdict distribution donut chart, team velocity sparkline, top contributors ranked by activity, and most-engaged ideas by reaction count",

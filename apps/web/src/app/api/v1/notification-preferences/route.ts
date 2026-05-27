@@ -6,7 +6,7 @@ const NotificationPrefsSchema = z.object({
   accuracy_report: z.boolean().optional(),
   queue_alerts: z.boolean().optional(),
   weekly_digest: z.boolean().optional(),
-  goldmine: z.boolean().optional(),
+  signal_feed: z.boolean().optional(),
   score: z.boolean().optional(),
 });
 

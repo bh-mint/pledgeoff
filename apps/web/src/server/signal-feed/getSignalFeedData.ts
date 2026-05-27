@@ -3,14 +3,14 @@ import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { logger } from '@pledgeoff/observability';
 import { isAtLeastPlan, PLAN } from '@pledgeoff/core';
 import { NICHE_LABELS, type Niche } from '@/lib/niche-classifier';
-import type { GoldmineNiche } from '@/app/api/v1/goldmine/route';
+import type { SignalFeedNiche } from '@/app/api/v1/signal-feed/route';
 import type { Plan } from '@pledgeoff/core';
 
 // Runs the full-table cross-user query once and caches for 1 hour.
 // All paid-plan users share the same cached result — avoids a full
 // table scan on every dashboard render.
-const fetchGoldmineNiches = unstable_cache(
-  async (): Promise<GoldmineNiche[]> => {
+const fetchSignalFeedNiches = unstable_cache(
+  async (): Promise<SignalFeedNiche[]> => {
     const supabase = createSupabaseServiceClient();
 
     const { data: rows, error } = await supabase
@@ -21,7 +21,7 @@ const fetchGoldmineNiches = unstable_cache(
       .returns<{ niche: string; decisions: { verdict: string; created_at: string }[] }[]>();
 
     if (error) {
-      logger.error({ traceId: 'goldmine', error: error.message, outcome: 'error' }, 'getGoldmineData: DB query failed');
+      logger.error({ traceId: 'signal-feed', error: error.message, outcome: 'error' }, 'getSignalFeedData: DB query failed');
       return [];
     }
 
@@ -53,7 +53,7 @@ const fetchGoldmineNiches = unstable_cache(
       }
     }
 
-    const results: GoldmineNiche[] = [];
+    const results: SignalFeedNiche[] = [];
     for (const [niche, stats] of nicheMap.entries()) {
       results.push({
         niche: niche as Niche,
@@ -69,20 +69,20 @@ const fetchGoldmineNiches = unstable_cache(
     results.sort((a, b) => b.heatScore - a.heatScore);
     return results.slice(0, 8);
   },
-  ['goldmine-niches'],
+  ['signal-feed-niches'],
   { revalidate: 3600 },
 );
 
-export async function getGoldmineData(plan: Plan | string): Promise<{ data: GoldmineNiche[]; locked: boolean }> {
+export async function getSignalFeedData(plan: Plan | string): Promise<{ data: SignalFeedNiche[]; locked: boolean }> {
   if (!isAtLeastPlan(plan as Plan, PLAN.TEAM)) {
     return { data: [], locked: true };
   }
 
   try {
-    const data = await fetchGoldmineNiches();
+    const data = await fetchSignalFeedNiches();
     return { data, locked: false };
   } catch (e) {
-    logger.error({ traceId: 'goldmine', error: String(e), outcome: 'error' }, 'getGoldmineData: unexpected error');
+    logger.error({ traceId: 'signal-feed', error: String(e), outcome: 'error' }, 'getSignalFeedData: unexpected error');
     return { data: [], locked: false };
   }
 }
