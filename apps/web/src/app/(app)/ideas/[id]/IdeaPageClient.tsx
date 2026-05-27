@@ -126,7 +126,7 @@ export function IdeaPageClient({
               </div>
             </>
           ) : (
-            <ValidatingLoader />
+            <ValidatingLoader ideaId={idea.id} />
           )}
         </div>
 

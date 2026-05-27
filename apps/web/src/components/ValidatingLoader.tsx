@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { getAuthToken } from "@/lib/auth-client";
 
 // Decorative fake data — purely for animation
 const REDDIT_POSTS = [
@@ -33,10 +34,12 @@ const STAGES = [
 
 const TOTAL_MS = STAGES.reduce((s, st) => s + st.duration, 0); // 15000ms
 
-export function ValidatingLoader() {
+export function ValidatingLoader({ ideaId }: { ideaId: string }) {
   const startRef = useRef<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [realSignalCount, setRealSignalCount] = useState<number | null>(null);
 
+  // Elapsed timer (150ms tick)
   useEffect(() => {
     startRef.current = Date.now();
     const id = setInterval(() => {
@@ -46,6 +49,36 @@ export function ValidatingLoader() {
     }, 150);
     return () => clearInterval(id);
   }, []);
+
+  // Poll real pipeline status every 3s
+  useEffect(() => {
+    let cancelled = false;
+
+    async function poll() {
+      try {
+        const token = await getAuthToken();
+        if (!token || cancelled) return;
+        const res = await fetch(`/api/v1/ideas/${ideaId}/pipeline-status`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        if (res.ok && !cancelled) {
+          const json = (await res.json()) as { data?: { signalCount?: number } };
+          const count = json.data?.signalCount ?? null;
+          if (count !== null) setRealSignalCount(count);
+        }
+      } catch {
+        // polling — silent failure is fine
+      }
+    }
+
+    void poll();
+    const id = setInterval(() => void poll(), 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [ideaId]);
 
   // Loop every 15s
   const cycleMs = elapsed % TOTAL_MS;
@@ -67,8 +100,12 @@ export function ValidatingLoader() {
     stageIndex >= 1
       ? REDDIT_POSTS.length
       : Math.min(REDDIT_POSTS.length, Math.floor(stageProgress * (REDDIT_POSTS.length + 1)));
-  const signalCounter =
-    stageIndex >= 1 ? 847 : Math.floor(stageProgress * 847);
+
+  // Show real signal count when available, otherwise animate to 847
+  const animatedCounter = stageIndex >= 1 ? 847 : Math.floor(stageProgress * 847);
+  const signalCounter = realSignalCount !== null && realSignalCount > 0
+    ? realSignalCount
+    : animatedCounter;
 
   // Trends: SVG draw progress
   const trendProgress =
@@ -341,6 +378,11 @@ export function ValidatingLoader() {
               <p className="mono text-[10px] text-(--t3) mt-2 uppercase tracking-[0.1em]">
                 weighted scoring · 4 dimensions
               </p>
+              {realSignalCount !== null && realSignalCount > 0 && (
+                <p className="mono tnum text-[10px] mt-1" style={{ color: "var(--accent)" }}>
+                  {realSignalCount} signals analysed
+                </p>
+              )}
             </div>
           </div>
         )}
