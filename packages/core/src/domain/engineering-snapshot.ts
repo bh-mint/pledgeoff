@@ -6,7 +6,7 @@ export const VelocityMetricsSchema = z.object({
   avgLeadTimeDays: z.number().nonnegative(),
   issuesClosedPerWeek: z.number().nonnegative(),
   topBottlenecks: z.array(z.string()).max(5),
-  snapshotAt: z.string().datetime(),
+  snapshotAt: z.string().datetime({ offset: true }),
 });
 
 export type VelocityMetrics = z.infer<typeof VelocityMetricsSchema>;
@@ -18,8 +18,8 @@ export const EngineeringSnapshotSchema = z.object({
   repoFilter: z.array(z.string()).nullable(),
   velocityMetrics: VelocityMetricsSchema,
   bottlenecks: z.array(z.string()).max(5),
-  snapshotAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
+  snapshotAt: z.string().datetime({ offset: true }),
+  createdAt: z.string().datetime({ offset: true }),
 });
 
 export type EngineeringSnapshot = z.infer<typeof EngineeringSnapshotSchema>;

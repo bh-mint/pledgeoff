@@ -7,9 +7,9 @@ export const ApiKeySchema = z.object({
   name: z.string().min(1).max(64),
   keyHash: z.string(),
   keyPrefix: z.string(),
-  createdAt: z.string().datetime(),
-  lastUsedAt: z.string().datetime().nullable(),
-  revokedAt: z.string().datetime().nullable(),
+  createdAt: z.string().datetime({ offset: true }),
+  lastUsedAt: z.string().datetime({ offset: true }).nullable(),
+  revokedAt: z.string().datetime({ offset: true }).nullable(),
 });
 
 export type ApiKey = z.infer<typeof ApiKeySchema>;

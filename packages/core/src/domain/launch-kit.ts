@@ -28,7 +28,7 @@ export const LaunchKitSchema = z.object({
   headlines: z.array(HeadlineVariantSchema).min(1).max(3),
   emailSequence: z.array(EmailMessageSchema).min(1).max(3),
   pricingRecommendation: PricingRecommendationSchema,
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 
 export type HeadlineVariant = z.infer<typeof HeadlineVariantSchema>;

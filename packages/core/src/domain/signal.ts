@@ -11,7 +11,7 @@ export const SignalSchema = z.object({
   title: z.string().min(1).max(500),
   summary: z.string().max(2000),
   sentiment: z.enum(['positive', 'negative', 'neutral']),
-  fetchedAt: z.string().datetime(),
+  fetchedAt: z.string().datetime({ offset: true }),
 });
 
 export type Signal = z.infer<typeof SignalSchema>;

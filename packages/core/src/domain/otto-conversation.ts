@@ -7,7 +7,7 @@ export type OttoMessageRole = z.infer<typeof OttoMessageRoleSchema>;
 export const OttoMessageSchema = z.object({
   role: OttoMessageRoleSchema,
   content: z.string().min(1).max(10000),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 
 export type OttoMessage = z.infer<typeof OttoMessageSchema>;
@@ -17,8 +17,8 @@ export const OttoConversationSchema = z.object({
   userId: z.string().uuid(),
   ideaId: z.string().uuid(),
   messages: z.array(OttoMessageSchema),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
+  updatedAt: z.string().datetime({ offset: true }),
 });
 
 export type OttoConversation = z.infer<typeof OttoConversationSchema>;

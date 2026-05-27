@@ -35,6 +35,6 @@ export const CustomerAnalysisSchema = z.object({
   painPoints: z.array(PainPointSchema).min(1).max(10),
   sentiment: SentimentBreakdownSchema,
   quotes: z.array(CustomerQuoteSchema).min(1).max(10),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 export type CustomerAnalysis = z.infer<typeof CustomerAnalysisSchema>;

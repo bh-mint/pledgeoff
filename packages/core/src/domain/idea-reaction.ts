@@ -8,7 +8,7 @@ export const IdeaReactionSchema = z.object({
   ideaId: z.string().uuid(),
   userId: z.string().uuid(),
   reaction: ReactionTypeSchema,
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 
 export type IdeaReaction = z.infer<typeof IdeaReactionSchema>;

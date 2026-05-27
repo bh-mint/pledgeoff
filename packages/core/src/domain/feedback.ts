@@ -10,7 +10,7 @@ export const FeedbackSchema = z.object({
   userId: z.string().uuid(),
   vote: FeedbackVoteSchema,
   comment: z.string().max(500).optional(),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 
 export type Feedback = z.infer<typeof FeedbackSchema>;

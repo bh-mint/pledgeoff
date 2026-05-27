@@ -13,8 +13,8 @@ export const TeamSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).max(100),
   ownerId: z.string().uuid(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
+  updatedAt: z.string().datetime({ offset: true }),
 });
 export type Team = z.infer<typeof TeamSchema>;
 
@@ -26,13 +26,13 @@ export const TeamMembershipSchema = z.object({
   role: TeamRoleSchema,
   status: TeamMembershipStatusSchema,
   inviteToken: z.string().uuid(),
-  invitedAt: z.string().datetime(),
-  acceptedAt: z.string().datetime().nullable(),
-  leftAt: z.string().datetime().nullable(),
+  invitedAt: z.string().datetime({ offset: true }),
+  acceptedAt: z.string().datetime({ offset: true }).nullable(),
+  leftAt: z.string().datetime({ offset: true }).nullable(),
   removedBy: z.string().uuid().nullable(),
   removalReason: RemovalReasonSchema.nullable(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
+  updatedAt: z.string().datetime({ offset: true }),
 });
 export type TeamMembership = z.infer<typeof TeamMembershipSchema>;
 

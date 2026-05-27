@@ -9,6 +9,6 @@ export const LandingPageSchema = z.object({
   features: z.array(z.string()).min(1).max(5),
   ctaText: z.string().min(1).max(60),
   waitlistHeadline: z.string().min(1).max(120),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 export type LandingPage = z.infer<typeof LandingPageSchema>;

@@ -20,15 +20,15 @@ export const SubscriptionSchema = z.object({
   stripeSubscriptionId: z.string().nullable(),
   plan: PlanSchema,
   status: SubscriptionStatusSchema,
-  currentPeriodEnd: z.string().datetime().nullable(),
+  currentPeriodEnd: z.string().datetime({ offset: true }).nullable(),
   extraSeats: z.number().int().min(0).default(0),
   stripeExtraSeatItemId: z.string().nullable().default(null),
-  pastDueSince: z.string().datetime().nullable().default(null),
+  pastDueSince: z.string().datetime({ offset: true }).nullable().default(null),
   ottoIncludedUsed: z.number().int().min(0).default(0),
-  ottoIncludedResetAt: z.string().datetime().nullable().default(null),
+  ottoIncludedResetAt: z.string().datetime({ offset: true }).nullable().default(null),
   ottoPurchased: z.number().int().min(0).default(0),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
+  updatedAt: z.string().datetime({ offset: true }),
 });
 
 export type Subscription = z.infer<typeof SubscriptionSchema>;

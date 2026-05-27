@@ -18,6 +18,6 @@ export const SimulationSchema = z.object({
   scenarios: z.array(SimulationScenarioSchema).length(3),
   breakEvenMonths: z.number().nonnegative(),
   assumptions: z.array(z.string()),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 export type Simulation = z.infer<typeof SimulationSchema>;

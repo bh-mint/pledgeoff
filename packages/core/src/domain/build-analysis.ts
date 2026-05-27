@@ -38,7 +38,7 @@ export const BuildAnalysisSchema = z.object({
   gaps: z.array(TechGapSchema).min(0).max(5),
   signalCount: z.number().int().nonnegative(),
   confidenceTier: ConfidenceTierSchema.optional(),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 export type BuildAnalysis = z.infer<typeof BuildAnalysisSchema>;
 

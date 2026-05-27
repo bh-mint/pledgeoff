@@ -16,7 +16,7 @@ export const IdeaSchema = z.object({
   teamId: z.string().uuid().nullable().optional(),
   text: z.string().min(10).max(2000),
   niche: z.enum(NICHES).default('other'),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 
 export type Idea = z.infer<typeof IdeaSchema>;

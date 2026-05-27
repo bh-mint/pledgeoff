@@ -21,7 +21,7 @@ export const DecisionSchema = z.object({
   score: z.number().int().min(0).max(100).optional(),
   signalIds: z.array(z.string().uuid()),
   dimensions: z.array(DimensionSchema).optional(),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 
 export type Decision = z.infer<typeof DecisionSchema>;

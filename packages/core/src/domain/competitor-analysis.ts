@@ -24,6 +24,6 @@ export const CompetitorAnalysisSchema = z.object({
   competitors: z.array(CompetitorSchema).min(0).max(8),
   gaps: z.array(CompetitorGapSchema).min(0).max(5),
   signalCount: z.number().int().nonnegative(),
-  createdAt: z.string().datetime(),
+  createdAt: z.string().datetime({ offset: true }),
 });
 export type CompetitorAnalysis = z.infer<typeof CompetitorAnalysisSchema>;

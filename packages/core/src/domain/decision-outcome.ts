@@ -11,7 +11,7 @@ export const DecisionOutcomeSchema = z.object({
   verdictAtTime: z.string(),
   outcomeType: OutcomeTypeSchema,
   notes: z.string().max(1000).nullable(),
-  reportedAt: z.string().datetime(),
+  reportedAt: z.string().datetime({ offset: true }),
 });
 
 export type DecisionOutcome = z.infer<typeof DecisionOutcomeSchema>;
