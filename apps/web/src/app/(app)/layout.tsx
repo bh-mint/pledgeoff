@@ -17,7 +17,7 @@ export default async function AppLayout({
 
   const [plan, ideasResult] = await Promise.all([
     getUserPlan(user.id),
-    container._unsafeRepos.ideaRepo.findByUserId(user.id),
+    container.ideaRepo.findByUserId(user.id),
   ]);
 
   const limit = PLAN_LIMITS[plan].verificationsPerMonth;

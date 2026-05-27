@@ -28,12 +28,9 @@ vi.mock('next/server', async (importOriginal) => {
 });
 vi.mock('@/lib/container', () => ({
   container: {
-    _unsafeRepos: {
-      ideaRepo: mockIdeaRepo,
-      decisionRepo: mockDecisionRepo,
-      idempotencyStore: mockIdempotencyStore,
-    },
     ideaRepo: mockIdeaRepo,
+    decisionRepo: mockDecisionRepo,
+    idempotencyStore: mockIdempotencyStore,
     createIdeaUseCase: mockCreateIdeaUseCase,
     auditLog: mockAuditLog,
     eventBus: mockEventBus,

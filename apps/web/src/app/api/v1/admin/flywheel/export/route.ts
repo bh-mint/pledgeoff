@@ -21,7 +21,7 @@ export async function GET(req: Request): Promise<Response> {
     ? (rawPeriod as Period)
     : 'all';
 
-  const result = await container._unsafeRepos.decisionOutcomeRepo.findAll();
+  const result = await container.decisionOutcomeRepo.findAll();
   if (result.isErr()) return Response.json({ error: 'Failed to fetch outcomes' }, { status: 500 });
 
   const since = periodToDate(period);

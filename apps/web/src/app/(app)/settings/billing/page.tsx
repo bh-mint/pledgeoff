@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 export default async function BillingPage() {
   const user = await requireUser();
   const [ideasResult, subResult] = await Promise.all([
-    container._unsafeRepos.ideaRepo.findByUserId(user.id),
-    container._unsafeRepos.subscriptionRepo.findByUserId(user.id),
+    container.ideaRepo.findByUserId(user.id),
+    container.subscriptionRepo.findByUserId(user.id),
   ]);
 
   const ideas = ideasResult.isOk() ? ideasResult.value : [];

@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     return Response.json({ error: { code: 'UNAUTHENTICATED' } }, { status: 401, headers: { 'X-Trace-Id': traceId } });
   }
 
-  const existing = await container._unsafeRepos.launchKitRepo.findByIdeaId(ideaId);
+  const existing = await container.launchKitRepo.findByIdeaId(ideaId);
   if (existing.isErr()) {
     return Response.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }

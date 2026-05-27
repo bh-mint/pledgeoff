@@ -52,7 +52,7 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const subResult = await container._unsafeRepos.subscriptionRepo.findByUserId(userId);
+  const subResult = await container.subscriptionRepo.findByUserId(userId);
   const sub = subResult.isOk() ? subResult.value : null;
 
   if (!sub?.stripeSubscriptionId) {

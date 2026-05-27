@@ -23,7 +23,7 @@ export async function GET(
     return NextResponse.json({ error: 'Studio plan required' }, { status: 403 });
   }
 
-  const ideaResult = await container._unsafeRepos.ideaRepo.findById(ideaId);
+  const ideaResult = await container.ideaRepo.findById(ideaId);
   if (ideaResult.isErr() || !ideaResult.value || ideaResult.value.userId !== user.id) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }

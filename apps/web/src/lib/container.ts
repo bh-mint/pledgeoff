@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/nextjs';
 import {
   SupabaseIdeaRepository,
   SupabaseSignalRepository,
@@ -32,8 +33,9 @@ import {
   InMemoryCacheAdapter,
   UpstashRedisCacheAdapter,
   VoyageEmbeddingAdapter,
+  sendVerdictEmail,
 } from '@pledgeoff/adapters';
-import type { ICache } from '@pledgeoff/core';
+import type { ICache, ISourceAdapter, ILLMClient, IEmbeddingClient } from '@pledgeoff/core';
 import { PostgresEventBus, RedisStreamsEventBus } from '@pledgeoff/eventbus';
 import {
   CreateIdeaUseCase,
@@ -71,8 +73,8 @@ import {
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { createSupabaseServiceClient } from './supabase-server';
-import { sendVerdictEmail } from '@pledgeoff/adapters';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -80,297 +82,603 @@ function requireEnv(name: string): string {
   return value;
 }
 
-const PROD_SUPABASE_REF = 'gphupxlfmeokquvyxqfw';
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
-if (process.env.NODE_ENV !== 'production' && supabaseUrl.includes(PROD_SUPABASE_REF)) {
-  throw new Error(
-    `[ENV GUARD] Dev environment is pointing to PRODUCTION Supabase (${supabaseUrl}). ` +
-    'Set NEXT_PUBLIC_SUPABASE_URL to dev project in .env.local.',
-  );
-}
+class AppContainer {
+  // ── eagerly initialized infrastructure ───────────────────────────────────
+  private readonly _supabase: SupabaseClient;
+  private readonly _eventBus: PostgresEventBus | RedisStreamsEventBus;
+  private readonly _cache: ICache;
+  private readonly _llmClient: ILLMClient;
+  private readonly _ottoLLMClient: ILLMClient;
+  private readonly _embeddingClient: IEmbeddingClient | undefined;
+  private readonly _sourceAdapters: ISourceAdapter[];
+  private readonly _usageLogger: SupabaseUsageLogAdapter;
+  readonly stripeAdapter: StripeAdapter | null;
 
-function buildContainer() {
-  const supabase = createSupabaseServiceClient();
-
-  const auditLog = new SupabaseAuditLogAdapter(supabase);
-  const ideaRepo = new SupabaseIdeaRepository(supabase);
-  const signalRepo = new SupabaseSignalRepository(supabase);
-  const decisionRepo = new SupabaseDecisionRepository(supabase);
-  const feedbackRepo = new SupabaseFeedbackRepository(supabase);
-  const idempotencyStore = new SupabaseIdempotencyStore(supabase);
-  const simulationRepo = new SupabaseSimulationRepository(supabase);
-  const landingPageRepo = new SupabaseLandingPageRepository(supabase);
-  const customerAnalysisRepo = new SupabaseCustomerAnalysisRepository(supabase);
-  const buildAnalysisRepo = new SupabaseBuildAnalysisRepository(supabase);
-  const competitorAnalysisRepo = new SupabaseCompetitorAnalysisRepository(supabase);
-  const subscriptionRepo = new SupabaseSubscriptionRepository(supabase);
-  const teamRepo = new SupabaseTeamRepository(supabase);
-  const ideaReactionRepo = new SupabaseIdeaReactionRepository(supabase);
-
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
-  // Guard: dev must never use live Stripe keys (would charge real money)
-  if (process.env.NODE_ENV !== 'production' && stripeSecretKey?.startsWith('sk_live_')) {
-    throw new Error(
-      '[ENV GUARD] Development environment is using Stripe LIVE keys. ' +
-      'Use sk_test_... in .env.local to avoid real charges.',
-    );
-  }
-  // Guard: prod should not use test keys (soft warn — allows testing period before go-live)
-  if (process.env.NODE_ENV === 'production' && stripeSecretKey?.startsWith('sk_test_')) {
-    console.warn('[container] WARNING: Production is using Stripe test keys. Set STRIPE_SECRET_KEY to sk_live_... before going live.');
+  // ── lazy repos ─────────────────────────────────────────────────────────────
+  private _ideaRepo?: SupabaseIdeaRepository;
+  get ideaRepo(): SupabaseIdeaRepository {
+    return (this._ideaRepo ??= new SupabaseIdeaRepository(this._supabase));
   }
 
-  // Startup validation: all price IDs must be present when Stripe is configured (§17.5)
-  if (stripeSecretKey) {
-    const requiredStripeEnvs = [
-      'STRIPE_WEBHOOK_SECRET',
-      'STRIPE_PRO_MONTHLY_PRICE_ID',
-      'STRIPE_PRO_ANNUAL_PRICE_ID',
-      'STRIPE_PRO_PLUS_MONTHLY_PRICE_ID',
-      'STRIPE_PRO_PLUS_ANNUAL_PRICE_ID',
-    ] as const;
-    for (const name of requiredStripeEnvs) {
-      if (!process.env[name]) {
-        throw new Error(`[ENV GUARD] Stripe is configured but ${name} is missing. Add it to .env.local or Vercel env vars.`);
+  private _signalRepo?: SupabaseSignalRepository;
+  get signalRepo(): SupabaseSignalRepository {
+    return (this._signalRepo ??= new SupabaseSignalRepository(this._supabase));
+  }
+
+  private _decisionRepo?: SupabaseDecisionRepository;
+  get decisionRepo(): SupabaseDecisionRepository {
+    return (this._decisionRepo ??= new SupabaseDecisionRepository(this._supabase));
+  }
+
+  private _feedbackRepo?: SupabaseFeedbackRepository;
+  get feedbackRepo(): SupabaseFeedbackRepository {
+    return (this._feedbackRepo ??= new SupabaseFeedbackRepository(this._supabase));
+  }
+
+  private _idempotencyStore?: SupabaseIdempotencyStore;
+  get idempotencyStore(): SupabaseIdempotencyStore {
+    return (this._idempotencyStore ??= new SupabaseIdempotencyStore(this._supabase));
+  }
+
+  private _auditLog?: SupabaseAuditLogAdapter;
+  get auditLog(): SupabaseAuditLogAdapter {
+    return (this._auditLog ??= new SupabaseAuditLogAdapter(this._supabase));
+  }
+
+  private _simulationRepo?: SupabaseSimulationRepository;
+  get simulationRepo(): SupabaseSimulationRepository {
+    return (this._simulationRepo ??= new SupabaseSimulationRepository(this._supabase));
+  }
+
+  private _landingPageRepo?: SupabaseLandingPageRepository;
+  get landingPageRepo(): SupabaseLandingPageRepository {
+    return (this._landingPageRepo ??= new SupabaseLandingPageRepository(this._supabase));
+  }
+
+  private _customerAnalysisRepo?: SupabaseCustomerAnalysisRepository;
+  get customerAnalysisRepo(): SupabaseCustomerAnalysisRepository {
+    return (this._customerAnalysisRepo ??= new SupabaseCustomerAnalysisRepository(this._supabase));
+  }
+
+  private _buildAnalysisRepo?: SupabaseBuildAnalysisRepository;
+  get buildAnalysisRepo(): SupabaseBuildAnalysisRepository {
+    return (this._buildAnalysisRepo ??= new SupabaseBuildAnalysisRepository(this._supabase));
+  }
+
+  private _competitorAnalysisRepo?: SupabaseCompetitorAnalysisRepository;
+  get competitorAnalysisRepo(): SupabaseCompetitorAnalysisRepository {
+    return (this._competitorAnalysisRepo ??= new SupabaseCompetitorAnalysisRepository(this._supabase));
+  }
+
+  private _subscriptionRepo?: SupabaseSubscriptionRepository;
+  get subscriptionRepo(): SupabaseSubscriptionRepository {
+    return (this._subscriptionRepo ??= new SupabaseSubscriptionRepository(this._supabase));
+  }
+
+  private _teamRepo?: SupabaseTeamRepository;
+  get teamRepo(): SupabaseTeamRepository {
+    return (this._teamRepo ??= new SupabaseTeamRepository(this._supabase));
+  }
+
+  private _ideaReactionRepo?: SupabaseIdeaReactionRepository;
+  get ideaReactionRepo(): SupabaseIdeaReactionRepository {
+    return (this._ideaReactionRepo ??= new SupabaseIdeaReactionRepository(this._supabase));
+  }
+
+  private _ottoConversationRepo?: SupabaseOttoConversationRepository;
+  get ottoConversationRepo(): SupabaseOttoConversationRepository {
+    return (this._ottoConversationRepo ??= new SupabaseOttoConversationRepository(this._supabase));
+  }
+
+  private _apiKeyRepo?: SupabaseApiKeyRepository;
+  get apiKeyRepo(): SupabaseApiKeyRepository {
+    return (this._apiKeyRepo ??= new SupabaseApiKeyRepository(this._supabase));
+  }
+
+  private _launchKitRepo?: SupabaseLaunchKitRepository;
+  get launchKitRepo(): SupabaseLaunchKitRepository {
+    return (this._launchKitRepo ??= new SupabaseLaunchKitRepository(this._supabase));
+  }
+
+  private _decisionQueueRepo?: SupabaseDecisionQueueRepository;
+  get decisionQueueRepo(): SupabaseDecisionQueueRepository {
+    return (this._decisionQueueRepo ??= new SupabaseDecisionQueueRepository(this._supabase));
+  }
+
+  private _engineeringSnapshotRepo?: SupabaseEngineeringSnapshotRepository;
+  get engineeringSnapshotRepo(): SupabaseEngineeringSnapshotRepository {
+    return (this._engineeringSnapshotRepo ??= new SupabaseEngineeringSnapshotRepository(
+      this._supabase,
+      process.env.GITHUB_TOKEN_MASTER_KEY ?? '',
+    ));
+  }
+
+  private _decisionOutcomeRepo?: SupabaseDecisionOutcomeRepository;
+  get decisionOutcomeRepo(): SupabaseDecisionOutcomeRepository {
+    return (this._decisionOutcomeRepo ??= new SupabaseDecisionOutcomeRepository(this._supabase));
+  }
+
+  // ── lazy use-cases ─────────────────────────────────────────────────────────
+  private _createIdeaUseCase?: CreateIdeaUseCase;
+  get createIdeaUseCase(): CreateIdeaUseCase {
+    return (this._createIdeaUseCase ??= new CreateIdeaUseCase(this.ideaRepo, this._eventBus));
+  }
+
+  private _fetchSignalsUseCase?: FetchSignalsUseCase;
+  get fetchSignalsUseCase(): FetchSignalsUseCase {
+    return (this._fetchSignalsUseCase ??= new FetchSignalsUseCase(
+      this.signalRepo,
+      this._eventBus,
+      this.idempotencyStore,
+      this._sourceAdapters,
+      this._llmClient,
+    ));
+  }
+
+  private _decideUseCase?: DecideUseCase;
+  get decideUseCase(): DecideUseCase {
+    return (this._decideUseCase ??= new DecideUseCase(
+      this.signalRepo,
+      this.decisionRepo,
+      this._llmClient,
+      this._eventBus,
+      this.idempotencyStore,
+      this._embeddingClient,
+    ));
+  }
+
+  private _recordFeedbackUseCase?: RecordFeedbackUseCase;
+  get recordFeedbackUseCase(): RecordFeedbackUseCase {
+    return (this._recordFeedbackUseCase ??= new RecordFeedbackUseCase(this.feedbackRepo));
+  }
+
+  private _simulateRevenueUseCase?: SimulateRevenueUseCase;
+  get simulateRevenueUseCase(): SimulateRevenueUseCase {
+    return (this._simulateRevenueUseCase ??= new SimulateRevenueUseCase(
+      this.simulationRepo,
+      this.signalRepo,
+      this._llmClient,
+    ));
+  }
+
+  private _generateLandingUseCase?: GenerateLandingUseCase;
+  get generateLandingUseCase(): GenerateLandingUseCase {
+    return (this._generateLandingUseCase ??= new GenerateLandingUseCase(
+      this.landingPageRepo,
+      this._llmClient,
+      this.signalRepo,
+    ));
+  }
+
+  private _analyzeCustomersUseCase?: AnalyzeCustomersUseCase;
+  get analyzeCustomersUseCase(): AnalyzeCustomersUseCase {
+    return (this._analyzeCustomersUseCase ??= new AnalyzeCustomersUseCase(
+      this.customerAnalysisRepo,
+      this.signalRepo,
+      this._llmClient,
+    ));
+  }
+
+  private _analyzeBuildUseCase?: AnalyzeBuildUseCase;
+  get analyzeBuildUseCase(): AnalyzeBuildUseCase {
+    return (this._analyzeBuildUseCase ??= new AnalyzeBuildUseCase(
+      this.buildAnalysisRepo,
+      this.signalRepo,
+      this._llmClient,
+    ));
+  }
+
+  private _analyzeCompetitorsUseCase?: AnalyzeCompetitorsUseCase;
+  get analyzeCompetitorsUseCase(): AnalyzeCompetitorsUseCase {
+    return (this._analyzeCompetitorsUseCase ??= new AnalyzeCompetitorsUseCase(
+      this.competitorAnalysisRepo,
+      this.signalRepo,
+      this._llmClient,
+    ));
+  }
+
+  private _getOrCreateSubscriptionUseCase?: GetOrCreateSubscriptionUseCase;
+  get getOrCreateSubscriptionUseCase(): GetOrCreateSubscriptionUseCase {
+    return (this._getOrCreateSubscriptionUseCase ??= new GetOrCreateSubscriptionUseCase(
+      this.subscriptionRepo,
+    ));
+  }
+
+  private _inviteTeamMemberUseCase?: InviteTeamMemberUseCase;
+  get inviteTeamMemberUseCase(): InviteTeamMemberUseCase {
+    return (this._inviteTeamMemberUseCase ??= new InviteTeamMemberUseCase(this.teamRepo));
+  }
+
+  private _acceptTeamInviteUseCase?: AcceptTeamInviteUseCase;
+  get acceptTeamInviteUseCase(): AcceptTeamInviteUseCase {
+    return (this._acceptTeamInviteUseCase ??= new AcceptTeamInviteUseCase(this.teamRepo));
+  }
+
+  private _removeTeamMemberUseCase?: RemoveTeamMemberUseCase;
+  get removeTeamMemberUseCase(): RemoveTeamMemberUseCase {
+    return (this._removeTeamMemberUseCase ??= new RemoveTeamMemberUseCase(this.teamRepo));
+  }
+
+  private _leaveTeamUseCase?: LeaveTeamUseCase;
+  get leaveTeamUseCase(): LeaveTeamUseCase {
+    return (this._leaveTeamUseCase ??= new LeaveTeamUseCase(this.teamRepo));
+  }
+
+  private _updateTeamNameUseCase?: UpdateTeamNameUseCase;
+  get updateTeamNameUseCase(): UpdateTeamNameUseCase {
+    return (this._updateTeamNameUseCase ??= new UpdateTeamNameUseCase(this.teamRepo));
+  }
+
+  private _updateTeamSeatsUseCase?: UpdateTeamSeatsUseCase;
+  get updateTeamSeatsUseCase(): UpdateTeamSeatsUseCase {
+    return (this._updateTeamSeatsUseCase ??= new UpdateTeamSeatsUseCase(this.subscriptionRepo));
+  }
+
+  private _reactToIdeaUseCase?: ReactToIdeaUseCase;
+  get reactToIdeaUseCase(): ReactToIdeaUseCase {
+    return (this._reactToIdeaUseCase ??= new ReactToIdeaUseCase(this.ideaReactionRepo));
+  }
+
+  private _askOttoUseCase?: AskOttoUseCase;
+  get askOttoUseCase(): AskOttoUseCase {
+    return (this._askOttoUseCase ??= new AskOttoUseCase(
+      this.ottoConversationRepo,
+      this.subscriptionRepo,
+      this._ottoLLMClient,
+    ));
+  }
+
+  private _getOttoBalanceUseCase?: GetOttoBalanceUseCase;
+  get getOttoBalanceUseCase(): GetOttoBalanceUseCase {
+    return (this._getOttoBalanceUseCase ??= new GetOttoBalanceUseCase(this.subscriptionRepo));
+  }
+
+  private _generateApiKeyUseCase?: GenerateApiKeyUseCase;
+  get generateApiKeyUseCase(): GenerateApiKeyUseCase {
+    return (this._generateApiKeyUseCase ??= new GenerateApiKeyUseCase(this.apiKeyRepo));
+  }
+
+  private _revokeApiKeyUseCase?: RevokeApiKeyUseCase;
+  get revokeApiKeyUseCase(): RevokeApiKeyUseCase {
+    return (this._revokeApiKeyUseCase ??= new RevokeApiKeyUseCase(this.apiKeyRepo));
+  }
+
+  private _listApiKeysUseCase?: ListApiKeysUseCase;
+  get listApiKeysUseCase(): ListApiKeysUseCase {
+    return (this._listApiKeysUseCase ??= new ListApiKeysUseCase(this.apiKeyRepo));
+  }
+
+  private _getDecisionTimelineUseCase?: GetDecisionTimelineUseCase;
+  get getDecisionTimelineUseCase(): GetDecisionTimelineUseCase {
+    return (this._getDecisionTimelineUseCase ??= new GetDecisionTimelineUseCase(
+      this.ideaRepo,
+      this.decisionRepo,
+      this.feedbackRepo,
+    ));
+  }
+
+  private _generateLaunchKitUseCase?: GenerateLaunchKitUseCase;
+  get generateLaunchKitUseCase(): GenerateLaunchKitUseCase {
+    return (this._generateLaunchKitUseCase ??= new GenerateLaunchKitUseCase(
+      this.ideaRepo,
+      this.signalRepo,
+      this.launchKitRepo,
+      this._llmClient,
+    ));
+  }
+
+  private _updateDecisionQueueUseCase?: UpdateDecisionQueueUseCase;
+  get updateDecisionQueueUseCase(): UpdateDecisionQueueUseCase {
+    return (this._updateDecisionQueueUseCase ??= new UpdateDecisionQueueUseCase(
+      this.ideaRepo,
+      this.decisionRepo,
+      this.decisionQueueRepo,
+      this._llmClient,
+    ));
+  }
+
+  private _getDecisionQueueUseCase?: GetDecisionQueueUseCase;
+  get getDecisionQueueUseCase(): GetDecisionQueueUseCase {
+    return (this._getDecisionQueueUseCase ??= new GetDecisionQueueUseCase(
+      this.decisionQueueRepo,
+      this.ideaRepo,
+      this.decisionRepo,
+    ));
+  }
+
+  private _gitHubVelocityAdapter?: GitHubVelocityAdapter;
+  private get gitHubVelocityAdapter(): GitHubVelocityAdapter {
+    return (this._gitHubVelocityAdapter ??= new GitHubVelocityAdapter());
+  }
+
+  private _connectGitHubUseCase?: ConnectGitHubUseCase;
+  get connectGitHubUseCase(): ConnectGitHubUseCase {
+    return (this._connectGitHubUseCase ??= new ConnectGitHubUseCase(
+      this.gitHubVelocityAdapter,
+      this.engineeringSnapshotRepo,
+    ));
+  }
+
+  private _refreshEngineeringSnapshotUseCase?: RefreshEngineeringSnapshotUseCase;
+  get refreshEngineeringSnapshotUseCase(): RefreshEngineeringSnapshotUseCase {
+    return (this._refreshEngineeringSnapshotUseCase ??= new RefreshEngineeringSnapshotUseCase(
+      this.gitHubVelocityAdapter,
+      this.engineeringSnapshotRepo,
+    ));
+  }
+
+  private _estimateDeliveryUseCase?: EstimateDeliveryUseCase;
+  get estimateDeliveryUseCase(): EstimateDeliveryUseCase {
+    return (this._estimateDeliveryUseCase ??= new EstimateDeliveryUseCase(
+      this.buildAnalysisRepo,
+      this.engineeringSnapshotRepo,
+    ));
+  }
+
+  private _recordOutcomeUseCase?: RecordOutcomeUseCase;
+  get recordOutcomeUseCase(): RecordOutcomeUseCase {
+    return (this._recordOutcomeUseCase ??= new RecordOutcomeUseCase(
+      this.decisionOutcomeRepo,
+      this.decisionRepo,
+    ));
+  }
+
+  private _getFlywheelStatsUseCase?: GetFlywheelStatsUseCase;
+  get getFlywheelStatsUseCase(): GetFlywheelStatsUseCase {
+    return (this._getFlywheelStatsUseCase ??= new GetFlywheelStatsUseCase(this.decisionOutcomeRepo));
+  }
+
+  private _getUsersAccuracyReportUseCase?: GetUsersAccuracyReportUseCase;
+  get getUsersAccuracyReportUseCase(): GetUsersAccuracyReportUseCase {
+    return (this._getUsersAccuracyReportUseCase ??= new GetUsersAccuracyReportUseCase(
+      this.decisionOutcomeRepo,
+    ));
+  }
+
+  // expose eventBus for process-outbox cron
+  get eventBus(): PostgresEventBus | RedisStreamsEventBus {
+    return this._eventBus;
+  }
+
+  constructor() {
+    const PROD_SUPABASE_REF = 'gphupxlfmeokquvyxqfw';
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+    if (process.env.NODE_ENV !== 'production' && supabaseUrl.includes(PROD_SUPABASE_REF)) {
+      throw new Error(
+        `[ENV GUARD] Dev environment is pointing to PRODUCTION Supabase (${supabaseUrl}). ` +
+          'Set NEXT_PUBLIC_SUPABASE_URL to dev project in .env.local.',
+      );
+    }
+
+    this._supabase = createSupabaseServiceClient();
+    this._usageLogger = new SupabaseUsageLogAdapter(this._supabase);
+
+    // Stripe guards
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    if (process.env.NODE_ENV !== 'production' && stripeSecretKey?.startsWith('sk_live_')) {
+      throw new Error(
+        '[ENV GUARD] Development environment is using Stripe LIVE keys. ' +
+          'Use sk_test_... in .env.local to avoid real charges.',
+      );
+    }
+    if (process.env.NODE_ENV === 'production' && stripeSecretKey?.startsWith('sk_test_')) {
+      console.warn(
+        '[container] WARNING: Production is using Stripe test keys. Set STRIPE_SECRET_KEY to sk_live_... before going live.',
+      );
+    }
+    if (stripeSecretKey) {
+      const requiredStripeEnvs = [
+        'STRIPE_WEBHOOK_SECRET',
+        'STRIPE_PRO_MONTHLY_PRICE_ID',
+        'STRIPE_PRO_ANNUAL_PRICE_ID',
+        'STRIPE_PRO_PLUS_MONTHLY_PRICE_ID',
+        'STRIPE_PRO_PLUS_ANNUAL_PRICE_ID',
+      ] as const;
+      for (const name of requiredStripeEnvs) {
+        if (!process.env[name]) {
+          throw new Error(
+            `[ENV GUARD] Stripe is configured but ${name} is missing. Add it to .env.local or Vercel env vars.`,
+          );
+        }
       }
     }
-  }
+    const stripeMode = stripeSecretKey?.startsWith('sk_live_')
+      ? 'live'
+      : stripeSecretKey
+        ? 'test'
+        : 'disabled';
+    console.info(`[container] Stripe mode: ${stripeMode}`);
+    this.stripeAdapter = stripeSecretKey ? new StripeAdapter(stripeSecretKey) : null;
 
-  const stripeMode = stripeSecretKey?.startsWith('sk_live_') ? 'live' : stripeSecretKey ? 'test' : 'disabled';
-  console.info(`[container] Stripe mode: ${stripeMode}`);
-  const stripeAdapter = stripeSecretKey ? new StripeAdapter(stripeSecretKey) : null;
+    // Event bus
+    const eventBusProvider = process.env.EVENT_BUS_PROVIDER ?? 'postgres';
+    this._eventBus =
+      eventBusProvider === 'redis-streams'
+        ? new RedisStreamsEventBus(
+            this._supabase,
+            requireEnv('UPSTASH_REDIS_REST_URL'),
+            requireEnv('UPSTASH_REDIS_REST_TOKEN'),
+          )
+        : new PostgresEventBus(this._supabase);
 
-  const eventBusProvider = process.env.EVENT_BUS_PROVIDER ?? 'postgres';
-  const eventBus =
-    eventBusProvider === 'redis-streams'
-      ? new RedisStreamsEventBus(
-          supabase,
-          requireEnv('UPSTASH_REDIS_REST_URL'),
-          requireEnv('UPSTASH_REDIS_REST_TOKEN'),
-        )
-      : new PostgresEventBus(supabase);
+    // Cache
+    const cacheProvider = process.env.CACHE_PROVIDER ?? 'memory';
+    this._cache =
+      cacheProvider === 'redis'
+        ? new UpstashRedisCacheAdapter(
+            requireEnv('UPSTASH_REDIS_REST_URL'),
+            requireEnv('UPSTASH_REDIS_REST_TOKEN'),
+          )
+        : new InMemoryCacheAdapter();
 
-  const cacheProvider = process.env.CACHE_PROVIDER ?? 'memory';
-  const cache: ICache =
-    cacheProvider === 'redis'
-      ? new UpstashRedisCacheAdapter(
-          requireEnv('UPSTASH_REDIS_REST_URL'),
-          requireEnv('UPSTASH_REDIS_REST_TOKEN'),
-        )
-      : new InMemoryCacheAdapter();
+    // Source adapters
+    this._sourceAdapters = [
+      new HNSourceAdapter(8_000, 2, this._cache),
+      new DevToSourceAdapter(8_000, 2, this._cache),
+      new GitHubSourceAdapter(process.env.GITHUB_PAT ?? '', 8_000, 2, this._cache),
+      ...(process.env.BRAVE_SEARCH_API_KEY
+        ? [new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 8_000, 2, this._cache)]
+        : []),
+      ...(process.env.GOOGLE_SEARCH_API_KEY && process.env.GOOGLE_SEARCH_ENGINE_ID
+        ? [
+            new GoogleSearchSourceAdapter(
+              process.env.GOOGLE_SEARCH_API_KEY,
+              process.env.GOOGLE_SEARCH_ENGINE_ID,
+              10_000,
+              2,
+              this._cache,
+            ),
+          ]
+        : []),
+    ];
 
-  const sourceAdapters = [
-    new HNSourceAdapter(8_000, 2, cache),
-    new DevToSourceAdapter(8_000, 2, cache),
-    new GitHubSourceAdapter(process.env.GITHUB_PAT ?? '', 8_000, 2, cache),
-    ...(process.env.BRAVE_SEARCH_API_KEY
-      ? [new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 8_000, 2, cache)]
-      : []),
-    ...(process.env.GOOGLE_SEARCH_API_KEY && process.env.GOOGLE_SEARCH_ENGINE_ID
-      ? [new GoogleSearchSourceAdapter(process.env.GOOGLE_SEARCH_API_KEY, process.env.GOOGLE_SEARCH_ENGINE_ID, 10_000, 2, cache)]
-      : []),
-  ];
-  const usageLogger = new SupabaseUsageLogAdapter(supabase);
+    // LLM clients
+    const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
+    this._llmClient =
+      llmProvider === 'anthropic'
+        ? new AnthropicLLMAdapter(
+            requireEnv('ANTHROPIC_API_KEY'),
+            process.env.ANTHROPIC_MODEL,
+            this._usageLogger,
+          )
+        : new GroqLLMAdapter(requireEnv('GROQ_API_KEY'), undefined, this._usageLogger);
 
-  const llmProvider = process.env.LLM_PROVIDER ?? 'groq';
-  const llmClient =
-    llmProvider === 'anthropic'
-      ? new AnthropicLLMAdapter(requireEnv('ANTHROPIC_API_KEY'), process.env.ANTHROPIC_MODEL, usageLogger)
-      : new GroqLLMAdapter(requireEnv('GROQ_API_KEY'), undefined, usageLogger);
-
-  const createIdeaUseCase = new CreateIdeaUseCase(ideaRepo, eventBus);
-  const fetchSignalsUseCase = new FetchSignalsUseCase(
-    signalRepo,
-    eventBus,
-    idempotencyStore,
-    sourceAdapters,
-    llmClient,
-  );
-  const embeddingClient = process.env.VOYAGE_API_KEY
-    ? new VoyageEmbeddingAdapter(process.env.VOYAGE_API_KEY)
-    : undefined;
-
-  const decideUseCase = new DecideUseCase(
-    signalRepo,
-    decisionRepo,
-    llmClient,
-    eventBus,
-    idempotencyStore,
-    embeddingClient,
-  );
-  const recordFeedbackUseCase = new RecordFeedbackUseCase(feedbackRepo);
-  const simulateRevenueUseCase = new SimulateRevenueUseCase(simulationRepo, signalRepo, llmClient);
-  const generateLandingUseCase = new GenerateLandingUseCase(landingPageRepo, llmClient, signalRepo);
-  const analyzeCustomersUseCase = new AnalyzeCustomersUseCase(customerAnalysisRepo, signalRepo, llmClient);
-  const analyzeBuildUseCase = new AnalyzeBuildUseCase(buildAnalysisRepo, signalRepo, llmClient);
-  const analyzeCompetitorsUseCase = new AnalyzeCompetitorsUseCase(competitorAnalysisRepo, signalRepo, llmClient);
-  const getOrCreateSubscriptionUseCase = new GetOrCreateSubscriptionUseCase(subscriptionRepo);
-  const inviteTeamMemberUseCase = new InviteTeamMemberUseCase(teamRepo);
-  const acceptTeamInviteUseCase = new AcceptTeamInviteUseCase(teamRepo);
-  const removeTeamMemberUseCase = new RemoveTeamMemberUseCase(teamRepo);
-  const leaveTeamUseCase = new LeaveTeamUseCase(teamRepo);
-  const updateTeamNameUseCase = new UpdateTeamNameUseCase(teamRepo);
-  const updateTeamSeatsUseCase = new UpdateTeamSeatsUseCase(subscriptionRepo);
-  const reactToIdeaUseCase = new ReactToIdeaUseCase(ideaReactionRepo);
-  const ottoConversationRepo = new SupabaseOttoConversationRepository(supabase);
-  // Otto always uses Anthropic Haiku regardless of LLM_PROVIDER
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('[container] ANTHROPIC_API_KEY is not set — Otto will be unavailable (503 on all /api/v1/otto/chat requests)');
-  }
-  const ottoLLMClient = process.env.ANTHROPIC_API_KEY
-    ? new AnthropicLLMAdapter(process.env.ANTHROPIC_API_KEY, 'claude-haiku-4-5-20251001', usageLogger)
-    : llmClient;
-  const askOttoUseCase = new AskOttoUseCase(ottoConversationRepo, subscriptionRepo, ottoLLMClient);
-  const getOttoBalanceUseCase = new GetOttoBalanceUseCase(subscriptionRepo);
-
-  const launchKitRepo = new SupabaseLaunchKitRepository(supabase);
-  const generateLaunchKitUseCase = new GenerateLaunchKitUseCase(ideaRepo, signalRepo, launchKitRepo, llmClient);
-
-  const decisionQueueRepo = new SupabaseDecisionQueueRepository(supabase);
-  const updateDecisionQueueUseCase = new UpdateDecisionQueueUseCase(ideaRepo, decisionRepo, decisionQueueRepo, llmClient);
-  const getDecisionQueueUseCase = new GetDecisionQueueUseCase(decisionQueueRepo, ideaRepo, decisionRepo);
-
-  const engineeringSnapshotRepo = new SupabaseEngineeringSnapshotRepository(
-    supabase,
-    process.env.GITHUB_TOKEN_MASTER_KEY ?? '',
-  );
-  const gitHubVelocityAdapter = new GitHubVelocityAdapter();
-  const connectGitHubUseCase = new ConnectGitHubUseCase(gitHubVelocityAdapter, engineeringSnapshotRepo);
-  const refreshEngineeringSnapshotUseCase = new RefreshEngineeringSnapshotUseCase(gitHubVelocityAdapter, engineeringSnapshotRepo);
-  const estimateDeliveryUseCase = new EstimateDeliveryUseCase(buildAnalysisRepo, engineeringSnapshotRepo);
-
-  const decisionOutcomeRepo = new SupabaseDecisionOutcomeRepository(supabase);
-  const recordOutcomeUseCase = new RecordOutcomeUseCase(decisionOutcomeRepo, decisionRepo);
-  const getFlywheelStatsUseCase = new GetFlywheelStatsUseCase(decisionOutcomeRepo);
-  const getUsersAccuracyReportUseCase = new GetUsersAccuracyReportUseCase(decisionOutcomeRepo);
-
-  const apiKeyRepo = new SupabaseApiKeyRepository(supabase);
-  const generateApiKeyUseCase = new GenerateApiKeyUseCase(apiKeyRepo);
-  const revokeApiKeyUseCase = new RevokeApiKeyUseCase(apiKeyRepo);
-  const listApiKeysUseCase = new ListApiKeysUseCase(apiKeyRepo);
-  const getDecisionTimelineUseCase = new GetDecisionTimelineUseCase(ideaRepo, decisionRepo, feedbackRepo);
-
-  // Wire: idea.created.v1 → FetchSignalsUseCase → generate embeddings for new signals (fire-and-forget)
-  eventBus.subscribe<IdeaCreatedV1['payload']>('idea.created.v1', async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
-    const result = await fetchSignalsUseCase.execute({
-      ideaId: event.payload.ideaId,
-      ideaText: event.payload.text,
-      traceId: event.traceId,
-      eventId: event.eventId,
-    });
-    if (result.isErr()) {
-      throw new Error(`FetchSignalsUseCase failed: ${result.error.message}`);
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error(
+        '[container] ANTHROPIC_API_KEY is not set — Otto will be unavailable (503 on all /api/v1/otto/chat requests)',
+      );
     }
+    // Otto always uses Anthropic Haiku regardless of LLM_PROVIDER
+    this._ottoLLMClient = process.env.ANTHROPIC_API_KEY
+      ? new AnthropicLLMAdapter(
+          process.env.ANTHROPIC_API_KEY,
+          'claude-haiku-4-5-20251001',
+          this._usageLogger,
+        )
+      : this._llmClient;
 
-    // Generate and save embeddings for newly fetched signals (non-blocking)
-    if (embeddingClient && result.value) {
-      void (async () => {
-        const signals = Array.isArray(result.value) ? result.value : [];
-        const entries: Array<{ id: string; embedding: number[] }> = [];
-        for (const signal of signals) {
-          const text = `${signal.title} ${signal.summary}`.trim();
-          const embResult = await embeddingClient.embed(text);
-          if (embResult.isOk()) entries.push({ id: signal.id, embedding: embResult.value });
+    this._embeddingClient = process.env.VOYAGE_API_KEY
+      ? new VoyageEmbeddingAdapter(process.env.VOYAGE_API_KEY)
+      : undefined;
+
+    // Wire: idea.created.v1 → FetchSignalsUseCase
+    this._eventBus.subscribe<IdeaCreatedV1['payload']>(
+      'idea.created.v1',
+      async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
+        try {
+          const result = await this.fetchSignalsUseCase.execute({
+            ideaId: event.payload.ideaId,
+            ideaText: event.payload.text,
+            traceId: event.traceId,
+            eventId: event.eventId,
+          });
+          if (result.isErr()) {
+            throw new Error(`FetchSignalsUseCase failed: ${result.error.message}`);
+          }
+
+          // Generate and save embeddings for newly fetched signals (non-blocking)
+          if (this._embeddingClient && result.value) {
+            void (async () => {
+              const signals = Array.isArray(result.value) ? result.value : [];
+              const entries: Array<{ id: string; embedding: number[] }> = [];
+              for (const signal of signals) {
+                const text = `${signal.title} ${signal.summary}`.trim();
+                const embResult = await this._embeddingClient!.embed(text);
+                if (embResult.isOk()) entries.push({ id: signal.id, embedding: embResult.value });
+              }
+              if (entries.length > 0) await this.signalRepo.saveEmbeddings(entries);
+            })();
+          }
+        } catch (error) {
+          Sentry.captureException(error, {
+            extra: { eventType: 'idea.created.v1', traceId: event.traceId, ideaId: event.payload.ideaId },
+          });
+          throw error;
         }
-        if (entries.length > 0) await signalRepo.saveEmbeddings(entries);
-      })();
+      },
+    );
+
+    // Wire: signals.fetched.v1 → DecideUseCase
+    this._eventBus.subscribe<SignalsFetchedV1['payload']>(
+      'signals.fetched.v1',
+      async (event: DomainEvent<SignalsFetchedV1['payload']>) => {
+        try {
+          const ideaResult = await this.ideaRepo.findById(event.payload.ideaId);
+          if (ideaResult.isErr() || !ideaResult.value) {
+            throw new Error(`Idea not found for DecideUseCase: ${event.payload.ideaId}`);
+          }
+
+          const result = await this.decideUseCase.execute({
+            ideaId: event.payload.ideaId,
+            ideaText: ideaResult.value.text,
+            traceId: event.traceId,
+            eventId: event.eventId,
+          });
+          if (result.isErr()) {
+            throw new Error(`DecideUseCase failed: ${result.error.message}`);
+          }
+        } catch (error) {
+          Sentry.captureException(error, {
+            extra: {
+              eventType: 'signals.fetched.v1',
+              traceId: event.traceId,
+              ideaId: event.payload.ideaId,
+            },
+          });
+          throw error;
+        }
+      },
+    );
+
+    // Wire: decision.ready.v1 → send verdict email (fire-and-forget)
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (resendApiKey) {
+      this._eventBus.subscribe<DecisionReadyV1['payload']>(
+        'decision.ready.v1',
+        async (event: DomainEvent<DecisionReadyV1['payload']>) => {
+          try {
+            const ideaResult = await this.ideaRepo.findById(event.payload.ideaId);
+            if (ideaResult.isErr() || !ideaResult.value) return;
+            const idea = ideaResult.value;
+
+            const { data } = await this._supabase.auth.admin.getUserById(idea.userId);
+            const userEmail = data?.user?.email;
+            if (!userEmail) return;
+
+            const decisionResult = await this.decisionRepo.findByIdeaId(event.payload.ideaId);
+            const decision = decisionResult.isOk() ? decisionResult.value : null;
+            const dims = decision?.dimensions;
+            const score = dims?.length
+              ? Math.round(
+                  dims.reduce(
+                    (sum: number, d: { weight: number; score: number }) => sum + d.weight * d.score,
+                    0,
+                  ),
+                )
+              : Math.round(event.payload.confidence * 100);
+
+            await sendVerdictEmail(resendApiKey, {
+              to: userEmail,
+              ideaId: idea.id,
+              ideaText: idea.text,
+              verdict: event.payload.verdict,
+              score,
+              traceId: event.traceId,
+            });
+          } catch (error) {
+            Sentry.captureException(error, {
+              extra: {
+                eventType: 'decision.ready.v1',
+                traceId: event.traceId,
+                ideaId: event.payload.ideaId,
+              },
+            });
+          }
+        },
+      );
     }
-  });
-
-  // Wire: signals.fetched.v1 → DecideUseCase
-  eventBus.subscribe<SignalsFetchedV1['payload']>('signals.fetched.v1', async (event: DomainEvent<SignalsFetchedV1['payload']>) => {
-    const ideaResult = await ideaRepo.findById(event.payload.ideaId);
-    if (ideaResult.isErr() || !ideaResult.value) {
-      throw new Error(`Idea not found for DecideUseCase: ${event.payload.ideaId}`);
-    }
-
-    const result = await decideUseCase.execute({
-      ideaId: event.payload.ideaId,
-      ideaText: ideaResult.value.text,
-      traceId: event.traceId,
-      eventId: event.eventId,
-    });
-    if (result.isErr()) {
-      throw new Error(`DecideUseCase failed: ${result.error.message}`);
-    }
-  });
-
-  // Wire: decision.ready.v1 → send verdict email (fire-and-forget, never blocks pipeline)
-  const resendApiKey = process.env.RESEND_API_KEY;
-  if (resendApiKey) {
-    eventBus.subscribe<DecisionReadyV1['payload']>('decision.ready.v1', async (event: DomainEvent<DecisionReadyV1['payload']>) => {
-      const ideaResult = await ideaRepo.findById(event.payload.ideaId);
-      if (ideaResult.isErr() || !ideaResult.value) return;
-      const idea = ideaResult.value;
-
-      const { data } = await supabase.auth.admin.getUserById(idea.userId);
-      const userEmail = data?.user?.email;
-      if (!userEmail) return;
-
-      const decisionResult = await decisionRepo.findByIdeaId(event.payload.ideaId);
-      const decision = decisionResult.isOk() ? decisionResult.value : null;
-      const dims = decision?.dimensions;
-      const score = dims?.length
-        ? Math.round(dims.reduce((sum: number, d: { weight: number; score: number }) => sum + d.weight * d.score, 0))
-        : Math.round(event.payload.confidence * 100);
-
-      await sendVerdictEmail(resendApiKey, {
-        to: userEmail,
-        ideaId: idea.id,
-        ideaText: idea.text,
-        verdict: event.payload.verdict,
-        score,
-        traceId: event.traceId,
-      });
-    });
   }
-
-  return {
-    createIdeaUseCase,
-    fetchSignalsUseCase,
-    decideUseCase,
-    recordFeedbackUseCase,
-    simulateRevenueUseCase,
-    generateLandingUseCase,
-    analyzeCustomersUseCase,
-    analyzeBuildUseCase,
-    analyzeCompetitorsUseCase,
-    getOrCreateSubscriptionUseCase,
-    stripeAdapter,
-    subscriptionRepo,
-    teamRepo,
-    inviteTeamMemberUseCase,
-    acceptTeamInviteUseCase,
-    removeTeamMemberUseCase,
-    leaveTeamUseCase,
-    updateTeamNameUseCase,
-    updateTeamSeatsUseCase,
-    reactToIdeaUseCase,
-    askOttoUseCase,
-    getOttoBalanceUseCase,
-    ideaRepo,
-    eventBus,
-    auditLog,
-    apiKeyRepo,
-    generateApiKeyUseCase,
-    revokeApiKeyUseCase,
-    listApiKeysUseCase,
-    getDecisionTimelineUseCase,
-    generateLaunchKitUseCase,
-    updateDecisionQueueUseCase,
-    getDecisionQueueUseCase,
-    connectGitHubUseCase,
-    refreshEngineeringSnapshotUseCase,
-    estimateDeliveryUseCase,
-    engineeringSnapshotRepo,
-    recordOutcomeUseCase,
-    getFlywheelStatsUseCase,
-    getUsersAccuracyReportUseCase,
-    /** @deprecated Direct repo access bypasses use-case layer. Migrate callers to dedicated use cases. */
-    _unsafeRepos: { ideaRepo, signalRepo, decisionRepo, feedbackRepo, idempotencyStore, simulationRepo, landingPageRepo, customerAnalysisRepo, buildAnalysisRepo, competitorAnalysisRepo, launchKitRepo, subscriptionRepo, teamRepo, ideaReactionRepo, decisionOutcomeRepo },
-  };
 }
 
 // Singleton per process (Next.js module caching handles this in dev + prod)
-export const container = buildContainer();
+export const container = new AppContainer();

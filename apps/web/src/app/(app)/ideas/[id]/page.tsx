@@ -20,7 +20,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const result = await container._unsafeRepos.ideaRepo.findById(id);
+  const result = await container.ideaRepo.findById(id);
   const idea = result.isOk() ? result.value : null;
   if (!idea) return { title: "Idea not found" };
 
@@ -51,22 +51,22 @@ export default async function IdeaPage({ params }: Props) {
   const { id } = await params;
   const user = await requireUser();
 
-  const ideaResult = await container._unsafeRepos.ideaRepo.findById(id);
+  const ideaResult = await container.ideaRepo.findById(id);
   if (ideaResult.isErr() || !ideaResult.value) notFound();
 
   const idea = ideaResult.value;
   if (idea.userId !== user.id) notFound();
 
   const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, plan] = await Promise.all([
-    container._unsafeRepos.decisionRepo.findByIdeaId(id),
-    container._unsafeRepos.signalRepo.findByIdeaId(id),
-    container._unsafeRepos.simulationRepo.findByIdeaId(id),
-    container._unsafeRepos.landingPageRepo.findByIdeaId(id),
-    container._unsafeRepos.customerAnalysisRepo.findByIdeaId(id),
-    container._unsafeRepos.buildAnalysisRepo.findByIdeaId(id),
-    container._unsafeRepos.competitorAnalysisRepo.findByIdeaId(id),
-    container._unsafeRepos.launchKitRepo.findByIdeaId(id),
-    container._unsafeRepos.decisionOutcomeRepo.findByIdea(id),
+    container.decisionRepo.findByIdeaId(id),
+    container.signalRepo.findByIdeaId(id),
+    container.simulationRepo.findByIdeaId(id),
+    container.landingPageRepo.findByIdeaId(id),
+    container.customerAnalysisRepo.findByIdeaId(id),
+    container.buildAnalysisRepo.findByIdeaId(id),
+    container.competitorAnalysisRepo.findByIdeaId(id),
+    container.launchKitRepo.findByIdeaId(id),
+    container.decisionOutcomeRepo.findByIdea(id),
     getUserPlan(user.id),
   ]);
 

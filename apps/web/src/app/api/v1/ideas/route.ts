@@ -28,7 +28,7 @@ export async function GET(req: Request) {
   const cursor = url.searchParams.get('cursor') ?? undefined;
   const limit = Math.min(Math.max(1, parseInt(limitParam ?? '20', 10) || 20), 100);
 
-  const result = await container._unsafeRepos.ideaRepo.findByUserIdPaginated(userId, limit, cursor);
+  const result = await container.ideaRepo.findByUserIdPaginated(userId, limit, cursor);
   if (result.isErr()) {
     return Response.json(
       { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
@@ -38,7 +38,7 @@ export async function GET(req: Request) {
 
   const { ideas, hasMore, nextCursor } = result.value;
   const decisions = await Promise.all(
-    ideas.map((idea) => container._unsafeRepos.decisionRepo.findByIdeaId(idea.id))
+    ideas.map((idea) => container.decisionRepo.findByIdeaId(idea.id))
   );
 
   const data = ideas.map((idea, i) => ({
@@ -103,7 +103,7 @@ export async function POST(req: Request) {
   // Idempotency-Key
   const idempotencyKey = req.headers.get('idempotency-key');
   if (idempotencyKey) {
-    const alreadyProcessed = await container._unsafeRepos.idempotencyStore.hasBeenProcessed(idempotencyKey);
+    const alreadyProcessed = await container.idempotencyStore.hasBeenProcessed(idempotencyKey);
     if (alreadyProcessed.isOk() && alreadyProcessed.value) {
       return Response.json(
         { error: { code: 'ALREADY_PROCESSED', message: 'This request was already processed.' } },
@@ -156,7 +156,7 @@ export async function POST(req: Request) {
 
   // Mark idempotency key as processed
   if (idempotencyKey) {
-    await container._unsafeRepos.idempotencyStore.markAsProcessed(idempotencyKey);
+    await container.idempotencyStore.markAsProcessed(idempotencyKey);
   }
 
   const idea = result.value;
