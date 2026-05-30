@@ -113,6 +113,13 @@ export function IdeaPageClient({
               {analysisS !== null ? `${analysisS}s analysis` : "scored"}
             </div>
             <button
+              onClick={() => router.push(`/ideas/compare?a=${idea.id}`)}
+              className="mono text-[10px] h-7 px-3 rounded-md border transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+            >
+              Compare →
+            </button>
+            <button
               onClick={() => router.push(`/ideas/new?from=${idea.id}`)}
               className="mono text-[10px] h-7 px-3 rounded-md border transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
               style={{ borderColor: "var(--border)", color: "var(--t3)" }}
