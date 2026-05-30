@@ -88,3 +88,6 @@ export * from './use-cases/get-users-accuracy-report';
 export * from './use-cases/generate-invite-link';
 export * from './use-cases/join-via-invite-link';
 export * from './use-cases/delete-idea';
+export * from './domain/webhook-config';
+export * from './ports/IWebhookConfigRepository';
+export * from './use-cases/register-webhook';

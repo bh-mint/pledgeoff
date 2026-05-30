@@ -1,6 +1,7 @@
 "use client";
 
 import { ApiKeySection } from "../ApiKeySection";
+import { WebhookConfigSection } from "@/components/WebhookConfigSection";
 
 export function DeveloperClient() {
   return (
@@ -16,6 +17,10 @@ export function DeveloperClient() {
       </p>
 
       <ApiKeySection />
+
+      <div className="my-10 h-px" style={{ background: "var(--border)" }} />
+
+      <WebhookConfigSection />
     </div>
   );
 }

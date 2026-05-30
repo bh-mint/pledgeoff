@@ -22,6 +22,7 @@ import {
   SupabaseEngineeringSnapshotRepository,
   SupabaseDecisionOutcomeRepository,
   SupabaseNotificationRepository,
+  SupabaseWebhookConfigRepository,
   GitHubVelocityAdapter,
   StripeAdapter,
   HNSourceAdapter,
@@ -75,6 +76,7 @@ import {
   RecordOutcomeUseCase,
   GetFlywheelStatsUseCase,
   GetUsersAccuracyReportUseCase,
+  RegisterWebhookUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -206,6 +208,11 @@ class AppContainer {
   private _notificationRepo?: SupabaseNotificationRepository;
   get notificationRepo(): SupabaseNotificationRepository {
     return (this._notificationRepo ??= new SupabaseNotificationRepository(this._supabase));
+  }
+
+  private _webhookConfigRepo?: SupabaseWebhookConfigRepository;
+  get webhookConfigRepo(): SupabaseWebhookConfigRepository {
+    return (this._webhookConfigRepo ??= new SupabaseWebhookConfigRepository(this._supabase));
   }
 
   // ── lazy use-cases ─────────────────────────────────────────────────────────
@@ -465,6 +472,60 @@ class AppContainer {
     ));
   }
 
+  private _registerWebhookUseCase?: RegisterWebhookUseCase;
+  get registerWebhookUseCase(): RegisterWebhookUseCase {
+    return (this._registerWebhookUseCase ??= new RegisterWebhookUseCase(this.webhookConfigRepo));
+  }
+
+  // Deliver outbound webhook for decision.ready.v1 — fire-and-forget
+  private async deliverWebhook(
+    ideaId: string,
+    ideaText: string,
+    userId: string,
+    verdict: string,
+    score: number,
+    traceId: string,
+  ): Promise<void> {
+    const configResult = await this.webhookConfigRepo.findByUserId(userId);
+    if (configResult.isErr() || !configResult.value?.active) return;
+
+    const { url, signingSecret } = configResult.value;
+    const payload = JSON.stringify({
+      event: 'decision.ready',
+      version: '1',
+      timestamp: new Date().toISOString(),
+      data: { ideaId, ideaText, verdict, score, verdictUrl: `https://pledgeoff.com/ideas/${ideaId}`, traceId },
+    });
+
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(signingSecret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    );
+    const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
+    const sigHex = Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, '0')).join('');
+
+    try {
+      await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-PledgeOFF-Signature': `sha256=${sigHex}`,
+          'X-PledgeOFF-Event': 'decision.ready',
+          'User-Agent': 'PledgeOFF-Webhook/1.0',
+        },
+        body: payload,
+        signal: AbortSignal.timeout(10_000),
+      });
+    } catch (deliveryError) {
+      // Fire-and-forget: log but never throw — webhook failure must not break the pipeline
+      Sentry.captureException(deliveryError, { extra: { traceId, ideaId, url } });
+    }
+  }
+
   // expose eventBus for process-outbox cron
   get eventBus(): PostgresEventBus | RedisStreamsEventBus {
     return this._eventBus;
@@ -707,6 +768,43 @@ class AppContainer {
         },
       );
     }
+
+    // Wire: decision.ready.v1 → outbound webhook delivery (fire-and-forget)
+    this._eventBus.subscribe<DecisionReadyV1['payload']>(
+      'decision.ready.v1',
+      async (event: DomainEvent<DecisionReadyV1['payload']>) => {
+        try {
+          const ideaResult = await this.ideaRepo.findById(event.payload.ideaId);
+          if (ideaResult.isErr() || !ideaResult.value) return;
+          const idea = ideaResult.value;
+
+          const decisionResult = await this.decisionRepo.findByIdeaId(event.payload.ideaId);
+          const decision = decisionResult.isOk() ? decisionResult.value : null;
+          const dims = decision?.dimensions;
+          const score = dims?.length
+            ? Math.round(
+                dims.reduce(
+                  (sum: number, d: { weight: number; score: number }) => sum + d.weight * d.score,
+                  0,
+                ),
+              )
+            : Math.round(event.payload.confidence * 100);
+
+          await this.deliverWebhook(
+            idea.id,
+            idea.text,
+            idea.userId,
+            event.payload.verdict,
+            score,
+            event.traceId,
+          );
+        } catch (error) {
+          Sentry.captureException(error, {
+            extra: { eventType: 'decision.ready.v1.webhook', traceId: event.traceId, ideaId: event.payload.ideaId },
+          });
+        }
+      },
+    );
   }
 }
 

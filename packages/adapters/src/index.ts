@@ -38,3 +38,4 @@ export { SupabaseEngineeringSnapshotRepository } from './storage/supabase-engine
 export { GitHubVelocityAdapter } from './engineering/github-velocity-adapter';
 export { SupabaseDecisionOutcomeRepository } from './storage/supabase-decision-outcome-repository';
 export { SupabaseNotificationRepository } from './storage/supabase-notification-repository';
+export { SupabaseWebhookConfigRepository } from './storage/supabase-webhook-config-repository';
