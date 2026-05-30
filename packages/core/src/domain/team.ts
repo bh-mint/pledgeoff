@@ -13,6 +13,7 @@ export const TeamSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).max(100),
   ownerId: z.string().uuid(),
+  logoUrl: z.string().url().nullable().optional(),
   createdAt: z.string().datetime({ offset: true }),
   updatedAt: z.string().datetime({ offset: true }),
 });

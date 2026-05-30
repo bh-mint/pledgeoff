@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getAuthToken } from "@/lib/auth-client";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import type { Team, TeamMembership, SubscriptionStatus } from "@pledgeoff/core";
@@ -10,6 +10,88 @@ type TeamData = {
   memberships: TeamMembership[];
   isOwner: boolean;
 };
+
+function TeamLogoUpload({ currentLogoUrl, onUploaded }: { currentLogoUrl?: string | null; onUploaded: (url: string) => void }) {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(currentLogoUrl ?? null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (file: File) => {
+    setError(null);
+    setUploading(true);
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+
+    const token = await getAuthToken();
+    if (!token) { setUploading(false); return; }
+
+    const form = new FormData();
+    form.append("file", file);
+
+    const res = await fetch("/api/v1/teams/logo", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: form,
+    });
+
+    if (!res.ok) {
+      const json = await res.json() as { error?: { message?: string } };
+      setError(json.error?.message ?? "Upload failed. Try again.");
+      setPreviewUrl(currentLogoUrl ?? null);
+    } else {
+      const json = await res.json() as { data: { logoUrl: string } };
+      onUploaded(json.data.logoUrl);
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div className="flex items-center gap-4">
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="relative w-14 h-14 rounded-lg border overflow-hidden flex items-center justify-center shrink-0 transition-opacity hover:opacity-80 disabled:opacity-50"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        aria-label="Upload workspace logo"
+      >
+        {previewUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={previewUrl} alt="Workspace logo" className="w-full h-full object-cover" />
+        ) : (
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="16" height="16" rx="4" stroke="var(--t3)" strokeWidth="1.5" />
+            <path d="M10 7v6M7 10h6" stroke="var(--t3)" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        )}
+        {uploading && (
+          <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
+      </button>
+      <div>
+        <div className="text-[13px] font-medium" style={{ color: "var(--t1)" }}>Workspace logo</div>
+        <div className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
+          JPEG, PNG or WebP · max 2 MB · 128×128px
+        </div>
+        {error && <div className="mono text-[11px] mt-1" style={{ color: "var(--kill)" }}>{error}</div>}
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="sr-only"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) void handleFile(file);
+          e.target.value = "";
+        }}
+      />
+    </div>
+  );
+}
 
 type Props = {
   plan: "free" | "founder" | "team" | "studio" | "enterprise";
@@ -29,6 +111,7 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
   const [renamingTeam, setRenamingTeam] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [inviteLinkState, setInviteLinkState] = useState<"idle" | "loading" | "revoking" | "copied">("idle");
+  const [teamLogoUrl, setTeamLogoUrl] = useState<string | null>(null);
 
   const seatsIncluded = PLAN_LIMITS[plan].seatsIncluded;
 
@@ -44,7 +127,10 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
     if (teamRes.ok) {
       const json = await teamRes.json() as { data: TeamData };
       setData(json.data);
-      if (json.data.team) setTeamName(json.data.team.name);
+      if (json.data.team) {
+        setTeamName(json.data.team.name);
+        setTeamLogoUrl(json.data.team.logoUrl ?? null);
+      }
     }
     if (linkRes.ok) {
       const json = await linkRes.json() as { data: { url: string | null } };
@@ -288,6 +374,14 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
         <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
           Team: <span style={{ color: "var(--t1)" }}>{data.team.name}</span>
         </div>
+      )}
+
+      {/* Workspace logo — owner only */}
+      {data?.isOwner && (
+        <TeamLogoUpload
+          currentLogoUrl={teamLogoUrl}
+          onUploaded={(url) => setTeamLogoUrl(url)}
+        />
       )}
 
       {/* Seat usage */}

@@ -66,6 +66,7 @@ interface DashboardClientProps {
   totalCount: number;
   teamFeedRows?: TeamFeedRow[];
   teamName?: string | null;
+  teamLogoUrl?: string | null;
   teamId?: string | null;
   plan?: Plan;
   isWorkspace?: boolean;
@@ -76,6 +77,7 @@ export function DashboardClient({
   totalCount,
   teamFeedRows = [],
   teamName,
+  teamLogoUrl,
   teamId,
   plan = "free",
   isWorkspace = false,
@@ -337,7 +339,11 @@ export function DashboardClient({
             className="px-4 sm:px-6 py-4 border-b flex flex-wrap gap-3 items-center"
             style={{ borderColor: "var(--border)" }}
           >
-            <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">
+            <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1) flex items-center gap-2">
+              {isWorkspace && teamLogoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={teamLogoUrl} alt="" className="w-5 h-5 rounded object-cover shrink-0" aria-hidden="true" />
+              )}
               {isWorkspace ? (teamName ? `${teamName} workspace` : "Workspace") : "My validations"}
             </h2>
             <span className="mono text-[10px] text-(--t3)">

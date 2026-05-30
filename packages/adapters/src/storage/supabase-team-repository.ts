@@ -14,6 +14,7 @@ type TeamRow = {
   id: string;
   name: string;
   owner_id: string;
+  logo_url: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -62,6 +63,7 @@ function rowToTeam(row: TeamRow): Team {
     id: row.id,
     name: row.name,
     ownerId: row.owner_id,
+    logoUrl: row.logo_url ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -124,7 +126,7 @@ export class SupabaseTeamRepository implements ITeamRepository {
   async updateTeam(team: Team): Promise<Result<Team, TeamRepositoryError>> {
     const { data, error } = await this.client
       .from('teams')
-      .update({ name: team.name, updated_at: team.updatedAt })
+      .update({ name: team.name, logo_url: team.logoUrl ?? null, updated_at: team.updatedAt })
       .eq('id', team.id)
       .select()
       .single<TeamRow>();

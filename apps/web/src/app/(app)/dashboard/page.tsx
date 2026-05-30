@@ -36,14 +36,17 @@ export default async function DashboardPage() {
   const displayName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || user.email?.split("@")[0] || "—";
 
   // Phase 1 — plan + team (parallel)
-  const [plan, teamResult] = await Promise.all([
+  // Check both member role (has membership row) and owner role (no membership row, owns the team)
+  const [plan, memberTeamResult, ownerTeamResult] = await Promise.all([
     getUserPlan(user.id),
     container.teamRepo.findByMemberId(user.id),
+    container.teamRepo.findByOwnerId(user.id),
   ]);
 
   const isWorkspacePlan = plan === "team" || plan === "studio" || plan === "enterprise";
   const isPaidPlan = plan !== "free";
-  const team = teamResult.isOk() ? teamResult.value : null;
+  const team = (memberTeamResult.isOk() ? memberTeamResult.value : null)
+    ?? (ownerTeamResult.isOk() ? ownerTeamResult.value : null);
 
   // Phase 2 — if workspace plan + team: resolve all member IDs + profiles
   let allMemberIds: string[] = [user.id];
@@ -272,6 +275,7 @@ export default async function DashboardPage() {
             totalCount={rawIdeas.length}
             teamFeedRows={teamFeedRows}
             teamName={teamName}
+            teamLogoUrl={team?.logoUrl ?? null}
             teamId={teamId}
             plan={plan}
             isWorkspace={isWorkspacePlan && !!team}
