@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getAuthToken } from "@/lib/auth-client";
 
 const LOADING_MESSAGES = [
@@ -43,6 +43,8 @@ export function NewIdeaClient({
   teamName?: string | null;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const fromId = searchParams.get("from");
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
@@ -51,6 +53,31 @@ export function NewIdeaClient({
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [loadingStep, setLoadingStep] = useState(0);
+
+  // Pre-fill from duplicated idea
+  useEffect(() => {
+    if (!fromId) return;
+    void (async () => {
+      const token = await getAuthToken();
+      if (!token) return;
+      const res = await fetch(`/api/v1/ideas/${fromId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const json = (await res.json()) as { data?: { idea?: { text: string } } };
+      const text = json.data?.idea?.text ?? "";
+      if (!text) return;
+      const parts = text.split("\n\n");
+      setTitle(parts[0] ?? "");
+      const catLine = parts.find((p) => p.startsWith("Category: "));
+      if (catLine) {
+        setCat(catLine.replace("Category: ", "").trim());
+        setDesc(parts.slice(1).filter((p) => !p.startsWith("Category: ")).join("\n\n"));
+      } else {
+        setDesc(parts.slice(1).join("\n\n"));
+      }
+    })();
+  }, [fromId]);
 
   useEffect(() => {
     if (status !== "loading") return;

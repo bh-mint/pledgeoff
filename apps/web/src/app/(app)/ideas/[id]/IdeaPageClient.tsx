@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { getAuthToken } from "@/lib/auth-client";
 import { DecisionCard } from "@/components/DecisionCard";
 import { ValidatingLoader } from "@/components/ValidatingLoader";
@@ -41,6 +42,7 @@ export function IdeaPageClient({
   plan,
   categoryAvg,
 }: IdeaPageClientProps) {
+  const router = useRouter();
   const [decision, setDecision] = useState<Decision | null>(initialDecision);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
   const [polls, setPolls] = useState(0);
@@ -106,8 +108,17 @@ export function IdeaPageClient({
             <span className="hidden sm:inline">signal verdict ·</span>
             <span>{valId}</span>
           </div>
-          <div className="mono text-[10px] text-(--t3)">
-            {analysisS !== null ? `${analysisS}s analysis` : "scored"}
+          <div className="flex items-center gap-3">
+            <div className="mono text-[10px] text-(--t3)">
+              {analysisS !== null ? `${analysisS}s analysis` : "scored"}
+            </div>
+            <button
+              onClick={() => router.push(`/ideas/new?from=${idea.id}`)}
+              className="mono text-[10px] h-7 px-3 rounded-md border transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+            >
+              Duplicate →
+            </button>
           </div>
         </div>
       )}
