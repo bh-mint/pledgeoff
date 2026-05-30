@@ -272,6 +272,29 @@ components:
           type: string
           format: date-time
 
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        keyPrefix:
+          type: string
+          description: First 8 chars of the key for display (e.g. po_live_ab)
+        createdAt:
+          type: string
+          format: date-time
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        revokedAt:
+          type: string
+          format: date-time
+          nullable: true
+
 tags:
   - name: System
     description: Platform health
@@ -293,6 +316,8 @@ tags:
     description: User profile and account management
   - name: Auth
     description: Authentication helpers
+  - name: Engineering
+    description: GitHub Engineering Intelligence — velocity metrics and delivery estimates (Team+ plans)
   - name: Public
     description: Unauthenticated endpoints
 
@@ -633,6 +658,625 @@ paths:
         '404':
           description: Idea not found
 
+  /api/v1/ideas/{id}/pipeline-status:
+    get:
+      summary: Get pipeline status
+      description: Returns signal count and whether a decision exists yet. Used to poll pipeline progress after idea submission.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Pipeline status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      signalCount:
+                        type: integer
+                      hasDecision:
+                        type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+
+  /api/v1/ideas/{id}/competitors:
+    get:
+      summary: Get competitor analysis
+      description: Returns cached competitor analysis for an idea, or null if not yet generated.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Competitor analysis or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+    post:
+      summary: Generate competitor analysis
+      description: Triggers an AI competitor analysis for the idea. Result is cached — subsequent GETs return it immediately. Subject to AI rate limiting.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Competitor analysis generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+        '429':
+          description: AI rate limit exceeded
+
+  /api/v1/ideas/{id}/customers:
+    get:
+      summary: Get customer analysis
+      description: Returns cached ICP/customer persona analysis, or null if not yet generated.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Customer analysis or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+    post:
+      summary: Generate customer analysis
+      description: Triggers an AI ICP/customer persona analysis. Result is cached. Subject to AI rate limiting.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Customer analysis generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+        '429':
+          description: AI rate limit exceeded
+
+  /api/v1/ideas/{id}/build:
+    get:
+      summary: Get build plan
+      description: Returns cached technical build plan, or null if not yet generated.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Build plan or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+    post:
+      summary: Generate build plan
+      description: Triggers an AI technical build plan analysis. Result is cached. Subject to AI rate limiting.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Build plan generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+        '429':
+          description: AI rate limit exceeded
+
+  /api/v1/ideas/{id}/landing:
+    get:
+      summary: Get landing page copy
+      description: Returns cached AI-generated landing page copy, or null if not yet generated.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Landing page copy or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+    post:
+      summary: Generate landing page copy
+      description: >
+        Generates AI landing page copy for the idea. Requires the idea to have a decision first.
+        Result is cached. Subject to AI rate limiting.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Landing page copy generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+        '422':
+          description: Idea has no decision yet
+        '429':
+          description: AI rate limit exceeded
+
+  /api/v1/ideas/{id}/launch-kit:
+    get:
+      summary: Get launch kit
+      description: Returns cached AI-generated launch kit (Product Hunt copy, social posts, etc.), or null.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Launch kit or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+    post:
+      summary: Generate launch kit
+      description: Generates AI launch kit content. Result is cached. Subject to AI rate limiting.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Launch kit generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+        '429':
+          description: AI rate limit exceeded
+
+  /api/v1/ideas/{id}/simulate:
+    get:
+      summary: Get revenue simulation
+      description: Returns cached revenue simulation, or null if not yet generated.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Revenue simulation or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+    post:
+      summary: Generate revenue simulation
+      description: >
+        Triggers an AI revenue/growth simulation. Requires a decision first.
+        Result is cached. Subject to AI rate limiting.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Simulation generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+        '422':
+          description: Idea has no decision yet
+        '429':
+          description: AI rate limit exceeded
+
+  /api/v1/ideas/{id}/pdf:
+    get:
+      summary: Export idea PDF report
+      description: >
+        Generates and downloads a branded PDF report for the idea including verdict, signals,
+        and simulation. Studio+ plans only. Pass `?brand=YourName` for white-label output.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: brand
+          in: query
+          schema:
+            type: string
+          description: Optional agency/brand name for white-label PDF header
+      responses:
+        '200':
+          description: PDF file
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: 'attachment; filename="report-abc12345-2026-05-30.pdf"'
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Studio plan required
+        '404':
+          description: Idea not found
+
+  /api/v1/ideas/{id}/report:
+    get:
+      summary: Get decision timeline
+      description: Returns the full decision history (all re-validations) for an idea as a JSON array.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Decision timeline
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Decision'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+
+  /api/v1/ideas/{id}/report/pdf:
+    get:
+      summary: Export audit trail PDF
+      description: >
+        Generates and downloads an audit trail PDF listing all decisions over time.
+        Studio+ plans only.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Audit trail PDF
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: 'attachment; filename="report-abc12345-2026-05-30.pdf"'
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Studio plan required
+        '404':
+          description: Idea not found
+
+  /api/v1/ideas/{id}/export:
+    get:
+      summary: Export idea as JSON
+      description: >
+        Downloads all data for a single idea as a JSON file — idea, decision, signals,
+        simulation, landing page, customer analysis, build plan, competitor analysis.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: JSON export file
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: 'attachment; filename="pledgeoff-idea-abc12345-2026-05-30.json"'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exportedAt:
+                    type: string
+                    format: date-time
+                  exportVersion:
+                    type: string
+                  idea:
+                    $ref: '#/components/schemas/Idea'
+                  decision:
+                    $ref: '#/components/schemas/Decision'
+                  signals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Signal'
+                  simulation:
+                    type: object
+                    nullable: true
+                  landingPage:
+                    type: object
+                    nullable: true
+                  customers:
+                    type: object
+                    nullable: true
+                  build:
+                    type: object
+                    nullable: true
+                  competitors:
+                    type: object
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Idea not found
+
+  /api/v1/ideas/{id}/reactions:
+    get:
+      summary: Get reactions
+      description: Returns agree/disagree counts and the authenticated user's current reaction.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Reaction counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      agree:
+                        type: integer
+                      disagree:
+                        type: integer
+                      myReaction:
+                        type: string
+                        enum: [agree, disagree]
+                        nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      summary: Set reaction
+      description: >
+        Sets or clears a reaction on a team idea. User must be in a team that shares this idea.
+        Pass `reaction: null` to remove an existing reaction.
+      tags: [Ideas]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reaction]
+              properties:
+                reaction:
+                  type: string
+                  enum: [agree, disagree]
+                  nullable: true
+            example:
+              reaction: agree
+      responses:
+        '200':
+          description: Updated reaction counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      agree:
+                        type: integer
+                      disagree:
+                        type: integer
+                      myReaction:
+                        type: string
+                        nullable: true
+        '400':
+          description: Validation error
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: User must be in a team to react
+        '404':
+          description: Idea not found
+
   /api/v1/billing/subscription:
     get:
       summary: Get subscription
@@ -944,6 +1588,194 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           description: Free plan cannot set VAT ID
+
+  /api/v1/billing/request-invoice:
+    post:
+      summary: Request invoice billing
+      description: >
+        Sends a NET30 invoice billing request to the PledgeOFF billing team.
+        Studio plan only. Fires an email to billing@pledgeoff.com with the user's details.
+      tags: [Billing]
+      responses:
+        '200':
+          description: Invoice request submitted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Studio plan required
+
+  /api/v1/api-keys:
+    get:
+      summary: List API keys
+      description: Returns all API keys for the authenticated user (Team+ plans only). The full key value is never returned after creation.
+      tags: [Auth]
+      responses:
+        '200':
+          description: API key list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ApiKey'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Team or Studio plan required
+    post:
+      summary: Create API key
+      description: >
+        Creates a new personal API key (`po_live_…`). Team+ plans only.
+        The full key is returned **once** in the response — store it securely.
+        Subsequent requests return only the prefix.
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                  description: Human-readable label for this key
+            example:
+              name: CI Integration
+      responses:
+        '201':
+          description: API key created — key shown once
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/ApiKey'
+                      - type: object
+                        properties:
+                          key:
+                            type: string
+                            description: Full API key — shown once, store immediately
+              example:
+                data:
+                  id: 123e4567-e89b-12d3-a456-426614174000
+                  name: CI Integration
+                  keyPrefix: po_live_
+                  key: po_live_abcdef1234567890
+                  createdAt: '2026-05-30T10:00:00.000Z'
+                  lastUsedAt: null
+                  revokedAt: null
+        '400':
+          description: Validation error or invalid key name
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Team or Studio plan required
+        '422':
+          description: Key limit reached for this account
+
+  /api/v1/api-keys/{id}:
+    delete:
+      summary: Revoke API key
+      description: Permanently revokes an API key. Any requests using this key will immediately return 401.
+      tags: [Auth]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: API key revoked
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: API key not found
+
+  /api/v1/engineering/snapshot:
+    get:
+      summary: Get engineering snapshot
+      description: >
+        Returns GitHub velocity metrics for the authenticated user's connected repository —
+        commit frequency, open PRs, cycle time, and contributor count.
+        Team+ plans only.
+      tags: [Engineering]
+      responses:
+        '200':
+          description: Engineering snapshot or null if no GitHub repo connected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    description: GitHub velocity metrics object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Team plan or higher required
+
+  /api/v1/engineering/estimate/{ideaId}:
+    get:
+      summary: Get delivery estimate
+      description: >
+        Returns an AI-generated delivery time estimate for an idea based on the idea's
+        build plan and the engineering snapshot velocity. Requires a GitHub repo connected.
+      tags: [Engineering]
+      parameters:
+        - name: ideaId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Delivery estimate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    description: Delivery estimate breakdown
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/engineering/disconnect:
+    delete:
+      summary: Disconnect GitHub
+      description: Removes the stored engineering snapshot, effectively disconnecting GitHub from Engineering Intelligence.
+      tags: [Engineering]
+      responses:
+        '204':
+          description: GitHub disconnected
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
   /api/v1/otto/balance:
     get:
@@ -2010,6 +2842,110 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalError'
+
+  /api/v1/contact:
+    post:
+      summary: Send contact message
+      description: Sends a contact form message to contact@pledgeoff.com. No authentication required.
+      security: []
+      tags: [Public]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, subject, message]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 200
+                email:
+                  type: string
+                  format: email
+                  maxLength: 200
+                subject:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+                message:
+                  type: string
+                  minLength: 10
+                  maxLength: 5000
+            example:
+              name: Alex Founder
+              email: alex@startup.io
+              subject: Question about Enterprise plan
+              message: Hi, I have a question about custom signal sources.
+      responses:
+        '200':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      ok:
+                        type: boolean
+        '400':
+          description: Validation error
+
+  /api/v1/public/last-validated:
+    get:
+      summary: Last validated timestamp
+      description: Returns the timestamp of the most recent decision generated on the platform. No authentication required. Cached 60 seconds.
+      security: []
+      tags: [Public]
+      responses:
+        '200':
+          description: Last validated timestamp or null
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    nullable: true
+                    properties:
+                      lastValidatedAt:
+                        type: string
+                        format: date-time
+              example:
+                data:
+                  lastValidatedAt: '2026-05-30T10:42:00.000Z'
+
+  /api/v1/teams/auto-join:
+    post:
+      summary: Auto-join by email domain
+      description: >
+        Checks if the authenticated user's email domain matches any team's domain allowlist
+        and auto-joins the workspace if so. Idempotent — safe to call on every login.
+        Enterprise feature (allowlist is Enterprise-gated on the team side).
+      tags: [Teams]
+      responses:
+        '200':
+          description: Auto-join result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      joined:
+                        type: boolean
+                      teamId:
+                        type: string
+                        format: uuid
+                        nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
   /api/v1/waitlist:
     post:
