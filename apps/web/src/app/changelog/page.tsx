@@ -35,7 +35,7 @@ const RELEASES = [
       "Decision Audit Trail: full timeline of every verdict, re-validation, and outcome on an idea — PDF export for Studio+",
       "Data Flywheel: report what happened after each verdict — GO/KILL/PIVOT outcomes feed into your accuracy score over time",
       "Accuracy Report: monthly email with your personal GO / KILL accuracy rate vs. the platform average",
-      "Plan rename: Pro → Founder · Pro+ → Team · Agency → Studio — pricing and limits unchanged",
+      "Plans: Founder (20 validations/mo, €49/mo) · Team (unlimited, 3 seats, €99/mo) · Studio (unlimited, 8 seats, PDF export, €349/mo) · Enterprise (custom)",
     ],
   },
   {
@@ -43,10 +43,10 @@ const RELEASES = [
     date: "May 2026",
     tag: "NEW",
     items: [
-      "Agency plan launched at €499/month (€399/month annual) — includes all Pro+ features plus white-label PDF exports, advanced team analytics, NET30 invoicing on request, and a full activity audit log",
-      "Pricing updated across all tiers: Pro €149/month, Pro+ €249/month, Agency €499/month — annual plans available with up to 20% savings",
+      "Studio plan launched at €349/month (€279/month annual) — white-label PDF exports, advanced team analytics, NET30 invoicing on request, and a full activity audit log",
+      "Pricing: Founder €49/month · Team €99/month · Studio €349/month — annual plans available with up to ~20% savings",
       "Enterprise tier added for larger organizations: custom pricing, dedicated onboarding, SSO/SAML (Okta), contractual SLA, and custom DPA — contact via /enterprise",
-      "Annual billing available for Pro, Pro+, and Agency — switch in Settings → Billing",
+      "Annual billing available for Founder, Team, and Studio — switch in Settings → Billing",
     ],
   },
   {
@@ -54,7 +54,7 @@ const RELEASES = [
     date: "May 2026",
     tag: "FEATURE",
     items: [
-      "API Keys: Pro+ and Agency users can generate personal API keys (po_live_...) for programmatic access to all validation endpoints",
+      "API Keys: Team and Studio users can generate personal API keys (po_live_...) for programmatic access to all validation endpoints",
       "Keys are created and revoked in Settings → API — each key shows creation date and last used timestamp",
       "Authenticate any API request with the X-API-Key header — same rate limits and plan gates as the web interface",
       "Full API documentation at pledgeoff.com/api-docs — all 25 routes documented with request/response schemas and examples",
@@ -65,10 +65,10 @@ const RELEASES = [
     date: "May 2026",
     tag: "FEATURE",
     items: [
-      "Signal Feed (Pro+): a live feed of trending startup niches ranked by heat score — 15 categories, continuously updated from real market signals, with sparklines showing momentum over the last 7 days",
+      "Signal Feed (Team+): a live feed of trending startup niches ranked by heat score — 15 categories, continuously updated from real market signals, with sparklines showing momentum over the last 7 days",
       "Decision log filters: filter your dashboard by GO, KILL, or PIVOT verdict — counts shown on each chip so you see the breakdown instantly",
-      "Team PDF export (Agency): generate a white-label PDF report for any validated idea — covers the verdict, score breakdown, signals, and all intelligence tools run on the idea",
-      "Advanced team analytics (Agency): verdict distribution donut chart, team velocity sparkline, top contributors ranked by activity, and most-engaged ideas by reaction count",
+      "Team PDF export (Studio+): generate a white-label PDF report for any validated idea — covers the verdict, score breakdown, signals, and all intelligence tools run on the idea",
+      "Advanced team analytics (Studio+): verdict distribution donut chart, team velocity sparkline, top contributors ranked by activity, and most-engaged ideas by reaction count",
     ],
   },
   {
@@ -76,8 +76,8 @@ const RELEASES = [
     date: "May 2026",
     tag: "FEATURE",
     items: [
-      "Agency invoice billing: Agency plan users can request a NET30 invoice directly from Settings → Billing — the request is logged and the finance team follows up within one business day",
-      "Activity audit log (Agency): every action taken by team members — idea creation, tool runs, plan changes, invite activity — recorded and viewable in Settings → Activity",
+      "Studio invoice billing: Studio plan users can request a NET30 invoice directly from Settings → Billing — the request is logged and the finance team follows up within one business day",
+      "Activity audit log (Studio+): every action taken by team members — idea creation, tool runs, plan changes, invite activity — recorded and viewable in Settings → Activity",
       "Google Search added as a signal source alongside Reddit and GitHub — broader coverage for market validation",
       "Domain redirect fixed: www.pledgeoff.com now correctly redirects to pledgeoff.com (308 permanent) — no more split authority in search rankings",
     ],
@@ -89,7 +89,7 @@ const RELEASES = [
     items: [
       "Ask Otto — AI Co-Founder chat on every validated idea: ask strategy, competition, go-to-market, or what to build first",
       "Otto remembers the full conversation per idea — close the page and come back later, the context is preserved",
-      "Pro plan includes 3 Otto questions/month; Pro+ includes 10/month — included quota resets on the 1st of every month",
+      "Founder plan includes 5 Otto questions/month; Team includes 15/month; Studio includes 50/month — included quota resets on the 1st of every month",
       "Buy more questions anytime with one-time packs: 10 questions (€15), 25 (€30), 60 (€60), 150 (€120) — questions never expire and work across all your ideas",
       "Balance display shows included remaining and extra questions separately — always know exactly what you have",
       "Free users see the Otto panel locked with a direct upgrade prompt",
@@ -100,7 +100,7 @@ const RELEASES = [
     date: "May 2026",
     tag: "IMPROVEMENT",
     items: [
-      "Payment recovery flow: when a Pro subscription payment fails, you now receive an email immediately with a link to update your card — your account stays active for 24 hours before any downgrade",
+      "Payment recovery flow: when a paid subscription payment fails, you now receive an email immediately with a link to update your card — your account stays active for 24 hours before any downgrade",
       "Automatic retry: after 24 hours, the payment is retried automatically — if it succeeds, nothing changes; if it fails, the account is downgraded to Free",
       "Team tab locked on payment failure: if your payment is unresolved, the Team section shows a clear notice with a direct link to the billing portal",
     ],
@@ -110,7 +110,7 @@ const RELEASES = [
     date: "May 2026",
     tag: "IMPROVEMENT",
     items: [
-      "Team context on idea creation: Pro and Pro+ users with a team can now choose Personal or Team context when submitting a new idea — ideas tagged as Team appear in the team feed",
+      "Team context on idea creation: Founder and Team users with a team can now choose Personal or Team context when submitting a new idea — ideas tagged as Team appear in the team feed",
       "Security hardening: SECURITY DEFINER functions no longer callable by unauthenticated users; trigger functions hardened against search_path injection",
       "RLS performance: all row-level security policies updated to use the initplan optimization — auth evaluation now runs once per query instead of once per row",
       "Env isolation: development builds now throw immediately if Stripe live keys are used accidentally; all Stripe price IDs validated at startup",
@@ -121,7 +121,7 @@ const RELEASES = [
     date: "May 2026",
     tag: "FIX",
     items: [
-      "Seat add-ons fully live: STRIPE_EXTRA_SEAT_PRICE_ID wired in production — extra seats at €7/seat/month now purchasable from Settings → Billing",
+      "Seat add-ons fully live: STRIPE_EXTRA_SEAT_PRICE_ID wired in production — extra seats at €20/seat/month now purchasable from Settings → Billing",
       "Webhook fix: customer.subscription.updated no longer nullifies stripe_subscription_id — targeted updatePlan() replaces full upsert for plan/status updates",
     ],
   },
@@ -134,7 +134,7 @@ const RELEASES = [
       "Team pulse: stats bar showing total team validations, GO rate, pending count, and most active member",
       "Verdict reactions: agree (↑) or disagree (↓) on any idea in the team feed — counts update live without a page reload",
       "Team feed filters: filter by verdict (GO / KILL / PIVOT / Pending) and by individual member",
-      "Seat add-ons for Pro+: buy extra team seats at €7/seat/month directly from Settings → Billing",
+      "Seat add-ons for Team+: buy extra team seats at €20/seat/month directly from Settings → Billing",
     ],
   },
   {
@@ -145,7 +145,7 @@ const RELEASES = [
       "Team collaboration: invite colleagues by email, accept invites via link, see team members in Settings → Team",
       "Team name editable by the owner directly in Settings → Team",
       "Accept-invite redirect fixed — clicking an email invite link after login now lands on the correct page",
-      "PDF and JSON export no longer marked as coming soon — available to Pro and Pro+ users",
+      "PDF and JSON export no longer marked as coming soon — available to Founder and Team users",
     ],
   },
   {
@@ -194,8 +194,8 @@ const RELEASES = [
     date: "May 2026",
     tag: "FIX",
     items: [
-      "Pro plan now shows correctly in Settings — Account, Billing, and Team tabs all reflect the active subscription",
-      "Team seats now display 1/3 for Pro (was showing 1/1 due to a billing read failure)",
+      "Paid plan now shows correctly in Settings — Account, Billing, and Team tabs all reflect the active subscription",
+      "Team seats now display correctly for Founder (was showing 1/1 due to a billing read failure)",
       "Billing architecture hardened: single service client, centralized plan resolver, all errors logged instead of silently defaulting to free",
     ],
   },

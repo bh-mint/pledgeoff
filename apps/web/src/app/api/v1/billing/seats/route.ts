@@ -8,7 +8,7 @@ const SeatsRequestSchema = z.object({
   extraSeats: z.number().int().min(0).max(97),
 });
 
-// POST /api/v1/billing/seats — buy or update extra seat add-on (Pro+ owner only)
+// POST /api/v1/billing/seats — buy or update extra seat add-on (Team+ owner only)
 export async function POST(req: Request) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 

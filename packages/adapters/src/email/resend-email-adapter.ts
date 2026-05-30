@@ -87,16 +87,16 @@ const SEQUENCE_CONTENT: Record<SequenceDay, (name: string) => { subject: string;
     html: EMAIL_SHELL(`
       <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">DAY 14 · PLEDGEOFF</p>
       <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
-        ${name}, don't stop at 3 ideas.
+        ${name}, don't stop at one idea.
       </h1>
       <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
-        The free plan gives you 3 validations — enough to test your sharpest ideas. But the founders who find product-market fit aren't working from a single idea. They're iterating fast across many.
+        The free plan gives you 1 validation per month — enough to test your sharpest idea. But the founders who find product-market fit aren't working from a single idea. They're iterating fast across many.
       </p>
       <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
-        Pro gives you unlimited validations, team sharing, and priority signals. Starting at €39/month — less than a cancelled subscription you forgot about.
+        Founder gives you 20 validations per month, team sharing, and priority signals. Starting at €39/month — less than a cancelled subscription you forgot about.
       </p>
       <a href="https://pledgeoff.com/pricing" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
-        See Pro plans →
+        See plans →
       </a>
       <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
       <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
@@ -122,7 +122,7 @@ const SEQUENCE_CONTENT: Record<SequenceDay, (name: string) => { subject: string;
         Run a validation →
       </a>
       <a href="https://pledgeoff.com/pricing" style="display:inline-block;margin-left:12px;background:transparent;color:#888;font-size:13px;font-weight:500;padding:10px 20px;border-radius:6px;text-decoration:none;border:1px solid #2a2a2a;">
-        See Pro plans
+        See plans
       </a>
       <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
       <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
@@ -150,7 +150,7 @@ export async function sendPaymentFailedEmail(
       Hey ${displayName}, we couldn't charge your card.
     </h1>
     <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
-      Your Pro subscription payment failed. Your account is still active for now — but if the payment isn't resolved within <strong style="color:#f5f5f5;">24 hours</strong>, your account will be downgraded to the Free plan.
+      Your subscription payment failed. Your account is still active for now — but if the payment isn't resolved within <strong style="color:#f5f5f5;">24 hours</strong>, your account will be downgraded to the Free plan.
     </p>
     <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
       Update your payment method or retry the charge from your billing settings.

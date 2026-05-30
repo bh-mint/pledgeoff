@@ -55,7 +55,7 @@ export class AskOttoUseCase {
     const plan = sub ? effectivePlan(sub) : 'free';
 
     if (plan === 'free' || !sub) {
-      return err(new OttoInsufficientQuestionsError('Upgrade to Pro to use Otto'));
+      return err(new OttoInsufficientQuestionsError('Upgrade to Founder or higher to use Otto'));
     }
 
     if (!canAskOtto(sub)) {
