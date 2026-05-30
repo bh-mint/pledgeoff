@@ -23,7 +23,8 @@ export type DashboardOutcomeRow = {
 
 // Replaces 1 + 5×N separate repo calls with two queries:
 // one JOIN for ideas+decisions+tool presence, one for outcomes.
-export async function getDashboardData(userId: string): Promise<{
+// userIds: pass [userId] for personal view, or all team member IDs for workspace view.
+export async function getDashboardData(userIds: string[]): Promise<{
   ideas: DashboardIdeaRow[];
   outcomes: DashboardOutcomeRow[];
 }> {
@@ -44,14 +45,14 @@ export async function getDashboardData(userId: string): Promise<{
         customer_analyses ( id ),
         build_analyses ( id )
       `)
-      .eq('user_id', userId)
+      .in('user_id', userIds)
       .order('created_at', { ascending: false })
       .returns<RawIdeaRow[]>(),
 
     supabase
       .from('decision_outcomes')
       .select('idea_id, outcome_type')
-      .eq('user_id', userId)
+      .in('user_id', userIds)
       .returns<{ idea_id: string; outcome_type: string }[]>(),
   ]);
 

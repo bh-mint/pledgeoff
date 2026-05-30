@@ -50,13 +50,32 @@ export default async function IdeaPage({ params }: Props) {
   const { id } = await params;
   const user = await requireUser();
 
-  const ideaResult = await container.ideaRepo.findById(id);
+  // Parallel: idea + plan + team (plan needed for access check + gating; team for workspace access)
+  const [ideaResult, plan, teamResult] = await Promise.all([
+    container.ideaRepo.findById(id),
+    getUserPlan(user.id),
+    container.teamRepo.findByMemberId(user.id),
+  ]);
+
   if (ideaResult.isErr() || !ideaResult.value) notFound();
-
   const idea = ideaResult.value;
-  if (idea.userId !== user.id) notFound();
+  const isOwn = idea.userId === user.id;
 
-  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, plan] = await Promise.all([
+  if (!isOwn) {
+    // Allow team members on Team+ plans to view workspace ideas
+    const isWorkspacePlan = plan === "team" || plan === "studio" || plan === "enterprise";
+    const userTeam = teamResult.isOk() ? teamResult.value : null;
+    if (!isWorkspacePlan || !userTeam) notFound();
+
+    const membershipsResult = await container.teamRepo.findMembershipsByTeamId(userTeam.id);
+    const memberships = membershipsResult.isOk() ? membershipsResult.value : [];
+    const isSameTeam =
+      idea.userId === userTeam.ownerId ||
+      memberships.some((m) => m.userId === idea.userId && m.status === "active");
+    if (!isSameTeam) notFound();
+  }
+
+  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult] = await Promise.all([
     container.decisionRepo.findByIdeaId(id),
     container.signalRepo.findByIdeaId(id),
     container.simulationRepo.findByIdeaId(id),
@@ -66,7 +85,6 @@ export default async function IdeaPage({ params }: Props) {
     container.competitorAnalysisRepo.findByIdeaId(id),
     container.launchKitRepo.findByIdeaId(id),
     container.decisionOutcomeRepo.findByIdea(id),
-    getUserPlan(user.id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -82,7 +100,7 @@ export default async function IdeaPage({ params }: Props) {
   const now = new Date();
   const daysOld = Math.floor((now.getTime() - new Date(idea.createdAt).getTime()) / (1000 * 60 * 60 * 24));
   const isOlderThan30Days = daysOld >= 30;
-  const showOutcomeBanner = isOlderThan30Days && !existingOutcome;
+  const showOutcomeBanner = isOwn && isOlderThan30Days && !existingOutcome;
 
   // Signal age: oldest fetchedAt among current signals
   const oldestSignalFetchedAt = signals.length > 0
@@ -91,7 +109,7 @@ export default async function IdeaPage({ params }: Props) {
   const signalAgeDays = oldestSignalFetchedAt
     ? Math.floor((now.getTime() - new Date(oldestSignalFetchedAt).getTime()) / (1000 * 60 * 60 * 24))
     : null;
-  const showRevalidate = decision && signalAgeDays !== null && signalAgeDays >= 7;
+  const showRevalidate = isOwn && decision && signalAgeDays !== null && signalAgeDays >= 7;
 
   const { title, description, category } = parseIdeaText(idea.text);
 
@@ -143,7 +161,7 @@ export default async function IdeaPage({ params }: Props) {
               <div className="hidden sm:flex items-center gap-2 flex-wrap">
                 {decision && <ShareVerdictButton ideaId={id} />}
                 {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
-                {isOlderThan30Days && (
+                {isOwn && isOlderThan30Days && (
                   <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
                 )}
                 <ExportButtons ideaId={id} plan={plan} />
@@ -162,7 +180,7 @@ export default async function IdeaPage({ params }: Props) {
                 >
                   {decision && <ShareVerdictButton ideaId={id} />}
                   {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
-                  {isOlderThan30Days && (
+                  {isOwn && isOlderThan30Days && (
                     <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
                   )}
                   <ExportButtons ideaId={id} plan={plan} />

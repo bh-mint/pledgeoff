@@ -27,6 +27,8 @@ export type TableRow = {
   outcomeType: string | null;
   needsOutcome: boolean;
   signalsStale: boolean;
+  isOwn: boolean;
+  memberInitials?: string;
 };
 
 export type TeamFeedRow = {
@@ -66,6 +68,7 @@ interface DashboardClientProps {
   teamName?: string | null;
   teamId?: string | null;
   plan?: Plan;
+  isWorkspace?: boolean;
 }
 
 export function DashboardClient({
@@ -75,6 +78,7 @@ export function DashboardClient({
   teamName,
   teamId,
   plan = "free",
+  isWorkspace = false,
 }: DashboardClientProps) {
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date");
@@ -334,7 +338,7 @@ export function DashboardClient({
             style={{ borderColor: "var(--border)" }}
           >
             <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">
-              My validations
+              {isWorkspace ? (teamName ? `${teamName} workspace` : "Workspace") : "My validations"}
             </h2>
             <span className="mono text-[10px] text-(--t3)">
               {totalCount}
@@ -487,6 +491,19 @@ export function DashboardClient({
                 {/* Idea */}
                 <div className="sm:col-span-4 min-w-0 mb-1.5 sm:mb-0">
                   <div className="flex items-center gap-2 min-w-0">
+                    {!row.isOwn && row.memberInitials && (
+                      <span
+                        className="w-5 h-5 rounded-full border flex items-center justify-center mono text-[8px] font-semibold shrink-0"
+                        title={`By ${row.memberInitials}`}
+                        style={{
+                          borderColor: "var(--border)",
+                          background: "var(--canvas)",
+                          color: "var(--t2)",
+                        }}
+                      >
+                        {row.memberInitials}
+                      </span>
+                    )}
                     <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
                     {row.needsOutcome && (
                       <span
