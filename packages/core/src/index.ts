@@ -84,3 +84,4 @@ export * from './use-cases/get-flywheel-stats';
 export * from './use-cases/get-users-accuracy-report';
 export * from './use-cases/generate-invite-link';
 export * from './use-cases/join-via-invite-link';
+export * from './use-cases/delete-idea';

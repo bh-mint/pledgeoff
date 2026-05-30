@@ -1,5 +1,5 @@
 import { container } from '@/lib/container';
-import { getCachedIdea, setCachedIdea } from '@/lib/idea-cache';
+import { getCachedIdea, setCachedIdea, invalidateCachedIdea } from '@/lib/idea-cache';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 
 function unauthorizedResponse(traceId: string) {
@@ -63,4 +63,31 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     { data: { idea, decision, signals } },
     { status: 200, headers: { 'X-Trace-Id': traceId, 'X-Cache': 'MISS' } },
   );
+}
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
+  const { id } = await params;
+
+  const userId = await resolveUserIdFromRequest(req);
+  if (!userId) return unauthorizedResponse(traceId);
+
+  const result = await container.deleteIdeaUseCase.execute({ ideaId: id, userId, traceId });
+
+  if (result.isErr()) {
+    const code = result.error.code;
+    if (code === 'NOT_FOUND') {
+      return Response.json(
+        { error: { code: 'NOT_FOUND', message: 'Idea not found' } },
+        { status: 404, headers: { 'X-Trace-Id': traceId } },
+      );
+    }
+    return Response.json(
+      { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
+      { status: 500, headers: { 'X-Trace-Id': traceId } },
+    );
+  }
+
+  invalidateCachedIdea(userId, id);
+  return new Response(null, { status: 204, headers: { 'X-Trace-Id': traceId } });
 }

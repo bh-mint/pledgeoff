@@ -67,6 +67,7 @@ function makeDeps(opts: {
     findByUserIds: vi.fn().mockResolvedValue(ok(ideas)),
     findByUserIdPaginated: vi.fn(),
     countThisMonth: vi.fn(),
+    delete: vi.fn().mockResolvedValue(ok(undefined)),
   };
 
   const decisionRepo: IDecisionRepository = {

@@ -14,6 +14,7 @@ function makeRepo(overrides: Partial<IIdeaRepository> = {}): IIdeaRepository {
     findByUserIds: vi.fn().mockResolvedValue(ok([])),
     findByUserIdPaginated: vi.fn().mockResolvedValue(ok({ ideas: [], hasMore: false, nextCursor: null })),
     countThisMonth: vi.fn().mockResolvedValue(ok(0)),
+    delete: vi.fn().mockResolvedValue(ok(undefined)),
     ...overrides,
   };
 }

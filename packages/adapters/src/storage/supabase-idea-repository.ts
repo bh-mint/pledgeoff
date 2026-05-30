@@ -124,6 +124,17 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
     return ok({ ideas: items, hasMore, nextCursor });
   }
 
+  async delete(id: string, userId: string): Promise<Result<void, IdeaRepositoryError>> {
+    const { error } = await this.client
+      .from('ideas')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', userId);
+
+    if (error) return err(new IdeaRepositoryError(error.message));
+    return ok(undefined);
+  }
+
   async countThisMonth(userId: string): Promise<Result<number, IdeaRepositoryError>> {
     const startOfMonth = new Date();
     startOfMonth.setUTCDate(1);

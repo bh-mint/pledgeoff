@@ -25,4 +25,5 @@ export interface IIdeaRepository {
   findByUserIds(userIds: string[]): Promise<Result<Idea[], IdeaRepositoryError>>;
   findByUserIdPaginated(userId: string, limit: number, cursor?: string): Promise<Result<IdeasPage, IdeaRepositoryError>>;
   countThisMonth(userId: string): Promise<Result<number, IdeaRepositoryError>>;
+  delete(id: string, userId: string): Promise<Result<void, IdeaRepositoryError>>;
 }

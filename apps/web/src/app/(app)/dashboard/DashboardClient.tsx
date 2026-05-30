@@ -98,6 +98,9 @@ export function DashboardClient({
   const [quickText, setQuickText] = useState("");
   const [quickStatus, setQuickStatus] = useState<"idle" | "loading" | "error">("idle");
   const [quickError, setQuickError] = useState("");
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   const handleQuickValidate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -160,6 +163,20 @@ export function DashboardClient({
     }
   }, [reactionState]);
 
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }
+
   const verdictCounts = useMemo(() => ({
     GO:    rows.filter((r) => r.verdict === "GO").length,
     KILL:  rows.filter((r) => r.verdict === "KILL").length,
@@ -177,6 +194,37 @@ export function DashboardClient({
           : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
   }, [rows, search, sort, verdictFilter]);
+
+  function toggleSelectAll() {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((r) => r.id)));
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (deleting || selectedIds.size === 0) return;
+    const count = selectedIds.size;
+    if (!confirm(`Delete ${count} idea${count > 1 ? "s" : ""}? This cannot be undone.`)) return;
+
+    setDeleting(true);
+    const token = await getAuthToken();
+    if (!token) { setDeleting(false); return; }
+
+    await Promise.all(
+      [...selectedIds].map((id) =>
+        fetch(`/api/v1/ideas/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ),
+    );
+
+    setDeleting(false);
+    exitSelectMode();
+    router.refresh();
+  }
 
   return (
     <>
@@ -250,6 +298,18 @@ export function DashboardClient({
             >
               Upgrade →
             </Link>
+          )}
+          {tab === "all" && rows.length > 0 && (
+            <button
+              onClick={() => { setSelectMode((v) => !v); setSelectedIds(new Set()); }}
+              className="mono text-[11px] px-3 h-8 rounded-md border transition-colors shrink-0"
+              style={{
+                borderColor: selectMode ? "var(--kill)" : "var(--border)",
+                color: selectMode ? "var(--kill)" : "var(--t3)",
+              }}
+            >
+              {selectMode ? "Cancel" : "Select"}
+            </button>
           )}
           <Link
             href="/ideas/new"
@@ -335,12 +395,47 @@ export function DashboardClient({
             </div>
           </div>
 
+          {/* Bulk action bar */}
+          {selectMode && selectedIds.size > 0 && (
+            <div
+              className="px-4 sm:px-6 py-2.5 border-b flex items-center gap-3"
+              style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--kill) 6%, transparent)" }}
+            >
+              <span className="mono text-[11px] text-(--t2)">
+                {selectedIds.size} selected
+              </span>
+              <button
+                onClick={handleBulkDelete}
+                disabled={deleting}
+                className="mono text-[11px] px-3 h-7 rounded border transition-colors disabled:opacity-50"
+                style={{ borderColor: "var(--kill)", color: "var(--kill)" }}
+              >
+                {deleting ? "Deleting…" : `Delete ${selectedIds.size} →`}
+              </button>
+            </div>
+          )}
+
           {/* Column headers — desktop only */}
           <div
             className="hidden sm:grid px-6 py-2.5 grid-cols-12 gap-3 border-b mono text-[10px] uppercase tracking-[0.14em]"
             style={{ borderColor: "var(--border)", color: "var(--t3)" }}
           >
-            <div className="col-span-1" />
+            <div className="col-span-1 flex items-center">
+              {selectMode ? (
+                <button
+                  onClick={toggleSelectAll}
+                  className="w-4 h-4 rounded border flex items-center justify-center"
+                  style={{
+                    borderColor: selectedIds.size === filtered.length && filtered.length > 0 ? "var(--accent)" : "var(--t3)",
+                    background: selectedIds.size === filtered.length && filtered.length > 0 ? "var(--accent)" : "transparent",
+                    color: "var(--accent-fg)",
+                    fontSize: "9px",
+                  }}
+                >
+                  {selectedIds.size === filtered.length && filtered.length > 0 ? "✓" : ""}
+                </button>
+              ) : null}
+            </div>
             <div className="col-span-4">Idea</div>
             <div className="col-span-2">Score</div>
             <div className="col-span-1">Verdict</div>
@@ -358,20 +453,26 @@ export function DashboardClient({
               { key: "build" as const, label: "Build" },
             ];
             return (
-              <Link
+              <div
                 key={row.id}
-                href={`/ideas/${row.id}`}
-                className="px-4 sm:px-6 py-3 sm:grid sm:grid-cols-12 sm:gap-3 border-b items-center cursor-pointer transition-colors"
+                className="relative border-b"
                 style={{
                   borderColor: "var(--border)",
-                  background: isToday(row.createdAt) ? "rgba(var(--accent-rgb,99,102,241),0.04)" : undefined,
+                  background: selectedIds.has(row.id) ? "color-mix(in srgb, var(--accent) 6%, transparent)" : isToday(row.createdAt) ? "rgba(var(--accent-rgb,99,102,241),0.04)" : undefined,
                   borderLeft: isToday(row.createdAt) ? "2px solid var(--accent)" : undefined,
+                }}
+              >
+              <Link
+                href={`/ideas/${row.id}`}
+                className="block px-4 sm:px-6 py-3 sm:grid sm:grid-cols-12 sm:gap-3 items-center transition-colors"
+                style={{
+                  pointerEvents: selectMode ? "none" : undefined,
                 }}
                 onMouseEnter={(e) =>
                   (e.currentTarget.style.background = "rgba(255,255,255,0.015)")
                 }
                 onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = isToday(row.createdAt) ? "rgba(var(--accent-rgb,99,102,241),0.04)" : "transparent")
+                  (e.currentTarget.style.background = "transparent")
                 }
               >
                 {/* Verdict icon */}
@@ -488,6 +589,24 @@ export function DashboardClient({
                   </div>
                 </div>
               </Link>
+              {selectMode && (
+                <div
+                  className="absolute inset-0 z-10 cursor-pointer flex items-center pl-4 sm:pl-6"
+                  onClick={() => toggleSelect(row.id)}
+                >
+                  <span
+                    className="w-4 h-4 rounded border flex items-center justify-center text-[9px] shrink-0"
+                    style={{
+                      borderColor: selectedIds.has(row.id) ? "var(--accent)" : "var(--t3)",
+                      background: selectedIds.has(row.id) ? "var(--accent)" : "transparent",
+                      color: "var(--accent-fg)",
+                    }}
+                  >
+                    {selectedIds.has(row.id) ? "✓" : ""}
+                  </span>
+                </div>
+              )}
+              </div>
             );
           })}
 

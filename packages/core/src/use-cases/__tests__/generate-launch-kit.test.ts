@@ -48,6 +48,7 @@ function makeIdeaRepo(idea: Idea | null = mockIdea): IIdeaRepository {
     findByUserIds: vi.fn(),
     findByUserIdPaginated: vi.fn(),
     countThisMonth: vi.fn(),
+    delete: vi.fn().mockResolvedValue(ok(undefined)),
   };
 }
 
