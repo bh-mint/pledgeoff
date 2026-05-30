@@ -50,6 +50,15 @@ export class SupabaseDecisionRepository implements IDecisionRepository {
       .single<DecisionRow>();
 
     if (error) return err(new DecisionRepositoryError(error.message));
+
+    // Populate M2M table for signal→decisions analytics queries.
+    // signal_ids[] remains source of truth; failure here is non-fatal.
+    if (decision.signalIds.length > 0) {
+      void this.client
+        .from('decision_signals')
+        .insert(decision.signalIds.map((sid) => ({ decision_id: decision.id, signal_id: sid })));
+    }
+
     return ok(rowToDecision(data));
   }
 
