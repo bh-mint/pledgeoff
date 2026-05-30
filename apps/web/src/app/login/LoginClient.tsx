@@ -12,7 +12,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 type Mode = "signin" | "signup";
-type State = "idle" | "loading" | "error" | "check_email" | "reset_sent";
+type State = "idle" | "loading" | "error" | "check_email" | "reset_sent" | "mfa_required";
 
 export function LoginClient() {
   const router = useRouter();
@@ -25,6 +25,8 @@ export function LoginClient() {
   const [password, setPassword] = useState("");
   const [uiState, setUiState] = useState<State>(urlError ? "error" : "idle");
   const [errorMsg, setErrorMsg] = useState(urlError);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaFactorId, setMfaFactorId] = useState("");
 
   const handleEmailAuth = async (e: { preventDefault(): void }) => {
     e.preventDefault();
@@ -62,6 +64,17 @@ export function LoginClient() {
         );
         setUiState("error");
       } else {
+        // Check if MFA upgrade is required
+        const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aalData?.nextLevel === "aal2" && aalData.nextLevel !== aalData.currentLevel) {
+          const { data: factorsData } = await supabase.auth.mfa.listFactors();
+          const totpFactor = factorsData?.totp?.[0];
+          if (totpFactor) {
+            setMfaFactorId(totpFactor.id);
+            setUiState("mfa_required");
+            return;
+          }
+        }
         const next = searchParams.get("next") ?? "/dashboard";
         router.push(next);
         router.refresh();
@@ -124,11 +137,108 @@ export function LoginClient() {
     }
   };
 
+  const handleMfaVerify = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setUiState("loading");
+    const supabase = createSupabaseBrowserClient();
+    const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
+    if (challengeError || !challengeData) {
+      setErrorMsg(challengeError?.message ?? "Failed to start MFA challenge.");
+      setUiState("mfa_required");
+      return;
+    }
+    const { error: verifyError } = await supabase.auth.mfa.verify({
+      factorId: mfaFactorId,
+      challengeId: challengeData.id,
+      code: mfaCode,
+    });
+    if (verifyError) {
+      setErrorMsg("Invalid code. Try again.");
+      setUiState("mfa_required");
+      return;
+    }
+    const next = searchParams.get("next") ?? "/dashboard";
+    router.push(next);
+    router.refresh();
+  };
+
   const switchMode = (m: Mode) => {
     setMode(m);
     setErrorMsg("");
     setUiState("idle");
   };
+
+  if (uiState === "mfa_required") {
+    return (
+      <div
+        className="rounded-md border p-8 w-full max-w-sm reveal"
+        style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
+      >
+        <div className="display text-[14px] font-semibold mb-4">
+          Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+        </div>
+        <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
+          Two-factor auth.
+        </h1>
+        <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
+          Enter the 6-digit code from your authenticator app.
+        </p>
+
+        {errorMsg && (
+          <div
+            className="rounded-md border p-3 mt-5"
+            style={{ borderColor: "rgba(229,91,60,0.4)", background: "rgba(229,91,60,0.06)" }}
+          >
+            <div className="text-[12px]" style={{ color: "var(--t1)" }}>{errorMsg}</div>
+          </div>
+        )}
+
+        <form onSubmit={handleMfaVerify} className="mt-6 space-y-3">
+          <label className="block">
+            <span className="mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>Authenticator code</span>
+            <div
+              className="mt-1.5 rounded-md border px-3 h-10 flex items-center"
+              style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+            >
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                value={mfaCode}
+                onChange={(e) => { setMfaCode(e.target.value.replace(/\D/g, "")); setErrorMsg(""); }}
+                placeholder="000000"
+                required
+                autoFocus
+                autoComplete="one-time-code"
+                className="w-full text-[13px] tracking-[0.25em] bg-transparent outline-none placeholder:text-(--t3) placeholder:tracking-normal"
+                style={{ color: "var(--t1)" }}
+              />
+            </div>
+          </label>
+          <button
+            type="submit"
+            disabled={mfaCode.length !== 6}
+            className="display w-full h-10 rounded-md text-[13px] font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-50"
+            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+          >
+            Verify →
+          </button>
+        </form>
+
+        <p className="mono text-[10px] mt-5" style={{ color: "var(--t3)" }}>
+          <button
+            type="button"
+            onClick={() => { setUiState("idle"); setMfaCode(""); setErrorMsg(""); }}
+            className="underline"
+            style={{ color: "var(--t2)" }}
+          >
+            Back to sign in
+          </button>
+        </p>
+      </div>
+    );
+  }
 
   if (uiState === "reset_sent") {
     return (

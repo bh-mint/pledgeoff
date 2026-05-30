@@ -11,6 +11,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/settings/billing", label: "Billing" },
   { href: "/settings/team", label: "Team" },
   { href: "/settings/integrations", label: "Integrations" },
+  { href: "/settings/security", label: "Security" },
   { href: "/settings/audit-log", label: "Activity", studioOnly: true },
   { href: "/settings/developer", label: "Developer" },
   { href: "/settings/data", label: "Danger zone" },
