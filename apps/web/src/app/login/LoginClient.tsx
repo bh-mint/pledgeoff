@@ -114,7 +114,7 @@ export function LoginClient() {
     setUiState("loading");
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/settings`,
+      redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) {
       setErrorMsg(error.message);
