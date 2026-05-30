@@ -66,6 +66,11 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('pledgeoff-theme');var prefer=t==='light'?'light':t==='dark'?'dark':(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',prefer)}catch(e){}})()`,
           }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js')})}`,
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         {children}
