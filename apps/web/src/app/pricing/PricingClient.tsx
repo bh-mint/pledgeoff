@@ -39,7 +39,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
     group: "Team",
     rows: [
       { k: "Seats included",            f: "1",               fo: "1",              t: "3",                s: "8" },
-      { k: "Extra seats",               f: "—",               fo: "—",              t: "€12/seat/mo",      s: "€20/seat/mo" },
+      { k: "Extra seats",               f: "—",               fo: "—",              t: `€${PRICING.seats.extraEurPerMonth}/seat/mo`,      s: `€${PRICING.seats.extraEurPerMonth}/seat/mo` },
       { k: "Early access to features",  f: "—",               fo: "—",              t: "✓",                s: "✓" },
     ],
   },
@@ -467,6 +467,11 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             Enterprise →
           </a>
         </div>
+
+        {/* VAT footnote */}
+        <p className="mono text-[10px] mt-4 text-center" style={{ color: "var(--t3)" }}>
+          All prices in EUR · excl. VAT where applicable
+        </p>
 
         {/* Feature comparison table */}
         <div className="mt-12 sm:mt-16">

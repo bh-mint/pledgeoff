@@ -15,4 +15,15 @@ export const PRICING = {
     monthly: { eur: 1199, annual_equivalent: 959, annual_total: 11508 },
     label: "Enterprise",
   },
+  seats: {
+    extraEurPerMonth: 20,
+  },
+  otto: {
+    packs: [
+      { count: 10, eur: 15 },
+      { count: 25, eur: 30 },
+      { count: 60, eur: 60 },
+      { count: 150, eur: 120 },
+    ] as const,
+  },
 } as const;

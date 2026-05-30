@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { getAuthToken } from '@/lib/auth-client';
+import { PRICING } from '@/lib/pricing.config';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -27,12 +28,11 @@ type Props = {
   initialMessages: Message[];
 };
 
-const PACK_OPTIONS = [
-  { count: 10, price: '€15', label: '10 questions' },
-  { count: 25, price: '€30', label: '25 questions' },
-  { count: 60, price: '€60', label: '60 questions' },
-  { count: 150, price: '€120', label: '150 questions' },
-] as const;
+const PACK_OPTIONS = PRICING.otto.packs.map((p) => ({
+  count: p.count,
+  price: `€${p.eur}`,
+  label: `${p.count} questions`,
+}));
 
 export default function OttoChatClient({
   ideaId, ideaText, verdict, reasoning, score,
@@ -86,7 +86,7 @@ export default function OttoChatClient({
     setLoading(false);
   }
 
-  async function handleBuyPack(count: 10 | 25 | 60 | 150) {
+  async function handleBuyPack(count: number) {
     setBuyLoading(true);
     const token = await getAuthToken();
     const res = await fetch('/api/v1/billing/otto-pack', {

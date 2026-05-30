@@ -7,6 +7,7 @@ import { getAuthToken } from "@/lib/auth-client";
 import type { Plan, SubscriptionStatus } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 import { CheckoutModal } from "@/components/CheckoutModal";
+import { PRICING } from "@/lib/pricing.config";
 
 type AvailablePlan = {
   id: "founder" | "team" | "studio" | "enterprise";
@@ -84,6 +85,7 @@ export function BillingClient({
   );
   const [modifyOpen, setModifyOpen] = useState(false);
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   const handleChangePlan = async (priceId: string) => {
     setBillingAction("loading");
@@ -137,6 +139,21 @@ export function BillingClient({
 
   const handleCheckout = (priceId: string) => {
     setCheckoutPriceId(priceId);
+  };
+
+  const handlePortal = async () => {
+    setPortalLoading(true);
+    const token = await getAuthToken();
+    const res = await fetch("/api/v1/billing/portal", {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (res.ok) {
+      const json = (await res.json()) as { data: { url: string } };
+      window.location.href = json.data.url;
+    } else {
+      setPortalLoading(false);
+    }
   };
 
   const handleUpdateSeats = async () => {
@@ -242,7 +259,15 @@ export function BillingClient({
           </div>
 
           {isPaid && !cancelAtPeriodEnd && (
-            <div className="flex gap-2 shrink-0">
+            <div className="flex gap-2 shrink-0 flex-wrap">
+              <button
+                onClick={handlePortal}
+                disabled={portalLoading}
+                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+              >
+                {portalLoading ? "Opening…" : "Manage billing →"}
+              </button>
               <button
                 onClick={() => {
                   setModifyOpen((v) => !v);
@@ -565,7 +590,7 @@ export function BillingClient({
       {/* Seat add-ons — Team and Studio */}
       {(plan === "team" || plan === "studio") && (() => {
         const baseSeats = plan === "team" ? 3 : 8;
-        const seatPrice = 20;
+        const seatPrice = PRICING.seats.extraEurPerMonth;
         return (
         <div
           className="border rounded-md p-5"
