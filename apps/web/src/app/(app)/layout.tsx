@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth-server";
 import { AppNav } from "@/components/AppNav";
+import { AutoJoinChecker } from "@/components/AutoJoinChecker";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { container } from "@/lib/container";
 import { PLAN_LIMITS } from "@pledgeoff/core";
@@ -55,6 +56,7 @@ export default async function AppLayout({
 
   return (
     <>
+      <AutoJoinChecker />
       <AppNav
         email={user.email ?? ""}
         initials={initials}

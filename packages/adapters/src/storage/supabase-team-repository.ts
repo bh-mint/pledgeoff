@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   TeamRepositoryError,
   type Team,
+  type TeamDomainAllowlist,
   type TeamInviteLink,
   type TeamMembership,
   type TeamRole,
@@ -298,6 +299,51 @@ export class SupabaseTeamRepository implements ITeamRepository {
       .from('team_invite_links')
       .update({ revoked_at: revokedAt })
       .eq('id', linkId);
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async findDomainAllowlistsByTeamId(teamId: string): Promise<Result<TeamDomainAllowlist[], TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('team_domain_allowlists')
+      .select('id, team_id, domain, created_by, created_at')
+      .eq('team_id', teamId)
+      .order('created_at', { ascending: true });
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok((data ?? []).map((r: { id: string; team_id: string; domain: string; created_by: string; created_at: string }) => ({
+      id: r.id, teamId: r.team_id, domain: r.domain, createdBy: r.created_by, createdAt: r.created_at,
+    })));
+  }
+
+  async findTeamByEmailDomain(domain: string): Promise<Result<Team | null, TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('team_domain_allowlists')
+      .select('teams!inner(id, name, owner_id, logo_url, created_at, updated_at)')
+      .eq('domain', domain)
+      .limit(1)
+      .maybeSingle<{ teams: { id: string; name: string; owner_id: string; logo_url: string | null; created_at: string; updated_at: string } }>();
+    if (error) return err(new TeamRepositoryError(error.message));
+    if (!data?.teams) return ok(null);
+    const t = data.teams;
+    return ok({ id: t.id, name: t.name, ownerId: t.owner_id, logoUrl: t.logo_url, createdAt: t.created_at, updatedAt: t.updated_at });
+  }
+
+  async saveDomainAllowlist(entry: TeamDomainAllowlist): Promise<Result<TeamDomainAllowlist, TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('team_domain_allowlists')
+      .insert({ id: entry.id, team_id: entry.teamId, domain: entry.domain, created_by: entry.createdBy, created_at: entry.createdAt })
+      .select('id, team_id, domain, created_by, created_at')
+      .single<{ id: string; team_id: string; domain: string; created_by: string; created_at: string }>();
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok({ id: data.id, teamId: data.team_id, domain: data.domain, createdBy: data.created_by, createdAt: data.created_at });
+  }
+
+  async deleteDomainAllowlist(teamId: string, domain: string): Promise<Result<void, TeamRepositoryError>> {
+    const { error } = await this.client
+      .from('team_domain_allowlists')
+      .delete()
+      .eq('team_id', teamId)
+      .eq('domain', domain);
     if (error) return err(new TeamRepositoryError(error.message));
     return ok(undefined);
   }

@@ -77,6 +77,9 @@ import {
   GetFlywheelStatsUseCase,
   GetUsersAccuracyReportUseCase,
   RegisterWebhookUseCase,
+  AddDomainAllowlistUseCase,
+  RemoveDomainAllowlistUseCase,
+  AutoJoinByDomainUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -339,6 +342,21 @@ class AppContainer {
   private _joinViaInviteLinkUseCase?: JoinViaInviteLinkUseCase;
   get joinViaInviteLinkUseCase(): JoinViaInviteLinkUseCase {
     return (this._joinViaInviteLinkUseCase ??= new JoinViaInviteLinkUseCase(this.teamRepo));
+  }
+
+  private _addDomainAllowlistUseCase?: AddDomainAllowlistUseCase;
+  get addDomainAllowlistUseCase(): AddDomainAllowlistUseCase {
+    return (this._addDomainAllowlistUseCase ??= new AddDomainAllowlistUseCase(this.teamRepo, this.subscriptionRepo));
+  }
+
+  private _removeDomainAllowlistUseCase?: RemoveDomainAllowlistUseCase;
+  get removeDomainAllowlistUseCase(): RemoveDomainAllowlistUseCase {
+    return (this._removeDomainAllowlistUseCase ??= new RemoveDomainAllowlistUseCase(this.teamRepo, this.subscriptionRepo));
+  }
+
+  private _autoJoinByDomainUseCase?: AutoJoinByDomainUseCase;
+  get autoJoinByDomainUseCase(): AutoJoinByDomainUseCase {
+    return (this._autoJoinByDomainUseCase ??= new AutoJoinByDomainUseCase(this.teamRepo));
   }
 
   private _updateMemberRoleUseCase?: UpdateMemberRoleUseCase;

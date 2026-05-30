@@ -1,5 +1,5 @@
 import type { Result } from 'neverthrow';
-import type { Team, TeamInviteLink, TeamMembership, TeamRepositoryError } from '../domain/team';
+import type { Team, TeamDomainAllowlist, TeamInviteLink, TeamMembership, TeamRepositoryError } from '../domain/team';
 
 export interface ITeamRepository {
   findById(teamId: string): Promise<Result<Team | null, TeamRepositoryError>>;
@@ -20,4 +20,9 @@ export interface ITeamRepository {
   findInviteLinkByTeamId(teamId: string): Promise<Result<TeamInviteLink | null, TeamRepositoryError>>;
   saveInviteLink(link: TeamInviteLink): Promise<Result<TeamInviteLink, TeamRepositoryError>>;
   revokeInviteLink(linkId: string, revokedAt: string): Promise<Result<void, TeamRepositoryError>>;
+  // Domain allowlists
+  findDomainAllowlistsByTeamId(teamId: string): Promise<Result<TeamDomainAllowlist[], TeamRepositoryError>>;
+  findTeamByEmailDomain(domain: string): Promise<Result<Team | null, TeamRepositoryError>>;
+  saveDomainAllowlist(entry: TeamDomainAllowlist): Promise<Result<TeamDomainAllowlist, TeamRepositoryError>>;
+  deleteDomainAllowlist(teamId: string, domain: string): Promise<Result<void, TeamRepositoryError>>;
 }

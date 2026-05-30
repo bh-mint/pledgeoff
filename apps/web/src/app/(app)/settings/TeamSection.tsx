@@ -114,6 +114,10 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [inviteLinkState, setInviteLinkState] = useState<"idle" | "loading" | "revoking" | "copied">("idle");
   const [teamLogoUrl, setTeamLogoUrl] = useState<string | null>(null);
+  const [domainAllowlists, setDomainAllowlists] = useState<string[]>([]);
+  const [newDomain, setNewDomain] = useState("");
+  const [domainState, setDomainState] = useState<"idle" | "loading" | "error">("idle");
+  const [domainError, setDomainError] = useState("");
 
   const seatsIncluded = PLAN_LIMITS[plan].seatsIncluded;
 
@@ -121,10 +125,14 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
     const token = await getAuthToken();
     if (!token) return;
 
-    const [teamRes, linkRes] = await Promise.all([
+    const requests: Promise<Response>[] = [
       fetch("/api/v1/teams", { headers: { Authorization: `Bearer ${token}` } }),
       fetch("/api/v1/teams/invite-link", { headers: { Authorization: `Bearer ${token}` } }),
-    ]);
+    ];
+    if (plan === "enterprise") {
+      requests.push(fetch("/api/v1/teams/domain-allowlist", { headers: { Authorization: `Bearer ${token}` } }));
+    }
+    const [teamRes, linkRes, domainRes] = await Promise.all(requests);
 
     if (teamRes.ok) {
       const json = await teamRes.json() as { data: Omit<TeamData, 'callerRole'> & { isOwner: boolean } };
@@ -147,8 +155,12 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
       const json = await linkRes.json() as { data: { url: string | null } };
       setInviteLink(json.data.url ?? null);
     }
+    if (domainRes?.ok) {
+      const json = await domainRes.json() as { data: { domain: string }[] };
+      setDomainAllowlists(json.data.map((e) => e.domain));
+    }
     setLoading(false);
-  }, []);
+  }, [plan]);
 
   const handleGenerateLink = async () => {
     setInviteLinkState("loading");
@@ -536,6 +548,124 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
             >
               {inviteLinkState === "loading" ? "Generating…" : "Generate invite link →"}
             </button>
+          )}
+        </div>
+      )}
+
+      {/* Domain allowlist — Enterprise owners only */}
+      {plan === "enterprise" && data?.callerRole === "owner" && (
+        <div
+          className="rounded-md border p-4"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>
+            Domain allowlist
+          </div>
+          <p className="text-[12px] mb-3" style={{ color: "var(--t2)" }}>
+            Users who sign up with a matching email domain join your workspace automatically — no invite needed.
+          </p>
+
+          <div className="flex gap-2 mb-3">
+            <input
+              type="text"
+              value={newDomain}
+              onChange={(e) => setNewDomain(e.target.value)}
+              placeholder="acme.com"
+              className="mono text-[12px] flex-1 rounded-md border px-3 h-8 bg-transparent outline-none focus:border-[var(--accent)]"
+              style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  void (async () => {
+                    if (!newDomain.trim()) return;
+                    setDomainState("loading");
+                    setDomainError("");
+                    const token = await getAuthToken();
+                    if (!token) { setDomainState("idle"); return; }
+                    const res = await fetch("/api/v1/teams/domain-allowlist", {
+                      method: "POST",
+                      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                      body: JSON.stringify({ domain: newDomain.trim() }),
+                    });
+                    if (res.ok) {
+                      const json = await res.json() as { data: { domain: string } };
+                      setDomainAllowlists((prev) => [...prev, json.data.domain]);
+                      setNewDomain("");
+                    } else {
+                      const json = await res.json() as { error?: { message?: string } };
+                      setDomainError(json.error?.message ?? "Could not add domain.");
+                    }
+                    setDomainState("idle");
+                  })();
+                }
+              }}
+            />
+            <button
+              disabled={domainState === "loading" || !newDomain.trim()}
+              onClick={() => {
+                void (async () => {
+                  if (!newDomain.trim()) return;
+                  setDomainState("loading");
+                  setDomainError("");
+                  const token = await getAuthToken();
+                  if (!token) { setDomainState("idle"); return; }
+                  const res = await fetch("/api/v1/teams/domain-allowlist", {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ domain: newDomain.trim() }),
+                  });
+                  if (res.ok) {
+                    const json = await res.json() as { data: { domain: string } };
+                    setDomainAllowlists((prev) => [...prev, json.data.domain]);
+                    setNewDomain("");
+                  } else {
+                    const json = await res.json() as { error?: { message?: string } };
+                    setDomainError(json.error?.message ?? "Could not add domain.");
+                  }
+                  setDomainState("idle");
+                })();
+              }}
+              className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-40"
+              style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+            >
+              {domainState === "loading" ? "…" : "Add"}
+            </button>
+          </div>
+
+          {domainError && <p className="mono text-[11px] mb-2" style={{ color: "var(--kill)" }}>{domainError}</p>}
+
+          {domainAllowlists.length > 0 ? (
+            <div className="flex flex-col gap-1">
+              {domainAllowlists.map((domain) => (
+                <div
+                  key={domain}
+                  className="flex items-center justify-between rounded border px-3 py-1.5"
+                  style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+                >
+                  <span className="mono text-[12px]" style={{ color: "var(--t1)" }}>@{domain}</span>
+                  <button
+                    onClick={() => {
+                      void (async () => {
+                        const token = await getAuthToken();
+                        if (!token) return;
+                        const res = await fetch(`/api/v1/teams/domain-allowlist/${encodeURIComponent(domain)}`, {
+                          method: "DELETE",
+                          headers: { Authorization: `Bearer ${token}` },
+                        });
+                        if (res.ok || res.status === 204) {
+                          setDomainAllowlists((prev) => prev.filter((d) => d !== domain));
+                        }
+                      })();
+                    }}
+                    className="mono text-[10px] transition-opacity hover:opacity-70"
+                    style={{ color: "var(--kill)" }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="mono text-[11px]" style={{ color: "var(--t3)" }}>No domains added yet.</p>
           )}
         </div>
       )}

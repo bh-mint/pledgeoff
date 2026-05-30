@@ -1,5 +1,50 @@
 import { z } from 'zod';
 
+export const TeamDomainAllowlistSchema = z.object({
+  id: z.string().uuid(),
+  teamId: z.string().uuid(),
+  domain: z.string().min(4).max(253),
+  createdBy: z.string().uuid(),
+  createdAt: z.string().datetime({ offset: true }),
+});
+export type TeamDomainAllowlist = z.infer<typeof TeamDomainAllowlistSchema>;
+
+export class DomainAllowlistNotFoundError extends Error {
+  readonly code = 'DOMAIN_ALLOWLIST_NOT_FOUND';
+}
+export class DomainAllowlistAlreadyExistsError extends Error {
+  readonly code = 'DOMAIN_ALLOWLIST_ALREADY_EXISTS';
+  constructor(public readonly domain: string) { super(`Domain ${domain} is already in the allowlist`); }
+}
+export class DomainAllowlistInvalidError extends Error {
+  readonly code = 'DOMAIN_ALLOWLIST_INVALID';
+  constructor(reason: string) { super(reason); }
+}
+export class DomainAllowlistPlanError extends Error {
+  readonly code = 'DOMAIN_ALLOWLIST_PLAN_ERROR';
+  constructor() { super('Domain allowlist requires an Enterprise plan'); }
+}
+
+const DOMAIN_RE = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,}$/;
+
+export function normalizeDomain(raw: string): string {
+  return raw.trim().toLowerCase().replace(/^@/, '');
+}
+
+export function validateDomain(domain: string): boolean {
+  return DOMAIN_RE.test(domain);
+}
+
+export function createDomainAllowlist(input: { teamId: string; domain: string; createdBy: string }): TeamDomainAllowlist {
+  return {
+    id: crypto.randomUUID(),
+    teamId: input.teamId,
+    domain: input.domain,
+    createdBy: input.createdBy,
+    createdAt: new Date().toISOString(),
+  };
+}
+
 export const TeamRoleSchema = z.enum(['owner', 'admin', 'member']);
 export type TeamRole = z.infer<typeof TeamRoleSchema>;
 

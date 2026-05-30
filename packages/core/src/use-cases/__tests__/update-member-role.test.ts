@@ -51,6 +51,10 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
     findInviteLinkByTeamId: async () => ok(null),
     saveInviteLink: async (l) => ok(l),
     revokeInviteLink: async () => ok(undefined),
+    findDomainAllowlistsByTeamId: async () => ok([]),
+    findTeamByEmailDomain: async () => ok(null),
+    saveDomainAllowlist: async (e) => ok(e),
+    deleteDomainAllowlist: async () => ok(undefined),
     ...overrides,
   };
 }

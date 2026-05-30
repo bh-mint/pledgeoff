@@ -38,7 +38,7 @@ export const PLAN_LIMITS = {
   founder:    { verificationsPerMonth: 20,       seatsIncluded: 1,        ottoQuestionsPerMonth: 5        },
   team:       { verificationsPerMonth: Infinity, seatsIncluded: 3,        ottoQuestionsPerMonth: 15       },
   studio:     { verificationsPerMonth: Infinity, seatsIncluded: 8,        ottoQuestionsPerMonth: 50       },
-  enterprise: { verificationsPerMonth: Infinity, seatsIncluded: 25,       ottoQuestionsPerMonth: Infinity },
+  enterprise: { verificationsPerMonth: Infinity, seatsIncluded: Infinity, ottoQuestionsPerMonth: Infinity },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
 
 export const OTTO_PACK_SIZES = [10, 25, 60, 150] as const;
