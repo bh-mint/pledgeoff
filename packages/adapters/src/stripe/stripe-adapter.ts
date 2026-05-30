@@ -347,4 +347,37 @@ export class StripeAdapter {
       return err(new StripeAdapterError('Failed to create Otto pack checkout session', e));
     }
   }
+
+  async getCustomerVatId(customerId: string): Promise<Result<{ id: string; value: string } | null, StripeAdapterError>> {
+    try {
+      const taxIds = await this.stripe.customers.listTaxIds(customerId, { limit: 10 });
+      const vatId = taxIds.data.find((t) => t.type === 'eu_vat' && !t.deleted);
+      if (!vatId) return ok(null);
+      return ok({ id: vatId.id, value: vatId.value });
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to fetch customer tax IDs', e));
+    }
+  }
+
+  async upsertCustomerVatId(
+    customerId: string,
+    vatId: string | null,
+  ): Promise<Result<{ value: string } | null, StripeAdapterError>> {
+    try {
+      // Remove all existing eu_vat entries first (Stripe tax IDs are immutable)
+      const existing = await this.stripe.customers.listTaxIds(customerId, { limit: 10 });
+      const euVats = existing.data.filter((t) => t.type === 'eu_vat' && !t.deleted);
+      await Promise.all(euVats.map((t) => this.stripe.customers.deleteTaxId(customerId, t.id)));
+
+      if (!vatId) return ok(null);
+
+      const created = await this.stripe.customers.createTaxId(customerId, {
+        type: 'eu_vat',
+        value: vatId.trim().toUpperCase(),
+      });
+      return ok({ value: created.value });
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to upsert customer VAT ID', e));
+    }
+  }
 }

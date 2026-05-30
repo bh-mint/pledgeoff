@@ -10,6 +10,8 @@ export type AuditAction =
   | 'subscription_cancelled'
   | 'subscription_reactivated'
   | 'invoice_requested'
+  | 'billing_vat_id_updated'
+  | 'billing_vat_id_removed'
   | 'rate_limited';
 
 export type AuditEntry = {

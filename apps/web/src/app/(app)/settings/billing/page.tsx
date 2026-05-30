@@ -29,13 +29,18 @@ export default async function BillingPage() {
 
   let cancelAtPeriodEnd = false;
   let billingInterval: "monthly" | "annual" = "monthly";
+  let currentVatId: string | null = null;
   if (sub?.stripeSubscriptionId && container.stripeAdapter) {
-    const liveResult = await container.stripeAdapter.getSubscription(
-      sub.stripeSubscriptionId,
-    );
+    const [liveResult, vatResult] = await Promise.all([
+      container.stripeAdapter.getSubscription(sub.stripeSubscriptionId),
+      stripeCustomerId ? container.stripeAdapter.getCustomerVatId(stripeCustomerId) : Promise.resolve(null),
+    ]);
     if (liveResult.isOk()) {
       cancelAtPeriodEnd = liveResult.value.cancelAtPeriodEnd;
       billingInterval = liveResult.value.interval;
+    }
+    if (vatResult && vatResult.isOk()) {
+      currentVatId = vatResult.value?.value ?? null;
     }
   }
 
@@ -77,8 +82,6 @@ export default async function BillingPage() {
     );
   }).length;
 
-  void stripeCustomerId;
-
   return (
     <BillingClient
       plan={plan}
@@ -89,6 +92,7 @@ export default async function BillingPage() {
       cancelAtPeriodEnd={cancelAtPeriodEnd}
       billingInterval={billingInterval}
       availablePlans={availablePlans}
+      currentVatId={currentVatId}
     />
   );
 }

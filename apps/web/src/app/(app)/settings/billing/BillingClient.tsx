@@ -28,6 +28,7 @@ type Props = {
   cancelAtPeriodEnd?: boolean;
   billingInterval?: "monthly" | "annual";
   availablePlans?: AvailablePlan[];
+  currentVatId?: string | null;
 };
 
 const PLAN_LABELS: Record<Plan, string> = {
@@ -54,6 +55,7 @@ export function BillingClient({
   cancelAtPeriodEnd: initialCancelAtPeriodEnd = false,
   billingInterval = "monthly",
   availablePlans = [],
+  currentVatId = null,
 }: Props) {
   const router = useRouter();
   const isPaid = plan !== "free";
@@ -86,6 +88,9 @@ export function BillingClient({
   const [modifyOpen, setModifyOpen] = useState(false);
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
+  const [vatId, setVatId] = useState(currentVatId ?? "");
+  const [vatState, setVatState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [vatError, setVatError] = useState("");
 
   const handleChangePlan = async (priceId: string) => {
     setBillingAction("loading");
@@ -153,6 +158,29 @@ export function BillingClient({
       window.location.href = json.data.url;
     } else {
       setPortalLoading(false);
+    }
+  };
+
+  const handleVatSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setVatState("loading");
+    setVatError("");
+    const token = await getAuthToken();
+    const res = await fetch("/api/v1/billing/vat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ vatId: vatId.trim() || null }),
+    });
+    if (res.ok) {
+      setVatState("success");
+      setTimeout(() => setVatState("idle"), 2500);
+    } else {
+      const json = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+      setVatError(json.error?.message ?? "Failed to save VAT ID.");
+      setVatState("error");
     }
   };
 
@@ -721,6 +749,72 @@ export function BillingClient({
         </div>
         );
       })()}
+
+      {/* VAT ID — only for paid plans */}
+      {isPaid && (
+        <div
+          className="rounded-md border p-5"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <div className="mb-4">
+            <h3 className="display text-[14px] font-semibold" style={{ color: "var(--t1)" }}>
+              VAT ID
+            </h3>
+            <p className="text-[12px] mt-0.5" style={{ color: "var(--t2)" }}>
+              EU businesses: add your VAT number to apply reverse charge on future invoices.
+            </p>
+          </div>
+
+          <form onSubmit={handleVatSave} className="flex items-start gap-2">
+            <div
+              className="flex-1 rounded-md border px-3 h-9 flex items-center"
+              style={{ borderColor: vatState === "error" ? "rgba(229,91,60,0.5)" : "var(--border)", background: "var(--canvas)" }}
+            >
+              <input
+                type="text"
+                value={vatId}
+                onChange={(e) => { setVatId(e.target.value.toUpperCase()); if (vatState === "error") setVatState("idle"); }}
+                placeholder="e.g. RO12345678"
+                maxLength={20}
+                disabled={vatState === "loading"}
+                className="w-full mono text-[12px] bg-transparent outline-none placeholder:text-(--t3)"
+                style={{ color: "var(--t1)" }}
+              />
+              {vatId && vatState !== "loading" && (
+                <button
+                  type="button"
+                  onClick={() => { setVatId(""); setVatState("idle"); setVatError(""); }}
+                  className="ml-1 mono text-[10px] shrink-0 hover:opacity-70"
+                  style={{ color: "var(--t3)" }}
+                >
+                  ×
+                </button>
+              )}
+            </div>
+            <button
+              type="submit"
+              disabled={vatState === "loading"}
+              className="shrink-0 h-9 px-4 rounded-md mono text-[11px] transition-colors disabled:opacity-50"
+              style={{
+                borderWidth: 1,
+                borderStyle: "solid",
+                borderColor: vatState === "success" ? "var(--validated)" : "var(--border)",
+                color: vatState === "success" ? "var(--validated)" : vatState === "error" ? "var(--kill)" : "var(--t2)",
+                background: "transparent",
+              }}
+            >
+              {vatState === "loading" ? "Saving…" : vatState === "success" ? "Saved ✓" : "Save"}
+            </button>
+          </form>
+
+          {vatState === "error" && vatError && (
+            <p className="mono text-[10px] mt-2" style={{ color: "var(--kill)" }}>{vatError}</p>
+          )}
+          <p className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
+            Leave blank to remove. Changes apply to future invoices only.
+          </p>
+        </div>
+      )}
 
       {checkoutPriceId && (
         <CheckoutModal
