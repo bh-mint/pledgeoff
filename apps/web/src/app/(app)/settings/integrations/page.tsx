@@ -14,7 +14,13 @@ export default async function IntegrationsPage({
 }: {
   searchParams: Promise<{ github?: string }>;
 }) {
-  await requireUser();
+  const user = await requireUser();
   const params = await searchParams;
-  return <IntegrationsClient githubParam={params.github ?? null} />;
+  const loginProvider = (user.app_metadata?.provider as string | undefined) ?? "email";
+  return (
+    <IntegrationsClient
+      githubParam={params.github ?? null}
+      loginProvider={loginProvider}
+    />
+  );
 }

@@ -6,9 +6,10 @@ import { GitHubConnectCard } from "@/components/engineering/GitHubConnectCard";
 
 type Props = {
   githubParam?: string | null;
+  loginProvider?: string;
 };
 
-export function IntegrationsClient({ githubParam }: Props) {
+export function IntegrationsClient({ githubParam, loginProvider }: Props) {
   const [githubConnected, setGithubConnected] = useState(false);
   const [githubOrg, setGithubOrg] = useState<string | undefined>(undefined);
 
@@ -72,6 +73,7 @@ export function IntegrationsClient({ githubParam }: Props) {
       <GitHubConnectCard
         isConnected={githubConnected}
         githubOrg={githubOrg}
+        loginProvider={loginProvider}
         onDisconnect={() => {
           setGithubConnected(false);
           setGithubOrg(undefined);

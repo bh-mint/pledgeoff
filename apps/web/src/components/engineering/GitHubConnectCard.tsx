@@ -5,10 +5,11 @@ import { useState } from 'react';
 interface Props {
   isConnected: boolean;
   githubOrg?: string;
+  loginProvider?: string;
   onDisconnect?: () => void;
 }
 
-export function GitHubConnectCard({ isConnected, githubOrg, onDisconnect }: Props) {
+export function GitHubConnectCard({ isConnected, githubOrg, loginProvider, onDisconnect }: Props) {
   const [disconnecting, setDisconnecting] = useState(false);
 
   async function handleDisconnect() {
@@ -72,6 +73,19 @@ export function GitHubConnectCard({ isConnected, githubOrg, onDisconnect }: Prop
           </a>
         )}
       </div>
+
+      {!isConnected && loginProvider === 'github' && (
+        <div
+          className="mt-4 rounded-md border px-4 py-3 text-xs"
+          style={{ borderColor: 'var(--border)', background: 'var(--canvas)', color: 'var(--t2)' }}
+        >
+          You signed in with GitHub.{' '}
+          <a href="/api/auth/github" className="underline" style={{ color: 'var(--t1)' }}>
+            Connect your repositories →
+          </a>{' '}
+          to enable delivery estimates based on your team&apos;s real cycle time.
+        </div>
+      )}
 
       {!isConnected && (
         <div className="mt-4 space-y-2">
