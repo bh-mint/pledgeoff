@@ -48,10 +48,13 @@ export function LoginClient() {
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
+        if (error.message.toLowerCase().includes("email not confirmed")) {
+          router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+          return;
+        }
         const isCredentialsError =
           error.message.toLowerCase().includes("invalid login") ||
-          error.message.toLowerCase().includes("invalid credentials") ||
-          error.message.toLowerCase().includes("email not confirmed");
+          error.message.toLowerCase().includes("invalid credentials");
         setErrorMsg(
           isCredentialsError
             ? "Sign-in failed. If you registered with Google, use 'Continue with Google' below."
