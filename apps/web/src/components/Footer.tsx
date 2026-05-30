@@ -42,7 +42,7 @@ const NAV_COLS = [
   {
     label: "Support",
     links: [
-      { href: "mailto:contact@pledgeoff.com", text: "Contact us", external: true },
+      { href: "/contact", text: "Contact" },
       { href: "mailto:support@pledgeoff.com", text: "Customer support", external: true },
       { href: "mailto:billing@pledgeoff.com", text: "Billing & invoices", external: true },
       { href: "mailto:partnerships@pledgeoff.com", text: "Partnerships", external: true },

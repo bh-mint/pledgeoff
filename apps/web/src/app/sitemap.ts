@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/about`, lastModified: "2026-05-11" },
     { url: `${SITE_URL}/pricing`, lastModified: "2026-05-20" },
     { url: `${SITE_URL}/enterprise`, lastModified: "2026-05-20" },
+    { url: `${SITE_URL}/contact`, lastModified: "2026-05-30" },
     { url: `${SITE_URL}/changelog`, lastModified: "2026-05-18" },
     { url: `${SITE_URL}/tools/decision-clarity`, lastModified: "2026-05-18" },
     { url: `${SITE_URL}/launch`, lastModified: "2026-05-18" },
