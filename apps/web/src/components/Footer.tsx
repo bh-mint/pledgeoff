@@ -36,7 +36,8 @@ const NAV_COLS = [
       { href: "/about", text: "About" },
       { href: "/blog", text: "Blog" },
       { href: "/enterprise", text: "Enterprise" },
-      { href: "mailto:affiliate@pledgeoff.com", text: "Affiliate program", external: true },
+      { href: "/roadmap", text: "Roadmap" },
+      { href: "/affiliate", text: "Affiliate program" },
     ],
   },
   {
@@ -46,7 +47,7 @@ const NAV_COLS = [
       { href: "mailto:support@pledgeoff.com", text: "Customer support", external: true },
       { href: "mailto:billing@pledgeoff.com", text: "Billing & invoices", external: true },
       { href: "mailto:partnerships@pledgeoff.com", text: "Partnerships", external: true },
-      { href: "mailto:security@pledgeoff.com", text: "Security", external: true },
+      { href: "/security", text: "Security" },
     ],
   },
   {
