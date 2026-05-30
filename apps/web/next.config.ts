@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [{ source: '/@:username', destination: '/profile/:username' }];
+  },
   transpilePackages: [
     '@pledgeoff/core',
     '@pledgeoff/adapters',

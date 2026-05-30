@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { container } from "@/lib/container";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { Logo } from "@/components/brand/Logo";
 import { VerdictMark } from "@/components/brand/VerdictMark";
 import { FooterMicro } from "@/components/FooterMicro";
@@ -75,6 +76,17 @@ export default async function SharePage({ params }: Props) {
 
   if (!idea || !decision) notFound();
 
+  const supabase = createSupabaseServiceClient();
+  const { data: authorProfile } = await supabase
+    .from('profiles')
+    .select('username, first_name')
+    .eq('id', idea.userId)
+    .single();
+
+  const authorHandle = authorProfile?.username
+    ? `@${authorProfile.username}`
+    : authorProfile?.first_name ?? null;
+
   const cfg = VERDICT_CONFIG[decision.verdict];
   const score = computeScore(decision);
   const hasDimensions = decision.dimensions && decision.dimensions.length > 0;
@@ -112,8 +124,28 @@ export default async function SharePage({ params }: Props) {
       <div className="flex-1 max-w-[680px] mx-auto w-full px-4 sm:px-8 py-10 sm:py-16">
         {/* Idea */}
         <div className="mb-8 pb-8 border-b" style={{ borderColor: "var(--border)" }}>
-          <div className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
-            Idea validated
+          <div className="flex items-center gap-2 mb-2">
+            <span className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+              Idea validated
+            </span>
+            {authorHandle && (
+              <>
+                <span className="mono text-[10px]" style={{ color: "var(--border)" }}>·</span>
+                {authorProfile?.username ? (
+                  <Link
+                    href={`/@${authorProfile.username}`}
+                    className="mono text-[10px] transition-opacity hover:opacity-70"
+                    style={{ color: "var(--t3)" }}
+                  >
+                    {authorHandle}
+                  </Link>
+                ) : (
+                  <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+                    {authorHandle}
+                  </span>
+                )}
+              </>
+            )}
           </div>
           <p className="text-[17px] font-medium leading-snug" style={{ color: "var(--t1)" }}>
             {idea.text.split("\n\n")[0]}
