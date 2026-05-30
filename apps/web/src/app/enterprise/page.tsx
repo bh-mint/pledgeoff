@@ -171,7 +171,7 @@ export default function EnterprisePage() {
                 <div className="border rounded-md p-4" style={{ borderColor: "var(--border)" }}>
                   <div className="mono text-[10px] uppercase tracking-[0.1em] mb-1" style={{ color: "var(--t3)" }}>starts at</div>
                   <div className="display text-[28px] font-semibold" style={{ color: "var(--t1)" }}>€{PRICING.studio.monthly.eur}<span className="text-[14px] font-normal" style={{ color: "var(--t3)" }}>/mo</span></div>
-                  <div className="mono text-[11px] mt-1" style={{ color: "var(--t3)" }}>Studio plan · self-serve · up to 10 seats</div>
+                  <div className="mono text-[11px] mt-1" style={{ color: "var(--t3)" }}>Studio plan · self-serve · 8 seats included</div>
                 </div>
                 <div
                   className="border rounded-md p-4"

@@ -225,7 +225,7 @@ export default function TermsPage() {
                     <td><strong>Enterprise</strong></td>
                     <td>from €1,199</td>
                     <td>Negotiated</td>
-                    <td>Unlimited · 25 seats · custom · dedicated support</td>
+                    <td>Unlimited · unlimited seats · custom pricing · dedicated support</td>
                   </tr>
                 </tbody>
               </table>
