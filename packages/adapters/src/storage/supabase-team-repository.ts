@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import {
   TeamRepositoryError,
   type Team,
+  type TeamInviteLink,
   type TeamMembership,
   type TeamRole,
   type TeamMembershipStatus,
@@ -16,6 +17,28 @@ type TeamRow = {
   created_at: string;
   updated_at: string;
 };
+
+type InviteLinkRow = {
+  id: string;
+  team_id: string;
+  token: string;
+  expires_at: string;
+  revoked_at: string | null;
+  created_by: string;
+  created_at: string;
+};
+
+function rowToInviteLink(row: InviteLinkRow): TeamInviteLink {
+  return {
+    id: row.id,
+    teamId: row.team_id,
+    token: row.token,
+    expiresAt: row.expires_at,
+    revokedAt: row.revoked_at,
+    createdBy: row.created_by,
+    createdAt: row.created_at,
+  };
+}
 
 type MembershipRow = {
   id: string;
@@ -203,5 +226,54 @@ export class SupabaseTeamRepository implements ITeamRepository {
       .eq('status', 'active');
     if (error) return err(new TeamRepositoryError(error.message));
     return ok(count ?? 0);
+  }
+
+  async findInviteLinkByToken(token: string): Promise<Result<TeamInviteLink | null, TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('team_invite_links')
+      .select()
+      .eq('token', token)
+      .maybeSingle<InviteLinkRow>();
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok(data ? rowToInviteLink(data) : null);
+  }
+
+  async findInviteLinkByTeamId(teamId: string): Promise<Result<TeamInviteLink | null, TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('team_invite_links')
+      .select()
+      .eq('team_id', teamId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle<InviteLinkRow>();
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok(data ? rowToInviteLink(data) : null);
+  }
+
+  async saveInviteLink(link: TeamInviteLink): Promise<Result<TeamInviteLink, TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('team_invite_links')
+      .insert({
+        id: link.id,
+        team_id: link.teamId,
+        token: link.token,
+        expires_at: link.expiresAt,
+        revoked_at: link.revokedAt,
+        created_by: link.createdBy,
+        created_at: link.createdAt,
+      })
+      .select()
+      .single<InviteLinkRow>();
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok(rowToInviteLink(data));
+  }
+
+  async revokeInviteLink(linkId: string, revokedAt: string): Promise<Result<void, TeamRepositoryError>> {
+    const { error } = await this.client
+      .from('team_invite_links')
+      .update({ revoked_at: revokedAt })
+      .eq('id', linkId);
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok(undefined);
   }
 }

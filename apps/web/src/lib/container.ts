@@ -54,6 +54,8 @@ import {
   LeaveTeamUseCase,
   UpdateTeamNameUseCase,
   UpdateTeamSeatsUseCase,
+  GenerateInviteLinkUseCase,
+  JoinViaInviteLinkUseCase,
   ReactToIdeaUseCase,
   AskOttoUseCase,
   GetOttoBalanceUseCase,
@@ -312,6 +314,16 @@ class AppContainer {
   private _updateTeamSeatsUseCase?: UpdateTeamSeatsUseCase;
   get updateTeamSeatsUseCase(): UpdateTeamSeatsUseCase {
     return (this._updateTeamSeatsUseCase ??= new UpdateTeamSeatsUseCase(this.subscriptionRepo));
+  }
+
+  private _generateInviteLinkUseCase?: GenerateInviteLinkUseCase;
+  get generateInviteLinkUseCase(): GenerateInviteLinkUseCase {
+    return (this._generateInviteLinkUseCase ??= new GenerateInviteLinkUseCase(this.teamRepo));
+  }
+
+  private _joinViaInviteLinkUseCase?: JoinViaInviteLinkUseCase;
+  get joinViaInviteLinkUseCase(): JoinViaInviteLinkUseCase {
+    return (this._joinViaInviteLinkUseCase ??= new JoinViaInviteLinkUseCase(this.teamRepo));
   }
 
   private _reactToIdeaUseCase?: ReactToIdeaUseCase;

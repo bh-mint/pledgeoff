@@ -52,6 +52,10 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
     findMembershipsByTeamId: async () => ok([]),
     deleteMembership: async () => ok(undefined),
     countActiveMembers: async () => ok(0),
+    findInviteLinkByToken: async () => ok(null),
+    findInviteLinkByTeamId: async () => ok(null),
+    saveInviteLink: async (l) => ok(l),
+    revokeInviteLink: async () => ok(undefined),
     ...overrides,
   };
 }
@@ -116,6 +120,10 @@ describe('InviteTeamMemberUseCase', () => {
     const repo = mockRepo({
       findByOwnerId: async () => ok(team),
       countActiveMembers: async () => ok(0),
+    findInviteLinkByToken: async () => ok(null),
+    findInviteLinkByTeamId: async () => ok(null),
+    saveInviteLink: async (l) => ok(l),
+    revokeInviteLink: async () => ok(undefined),
       findMembershipsByTeamId: async () =>
         ok([makeMembership({ invitedEmail: 'new@example.com' })]),
     });

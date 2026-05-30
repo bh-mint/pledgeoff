@@ -80,6 +80,41 @@ export class TeamRepositoryError extends Error {
   readonly code = 'TEAM_REPOSITORY_ERROR';
 }
 
+export const TeamInviteLinkSchema = z.object({
+  id: z.string().uuid(),
+  teamId: z.string().uuid(),
+  token: z.string(),
+  expiresAt: z.string().datetime({ offset: true }),
+  revokedAt: z.string().datetime({ offset: true }).nullable(),
+  createdBy: z.string().uuid(),
+  createdAt: z.string().datetime({ offset: true }),
+});
+export type TeamInviteLink = z.infer<typeof TeamInviteLinkSchema>;
+
+export class TeamInviteLinkNotFoundError extends Error {
+  readonly code = 'TEAM_INVITE_LINK_NOT_FOUND';
+}
+export class TeamInviteLinkExpiredError extends Error {
+  readonly code = 'TEAM_INVITE_LINK_EXPIRED';
+}
+export class TeamInviteLinkRevokedError extends Error {
+  readonly code = 'TEAM_INVITE_LINK_REVOKED';
+}
+
+export function createInviteLink(input: { teamId: string; createdBy: string }): TeamInviteLink {
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  return {
+    id: crypto.randomUUID(),
+    teamId: input.teamId,
+    token: crypto.randomUUID(),
+    expiresAt: expiresAt.toISOString(),
+    revokedAt: null,
+    createdBy: input.createdBy,
+    createdAt: now.toISOString(),
+  };
+}
+
 export function createTeam(input: { ownerId: string; name: string }): Team {
   const now = new Date().toISOString();
   return {

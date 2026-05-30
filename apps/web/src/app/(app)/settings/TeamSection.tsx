@@ -27,6 +27,8 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
   const [teamName, setTeamName] = useState("");
   const [teamNameState, setTeamNameState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [renamingTeam, setRenamingTeam] = useState(false);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [inviteLinkState, setInviteLinkState] = useState<"idle" | "loading" | "revoking" | "copied">("idle");
 
   const seatsIncluded = PLAN_LIMITS[plan].seatsIncluded;
 
@@ -34,16 +36,56 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
     const token = await getAuthToken();
     if (!token) return;
 
-    const res = await fetch("/api/v1/teams", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      const json = await res.json() as { data: TeamData };
+    const [teamRes, linkRes] = await Promise.all([
+      fetch("/api/v1/teams", { headers: { Authorization: `Bearer ${token}` } }),
+      fetch("/api/v1/teams/invite-link", { headers: { Authorization: `Bearer ${token}` } }),
+    ]);
+
+    if (teamRes.ok) {
+      const json = await teamRes.json() as { data: TeamData };
       setData(json.data);
       if (json.data.team) setTeamName(json.data.team.name);
     }
+    if (linkRes.ok) {
+      const json = await linkRes.json() as { data: { url: string | null } };
+      setInviteLink(json.data.url ?? null);
+    }
     setLoading(false);
   }, []);
+
+  const handleGenerateLink = async () => {
+    setInviteLinkState("loading");
+    const token = await getAuthToken();
+    if (!token) { setInviteLinkState("idle"); return; }
+    const res = await fetch("/api/v1/teams/invite-link", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const json = await res.json() as { data: { url: string } };
+      setInviteLink(json.data.url);
+    }
+    setInviteLinkState("idle");
+  };
+
+  const handleRevokeLink = async () => {
+    setInviteLinkState("revoking");
+    const token = await getAuthToken();
+    if (!token) { setInviteLinkState("idle"); return; }
+    await fetch("/api/v1/teams/invite-link", {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setInviteLink(null);
+    setInviteLinkState("idle");
+  };
+
+  const handleCopyLink = async () => {
+    if (!inviteLink) return;
+    await navigator.clipboard.writeText(inviteLink);
+    setInviteLinkState("copied");
+    setTimeout(() => setInviteLinkState("idle"), 2000);
+  };
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void fetchTeam(); }, [fetchTeam]);
@@ -308,6 +350,74 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
 
       {inviteState === "error" && (
         <p className="mono text-[11px]" style={{ color: "var(--kill)" }}>{inviteError}</p>
+      )}
+
+      {/* Invite link — owner only */}
+      {data?.isOwner && (
+        <div
+          className="rounded-md border p-4"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <div className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>
+            Invite link
+          </div>
+          <p className="text-[12px] mb-3" style={{ color: "var(--t2)" }}>
+            Share a link — anyone with it can join your team directly, no email needed. Valid 30 days.
+          </p>
+
+          {inviteLink ? (
+            <div className="flex flex-col gap-2">
+              <div
+                className="flex items-center gap-2 rounded-md border px-3 py-2"
+                style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+              >
+                <span
+                  className="mono text-[11px] flex-1 truncate"
+                  style={{ color: "var(--t2)" }}
+                >
+                  {inviteLink}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCopyLink}
+                  className="mono text-[11px] h-8 px-4 rounded-md border transition-colors"
+                  style={{
+                    borderColor: inviteLinkState === "copied" ? "var(--validated)" : "var(--border)",
+                    color: inviteLinkState === "copied" ? "var(--validated)" : "var(--t2)",
+                  }}
+                >
+                  {inviteLinkState === "copied" ? "Copied ✓" : "Copy link"}
+                </button>
+                <button
+                  onClick={handleGenerateLink}
+                  disabled={inviteLinkState === "loading"}
+                  className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                  style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                >
+                  {inviteLinkState === "loading" ? "…" : "Regenerate"}
+                </button>
+                <button
+                  onClick={handleRevokeLink}
+                  disabled={inviteLinkState === "revoking"}
+                  className="mono text-[11px] h-8 px-3 rounded-md border transition-colors hover:border-[var(--kill)] hover:text-[var(--kill)] disabled:opacity-50"
+                  style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                >
+                  {inviteLinkState === "revoking" ? "…" : "Revoke"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={handleGenerateLink}
+              disabled={inviteLinkState === "loading"}
+              className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+              style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+            >
+              {inviteLinkState === "loading" ? "Generating…" : "Generate invite link →"}
+            </button>
+          )}
+        </div>
       )}
 
       {/* Members list */}
