@@ -9,6 +9,7 @@ import { DashboardClient, type TableRow, type TeamFeedRow } from "./DashboardCli
 import { FooterMicro } from "@/components/FooterMicro";
 import { SignalFeed } from "@/components/SignalFeed";
 import { getSignalFeedData } from "@/server/signal-feed/getSignalFeedData";
+import { getTeamActivity, type TeamActivityEvent } from "@/server/team/getTeamActivity";
 import { WeeklyDigestBanner } from "@/components/WeeklyDigestBanner";
 import type { Decision } from "@pledgeoff/core";
 import { RoleGreeting } from "@/components/RoleGreeting";
@@ -84,6 +85,12 @@ export default async function DashboardPage() {
     getDashboardData(allMemberIds),
     getSignalFeedData(plan),
   ]);
+
+  // Phase 4 — team activity (only if has team + workspace plan)
+  let teamActivityEvents: TeamActivityEvent[] = [];
+  if (team && isWorkspacePlan) {
+    teamActivityEvents = await getTeamActivity(team.id, allMemberIds, user.id);
+  }
 
   const outcomeMap = new Map<string, string>();
   for (const o of rawOutcomes) {
@@ -274,6 +281,7 @@ export default async function DashboardPage() {
             rows={tableRows}
             totalCount={rawIdeas.length}
             teamFeedRows={teamFeedRows}
+            teamActivityEvents={teamActivityEvents}
             teamName={teamName}
             teamLogoUrl={team?.logoUrl ?? null}
             teamId={teamId}

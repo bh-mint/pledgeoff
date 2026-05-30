@@ -7,7 +7,9 @@ import { VerdictMark } from "@/components/brand/VerdictMark";
 import { getAuthToken } from "@/lib/auth-client";
 import { TeamAnalytics } from "@/components/TeamAnalytics";
 import { DecisionQueueView } from "./DecisionQueueView";
+import { TeamActivityFeed } from "@/components/TeamActivityFeed";
 import type { Plan } from "@pledgeoff/core";
+import type { TeamActivityEvent } from "@/server/team/getTeamActivity";
 
 export type ToolStatus = {
   simulate: boolean;
@@ -65,6 +67,7 @@ interface DashboardClientProps {
   rows: TableRow[];
   totalCount: number;
   teamFeedRows?: TeamFeedRow[];
+  teamActivityEvents?: TeamActivityEvent[];
   teamName?: string | null;
   teamLogoUrl?: string | null;
   teamId?: string | null;
@@ -76,6 +79,7 @@ export function DashboardClient({
   rows,
   totalCount,
   teamFeedRows = [],
+  teamActivityEvents = [],
   teamName,
   teamLogoUrl,
   teamId,
@@ -775,6 +779,19 @@ export function DashboardClient({
                       <div className="display text-[24px] tnum font-semibold text-(--t1) mt-1">—</div>
                     )}
                   </div>
+                </div>
+
+                {/* Activity feed */}
+                <div className="rounded-md border mb-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+                  <div className="px-4 sm:px-6 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border)" }}>
+                    <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">
+                      Recent activity
+                    </h2>
+                    {teamActivityEvents.length > 0 && (
+                      <span className="mono text-[10px] text-(--t3)">{teamActivityEvents.length}</span>
+                    )}
+                  </div>
+                  <TeamActivityFeed events={teamActivityEvents} />
                 </div>
 
                 {/* Feed */}
