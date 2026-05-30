@@ -3,6 +3,7 @@ import { sendAccuracyReportEmail } from '@pledgeoff/adapters';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { container } from '@/lib/container';
 import { requireCronAuth } from '@/lib/cron-auth';
+import { createNotification } from '@pledgeoff/core';
 
 export const maxDuration = 60;
 
@@ -34,6 +35,20 @@ export async function GET(req: Request): Promise<Response> {
   for (const report of reports) {
     const userTraceId = crypto.randomUUID();
     try {
+      // In-app notification (always)
+      const pct = report.stats.accuracyRate !== null ? Math.round(report.stats.accuracyRate * 100) : null;
+      const notif = createNotification({
+        userId: report.userId,
+        type: 'accuracy_report',
+        title: 'Monthly accuracy report',
+        body: pct !== null
+          ? `Your decisions were ${pct}% accurate across ${report.stats.totalOutcomes} outcomes.`
+          : `You have ${report.stats.totalOutcomes} recorded outcomes this month.`,
+      });
+      await container.notificationRepo.save(notif).catch(() => {
+        logger.error({ traceId: userTraceId, userId: report.userId }, 'accuracy-report: failed to save notification');
+      });
+
       const { data } = await supabase.auth.admin.getUserById(report.userId);
       const email = data.user?.email;
       if (!email) continue;

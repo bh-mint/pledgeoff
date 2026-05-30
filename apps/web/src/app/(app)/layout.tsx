@@ -13,7 +13,7 @@ export default async function AppLayout({
   const user = await requireUser();
 
   const supabase = createSupabaseServiceClient();
-  const [plan, ideasResult, profileResult] = await Promise.all([
+  const [plan, ideasResult, profileResult, unreadCountResult] = await Promise.all([
     getUserPlan(user.id),
     container.ideaRepo.findByUserId(user.id),
     supabase
@@ -21,6 +21,7 @@ export default async function AppLayout({
       .select("first_name, last_name, avatar_url")
       .eq("id", user.id)
       .single(),
+    container.notificationRepo.countUnread(user.id),
   ]);
 
   const profile = profileResult.data as {
@@ -59,6 +60,7 @@ export default async function AppLayout({
         initials={initials}
         avatarUrl={profile?.avatar_url ?? null}
         planLimitRemaining={planLimitRemaining}
+        unreadNotifications={unreadCountResult.isOk() ? unreadCountResult.value : 0}
       />
       {children}
     </>

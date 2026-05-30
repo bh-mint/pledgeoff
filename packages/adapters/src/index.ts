@@ -37,3 +37,4 @@ export { SupabaseDecisionQueueRepository } from './storage/supabase-decision-que
 export { SupabaseEngineeringSnapshotRepository } from './storage/supabase-engineering-snapshot-repository';
 export { GitHubVelocityAdapter } from './engineering/github-velocity-adapter';
 export { SupabaseDecisionOutcomeRepository } from './storage/supabase-decision-outcome-repository';
+export { SupabaseNotificationRepository } from './storage/supabase-notification-repository';

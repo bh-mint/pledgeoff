@@ -21,6 +21,7 @@ import {
   SupabaseDecisionQueueRepository,
   SupabaseEngineeringSnapshotRepository,
   SupabaseDecisionOutcomeRepository,
+  SupabaseNotificationRepository,
   GitHubVelocityAdapter,
   StripeAdapter,
   HNSourceAdapter,
@@ -200,6 +201,11 @@ class AppContainer {
   private _decisionOutcomeRepo?: SupabaseDecisionOutcomeRepository;
   get decisionOutcomeRepo(): SupabaseDecisionOutcomeRepository {
     return (this._decisionOutcomeRepo ??= new SupabaseDecisionOutcomeRepository(this._supabase));
+  }
+
+  private _notificationRepo?: SupabaseNotificationRepository;
+  get notificationRepo(): SupabaseNotificationRepository {
+    return (this._notificationRepo ??= new SupabaseNotificationRepository(this._supabase));
   }
 
   // ── lazy use-cases ─────────────────────────────────────────────────────────

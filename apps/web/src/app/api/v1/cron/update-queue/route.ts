@@ -3,6 +3,7 @@ import { logger } from '@pledgeoff/observability';
 import { container } from '@/lib/container';
 import { sendQueueAlertEmail } from '@pledgeoff/adapters';
 import { requireCronAuth } from '@/lib/cron-auth';
+import { createNotification } from '@pledgeoff/core';
 
 export const maxDuration = 60;
 
@@ -54,17 +55,30 @@ export async function GET(req: Request): Promise<Response> {
         usersProcessed++;
         totalSignificantChanges += result.value.significantChanges;
 
-        if (result.value.significantChanges > 0 && resendKey && !disableEmail) {
-          const { data: userData } = await supabase.auth.admin.getUserById(userId);
-          const email = userData?.user?.email;
-          if (email) {
-            await sendQueueAlertEmail(resendKey, {
-              to: email,
-              significantChanges: result.value.significantChanges,
-              traceId,
-            }).catch((e: unknown) => {
-              logger.error({ traceId, userId, error: String(e) }, 'update-queue: alert email failed');
-            });
+        if (result.value.significantChanges > 0) {
+          // In-app notification (always, regardless of email preference)
+          const notif = createNotification({
+            userId,
+            type: 'queue_alert',
+            title: 'Decision queue updated',
+            body: `${result.value.significantChanges} idea${result.value.significantChanges > 1 ? 's' : ''} shifted priority — check your queue.`,
+          });
+          await container.notificationRepo.save(notif).catch(() => {
+            logger.error({ traceId, userId }, 'update-queue: failed to save notification');
+          });
+
+          if (resendKey && !disableEmail) {
+            const { data: userData } = await supabase.auth.admin.getUserById(userId);
+            const email = userData?.user?.email;
+            if (email) {
+              await sendQueueAlertEmail(resendKey, {
+                to: email,
+                significantChanges: result.value.significantChanges,
+                traceId,
+              }).catch((e: unknown) => {
+                logger.error({ traceId, userId, error: String(e) }, 'update-queue: alert email failed');
+              });
+            }
           }
         }
       }),

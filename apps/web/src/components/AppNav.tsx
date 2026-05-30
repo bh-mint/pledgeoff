@@ -5,15 +5,17 @@ import { usePathname } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProfileButton } from "@/components/ProfileButton";
+import { NotificationBell } from "@/components/NotificationBell";
 
 interface AppNavProps {
   email: string;
   initials: string;
   avatarUrl?: string | null;
   planLimitRemaining?: number | null;
+  unreadNotifications?: number;
 }
 
-export function AppNav({ email, initials, avatarUrl, planLimitRemaining }: AppNavProps) {
+export function AppNav({ email, initials, avatarUrl, planLimitRemaining, unreadNotifications = 0 }: AppNavProps) {
   const pathname = usePathname();
 
   const links = [
@@ -90,7 +92,8 @@ export function AppNav({ email, initials, avatarUrl, planLimitRemaining }: AppNa
             className="hidden md:block w-px h-4 mx-4"
             style={{ background: "var(--border)" }}
           />
-          <div className="hidden md:block mr-3">
+          <div className="hidden md:flex items-center gap-1 mr-1">
+            <NotificationBell initialUnreadCount={unreadNotifications} />
             <ThemeToggle />
           </div>
           <ProfileButton email={email} initials={initials} avatarUrl={avatarUrl} />
