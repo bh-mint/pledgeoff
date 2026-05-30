@@ -5,12 +5,14 @@ import {
   createPendingMembership,
   TeamSeatLimitError,
   TeamMemberAlreadyExistsError,
+  TeamForbiddenError,
   TeamRepositoryError,
   type TeamMembership,
 } from '../domain/team';
 
 export type InviteTeamMemberInput = {
-  ownerId: string;
+  /** The user performing the invite — either the team owner or an admin member. */
+  callerId: string;
   /** Total seats allowed = plan included + extra purchased. Computed by caller via effectiveSeats(). */
   maxSeats: number;
   invitedEmail: string;
@@ -20,6 +22,7 @@ export type InviteTeamMemberInput = {
 export type InviteTeamMemberError =
   | TeamSeatLimitError
   | TeamMemberAlreadyExistsError
+  | TeamForbiddenError
   | TeamRepositoryError;
 
 export class InviteTeamMemberUseCase {
@@ -28,21 +31,41 @@ export class InviteTeamMemberUseCase {
   async execute(
     input: InviteTeamMemberInput,
   ): Promise<Result<TeamMembership, InviteTeamMemberError>> {
-    const { ownerId, maxSeats, invitedEmail } = input;
+    const { callerId, maxSeats, invitedEmail } = input;
     const normalizedEmail = invitedEmail.toLowerCase().trim();
     const limit = maxSeats;
 
-    // Get or create the owner's team
-    const teamResult = await this.teamRepo.findByOwnerId(ownerId);
-    if (teamResult.isErr()) return err(teamResult.error);
+    // Resolve team: caller is owner or admin
+    const ownerTeamResult = await this.teamRepo.findByOwnerId(callerId);
+    if (ownerTeamResult.isErr()) return err(ownerTeamResult.error);
 
-    let team = teamResult.value;
+    let team = ownerTeamResult.value;
+    let callerIsOwner = !!team;
+
     if (!team) {
-      const newTeam = createTeam({ ownerId, name: 'My Team' });
-      const saveResult = await this.teamRepo.saveTeam(newTeam);
-      if (saveResult.isErr()) return err(saveResult.error);
-      team = saveResult.value;
+      // Check if caller is an active admin member of a team
+      const memberTeamResult = await this.teamRepo.findByMemberId(callerId);
+      if (memberTeamResult.isErr()) return err(memberTeamResult.error);
+      if (!memberTeamResult.value) {
+        // No team exists yet for this caller — create one (legacy path for first invite)
+        const newTeam = createTeam({ ownerId: callerId, name: 'My Team' });
+        const saveResult = await this.teamRepo.saveTeam(newTeam);
+        if (saveResult.isErr()) return err(saveResult.error);
+        team = saveResult.value;
+        callerIsOwner = true;
+      } else {
+        team = memberTeamResult.value;
+        // Verify caller has admin role
+        const callerMembershipResult = await this.teamRepo.findMembershipByUserId(team.id, callerId);
+        if (callerMembershipResult.isErr()) return err(callerMembershipResult.error);
+        const callerMembership = callerMembershipResult.value;
+        if (!callerMembership || callerMembership.role !== 'admin') {
+          return err(new TeamForbiddenError('Only team owners and admins can invite members'));
+        }
+      }
     }
+
+    void callerIsOwner; // used for context — seat limit check applies to all callers
 
     // Enforce seat limit (owner counts as 1)
     const countResult = await this.teamRepo.countActiveMembers(team.id);

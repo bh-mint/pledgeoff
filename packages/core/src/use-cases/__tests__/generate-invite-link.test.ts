@@ -42,6 +42,8 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
     updateTeam: async (t) => ok(t),
     saveMembership: async (m) => ok(m),
     updateMembership: async (m) => ok(m),
+    updateMembershipRole: async (id, role, updatedAt) => ok({ id, role, updatedAt } as never),
+    findMembershipByUserId: async () => ok(null),
     findMembershipByToken: async () => ok(null),
     findMembershipsByTeamId: async () => ok([]),
     deleteMembership: async () => ok(undefined),

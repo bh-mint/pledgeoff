@@ -220,6 +220,29 @@ export class SupabaseTeamRepository implements ITeamRepository {
     return ok(undefined);
   }
 
+  async findMembershipByUserId(teamId: string, userId: string): Promise<Result<TeamMembership | null, TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('team_memberships')
+      .select()
+      .eq('team_id', teamId)
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .maybeSingle<MembershipRow>();
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok(data ? rowToMembership(data) : null);
+  }
+
+  async updateMembershipRole(membershipId: string, role: TeamMembership['role'], updatedAt: string): Promise<Result<TeamMembership, TeamRepositoryError>> {
+    const { data, error } = await this.client
+      .from('team_memberships')
+      .update({ role, updated_at: updatedAt })
+      .eq('id', membershipId)
+      .select()
+      .single<MembershipRow>();
+    if (error) return err(new TeamRepositoryError(error.message));
+    return ok(rowToMembership(data));
+  }
+
   async countActiveMembers(teamId: string): Promise<Result<number, TeamRepositoryError>> {
     const { count, error } = await this.client
       .from('team_memberships')

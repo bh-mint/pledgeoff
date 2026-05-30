@@ -5,6 +5,7 @@ import type { ITeamRepository } from '../../ports/team-repository';
 import {
   TeamSeatLimitError,
   TeamMemberAlreadyExistsError,
+  TeamForbiddenError,
   TeamRepositoryError,
   type Team,
   type TeamMembership,
@@ -48,6 +49,8 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
     updateTeam: async (t) => ok(t),
     saveMembership: async (m) => ok(m),
     updateMembership: async (m) => ok(m),
+    updateMembershipRole: async (id, role, updatedAt) => ok(makeMembership({ id, role, updatedAt })),
+    findMembershipByUserId: async () => ok(null),
     findMembershipByToken: async () => ok(null),
     findMembershipsByTeamId: async () => ok([]),
     deleteMembership: async () => ok(undefined),
@@ -62,7 +65,7 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
 
 describe('InviteTeamMemberUseCase', () => {
   const baseInput = {
-    ownerId: 'owner-1',
+    callerId: 'owner-1',
     maxSeats: 3,
     invitedEmail: 'new@example.com',
     traceId: 'trace-1',
@@ -158,5 +161,40 @@ describe('InviteTeamMemberUseCase', () => {
 
     expect(result.isErr()).toBe(true);
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamRepositoryError);
+  });
+
+  it('allows an active admin member to invite', async () => {
+    const team = makeTeam({ ownerId: 'owner-1' });
+    const adminMembership = makeMembership({ userId: 'admin-1', role: 'admin', status: 'active' });
+
+    const repo = mockRepo({
+      findByOwnerId: async () => ok(null),
+      findByMemberId: async () => ok(team),
+      findMembershipByUserId: async () => ok(adminMembership),
+      countActiveMembers: async () => ok(0),
+      findMembershipsByTeamId: async () => ok([adminMembership]),
+    });
+
+    const useCase = new InviteTeamMemberUseCase(repo);
+    const result = await useCase.execute({ ...baseInput, callerId: 'admin-1' });
+
+    expect(result.isOk()).toBe(true);
+  });
+
+  it('rejects a plain member trying to invite', async () => {
+    const team = makeTeam({ ownerId: 'owner-1' });
+    const plainMembership = makeMembership({ userId: 'member-1', role: 'member', status: 'active' });
+
+    const repo = mockRepo({
+      findByOwnerId: async () => ok(null),
+      findByMemberId: async () => ok(team),
+      findMembershipByUserId: async () => ok(plainMembership),
+    });
+
+    const useCase = new InviteTeamMemberUseCase(repo);
+    const result = await useCase.execute({ ...baseInput, callerId: 'member-1' });
+
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamForbiddenError);
   });
 });

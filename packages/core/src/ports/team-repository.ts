@@ -13,6 +13,8 @@ export interface ITeamRepository {
   updateTeam(team: Team): Promise<Result<Team, TeamRepositoryError>>;
   deleteMembership(membershipId: string): Promise<Result<void, TeamRepositoryError>>;
   countActiveMembers(teamId: string): Promise<Result<number, TeamRepositoryError>>;
+  findMembershipByUserId(teamId: string, userId: string): Promise<Result<TeamMembership | null, TeamRepositoryError>>;
+  updateMembershipRole(membershipId: string, role: TeamMembership['role'], updatedAt: string): Promise<Result<TeamMembership, TeamRepositoryError>>;
   // Invite links
   findInviteLinkByToken(token: string): Promise<Result<TeamInviteLink | null, TeamRepositoryError>>;
   findInviteLinkByTeamId(teamId: string): Promise<Result<TeamInviteLink | null, TeamRepositoryError>>;

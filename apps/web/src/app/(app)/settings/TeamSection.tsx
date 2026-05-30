@@ -9,6 +9,7 @@ type TeamData = {
   team: Team | null;
   memberships: TeamMembership[];
   isOwner: boolean;
+  callerRole: 'owner' | 'admin' | 'member' | null;
 };
 
 function TeamLogoUpload({ currentLogoUrl, onUploaded }: { currentLogoUrl?: string | null; onUploaded: (url: string) => void }) {
@@ -105,6 +106,7 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
   const [inviteState, setInviteState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [inviteError, setInviteError] = useState("");
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [updatingRoleId, setUpdatingRoleId] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [teamNameState, setTeamNameState] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -125,8 +127,17 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
     ]);
 
     if (teamRes.ok) {
-      const json = await teamRes.json() as { data: TeamData };
-      setData(json.data);
+      const json = await teamRes.json() as { data: Omit<TeamData, 'callerRole'> & { isOwner: boolean } };
+      const { data: supabaseUser } = await (await import('@/lib/supabase/client')).createSupabaseBrowserClient().auth.getUser();
+      const currentUserId = supabaseUser?.user?.id ?? null;
+      let callerRole: TeamData['callerRole'] = null;
+      if (json.data.isOwner) {
+        callerRole = 'owner';
+      } else if (currentUserId) {
+        const m = json.data.memberships.find((mb) => mb.userId === currentUserId && mb.status === 'active');
+        callerRole = (m?.role as TeamData['callerRole']) ?? 'member';
+      }
+      setData({ ...json.data, callerRole });
       if (json.data.team) {
         setTeamName(json.data.team.name);
         setTeamLogoUrl(json.data.team.logoUrl ?? null);
@@ -299,6 +310,21 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
     fetchTeam();
   };
 
+  const handleUpdateRole = async (membershipId: string, newRole: "admin" | "member") => {
+    setUpdatingRoleId(membershipId);
+    const token = await getAuthToken();
+    if (!token) { setUpdatingRoleId(null); return; }
+
+    await fetch(`/api/v1/teams/members/${membershipId}/role`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ role: newRole }),
+    });
+
+    setUpdatingRoleId(null);
+    fetchTeam();
+  };
+
   if (loading) {
     return (
       <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
@@ -309,12 +335,12 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
 
   const activeCount = data?.memberships.filter((m) => m.status === "active").length ?? 0;
   const seatsFilled = activeCount + 1; // +1 for owner
-  const canInvite = data?.isOwner && seatsFilled < seatsIncluded;
+  const canInvite = (data?.callerRole === "owner" || data?.callerRole === "admin") && seatsFilled < seatsIncluded;
 
   return (
     <div className="space-y-6">
       {/* Team name */}
-      {data?.isOwner && !renamingTeam && (
+      {data?.callerRole === "owner" && !renamingTeam && (
         <div className="flex items-center justify-between">
           <div className="display font-semibold text-[15px]" style={{ color: "var(--t1)" }}>
             {data.team?.name ?? "My Team"}
@@ -331,7 +357,7 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
           </button>
         </div>
       )}
-      {data?.isOwner && renamingTeam && (
+      {data?.callerRole === "owner" && renamingTeam && (
         <>
           <form onSubmit={handleUpdateTeamName} className="flex gap-2 items-center">
             <input
@@ -370,14 +396,14 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
           )}
         </>
       )}
-      {!data?.isOwner && data?.team && (
+      {data?.callerRole !== "owner" && data?.team && (
         <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
           Team: <span style={{ color: "var(--t1)" }}>{data.team.name}</span>
         </div>
       )}
 
       {/* Workspace logo — owner only */}
-      {data?.isOwner && (
+      {data?.callerRole === "owner" && (
         <TeamLogoUpload
           currentLogoUrl={teamLogoUrl}
           onUploaded={(url) => setTeamLogoUrl(url)}
@@ -405,8 +431,8 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
         )}
       </div>
 
-      {/* Invite form — only for owner */}
-      {data?.isOwner && (
+      {/* Invite form — owner and admins */}
+      {(data?.callerRole === "owner" || data?.callerRole === "admin") && (
         <form onSubmit={handleInvite} className="flex gap-2">
           <input
             type="email"
@@ -434,7 +460,7 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
         </form>
       )}
 
-      {!canInvite && data?.isOwner && (
+      {!canInvite && (data?.callerRole === "owner" || data?.callerRole === "admin") && (
         <p className="mono text-[11px]" style={{ color: "var(--t3)" }}>
           {seatsFilled >= seatsIncluded
             ? `Seat limit reached. Upgrade to invite more members.`
@@ -447,7 +473,7 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
       )}
 
       {/* Invite link — owner only */}
-      {data?.isOwner && (
+      {data?.callerRole === "owner" && (
         <div
           className="rounded-md border p-4"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
@@ -523,20 +549,41 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
                 <div className="text-[13px]" style={{ color: "var(--t1)" }}>
                   {m.invitedEmail}
                 </div>
-                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>
-                  {m.status === "pending" ? "Invite pending" : "Active"} · {m.role}
+                <div className="mono text-[10px] mt-0.5 flex items-center gap-1.5" style={{ color: "var(--t3)" }}>
+                  <span>{m.status === "pending" ? "Invite pending" : "Active"}</span>
+                  <span aria-hidden="true">·</span>
+                  <span style={{
+                    color: m.role === "admin" ? "var(--accent)" : m.role === "owner" ? "var(--validated)" : "var(--t3)",
+                    fontWeight: m.role !== "member" ? 600 : undefined,
+                  }}>
+                    {m.role}
+                  </span>
                 </div>
               </div>
-              {data.isOwner && m.role !== "owner" && (
-                <button
-                  onClick={() => handleRemove(m.id)}
-                  disabled={removingId === m.id}
-                  className="mono text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded transition-opacity hover:opacity-70 disabled:opacity-40"
-                  style={{ color: "var(--kill)" }}
-                >
-                  {removingId === m.id ? "…" : "Remove"}
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {/* Promote / Demote — owner only, active non-owner members */}
+                {data.callerRole === "owner" && m.role !== "owner" && m.status === "active" && (
+                  <button
+                    onClick={() => handleUpdateRole(m.id, m.role === "admin" ? "member" : "admin")}
+                    disabled={updatingRoleId === m.id}
+                    className="mono text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded border transition-opacity hover:opacity-70 disabled:opacity-40"
+                    style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                  >
+                    {updatingRoleId === m.id ? "…" : m.role === "admin" ? "Demote" : "Make admin"}
+                  </button>
+                )}
+                {/* Remove — owner can remove admin/member; admin can remove only members */}
+                {m.role !== "owner" && (data.callerRole === "owner" || (data.callerRole === "admin" && m.role === "member")) && (
+                  <button
+                    onClick={() => handleRemove(m.id)}
+                    disabled={removingId === m.id}
+                    className="mono text-[10px] uppercase tracking-[0.08em] px-2 py-1 rounded transition-opacity hover:opacity-70 disabled:opacity-40"
+                    style={{ color: "var(--kill)" }}
+                  >
+                    {removingId === m.id ? "…" : "Remove"}
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -544,12 +591,12 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
 
       {(!data?.memberships || data.memberships.length === 0) && (
         <p className="mono text-[11px]" style={{ color: "var(--t3)" }}>
-          No team members yet.{data?.isOwner ? " Invite someone above." : ""}
+          No team members yet.{(data?.callerRole === "owner" || data?.callerRole === "admin") ? " Invite someone above." : ""}
         </p>
       )}
 
       {/* Leave team — only for members */}
-      {data?.team && !data.isOwner && (
+      {data?.team && data.callerRole !== "owner" && (
         <div className="pt-4 border-t" style={{ borderColor: "var(--border)" }}>
           <button
             onClick={handleLeave}

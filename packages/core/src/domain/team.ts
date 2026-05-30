@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const TeamRoleSchema = z.enum(['owner', 'member']);
+export const TeamRoleSchema = z.enum(['owner', 'admin', 'member']);
 export type TeamRole = z.infer<typeof TeamRoleSchema>;
 
 export const TeamMembershipStatusSchema = z.enum(['pending', 'active', 'removed', 'left']);
@@ -74,6 +74,13 @@ export class LeaveTeamNotMemberError extends Error {
   readonly code = 'LEAVE_TEAM_NOT_MEMBER';
   constructor() {
     super('User is not an active member of any team');
+  }
+}
+
+export class TeamUnauthorizedRoleChangeError extends Error {
+  readonly code = 'TEAM_UNAUTHORIZED_ROLE_CHANGE';
+  constructor(reason: string) {
+    super(reason);
   }
 }
 

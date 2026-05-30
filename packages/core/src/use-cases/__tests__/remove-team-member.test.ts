@@ -39,6 +39,8 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
     updateTeam: async (t) => ok(t),
     saveMembership: async (m) => ok(m),
     updateMembership: async (m) => ok(m),
+    updateMembershipRole: async (id, role, updatedAt) => ok(makeMembership({ id, role, updatedAt })),
+    findMembershipByUserId: async () => ok(null),
     findMembershipByToken: async () => ok(null),
     findMembershipsByTeamId: async () => ok([]),
     deleteMembership: async () => ok(undefined),
@@ -52,7 +54,7 @@ function mockRepo(overrides?: Partial<ITeamRepository>): ITeamRepository {
 }
 
 describe('RemoveTeamMemberUseCase', () => {
-  const baseInput = { ownerId: 'owner-1', membershipId: 'mem-1', traceId: 'trace-1' };
+  const baseInput = { callerId: 'owner-1', membershipId: 'mem-1', traceId: 'trace-1' };
 
   it('soft-deletes a member (status=removed, removalReason=removed_by_owner)', async () => {
     const team = makeTeam();
@@ -75,8 +77,11 @@ describe('RemoveTeamMemberUseCase', () => {
     expect(captured.m?.leftAt).toBeTruthy();
   });
 
-  it('rejects when caller has no team', async () => {
-    const repo = mockRepo({ findByOwnerId: async () => ok(null) });
+  it('rejects when caller has no team (not owner, not member)', async () => {
+    const repo = mockRepo({
+      findByOwnerId: async () => ok(null),
+      findByMemberId: async () => ok(null),
+    });
     const useCase = new RemoveTeamMemberUseCase(repo);
     const result = await useCase.execute(baseInput);
 
@@ -119,5 +124,59 @@ describe('RemoveTeamMemberUseCase', () => {
 
     expect(result.isErr()).toBe(true);
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamRepositoryError);
+  });
+
+  it('allows an active admin to remove a plain member', async () => {
+    const team = makeTeam();
+    const adminMembership = makeMembership({ id: 'admin-mem', userId: 'admin-1', role: 'admin' });
+    const targetMembership = makeMembership({ id: 'mem-1', userId: 'user-2', role: 'member' });
+
+    const repo = mockRepo({
+      findByOwnerId: async () => ok(null),
+      findByMemberId: async () => ok(team),
+      findMembershipByUserId: async () => ok(adminMembership),
+      findMembershipsByTeamId: async () => ok([adminMembership, targetMembership]),
+    });
+
+    const useCase = new RemoveTeamMemberUseCase(repo);
+    const result = await useCase.execute({ callerId: 'admin-1', membershipId: 'mem-1', traceId: 't' });
+
+    expect(result.isOk()).toBe(true);
+  });
+
+  it('rejects admin trying to remove another admin', async () => {
+    const team = makeTeam();
+    const adminMembership = makeMembership({ id: 'admin-mem', userId: 'admin-1', role: 'admin' });
+    const targetAdmin = makeMembership({ id: 'mem-1', userId: 'admin-2', role: 'admin' });
+
+    const repo = mockRepo({
+      findByOwnerId: async () => ok(null),
+      findByMemberId: async () => ok(team),
+      findMembershipByUserId: async () => ok(adminMembership),
+      findMembershipsByTeamId: async () => ok([adminMembership, targetAdmin]),
+    });
+
+    const useCase = new RemoveTeamMemberUseCase(repo);
+    const result = await useCase.execute({ callerId: 'admin-1', membershipId: 'mem-1', traceId: 't' });
+
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamForbiddenError);
+  });
+
+  it('rejects plain member trying to remove', async () => {
+    const team = makeTeam();
+    const plainMembership = makeMembership({ id: 'caller-mem', userId: 'member-1', role: 'member' });
+
+    const repo = mockRepo({
+      findByOwnerId: async () => ok(null),
+      findByMemberId: async () => ok(team),
+      findMembershipByUserId: async () => ok(plainMembership),
+    });
+
+    const useCase = new RemoveTeamMemberUseCase(repo);
+    const result = await useCase.execute({ callerId: 'member-1', membershipId: 'mem-1', traceId: 't' });
+
+    expect(result.isErr()).toBe(true);
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(TeamForbiddenError);
   });
 });

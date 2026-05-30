@@ -26,7 +26,7 @@ export async function DELETE(
   }
 
   const result = await container.removeTeamMemberUseCase.execute({
-    ownerId: callerId,
+    callerId,
     membershipId: parsed.data.membershipId,
     traceId,
   });

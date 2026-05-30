@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { container } from '@/lib/container';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { sendTeamInviteEmail } from '@pledgeoff/adapters';
-import { TeamSeatLimitError, TeamMemberAlreadyExistsError } from '@pledgeoff/core';
+import { TeamSeatLimitError, TeamMemberAlreadyExistsError, TeamForbiddenError } from '@pledgeoff/core';
 import { effectiveSeats } from '@pledgeoff/core';
 import { logger } from '@pledgeoff/observability';
 import { resolveUserId } from '@/lib/api-auth';
@@ -30,10 +30,30 @@ export async function POST(req: Request) {
     return Response.json({ error: { code: 'VALIDATION_FAILED', details: parsed.error.flatten() } }, { status: 400, headers: { 'X-Trace-Id': traceId } });
   }
 
+  // Resolve the team owner's user ID for seat-limit lookup.
+  // If the caller is the owner, ownerId === userId.
+  // If the caller is an admin member, we need the team's actual owner.
+  let ownerId = userId;
+  const ownerTeamResult = await container.teamRepo.findByOwnerId(userId);
+  if (ownerTeamResult.isErr()) {
+    logger.error({ traceId, userId, outcome: 'error' as const }, 'teams/invite: owner team lookup failed');
+    return Response.json({ error: { code: 'INTERNAL_ERROR' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
+  }
+  if (!ownerTeamResult.value) {
+    // Caller is not the owner — try finding their team as a member
+    const memberTeamResult = await container.teamRepo.findByMemberId(userId);
+    if (memberTeamResult.isErr()) {
+      return Response.json({ error: { code: 'INTERNAL_ERROR' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
+    }
+    if (memberTeamResult.value) {
+      ownerId = memberTeamResult.value.ownerId;
+    }
+  }
+
   // Get owner's plan + effective seats (base included + extra purchased)
-  const subResult = await container.subscriptionRepo.findByUserId(userId);
+  const subResult = await container.subscriptionRepo.findByUserId(ownerId);
   if (subResult.isErr()) {
-    logger.error({ traceId, userId, outcome: 'error' as const }, 'teams/invite: subscription lookup failed');
+    logger.error({ traceId, userId, ownerId, outcome: 'error' as const }, 'teams/invite: subscription lookup failed');
     return Response.json({ error: { code: 'INTERNAL_ERROR' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }
   const sub = subResult.value;
@@ -44,7 +64,7 @@ export async function POST(req: Request) {
   const inviterEmail = userData?.user?.email ?? 'Your teammate';
 
   const result = await container.inviteTeamMemberUseCase.execute({
-    ownerId: userId,
+    callerId: userId,
     maxSeats,
     invitedEmail: parsed.data.email,
     traceId,
@@ -52,6 +72,9 @@ export async function POST(req: Request) {
 
   if (result.isErr()) {
     const error = result.error;
+    if (error instanceof TeamForbiddenError) {
+      return Response.json({ error: { code: 'FORBIDDEN', message: error.message } }, { status: 403, headers: { 'X-Trace-Id': traceId } });
+    }
     if (error instanceof TeamSeatLimitError) {
       return Response.json({ error: { code: 'SEAT_LIMIT_REACHED', message: error.message } }, { status: 403, headers: { 'X-Trace-Id': traceId } });
     }

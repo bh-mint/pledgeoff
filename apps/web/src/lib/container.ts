@@ -56,6 +56,7 @@ import {
   UpdateTeamSeatsUseCase,
   GenerateInviteLinkUseCase,
   JoinViaInviteLinkUseCase,
+  UpdateMemberRoleUseCase,
   DeleteIdeaUseCase,
   ReactToIdeaUseCase,
   AskOttoUseCase,
@@ -325,6 +326,11 @@ class AppContainer {
   private _joinViaInviteLinkUseCase?: JoinViaInviteLinkUseCase;
   get joinViaInviteLinkUseCase(): JoinViaInviteLinkUseCase {
     return (this._joinViaInviteLinkUseCase ??= new JoinViaInviteLinkUseCase(this.teamRepo));
+  }
+
+  private _updateMemberRoleUseCase?: UpdateMemberRoleUseCase;
+  get updateMemberRoleUseCase(): UpdateMemberRoleUseCase {
+    return (this._updateMemberRoleUseCase ??= new UpdateMemberRoleUseCase(this.teamRepo));
   }
 
   private _deleteIdeaUseCase?: DeleteIdeaUseCase;

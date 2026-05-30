@@ -51,6 +51,7 @@ export * from './use-cases/remove-team-member';
 export * from './use-cases/leave-team';
 export * from './use-cases/update-team-name';
 export * from './use-cases/update-team-seats';
+export * from './use-cases/update-member-role';
 export * from './use-cases/react-to-idea';
 export * from './ports/idea-reaction-repository';
 export * from './domain/otto-conversation';
