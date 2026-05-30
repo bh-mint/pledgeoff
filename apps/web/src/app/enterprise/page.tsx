@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { EnterpriseContactForm } from "./EnterpriseContactForm";
+import { PRICING } from "@/lib/pricing.config";
 
 export const metadata: Metadata = {
   title: { absolute: "Enterprise — PledgeOFF" },
@@ -157,7 +158,7 @@ export default function EnterprisePage() {
               <div>
                 <div className="mono text-[10px] uppercase tracking-[0.14em] mb-3" style={{ color: "var(--t3)" }}>pricing</div>
                 <div className="display text-[28px] sm:text-[36px] font-semibold tracking-tight leading-[1.05]" style={{ color: "var(--t1)" }}>
-                  From €1,199/mo.<br />
+                  From €{PRICING.enterprise.monthly.eur}/mo.<br />
                   <span style={{ color: "var(--t3)" }}>Negotiated annually, flat fee.</span>
                 </div>
                 <p className="mt-4 text-[13px] leading-[1.65]" style={{ color: "var(--t2)" }}>
@@ -169,7 +170,7 @@ export default function EnterprisePage() {
               <div className="flex flex-col gap-4">
                 <div className="border rounded-md p-4" style={{ borderColor: "var(--border)" }}>
                   <div className="mono text-[10px] uppercase tracking-[0.1em] mb-1" style={{ color: "var(--t3)" }}>starts at</div>
-                  <div className="display text-[28px] font-semibold" style={{ color: "var(--t1)" }}>€499<span className="text-[14px] font-normal" style={{ color: "var(--t3)" }}>/mo</span></div>
+                  <div className="display text-[28px] font-semibold" style={{ color: "var(--t1)" }}>€{PRICING.studio.monthly.eur}<span className="text-[14px] font-normal" style={{ color: "var(--t3)" }}>/mo</span></div>
                   <div className="mono text-[11px] mt-1" style={{ color: "var(--t3)" }}>Studio plan · self-serve · up to 10 seats</div>
                 </div>
                 <div

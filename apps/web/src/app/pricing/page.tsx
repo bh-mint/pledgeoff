@@ -19,7 +19,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebPage",
   name: "Pricing — PledgeOFF",
-  description: "Free until you're sure. Then €49/mo for Founder. Validate startup ideas with real Reddit, GitHub, and HN signals.",
+  description: `Free until you're sure. Then €${PRICING.founder.monthly.eur}/mo for Founder. Validate startup ideas with real Reddit, GitHub, and HN signals.`,
   url: "https://pledgeoff.com/pricing",
 };
 

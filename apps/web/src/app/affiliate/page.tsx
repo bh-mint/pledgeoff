@@ -2,6 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
+import { PRICING } from "@/lib/pricing.config";
+
+const COMMISSION_RATE = 0.3;
+const PLANS = [
+  { plan: "Founder", monthly: PRICING.founder.monthly.eur },
+  { plan: "Team", monthly: PRICING.team.monthly.eur },
+  { plan: "Studio", monthly: PRICING.studio.monthly.eur },
+] as const;
 
 export const metadata: Metadata = {
   title: { absolute: "Affiliate Program — PledgeOFF" },
@@ -59,7 +67,7 @@ const FAQ = [
   },
   {
     q: "Does the commission apply to all plans?",
-    a: "Yes — Founder (€49/mo), Team (€99/mo), and Studio (€349/mo). Annual plans are also included. Enterprise deals are handled separately.",
+    a: `Yes — Founder (€${PRICING.founder.monthly.eur}/mo), Team (€${PRICING.team.monthly.eur}/mo), and Studio (€${PRICING.studio.monthly.eur}/mo). Annual plans are also included. Enterprise deals are handled separately.`,
   },
   {
     q: "What if a referred user upgrades their plan?",
@@ -103,11 +111,7 @@ export default function AffiliatePage() {
 
             {/* Commission cards */}
             <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { plan: "Founder", monthly: "€49/mo", commission: "€14.70/mo per user" },
-                { plan: "Team", monthly: "€99/mo", commission: "€29.70/mo per user" },
-                { plan: "Studio", monthly: "€349/mo", commission: "€104.70/mo per user" },
-              ].map(({ plan, monthly, commission }) => (
+              {PLANS.map(({ plan, monthly }) => (
                 <div
                   key={plan}
                   className="rounded-md border p-4"
@@ -117,10 +121,10 @@ export default function AffiliatePage() {
                     {plan}
                   </div>
                   <div className="mono text-[11px] mb-3" style={{ color: "var(--t3)" }}>
-                    {monthly}
+                    €{monthly}/mo
                   </div>
                   <div className="text-[13px] font-semibold" style={{ color: "var(--validated)" }}>
-                    {commission}
+                    €{(monthly * COMMISSION_RATE).toFixed(2)}/mo per user
                   </div>
                 </div>
               ))}
