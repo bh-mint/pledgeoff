@@ -3,6 +3,7 @@ import Link from "next/link";
 import { LegalTOC } from "@/components/LegalTOC";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
+import { PRICING } from "@/lib/pricing.config";
 
 export const metadata: Metadata = {
   title: { absolute: "Terms of Service — PledgeOFF" },
@@ -205,25 +206,25 @@ export default function TermsPage() {
                   </tr>
                   <tr>
                     <td><strong>Founder</strong></td>
-                    <td>€49</td>
-                    <td>€39 (€468/yr)</td>
+                    <td>€{PRICING.founder.monthly.eur}</td>
+                    <td>€{PRICING.founder.monthly.annual_equivalent} (€{PRICING.founder.monthly.annual_total}/yr)</td>
                     <td>20 verdicts / month · 1 seat · 5 Otto questions</td>
                   </tr>
                   <tr>
                     <td><strong>Team</strong></td>
-                    <td>€99</td>
-                    <td>€79 (€948/yr)</td>
+                    <td>€{PRICING.team.monthly.eur}</td>
+                    <td>€{PRICING.team.monthly.annual_equivalent} (€{PRICING.team.monthly.annual_total}/yr)</td>
                     <td>Unlimited verdicts · 3 seats · 15 Otto questions</td>
                   </tr>
                   <tr>
                     <td><strong>Studio</strong></td>
-                    <td>€349</td>
-                    <td>€279 (€3,348/yr)</td>
+                    <td>€{PRICING.studio.monthly.eur}</td>
+                    <td>€{PRICING.studio.monthly.annual_equivalent} (€{PRICING.studio.monthly.annual_total}/yr)</td>
                     <td>Unlimited · 8 seats · 50 Otto questions · PDF export</td>
                   </tr>
                   <tr>
                     <td><strong>Enterprise</strong></td>
-                    <td>from €1,199</td>
+                    <td>from €{PRICING.enterprise.monthly.eur}</td>
                     <td>Negotiated</td>
                     <td>Unlimited · unlimited seats · custom pricing · dedicated support</td>
                   </tr>

@@ -65,7 +65,7 @@ export function ROICalculator() {
         style={{ borderColor: "var(--accent)", background: "rgba(var(--accent-rgb,99,102,241),0.06)" }}
       >
         <div className="mono text-[10px] uppercase tracking-wider mb-1" style={{ color: "var(--accent)" }}>
-          Result
+          Estimated result
         </div>
         <p className="text-[15px] sm:text-[17px] leading-snug" style={{ color: "var(--t1)" }}>
           At €{value.toLocaleString()}/mo, PledgeOFF Founder pays for itself in{" "}
@@ -73,6 +73,9 @@ export function ROICalculator() {
         </p>
         <p className="text-[12px] mt-2" style={{ color: "var(--t3)" }}>
           One avoided mistake — a pivot, a dead feature, a wrong market — is worth multiples of that.
+        </p>
+        <p className="text-[11px] mt-3" style={{ color: "var(--t3)", opacity: 0.6 }}>
+          Based on 160h/mo working time. Estimate only.
         </p>
       </div>
     </div>
