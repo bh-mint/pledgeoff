@@ -45,7 +45,7 @@ function makeRepo(sub: Subscription | null = makeSub()): ISubscriptionRepository
 }
 
 describe('GetOttoBalanceUseCase', () => {
-  it('returns correct balance for Pro user with 1 used and 5 purchased', async () => {
+  it('returns correct balance for Founder user with 1 used and 5 purchased', async () => {
     const repo = makeRepo();
     const useCase = new GetOttoBalanceUseCase(repo);
 
@@ -53,10 +53,10 @@ describe('GetOttoBalanceUseCase', () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.included).toBe(4); // 5 limit - 1 used
+      expect(result.value.included).toBe(14); // 15 limit - 1 used
       expect(result.value.purchased).toBe(5);
-      expect(result.value.total).toBe(9);
-      expect(result.value.includedLimit).toBe(5);
+      expect(result.value.total).toBe(19);
+      expect(result.value.includedLimit).toBe(15);
       expect(result.value.plan).toBe('founder');
     }
   });
@@ -74,7 +74,7 @@ describe('GetOttoBalanceUseCase', () => {
     }
   });
 
-  it('returns 10 included for Pro+ with none used', async () => {
+  it('returns 45 included for Team with none used', async () => {
     const repo = makeRepo(makeSub({ plan: 'team', ottoIncludedUsed: 0, ottoPurchased: 0 }));
     const useCase = new GetOttoBalanceUseCase(repo);
 
@@ -82,8 +82,8 @@ describe('GetOttoBalanceUseCase', () => {
 
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.included).toBe(15);
-      expect(result.value.includedLimit).toBe(15);
+      expect(result.value.included).toBe(45);
+      expect(result.value.includedLimit).toBe(45);
     }
   });
 
