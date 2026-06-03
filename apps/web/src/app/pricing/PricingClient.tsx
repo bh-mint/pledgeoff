@@ -332,7 +332,6 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                 "Reddit · GitHub signals",
                 "ICP Analysis (limited)",
                 "7-day idea history",
-                "1 seat",
               ].map((f) => (
                 <li key={f} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--t3)" }}>✓</span>
@@ -345,7 +344,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               </li>
               <li className="flex items-start gap-2">
                 <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
-                <span className="text-[12px]" style={{ color: "var(--t3)" }}>PDF / JSON export</span>
+                <span className="text-[12px]" style={{ color: "var(--t3)" }}>PDF / JSON export <span className="mono text-[10px]">Founder+</span></span>
               </li>
             </ul>
             <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
@@ -381,16 +380,15 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               <UpgradeButton priceId={founderPriceId} label="Upgrade to Founder" primary />
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
             </div>
+            <div className="mono text-[10px] mb-2" style={{ color: "var(--t3)" }}>Everything in Free, plus:</div>
             <ul className="space-y-2 flex-1">
               {([
                 { label: "20 validations / month" },
-                { label: "HN · Dev.to · GitHub · Reddit · Brave" },
+                { label: "All 5 signal sources" },
                 { label: "5 of 6 intelligence tools" },
                 { label: "15 Otto questions / mo" },
-                { label: "1-year idea history" },
-                { label: "PDF + JSON export" },
-                { label: "Outgoing webhooks" },
-                { label: "24h support SLA" },
+                { label: "1-year history · PDF + JSON export" },
+                { label: "Outgoing webhooks · 24h SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
@@ -421,16 +419,15 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               <UpgradeButton priceId={teamPriceId} label="Upgrade to Team" primary />
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
             </div>
+            <div className="mono text-[10px] mb-2" style={{ color: "var(--t3)" }}>Everything in Founder, plus:</div>
             <ul className="space-y-2 flex-1">
               {([
                 { label: "60 validations / month" },
-                { label: "HN · Dev.to · GitHub · Reddit · Brave" },
-                { label: "All 6 intelligence tools" },
+                { label: "GTM Brief (6th intelligence tool)" },
                 { label: "3 seats · 45 Otto questions / mo" },
                 { label: "Unlimited idea history" },
-                { label: "PDF + JSON export" },
-                { label: "API access + webhooks" },
-                { label: "Signal Feed · early access" },
+                { label: "API access · Signal Feed" },
+                { label: "Early access to features" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
@@ -457,15 +454,13 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               <UpgradeButton priceId={studioPriceId} label="Upgrade to Studio" />
               <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
             </div>
+            <div className="mono text-[10px] mb-2" style={{ color: "var(--t3)" }}>Everything in Team, plus:</div>
             <ul className="space-y-2 flex-1">
               {([
                 { label: "100 validations / month" },
                 { label: "All 5 sources + custom" },
-                { label: "All 6 intelligence tools" },
                 { label: "8 seats · 120 Otto questions / mo" },
-                { label: "Unlimited idea history" },
                 { label: "White-label reports", soon: true },
-                { label: "API access + webhooks" },
                 { label: "Activity log · NET30 invoicing" },
                 { label: "4h dedicated SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
