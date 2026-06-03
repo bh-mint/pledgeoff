@@ -1325,7 +1325,7 @@ paths:
                   default: true
                   description: When true, returns clientSecret for embedded checkout
             example:
-              priceId: price_1Tac4ZFGL6RVOLhmUIkrZsPZ
+              priceId: price_xxx
       responses:
         '200':
           description: Stripe Checkout client secret

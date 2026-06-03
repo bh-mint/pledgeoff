@@ -68,6 +68,9 @@ export class StripeAdapter {
         metadata: { userId: input.userId },
         subscription_data: { metadata: { userId: input.userId } },
         allow_promotion_codes: true,
+        automatic_tax: { enabled: true },
+        customer_update: { address: 'auto' },
+        tax_id_collection: { enabled: true },
         consent_collection: { terms_of_service: 'required' },
         custom_text: {
           terms_of_service_acceptance: {
