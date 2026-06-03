@@ -24,7 +24,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
     group: "Validation",
     rows: [
       { k: "Validations / month",       f: "1",               fo: "20",             t: "60",               s: "100" },
-      { k: "Signal sources",            f: "Reddit + GitHub", fo: "All 5 sources",  t: "All 5 sources",    s: "All + custom" },
+      { k: "Signal sources",            f: "Reddit · GitHub", fo: "HN · Dev.to · GitHub · Reddit · Brave",  t: "HN · Dev.to · GitHub · Reddit · Brave",    s: "All 5 + custom" },
       { k: "PDF / JSON export",         f: "—",               fo: "✓",              t: "✓",                s: "✓ · white-label" },
     ],
   },
@@ -97,7 +97,7 @@ const FAQ = [
   },
   {
     q: "What's the difference between Founder and Team?",
-    a: "Founder gives you 20 validations/month, all 5 signal sources, and 5 of the 6 intelligence tools — perfect for solo builders. Team raises the cap to 60 validations/month, adds GTM Brief (the 6th tool), 3 seats, 45 Otto questions, and early access to every new feature we ship.",
+    a: "Founder gives you 20 validations/month, all 5 signal sources (HN, Dev.to, GitHub, Reddit, Brave), and 5 of the 6 intelligence tools — perfect for solo builders. Team raises the cap to 60 validations/month, adds GTM Brief (the 6th tool), 3 seats, 45 Otto questions, and early access to every new feature we ship.",
   },
   {
     q: "Is the verdict really accurate?",
@@ -329,7 +329,8 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             <ul className="space-y-2 flex-1">
               {[
                 "1 validation / month",
-                "Reddit + GitHub signals",
+                "Reddit · GitHub signals",
+                "ICP Analysis (limited)",
                 "7-day idea history",
                 "1 seat",
               ].map((f) => (
@@ -339,12 +340,8 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                 </li>
               ))}
               <li className="flex items-start gap-2">
-                <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--t3)" }}>✓</span>
-                <span className="text-[12px]" style={{ color: "var(--t2)" }}>ICP Analysis <span style={{ color: "var(--t3)" }}>(limited)</span></span>
-              </li>
-              <li className="flex items-start gap-2">
                 <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
-                <span className="text-[12px]" style={{ color: "var(--t3)" }}>5 intelligence tools <span className="mono text-[10px]">Founder+</span></span>
+                <span className="text-[12px]" style={{ color: "var(--t3)" }}>Intelligence tools <span className="mono text-[10px]">Founder+</span></span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
@@ -387,28 +384,17 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             <ul className="space-y-2 flex-1">
               {([
                 { label: "20 validations / month" },
-                { label: "All 5 signal sources" },
-                { label: "PDF + JSON export" },
-                { label: "1-year idea history" },
+                { label: "HN · Dev.to · GitHub · Reddit · Brave" },
+                { label: "5 of 6 intelligence tools" },
                 { label: "15 Otto questions / mo" },
+                { label: "1-year idea history" },
+                { label: "PDF + JSON export" },
                 { label: "Outgoing webhooks" },
                 { label: "24h support SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f.label}{f.soon && <SoonBadge />}</span>
-                </li>
-              ))}
-              {[
-                "ICP Analysis",
-                "Competitive Landscape",
-                "Revenue Model",
-                "Build Spec",
-                "Page Brief",
-              ].map((tool) => (
-                <li key={tool} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{tool}</span>
                 </li>
               ))}
               <li className="flex items-start gap-2">
@@ -426,7 +412,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                 <span className="mono text-[10px]" style={{ color: "var(--validated)" }}>● most popular</span>
               )}
             </div>
-            <div className="text-[12px] mb-4 mt-1" style={{ color: "var(--t3)" }}>unlimited + collaborate</div>
+            <div className="text-[12px] mb-4 mt-1" style={{ color: "var(--t3)" }}>for teams that ship fast</div>
             <div className="flex items-baseline gap-1">
               <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{teamPrice}</span>
             </div>
@@ -438,31 +424,17 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             <ul className="space-y-2 flex-1">
               {([
                 { label: "60 validations / month" },
-                { label: "All 5 signal sources" },
-                { label: "PDF + JSON export" },
+                { label: "HN · Dev.to · GitHub · Reddit · Brave" },
+                { label: "All 6 intelligence tools" },
+                { label: "3 seats · 45 Otto questions / mo" },
                 { label: "Unlimited idea history" },
-                { label: "3 team seats" },
-                { label: "45 Otto questions / mo" },
+                { label: "PDF + JSON export" },
                 { label: "API access + webhooks" },
-                { label: "Signal Feed (trending niches)" },
-                { label: "Early access to features" },
+                { label: "Signal Feed · early access" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f.label}{f.soon && <SoonBadge />}</span>
-                </li>
-              ))}
-              {[
-                "ICP Analysis",
-                "Competitive Landscape",
-                "Revenue Model",
-                "Build Spec",
-                "Page Brief",
-                "GTM Brief",
-              ].map((tool) => (
-                <li key={tool} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{tool}</span>
                 </li>
               ))}
             </ul>
@@ -488,31 +460,18 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             <ul className="space-y-2 flex-1">
               {([
                 { label: "100 validations / month" },
-                { label: "All sources + custom" },
+                { label: "All 5 sources + custom" },
+                { label: "All 6 intelligence tools" },
+                { label: "8 seats · 120 Otto questions / mo" },
+                { label: "Unlimited idea history" },
                 { label: "White-label reports", soon: true },
-                { label: "8 team seats" },
-                { label: "120 Otto questions / mo" },
                 { label: "API access + webhooks" },
-                { label: "Activity log" },
-                { label: "Invoice billing (NET30)" },
+                { label: "Activity log · NET30 invoicing" },
                 { label: "4h dedicated SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f.label}{f.soon && <SoonBadge />}</span>
-                </li>
-              ))}
-              {[
-                "ICP Analysis",
-                "Competitive Landscape",
-                "Revenue Model",
-                "Build Spec",
-                "Page Brief",
-                "GTM Brief",
-              ].map((tool) => (
-                <li key={tool} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t2)" }}>{tool}</span>
                 </li>
               ))}
             </ul>
@@ -718,7 +677,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             >
               <div>
                 <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>Team</div>
-                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>unlimited + collaborate</div>
+                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>for teams that ship fast</div>
               </div>
               <div className="display text-[28px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>
                 €{teamPrice}<span className="text-[13px] font-normal ml-1" style={{ color: "var(--t3)" }}>/mo</span>
