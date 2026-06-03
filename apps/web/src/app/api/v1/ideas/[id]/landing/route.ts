@@ -3,6 +3,7 @@ export const maxDuration = 60;
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { checkAiRateLimit } from '@/lib/rate-limiter';
+import { checkPlanToolGate } from '@/server/billing/checkPlanToolGate';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -42,6 +43,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const ideaResult = await container.ideaRepo.findById(ideaId);
   if (ideaResult.isErr() || !ideaResult.value || ideaResult.value.userId !== userId) {
     return Response.json({ error: { code: 'NOT_FOUND' } }, { status: 404, headers: { 'X-Trace-Id': traceId } });
+  }
+
+  const planGate = await checkPlanToolGate(userId, 'page');
+  if (!planGate.allowed) {
+    return Response.json(
+      { error: { code: 'PLAN_TOOL_LOCKED', requiredPlan: planGate.requiredPlan } },
+      { status: 403, headers: { 'X-Trace-Id': traceId } },
+    );
   }
 
   const aiLimit = await checkAiRateLimit(userId);

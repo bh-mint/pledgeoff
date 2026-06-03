@@ -1,6 +1,7 @@
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { checkAiRateLimit } from '@/lib/rate-limiter';
+import { checkPlanToolGate } from '@/server/billing/checkPlanToolGate';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -29,6 +30,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const userId = await resolveUserIdFromRequest(req);
   if (!userId) {
     return Response.json({ error: { code: 'UNAUTHENTICATED' } }, { status: 401, headers: { 'X-Trace-Id': traceId } });
+  }
+
+  const planGate = await checkPlanToolGate(userId, 'gtm');
+  if (!planGate.allowed) {
+    return Response.json(
+      { error: { code: 'PLAN_TOOL_LOCKED', requiredPlan: planGate.requiredPlan } },
+      { status: 403, headers: { 'X-Trace-Id': traceId } },
+    );
   }
 
   const aiLimit = await checkAiRateLimit(userId);

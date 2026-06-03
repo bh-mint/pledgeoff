@@ -42,6 +42,26 @@ export const PLAN_LIMITS = {
   enterprise: { verificationsPerMonth: 200,      seatsIncluded: Infinity, ottoQuestionsPerMonth: Infinity },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
 
+export const TOOL_KEYS = ['icp', 'icp_limited', 'comp', 'rev', 'build', 'page', 'gtm'] as const;
+export type ToolKey = typeof TOOL_KEYS[number];
+
+export const PLAN_TOOL_GATES: Record<Plan, readonly ToolKey[]> = {
+  free:       ['icp_limited'],
+  founder:    ['icp', 'comp', 'rev', 'build', 'page'],
+  team:       ['icp', 'comp', 'rev', 'build', 'page', 'gtm'],
+  studio:     ['icp', 'comp', 'rev', 'build', 'page', 'gtm'],
+  enterprise: ['icp', 'comp', 'rev', 'build', 'page', 'gtm'],
+} as const;
+
+export function hasPlanToolAccess(plan: Plan, tool: ToolKey): boolean {
+  return (PLAN_TOOL_GATES[plan] as readonly string[]).includes(tool);
+}
+
+export function requiredPlanForTool(tool: ToolKey): Plan {
+  if (tool === 'gtm') return 'team';
+  return 'founder';
+}
+
 export const VALIDATION_PACK_SIZES = [10, 25, 60] as const;
 export type ValidationPackSize = typeof VALIDATION_PACK_SIZES[number];
 
