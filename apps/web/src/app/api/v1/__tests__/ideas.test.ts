@@ -16,6 +16,7 @@ const mockIdempotencyStore = {
   hasBeenProcessed: vi.fn(),
   markAsProcessed: vi.fn(),
 };
+const mockSubscriptionRepo = { findByUserId: vi.fn() };
 const mockAuditLog = { log: vi.fn() };
 const mockEventBus = { processOutbox: vi.fn() };
 
@@ -31,6 +32,7 @@ vi.mock('@/lib/container', () => ({
     ideaRepo: mockIdeaRepo,
     decisionRepo: mockDecisionRepo,
     idempotencyStore: mockIdempotencyStore,
+    subscriptionRepo: mockSubscriptionRepo,
     createIdeaUseCase: mockCreateIdeaUseCase,
     auditLog: mockAuditLog,
     eventBus: mockEventBus,
@@ -55,6 +57,7 @@ describe('POST /api/v1/ideas', () => {
     mockGetUserPlan.mockResolvedValue('free');
     mockCheckRateLimit.mockResolvedValue({ allowed: true });
     mockIdeaRepo.countThisMonth.mockResolvedValue(ok(0));
+    mockSubscriptionRepo.findByUserId.mockResolvedValue(ok(null));
     mockIdempotencyStore.hasBeenProcessed.mockResolvedValue(ok(false));
     mockIdempotencyStore.markAsProcessed.mockResolvedValue(ok(undefined));
     mockAuditLog.log.mockResolvedValue(undefined);
