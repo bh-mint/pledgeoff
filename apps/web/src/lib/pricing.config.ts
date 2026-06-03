@@ -26,4 +26,11 @@ export const PRICING = {
       { count: 150, eur: 120 },
     ] as const,
   },
+  validationPacks: {
+    packs: [
+      { count: 10, eur: 19, label: "Starter" },
+      { count: 25, eur: 42, label: "Builder" },
+      { count: 60, eur: 85, label: "Sprint" },
+    ] as const,
+  },
 } as const;

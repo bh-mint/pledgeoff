@@ -23,10 +23,20 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Validation",
     rows: [
-      { k: "Validations / month",       f: "1",               fo: "20",             t: "Unlimited",        s: "Unlimited" },
+      { k: "Validations / month",       f: "1",               fo: "20",             t: "60",               s: "100" },
       { k: "Signal sources",            f: "Reddit + GitHub", fo: "All 5 sources",  t: "All 5 sources",    s: "All + custom" },
-      { k: "Competitive Landscape",   f: "—",               fo: "✓",              t: "✓",                s: "✓" },
       { k: "PDF / JSON export",         f: "—",               fo: "✓",              t: "✓",                s: "✓ · white-label" },
+    ],
+  },
+  {
+    group: "Intelligence tools",
+    rows: [
+      { k: "ICP Analysis",              f: "Limited",         fo: "✓",              t: "✓",                s: "✓" },
+      { k: "Competitive Landscape",     f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "Revenue Model",             f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "Build Spec",                f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "Page Brief",                f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "GTM Brief",                 f: "—",               fo: "—",              t: "✓",                s: "✓" },
     ],
   },
   {
@@ -46,7 +56,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Otto AI",
     rows: [
-      { k: "Otto questions / month",    f: "—",               fo: "5",              t: "15",               s: "50" },
+      { k: "Otto questions / month",    f: "—",               fo: "15",             t: "45",               s: "120" },
     ],
   },
   {
@@ -78,7 +88,7 @@ const FAQ = [
   },
   {
     q: "What's the difference between Founder and Team?",
-    a: "Founder gives you 20 validations/month and all signal sources — perfect for solo builders. Team removes the monthly cap, adds 3 seats, extra Otto AI questions, and early access to every new feature we ship.",
+    a: "Founder gives you 20 validations/month, all 5 signal sources, and 5 of the 6 intelligence tools — perfect for solo builders. Team raises the cap to 60 validations/month, adds GTM Brief (the 6th tool), 3 seats, 45 Otto questions, and early access to every new feature we ship.",
   },
   {
     q: "Is the verdict really accurate?",
@@ -319,7 +329,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                   <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
                 </li>
               ))}
-              {["Competitive Landscape", "PDF / JSON export"].map((f) => (
+              {["Intelligence tools", "PDF / JSON export"].map((f) => (
                 <li key={f} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
                   <span className="text-[12px]" style={{ color: "var(--t3)" }}>{f}</span>
@@ -363,10 +373,10 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               {([
                 { label: "20 validations / month" },
                 { label: "All 5 signal sources" },
-                { label: "Competitive Landscape" },
+                { label: "ICP Analysis · Competitive · Revenue · Build · Page" },
                 { label: "PDF + JSON export" },
                 { label: "1-year idea history" },
-                { label: "5 Otto questions / mo" },
+                { label: "15 Otto questions / mo" },
                 { label: "24h support SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
@@ -396,13 +406,13 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             </div>
             <ul className="space-y-2 flex-1">
               {([
-                { label: "Unlimited validations" },
+                { label: "60 validations / month" },
                 { label: "All 5 signal sources" },
-                { label: "Competitive Landscape" },
+                { label: "All 6 intelligence tools incl. GTM Brief" },
                 { label: "PDF + JSON export" },
                 { label: "Unlimited idea history" },
                 { label: "3 team seats" },
-                { label: "15 Otto questions / mo" },
+                { label: "45 Otto questions / mo" },
                 { label: "Early access to features" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
@@ -432,12 +442,12 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             </div>
             <ul className="space-y-2 flex-1">
               {([
-                { label: "Unlimited validations" },
+                { label: "100 validations / month" },
                 { label: "All sources + custom" },
-                { label: "Competitive Landscape" },
+                { label: "All 6 intelligence tools" },
                 { label: "White-label reports", soon: true },
                 { label: "8 team seats" },
-                { label: "50 Otto questions / mo" },
+                { label: "120 Otto questions / mo" },
                 { label: "Invoice billing (NET30)" },
                 { label: "4h dedicated SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
@@ -466,6 +476,46 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
           >
             Enterprise →
           </a>
+        </div>
+
+        {/* Validation Packs */}
+        <div className="mt-8">
+          <div className="flex items-baseline gap-3 mb-1">
+            <h2 className="display text-[18px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
+              Validation Packs
+            </h2>
+            <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>Founder+ · never expire</span>
+          </div>
+          <p className="text-[13px] mb-4" style={{ color: "var(--t2)" }}>
+            Need more validations this month? Top up — credits stack with your plan quota.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {PRICING.validationPacks.packs.map((pack) => (
+              <div
+                key={pack.count}
+                className="border rounded-md px-5 py-4 flex items-center justify-between"
+                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              >
+                <div>
+                  <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>
+                    {pack.label}
+                    <span className="mono text-[11px] font-normal ml-2" style={{ color: "var(--t3)" }}>
+                      {pack.count} validations
+                    </span>
+                  </div>
+                  <div className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
+                    €{(pack.eur / pack.count).toFixed(2)}/validation
+                  </div>
+                </div>
+                <div className="display text-[22px] tnum font-semibold shrink-0" style={{ color: "var(--t1)" }}>
+                  €{pack.eur}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
+            Purchase from Settings → Billing · one-time · no subscription
+          </p>
         </div>
 
         {/* VAT footnote */}
