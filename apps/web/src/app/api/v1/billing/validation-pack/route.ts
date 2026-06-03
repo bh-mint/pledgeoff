@@ -5,13 +5,14 @@ import { container } from '@/lib/container';
 import { logger } from '@pledgeoff/observability';
 
 const ValidationPackSchema = z.object({
-  validationCount: z.union([z.literal(10), z.literal(25), z.literal(60)]),
+  validationCount: z.union([z.literal(10), z.literal(25), z.literal(60), z.literal(100)]),
 });
 
 const VALIDATION_PACK_PRICE_IDS: Record<number, string | undefined> = {
   10: process.env.STRIPE_VALIDATION_PACK_10_PRICE_ID,
   25: process.env.STRIPE_VALIDATION_PACK_25_PRICE_ID,
   60: process.env.STRIPE_VALIDATION_PACK_60_PRICE_ID,
+  100: process.env.STRIPE_VALIDATION_PACK_100_PRICE_ID,
 };
 
 export async function POST(req: Request) {

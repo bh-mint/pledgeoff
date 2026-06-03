@@ -489,7 +489,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
           <p className="text-[13px] mb-4" style={{ color: "var(--t2)" }}>
             Need more validations this month? Top up — credits stack with your plan quota.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             {PRICING.validationPacks.packs.map((pack) => (
               <div
                 key={pack.count}
@@ -503,8 +503,41 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                       {pack.count} validations
                     </span>
                   </div>
-                  <div className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
-                    €{(pack.eur / pack.count).toFixed(2)}/validation
+                </div>
+                <div className="display text-[22px] tnum font-semibold shrink-0" style={{ color: "var(--t1)" }}>
+                  €{pack.eur}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
+            Purchase from Settings → Billing · one-time · no subscription
+          </p>
+        </div>
+
+        {/* Otto Packs */}
+        <div className="mt-8">
+          <div className="flex items-baseline gap-3 mb-1">
+            <h2 className="display text-[18px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
+              Otto Packs
+            </h2>
+            <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>Founder+ · never expire</span>
+          </div>
+          <p className="text-[13px] mb-4" style={{ color: "var(--t2)" }}>
+            Need more Otto questions this month? Top up — credits stack with your plan quota.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            {PRICING.otto.packs.map((pack) => (
+              <div
+                key={pack.count}
+                className="border rounded-md px-5 py-4 flex items-center justify-between"
+                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              >
+                <div>
+                  <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>
+                    <span className="mono text-[11px] font-normal" style={{ color: "var(--t3)" }}>
+                      {pack.count} questions
+                    </span>
                   </div>
                 </div>
                 <div className="display text-[22px] tnum font-semibold shrink-0" style={{ color: "var(--t1)" }}>
