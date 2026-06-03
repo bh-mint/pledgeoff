@@ -60,10 +60,19 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
     ],
   },
   {
+    group: "Developer",
+    rows: [
+      { k: "Outgoing webhooks",         f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "API access",                f: "—",               fo: "—",              t: "✓",                s: "✓" },
+      { k: "Signal Feed (trending)",    f: "—",               fo: "—",              t: "✓",                s: "✓" },
+    ],
+  },
+  {
     group: "Support",
     rows: [
       { k: "Response SLA",              f: "Best effort",     fo: "24h",            t: "24h",              s: "4h dedicated" },
       { k: "White-label reports",       f: "—",               fo: "—",              t: "—",                s: "✓", soon: true },
+      { k: "Activity log",              f: "—",               fo: "—",              t: "—",                s: "✓" },
       { k: "Invoice billing (NET30)",   f: "—",               fo: "—",              t: "—",                s: "✓" },
     ],
   },
@@ -329,12 +338,18 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                   <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
                 </li>
               ))}
-              {["Intelligence tools", "PDF / JSON export"].map((f) => (
-                <li key={f} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
-                  <span className="text-[12px]" style={{ color: "var(--t3)" }}>{f}</span>
-                </li>
-              ))}
+              <li className="flex items-start gap-2">
+                <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--t3)" }}>✓</span>
+                <span className="text-[12px]" style={{ color: "var(--t2)" }}>ICP Analysis <span style={{ color: "var(--t3)" }}>(limited)</span></span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
+                <span className="text-[12px]" style={{ color: "var(--t3)" }}>5 intelligence tools <span className="mono text-[10px]">Founder+</span></span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
+                <span className="text-[12px]" style={{ color: "var(--t3)" }}>PDF / JSON export</span>
+              </li>
             </ul>
             <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
               <p className="text-[11px] leading-[1.55]" style={{ color: "var(--t3)" }}>
@@ -373,10 +388,10 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               {([
                 { label: "20 validations / month" },
                 { label: "All 5 signal sources" },
-                { label: "ICP Analysis · Competitive · Revenue · Build · Page" },
                 { label: "PDF + JSON export" },
                 { label: "1-year idea history" },
                 { label: "15 Otto questions / mo" },
+                { label: "Outgoing webhooks" },
                 { label: "24h support SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
@@ -384,6 +399,22 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                   <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f.label}{f.soon && <SoonBadge />}</span>
                 </li>
               ))}
+              {[
+                "ICP Analysis",
+                "Competitive Landscape",
+                "Revenue Model",
+                "Build Spec",
+                "Page Brief",
+              ].map((tool) => (
+                <li key={tool} className="flex items-start gap-2">
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
+                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{tool}</span>
+                </li>
+              ))}
+              <li className="flex items-start gap-2">
+                <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
+                <span className="text-[12px]" style={{ color: "var(--t3)" }}>GTM Brief <span className="mono text-[10px]">Team+</span></span>
+              </li>
             </ul>
           </div>
 
@@ -408,16 +439,30 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               {([
                 { label: "60 validations / month" },
                 { label: "All 5 signal sources" },
-                { label: "All 6 intelligence tools incl. GTM Brief" },
                 { label: "PDF + JSON export" },
                 { label: "Unlimited idea history" },
                 { label: "3 team seats" },
                 { label: "45 Otto questions / mo" },
+                { label: "API access + webhooks" },
+                { label: "Signal Feed (trending niches)" },
                 { label: "Early access to features" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f.label}{f.soon && <SoonBadge />}</span>
+                </li>
+              ))}
+              {[
+                "ICP Analysis",
+                "Competitive Landscape",
+                "Revenue Model",
+                "Build Spec",
+                "Page Brief",
+                "GTM Brief",
+              ].map((tool) => (
+                <li key={tool} className="flex items-start gap-2">
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
+                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{tool}</span>
                 </li>
               ))}
             </ul>
@@ -444,16 +489,30 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               {([
                 { label: "100 validations / month" },
                 { label: "All sources + custom" },
-                { label: "All 6 intelligence tools" },
                 { label: "White-label reports", soon: true },
                 { label: "8 team seats" },
                 { label: "120 Otto questions / mo" },
+                { label: "API access + webhooks" },
+                { label: "Activity log" },
                 { label: "Invoice billing (NET30)" },
                 { label: "4h dedicated SLA" },
               ] as { label: string; soon?: boolean }[]).map((f) => (
                 <li key={f.label} className="flex items-start gap-2">
                   <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
                   <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f.label}{f.soon && <SoonBadge />}</span>
+                </li>
+              ))}
+              {[
+                "ICP Analysis",
+                "Competitive Landscape",
+                "Revenue Model",
+                "Build Spec",
+                "Page Brief",
+                "GTM Brief",
+              ].map((tool) => (
+                <li key={tool} className="flex items-start gap-2">
+                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
+                  <span className="text-[12px]" style={{ color: "var(--t2)" }}>{tool}</span>
                 </li>
               ))}
             </ul>
