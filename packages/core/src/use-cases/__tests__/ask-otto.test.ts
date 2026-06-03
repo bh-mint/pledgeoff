@@ -21,6 +21,7 @@ const makeProSub = (overrides: Partial<Subscription> = {}): Subscription => ({
   ottoIncludedUsed: 0,
   ottoIncludedResetAt: null,
   ottoPurchased: 0,
+  verificationsPurchased: 0,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   ...overrides,
@@ -56,6 +57,7 @@ function makeRepos(subOverride?: Partial<Subscription>) {
     downgradeToFree: vi.fn(),
     deductOttoQuestion: vi.fn().mockResolvedValue(ok(undefined)),
     addOttoPurchasedQuestions: vi.fn(),
+    addVerificationsPurchased: vi.fn(),
     resetOttoIncludedUsed: vi.fn(),
     resetAllOttoIncludedUsed: vi.fn(),
   };

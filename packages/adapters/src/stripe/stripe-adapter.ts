@@ -348,6 +348,47 @@ export class StripeAdapter {
     }
   }
 
+  async createValidationPackCheckoutSession(input: {
+    userId: string;
+    userEmail: string;
+    priceId: string;
+    validationCount: number;
+    successUrl: string;
+    cancelUrl: string;
+    stripeCustomerId?: string | null;
+  }): Promise<Result<CheckoutSession, StripeAdapterError>> {
+    try {
+      const params: Stripe.Checkout.SessionCreateParams = {
+        mode: 'payment',
+        line_items: [{ price: input.priceId, quantity: 1 }],
+        success_url: input.successUrl,
+        cancel_url: input.cancelUrl,
+        customer_email: input.stripeCustomerId ? undefined : input.userEmail,
+        customer: input.stripeCustomerId ?? undefined,
+        metadata: {
+          userId: input.userId,
+          validationPackCount: String(input.validationCount),
+          type: 'validation_pack',
+        },
+        automatic_tax: { enabled: true },
+        tax_id_collection: { enabled: true },
+        consent_collection: { terms_of_service: 'required' },
+        custom_text: {
+          terms_of_service_acceptance: {
+            message:
+              'By completing this purchase you expressly request immediate access to the digital service and acknowledge that you waive your 14-day right of withdrawal under EU Directive 2011/83/EU Art. 16(m). A voluntary 7-day money-back guarantee applies — email support@pledgeoff.com.',
+          },
+        },
+      };
+
+      const session = await this.stripe.checkout.sessions.create(params);
+      if (!session.url) return err(new StripeAdapterError('No checkout URL returned'));
+      return ok({ id: session.id, url: session.url });
+    } catch (e) {
+      return err(new StripeAdapterError('Failed to create validation pack checkout session', e));
+    }
+  }
+
   async getCustomerVatId(customerId: string): Promise<Result<{ id: string; value: string } | null, StripeAdapterError>> {
     try {
       const taxIds = await this.stripe.customers.listTaxIds(customerId, { limit: 10 });

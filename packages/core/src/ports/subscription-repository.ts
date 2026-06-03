@@ -43,6 +43,7 @@ export interface ISubscriptionRepository {
   downgradeToFree(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
   deductOttoQuestion(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
   addOttoPurchasedQuestions(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>>;
+  addVerificationsPurchased(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>>;
   resetOttoIncludedUsed(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
   resetAllOttoIncludedUsed(): Promise<Result<void, SubscriptionRepositoryError>>;
 }

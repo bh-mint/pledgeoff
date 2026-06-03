@@ -70,14 +70,17 @@ export async function POST(req: Request) {
     );
   }
   const limit = PLAN_LIMITS[plan].verificationsPerMonth;
-  if (isFinite(limit)) {
-    const countResult = await container.ideaRepo.countThisMonth(userId);
-    if (countResult.isOk() && countResult.value >= limit) {
-      return Response.json(
-        { error: { code: 'PLAN_LIMIT_REACHED', message: `Your ${plan} plan allows ${limit} verification${limit === 1 ? '' : 's'} per month. Upgrade to continue.`, plan } },
-        { status: 403, headers: { 'X-Trace-Id': traceId } },
-      );
-    }
+  // getUserPlan already resolved plan (SSOT). Second read here is for verificationsPurchased only.
+  const subResult = await container.subscriptionRepo.findByUserId(userId);
+  const verificationsPurchased = subResult.isOk() ? (subResult.value?.verificationsPurchased ?? 0) : 0;
+  const totalVerificationsAvailable = limit + verificationsPurchased;
+
+  const countResult = await container.ideaRepo.countThisMonth(userId);
+  if (countResult.isOk() && countResult.value >= totalVerificationsAvailable) {
+    return Response.json(
+      { error: { code: 'PLAN_LIMIT_REACHED', message: `Your ${plan} plan allows ${limit} verification${limit === 1 ? '' : 's'} per month. Upgrade to continue.`, plan } },
+      { status: 403, headers: { 'X-Trace-Id': traceId } },
+    );
   }
 
   // Rate limiting

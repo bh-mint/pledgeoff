@@ -19,6 +19,7 @@ const makeSub = (overrides: Partial<Subscription> = {}): Subscription => ({
   ottoIncludedUsed: 1,
   ottoIncludedResetAt: null,
   ottoPurchased: 5,
+  verificationsPurchased: 0,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   ...overrides,
@@ -37,6 +38,7 @@ function makeRepo(sub: Subscription | null = makeSub()): ISubscriptionRepository
     downgradeToFree: vi.fn(),
     deductOttoQuestion: vi.fn(),
     addOttoPurchasedQuestions: vi.fn(),
+    addVerificationsPurchased: vi.fn(),
     resetOttoIncludedUsed: vi.fn(),
     resetAllOttoIncludedUsed: vi.fn(),
   };

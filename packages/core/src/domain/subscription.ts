@@ -27,6 +27,7 @@ export const SubscriptionSchema = z.object({
   ottoIncludedUsed: z.number().int().min(0).default(0),
   ottoIncludedResetAt: z.string().datetime({ offset: true }).nullable().default(null),
   ottoPurchased: z.number().int().min(0).default(0),
+  verificationsPurchased: z.number().int().min(0).default(0),
   createdAt: z.string().datetime({ offset: true }),
   updatedAt: z.string().datetime({ offset: true }),
 });
@@ -35,11 +36,20 @@ export type Subscription = z.infer<typeof SubscriptionSchema>;
 
 export const PLAN_LIMITS = {
   free:       { verificationsPerMonth: 1,        seatsIncluded: 1,        ottoQuestionsPerMonth: 0        },
-  founder:    { verificationsPerMonth: 20,       seatsIncluded: 1,        ottoQuestionsPerMonth: 5        },
-  team:       { verificationsPerMonth: Infinity, seatsIncluded: 3,        ottoQuestionsPerMonth: 15       },
-  studio:     { verificationsPerMonth: Infinity, seatsIncluded: 8,        ottoQuestionsPerMonth: 50       },
-  enterprise: { verificationsPerMonth: Infinity, seatsIncluded: Infinity, ottoQuestionsPerMonth: Infinity },
+  founder:    { verificationsPerMonth: 20,       seatsIncluded: 1,        ottoQuestionsPerMonth: 15       },
+  team:       { verificationsPerMonth: 60,       seatsIncluded: 3,        ottoQuestionsPerMonth: 45       },
+  studio:     { verificationsPerMonth: 100,      seatsIncluded: 8,        ottoQuestionsPerMonth: 120      },
+  enterprise: { verificationsPerMonth: 200,      seatsIncluded: Infinity, ottoQuestionsPerMonth: Infinity },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
+
+export const VALIDATION_PACK_SIZES = [10, 25, 60] as const;
+export type ValidationPackSize = typeof VALIDATION_PACK_SIZES[number];
+
+export const VALIDATION_PACK_PRICES_EUR: Record<ValidationPackSize, number> = {
+  10: 19,
+  25: 42,
+  60: 85,
+};
 
 export const OTTO_PACK_SIZES = [10, 25, 60, 150] as const;
 export type OttoPackSize = typeof OTTO_PACK_SIZES[number];

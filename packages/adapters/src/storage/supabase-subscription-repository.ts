@@ -24,6 +24,7 @@ type SubscriptionRow = {
   otto_included_used: number;
   otto_included_reset_at: string | null;
   otto_purchased: number;
+  verifications_purchased: number;
   created_at: string;
   updated_at: string;
 };
@@ -43,6 +44,7 @@ function rowToSubscription(row: SubscriptionRow): Subscription {
     ottoIncludedUsed: row.otto_included_used ?? 0,
     ottoIncludedResetAt: row.otto_included_reset_at ?? null,
     ottoPurchased: row.otto_purchased ?? 0,
+    verificationsPurchased: row.verifications_purchased ?? 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   });
@@ -203,6 +205,20 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
     const { error } = await this.client
       .from('subscriptions')
       .upsert({ user_id: userId, otto_purchased: current + count, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async addVerificationsPurchased(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>> {
+    const subResult = await this.findByUserId(userId);
+    if (subResult.isErr()) return err(subResult.error);
+    const sub = subResult.value;
+
+    const current = sub?.verificationsPurchased ?? 0;
+    const { error } = await this.client
+      .from('subscriptions')
+      .upsert({ user_id: userId, verifications_purchased: current + count, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
 
     if (error) return err(new SubscriptionRepositoryError(error.message));
     return ok(undefined);

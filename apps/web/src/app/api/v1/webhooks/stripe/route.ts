@@ -64,6 +64,23 @@ export async function POST(req: Request) {
           mode?: string;
         };
 
+        // Validation pack purchase (one-time payment mode)
+        if (session.metadata?.type === 'validation_pack') {
+          const userId = session.metadata?.userId;
+          const validationCount = parseInt(session.metadata?.validationPackCount ?? '0', 10);
+          if (!userId || validationCount <= 0) {
+            logger.warn({ traceId, metadata: session.metadata }, 'webhook.stripe.validation_pack_missing_metadata');
+            break;
+          }
+          const addResult = await container.subscriptionRepo.addVerificationsPurchased(userId, validationCount);
+          if (addResult.isErr()) {
+            logger.error({ traceId, userId, validationCount, error: String(addResult.error) }, 'webhook.stripe.validation_pack_add_failed');
+            return new Response('Failed to add validations', { status: 500 });
+          }
+          logger.info({ traceId, userId, validationCount }, 'webhook.stripe.validation_pack_purchased');
+          break;
+        }
+
         // Otto pack purchase (one-time payment mode)
         if (session.metadata?.type === 'otto_pack') {
           const userId = session.metadata?.userId;

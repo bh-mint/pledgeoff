@@ -12,7 +12,7 @@ function makeSub(override?: Partial<Subscription>): Subscription {
     plan: 'team', status: 'active',
     currentPeriodEnd: null, extraSeats: 0, stripeExtraSeatItemId: null,
     pastDueSince: null,
-    ottoIncludedUsed: 0, ottoIncludedResetAt: null, ottoPurchased: 0,
+    ottoIncludedUsed: 0, ottoIncludedResetAt: null, ottoPurchased: 0, verificationsPurchased: 0,
     createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
     ...override,
   };
@@ -31,6 +31,7 @@ function mockRepo(overrides?: Partial<ISubscriptionRepository>): ISubscriptionRe
     downgradeToFree: async () => ok(undefined),
     deductOttoQuestion: async () => ok(undefined),
     addOttoPurchasedQuestions: async () => ok(undefined),
+    addVerificationsPurchased: async () => ok(undefined),
     resetOttoIncludedUsed: async () => ok(undefined),
     resetAllOttoIncludedUsed: async () => ok(undefined),
     ...overrides,
