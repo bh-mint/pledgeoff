@@ -9,21 +9,45 @@
 -- Fix: REVOKE EXECUTE FROM PUBLIC on each function. service_role keeps its explicit grant,
 -- so the admin dashboard (createSupabaseServiceClient) and the pipeline keep working.
 --
+-- Schema-agnostic: resolves each function via pg_proc by name, so it works whether the
+-- `vector` type lives in `public` (prod) or `extensions` (dev, migration 0044). match_signals
+-- is matched by name regardless of its argument type schema.
+--
 -- Verify after apply: get_advisors(security) should no longer list these functions.
 
--- Admin AI cost/usage analytics (admin/ai-cost page; service_role only)
-REVOKE EXECUTE ON FUNCTION public.admin_ai_usage_by_feature(timestamptz) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.admin_ai_usage_daily(timestamptz) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.admin_ai_top_users(timestamptz, integer) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.admin_ai_usage_total(timestamptz) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.admin_ai_usage_total_all() FROM PUBLIC;
+DO $$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN
+    SELECT p.oid::regprocedure AS sig
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname IN (
+        'admin_ai_usage_by_feature',
+        'admin_ai_usage_daily',
+        'admin_ai_top_users',
+        'admin_ai_usage_total',
+        'admin_ai_usage_total_all',
+        'deduct_otto_question',
+        'match_signals'
+      )
+  LOOP
+    EXECUTE format('REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC', r.sig);
+  END LOOP;
 
--- Pipeline RPCs (called only by service_role via the container repositories)
-REVOKE EXECUTE ON FUNCTION public.deduct_otto_question(uuid) FROM PUBLIC;
-REVOKE EXECUTE ON FUNCTION public.match_signals(public.vector, uuid, integer) FROM PUBLIC;
--- match_signals also had an explicit `authenticated` grant (migration 0038) that 0042 never
--- revoked. It is called only via service_role, so revoke it too (FIX-5b on prod).
-REVOKE EXECUTE ON FUNCTION public.match_signals(public.vector, uuid, integer) FROM authenticated;
+  -- match_signals also had an explicit `authenticated` grant (migration 0038) that 0042
+  -- never revoked. It is called only via service_role, so revoke that too.
+  FOR r IN
+    SELECT p.oid::regprocedure AS sig
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname = 'match_signals'
+  LOOP
+    EXECUTE format('REVOKE EXECUTE ON FUNCTION %s FROM authenticated', r.sig);
+  END LOOP;
+END $$;
 
 -- Rollback (NOT recommended — reopens the exposure):
 --   GRANT EXECUTE ON FUNCTION public.admin_ai_usage_by_feature(timestamptz) TO PUBLIC;  -- etc.
