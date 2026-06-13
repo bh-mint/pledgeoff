@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getAuthToken } from "@/lib/auth-client";
+import { CheckoutModal } from "@/components/CheckoutModal";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { PRICING } from "@/lib/pricing.config";
@@ -170,7 +171,7 @@ function UpgradeButton({
 }) {
   const router = useRouter();
   const [unavailable, setUnavailable] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   async function handleClick() {
     if (!priceId) { setUnavailable(true); return; }
@@ -182,47 +183,55 @@ function UpgradeButton({
       return;
     }
 
-    setLoading(true);
-    const res = await fetch("/api/v1/billing/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ priceId, embedded: false }),
-    });
-    if (res.ok) {
-      const json = (await res.json()) as { data: { url: string } };
-      window.location.assign(json.data.url);
-    } else {
-      setLoading(false);
-      setUnavailable(true);
-    }
+    setModalOpen(true);
   }
 
   if (variant === "text") {
     return (
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="mono text-[11px] transition-opacity hover:opacity-70 disabled:opacity-50"
-        style={{ color: "var(--t2)" }}
-      >
-        {loading ? "Redirecting…" : label}
-      </button>
+      <>
+        <button
+          onClick={handleClick}
+          className="mono text-[11px] transition-opacity hover:opacity-70"
+          style={{ color: "var(--t2)" }}
+        >
+          {label}
+        </button>
+        <CheckoutModal priceId={priceId} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      </>
     );
   }
 
   if (primary) {
     return (
-      <div className="w-full sm:w-auto">
+      <>
+        <div className="w-full sm:w-auto">
+          <button
+            onClick={handleClick}
+            className="display w-full sm:w-auto px-6 h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity"
+            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+          >
+            {label}
+          </button>
+          {unavailable && (
+            <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
+              Plan unavailable — contact support
+            </p>
+          )}
+        </div>
+        <CheckoutModal priceId={priceId} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="w-full">
         <button
           onClick={handleClick}
-          disabled={loading}
-          className="display w-full sm:w-auto px-6 h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity disabled:opacity-60"
-          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+          className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
+          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
         >
-          {loading ? "Redirecting…" : label}
+          {label}
         </button>
         {unavailable && (
           <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
@@ -230,25 +239,8 @@ function UpgradeButton({
           </p>
         )}
       </div>
-    );
-  }
-
-  return (
-    <div className="w-full">
-      <button
-        onClick={handleClick}
-        disabled={loading}
-        className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors disabled:opacity-50"
-        style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-      >
-        {loading ? "Redirecting…" : label}
-      </button>
-      {unavailable && (
-        <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
-          Plan unavailable — contact support
-        </p>
-      )}
-    </div>
+      <CheckoutModal priceId={priceId} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+    </>
   );
 }
 

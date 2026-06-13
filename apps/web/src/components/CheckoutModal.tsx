@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js';
 import { getAuthToken } from '@/lib/auth-client';
@@ -14,7 +14,10 @@ type CheckoutModalProps = {
 };
 
 export function CheckoutModal({ priceId, isOpen, onClose }: CheckoutModalProps) {
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
   const fetchClientSecret = useCallback(async (): Promise<string> => {
+    setCheckoutError(null);
     const token = await getAuthToken();
     const res = await fetch('/api/v1/billing/checkout', {
       method: 'POST',
@@ -26,7 +29,9 @@ export function CheckoutModal({ priceId, isOpen, onClose }: CheckoutModalProps) 
     });
     const json = await res.json() as { data?: { clientSecret: string }; error?: { message: string } };
     if (!res.ok || !json.data?.clientSecret) {
-      throw new Error(json.error?.message ?? 'Failed to start checkout');
+      const msg = json.error?.message ?? 'Failed to start checkout. Please try again.';
+      setCheckoutError(msg);
+      throw new Error(msg);
     }
     return json.data.clientSecret;
   }, [priceId]);
@@ -88,12 +93,27 @@ export function CheckoutModal({ priceId, isOpen, onClose }: CheckoutModalProps) 
 
         {/* body — scrolls when Stripe form is taller than available space */}
         <div className="overflow-y-auto flex-1 p-1">
-          <EmbeddedCheckoutProvider
-            stripe={stripePromise}
-            options={{ fetchClientSecret }}
-          >
-            <EmbeddedCheckout />
-          </EmbeddedCheckoutProvider>
+          {checkoutError ? (
+            <div className="p-6 flex flex-col items-center gap-4">
+              <p className="mono text-[12px] text-center" style={{ color: 'var(--kill)' }}>
+                {checkoutError}
+              </p>
+              <button
+                onClick={onClose}
+                className="mono text-[11px] h-9 px-5 rounded-md border"
+                style={{ borderColor: 'var(--border)', color: 'var(--t2)' }}
+              >
+                Close
+              </button>
+            </div>
+          ) : (
+            <EmbeddedCheckoutProvider
+              stripe={stripePromise}
+              options={{ fetchClientSecret }}
+            >
+              <EmbeddedCheckout />
+            </EmbeddedCheckoutProvider>
+          )}
         </div>
       </div>
     </div>
