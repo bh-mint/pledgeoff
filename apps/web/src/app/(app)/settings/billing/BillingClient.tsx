@@ -6,7 +6,6 @@ import Link from "next/link";
 import { getAuthToken } from "@/lib/auth-client";
 import type { Plan, SubscriptionStatus } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
-import { CheckoutModal } from "@/components/CheckoutModal";
 import { PRICING } from "@/lib/pricing.config";
 
 type AvailablePlan = {
@@ -86,7 +85,6 @@ export function BillingClient({
     initialCancelAtPeriodEnd,
   );
   const [modifyOpen, setModifyOpen] = useState(false);
-  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [vatId, setVatId] = useState(currentVatId ?? "");
   const [vatState, setVatState] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -142,8 +140,23 @@ export function BillingClient({
     }
   };
 
-  const handleCheckout = (priceId: string) => {
-    setCheckoutPriceId(priceId);
+  const handleCheckout = async (priceId: string) => {
+    setBillingAction("loading");
+    const token = await getAuthToken();
+    const res = await fetch("/api/v1/billing/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ priceId, embedded: false }),
+    });
+    if (res.ok) {
+      const json = (await res.json()) as { data: { url: string } };
+      window.location.assign(json.data.url);
+    } else {
+      setBillingAction("error");
+    }
   };
 
   const handlePortal = async () => {
@@ -816,13 +829,6 @@ export function BillingClient({
         </div>
       )}
 
-      {checkoutPriceId && (
-        <CheckoutModal
-          priceId={checkoutPriceId}
-          isOpen={true}
-          onClose={() => setCheckoutPriceId(null)}
-        />
-      )}
     </div>
   );
 }
