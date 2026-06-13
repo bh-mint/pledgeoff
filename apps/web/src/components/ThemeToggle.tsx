@@ -59,7 +59,11 @@ const OPTIONS: { value: Theme; label: string; Icon: () => React.ReactElement }[]
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === "undefined") return "dark";
-    return (localStorage.getItem(STORAGE_KEY) as Theme) ?? "dark";
+    try {
+      return (localStorage.getItem(STORAGE_KEY) as Theme) ?? "dark";
+    } catch {
+      return "dark";
+    }
   });
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -92,7 +96,7 @@ export function ThemeToggle() {
 
   function select(t: Theme) {
     setTheme(t);
-    localStorage.setItem(STORAGE_KEY, t);
+    try { localStorage.setItem(STORAGE_KEY, t); } catch { /* storage blocked */ }
     applyTheme(t);
     setOpen(false);
   }

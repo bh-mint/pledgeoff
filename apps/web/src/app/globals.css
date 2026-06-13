@@ -314,12 +314,18 @@ body {
 
 /* Respect user's motion preference */
 @media (prefers-reduced-motion: reduce) {
+  /* Animations that start at opacity:0 — must show content immediately */
+  .reveal,
+  .fade-slide-in,
+  .fade-up {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  /* Decorative / looping animations — safe to stop */
   .animate-marquee,
   .pulse-dot,
   .float,
-  .reveal,
-  .fade-slide-in,
-  .fade-up,
   .blink,
   .otto-dot,
   .otto-ring {
