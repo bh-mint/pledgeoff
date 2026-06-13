@@ -108,8 +108,6 @@ export class StripeAdapter {
     input: CreateEmbeddedCheckoutSessionInput,
   ): Promise<Result<EmbeddedCheckoutSession, StripeAdapterError>> {
     try {
-      // consent_collection, allow_promotion_codes, and customer_update are
-      // not supported by the embedded_page ui_mode in the dahlia API.
       const params: Stripe.Checkout.SessionCreateParams = {
         ui_mode: 'embedded_page',
         mode: 'subscription',
@@ -120,6 +118,13 @@ export class StripeAdapter {
         subscription_data: { metadata: { userId: input.userId } },
         automatic_tax: { enabled: this.taxEnabled },
         ...(this.taxEnabled ? { tax_id_collection: { enabled: true } } : {}),
+        consent_collection: { terms_of_service: 'required' },
+        custom_text: {
+          terms_of_service_acceptance: {
+            message:
+              'By completing this purchase you expressly request immediate access to the digital service and acknowledge that you waive your 14-day right of withdrawal under EU Directive 2011/83/EU Art. 16(m). A voluntary 7-day money-back guarantee applies — email support@pledgeoff.com.',
+          },
+        },
       };
 
       if (input.stripeCustomerId) {
