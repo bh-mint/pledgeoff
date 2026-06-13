@@ -50,9 +50,13 @@ export type StripeSubscriptionData = {
 
 export class StripeAdapter {
   private readonly stripe: Stripe;
+  private readonly taxEnabled: boolean;
 
   constructor(secretKey: string) {
     this.stripe = new Stripe(secretKey, { apiVersion: '2026-04-22.dahlia' });
+    // automatic_tax requires Stripe Tax to be configured in the dashboard.
+    // Enable only on live keys — test accounts typically don't have Stripe Tax set up.
+    this.taxEnabled = secretKey.startsWith('sk_live_');
   }
 
   async createCheckoutSession(
@@ -68,9 +72,9 @@ export class StripeAdapter {
         metadata: { userId: input.userId },
         subscription_data: { metadata: { userId: input.userId } },
         allow_promotion_codes: true,
-        automatic_tax: { enabled: true },
+        automatic_tax: { enabled: this.taxEnabled },
         customer_update: { address: 'auto' },
-        tax_id_collection: { enabled: true },
+        ...(this.taxEnabled ? { tax_id_collection: { enabled: true } } : {}),
         consent_collection: { terms_of_service: 'required' },
         custom_text: {
           terms_of_service_acceptance: {
@@ -113,9 +117,9 @@ export class StripeAdapter {
         metadata: { userId: input.userId },
         subscription_data: { metadata: { userId: input.userId } },
         allow_promotion_codes: true,
-        automatic_tax: { enabled: true },
+        automatic_tax: { enabled: this.taxEnabled },
         customer_update: { address: 'auto' },
-        tax_id_collection: { enabled: true },
+        ...(this.taxEnabled ? { tax_id_collection: { enabled: true } } : {}),
         consent_collection: { terms_of_service: 'required' },
         custom_text: {
           terms_of_service_acceptance: {
@@ -332,8 +336,8 @@ export class StripeAdapter {
           ottoPackQuestions: String(input.questionCount),
           type: 'otto_pack',
         },
-        automatic_tax: { enabled: true },
-        tax_id_collection: { enabled: true },
+        automatic_tax: { enabled: this.taxEnabled },
+        ...(this.taxEnabled ? { tax_id_collection: { enabled: true } } : {}),
         consent_collection: { terms_of_service: 'required' },
         custom_text: {
           terms_of_service_acceptance: {
@@ -373,8 +377,8 @@ export class StripeAdapter {
           validationPackCount: String(input.validationCount),
           type: 'validation_pack',
         },
-        automatic_tax: { enabled: true },
-        tax_id_collection: { enabled: true },
+        automatic_tax: { enabled: this.taxEnabled },
+        ...(this.taxEnabled ? { tax_id_collection: { enabled: true } } : {}),
         consent_collection: { terms_of_service: 'required' },
         custom_text: {
           terms_of_service_acceptance: {

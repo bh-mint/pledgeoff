@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { resolveUserId } from '@/lib/api-auth';
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { container } from '@/lib/container';
+import { logger } from '@pledgeoff/observability';
 
 const CheckoutRequestSchema = z.object({
   priceId: z.string().min(1),
@@ -69,6 +70,7 @@ export async function POST(req: Request) {
     });
 
     if (sessionResult.isErr()) {
+      logger.error({ traceId, err: sessionResult.error, cause: sessionResult.error.cause }, 'Stripe embedded checkout session failed');
       return Response.json(
         { error: { code: 'STRIPE_ERROR', message: 'Failed to create checkout session' } },
         { status: 502, headers: { 'X-Trace-Id': traceId } },
@@ -91,6 +93,7 @@ export async function POST(req: Request) {
   });
 
   if (sessionResult.isErr()) {
+    logger.error({ traceId, err: sessionResult.error, cause: sessionResult.error.cause }, 'Stripe checkout session failed');
     return Response.json(
       { error: { code: 'STRIPE_ERROR', message: 'Failed to create checkout session' } },
       { status: 502, headers: { 'X-Trace-Id': traceId } },
