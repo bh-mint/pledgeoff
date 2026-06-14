@@ -161,7 +161,7 @@ export function BillingClient({
     }
   };
 
-  const handleVatSave = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleVatSave = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setVatState("loading");
     setVatError("");
@@ -291,7 +291,7 @@ export function BillingClient({
               <button
                 onClick={handlePortal}
                 disabled={portalLoading}
-                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-(--accent) disabled:opacity-50"
                 style={{ borderColor: "var(--border)", color: "var(--t2)" }}
               >
                 {portalLoading ? "Opening…" : "Manage billing →"}
@@ -302,7 +302,7 @@ export function BillingClient({
                   setSelectedPriceId(currentPriceId);
                 }}
                 disabled={billingAction === "loading"}
-                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-(--accent) disabled:opacity-50"
                 style={{ borderColor: "var(--border)", color: "var(--t2)" }}
               >
                 Modify plan
@@ -331,7 +331,7 @@ export function BillingClient({
               ) : (
                 <button
                   onClick={() => setCancelConfirm(true)}
-                  className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-[var(--kill)] hover:text-[var(--kill)]"
+                  className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-(--kill) hover:text-(--kill)"
                   style={{ borderColor: "var(--border)", color: "var(--t3)" }}
                 >
                   Cancel
@@ -399,7 +399,7 @@ export function BillingClient({
                         value={opt.priceId}
                         checked={isSelected}
                         onChange={() => setSelectedPriceId(opt.priceId)}
-                        className="accent-[var(--accent)]"
+                        className="accent-(--accent)"
                       />
                       <div className="flex-1">
                         <span className="text-[13px] text-(--t1)">
@@ -501,7 +501,7 @@ export function BillingClient({
                     disabled={
                       billingAction === "loading" || !ap.annualPriceId
                     }
-                    className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-[var(--accent)] disabled:opacity-50"
+                    className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-(--accent) disabled:opacity-50"
                     style={{
                       borderColor: "var(--border)",
                       color: "var(--t2)",
