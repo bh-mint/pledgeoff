@@ -47,6 +47,10 @@ export default function AboutPage() {
             We got tired of building the wrong things.
           </h1>
 
+          <p className="mkt-h2" style={{ marginBottom: "20px" }}>
+            Mirela este genul de persoana care aduce buna dispozitie oriunde apare. Creativa, autentica si mereu pozitiva, a transformat o simpla conexiune de pe TikTok intr-o prietenie frumoasa.
+          </p>
+
           <div className="art-body" style={{ marginBottom: "40px" }}>
             <p>
               PledgeOFF exists because the standard advice — &ldquo;talk to customers&rdquo;, &ldquo;build a landing page&rdquo;, &ldquo;find ten paying users&rdquo; — takes weeks and requires skills most early-stage founders don&apos;t have yet. By the time you&apos;ve done it right, you&apos;ve either lost momentum or built too much to pivot.
