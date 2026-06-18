@@ -45,6 +45,7 @@ const NAV_COLS = [
       { href: "/ideas/new", text: "Signal Verdict" },
       { href: "/dashboard", text: "Dashboard" },
       { href: "/pricing", text: "Pricing" },
+      { href: "/tools/decision-clarity", text: "Decision-Clarity Tool" },
       { href: "/changelog", text: "Changelog" },
       { href: "/api-docs", text: "API docs" },
     ],

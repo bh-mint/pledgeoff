@@ -3,325 +3,175 @@
 import { useState } from "react";
 import Link from "next/link";
 
-type Option = { label: string; score: number };
-type Question = { text: string; options: Option[] };
-
-const QUESTIONS: Question[] = [
+const QUESTIONS = [
   {
-    text: "How long have you been sitting on this decision?",
-    options: [
-      { label: "Less than a week", score: 0 },
-      { label: "1–4 weeks", score: 1 },
-      { label: "1–3 months", score: 2 },
-      { label: "More than 3 months", score: 3 },
+    q: "Can you explain your product's core value in one sentence?",
+    opts: [
+      { t: "Yes, clearly and simply.", s: 2 },
+      { t: "Sort of — it takes a paragraph to get there.", s: 1 },
+      { t: "Not yet. Still working it out.", s: 0 },
     ],
   },
   {
-    text: "What's the main reason you haven't decided yet?",
-    options: [
-      { label: "I need more information", score: 1 },
-      { label: "I'm afraid of making the wrong call", score: 2 },
-      { label: "The options feel equally uncertain", score: 2 },
-      { label: "I don't know what outcome I'm optimizing for", score: 3 },
+    q: "Who are your first ten customers?",
+    opts: [
+      { t: "I know specific people by name.", s: 2 },
+      { t: "I know the type of person, but not anyone specific.", s: 1 },
+      { t: "I haven't figured that out yet.", s: 0 },
     ],
   },
   {
-    text: "How reversible is this decision?",
-    options: [
-      { label: "Fully reversible — I can undo it", score: 0 },
-      { label: "Mostly reversible with some cost", score: 1 },
-      { label: "Hard to undo", score: 2 },
-      { label: "Irreversible", score: 3 },
+    q: "What tells you this is a real problem?",
+    opts: [
+      { t: "I have talked to people who have it and they confirmed it.", s: 2 },
+      { t: "I have seen it come up in forums, reviews, or comments.", s: 1 },
+      { t: "A personal hunch — I have the problem myself.", s: 0 },
     ],
   },
   {
-    text: "What happens if you delay another 30 days?",
-    options: [
-      { label: "Nothing significant", score: 0 },
-      { label: "Minor opportunity cost", score: 1 },
-      { label: "Real business impact", score: 2 },
-      { label: "We miss a window that won't reopen", score: 3 },
+    q: "What do people do today instead of using your product?",
+    opts: [
+      { t: "There is a product they use and actively complain about.", s: 2 },
+      { t: "There is a workaround — spreadsheets, a manual process.", s: 1 },
+      { t: "I am not sure what they currently do.", s: 0 },
     ],
   },
   {
-    text: "How much data do you actually have?",
-    options: [
-      { label: "Plenty — I just haven't acted on it", score: 0 },
-      { label: "Some — enough to make a reasonable call", score: 1 },
-      { label: "Not enough — key unknowns remain", score: 2 },
-      { label: "Very little — I'm mostly guessing", score: 3 },
+    q: "Why does this idea matter now, not in two years?",
+    opts: [
+      { t: "There is a specific window — new technology, regulation, or behavior shift.", s: 2 },
+      { t: "It matters now. I just have not articulated why.", s: 1 },
+      { t: "Timing is not really critical for this one.", s: 0 },
     ],
   },
-];
+] as const;
 
-type Band = "high" | "medium" | "low";
+const LEVELS = [
+  { min: 80, label: "Clear.", color: "var(--go)", desc: "You've done more pre-work than most. The premise is defined, the customer is identifiable, the evidence exists. Validate it now before the window narrows." },
+  { min: 60, label: "Promising.", color: "var(--ink)", desc: "You're past the vague phase. You know what you're building and for whom. A verdict will tell you whether the market agrees." },
+  { min: 30, label: "Forming.", color: "var(--pivot)", desc: "Real instincts here. A few gaps to close before you commit resources. A verdict would surface which gaps matter most." },
+  { min: 0,  label: "Hazy.", color: "var(--faint)", desc: "You have an impulse, not yet a defined idea. That is not a bad place to start — it just means the work ahead is about sharpening the premise before validating the market." },
+] as const;
 
-type Result = {
-  band: Band;
-  score: number;
-  label: string;
-  summary: string;
-  recommendations: string[];
-};
-
-function getResult(totalScore: number): Result {
-  const score = Math.round((1 - totalScore / 15) * 100);
-
-  if (totalScore <= 4) {
-    return {
-      band: "high",
-      score,
-      label: "High clarity",
-      summary:
-        "You have what you need. This is a decision, not a research project. The delay is psychological, not informational.",
-      recommendations: [
-        "Set a 48-hour deadline. Most decisions that feel complex become obvious under a real constraint.",
-        "Write down the worst realistic outcome. If you can live with it, the decision is already made.",
-        "Validate the one assumption you're most afraid of — with data, not gut feel.",
-      ],
-    };
-  }
-
-  if (totalScore <= 9) {
-    return {
-      band: "medium",
-      score,
-      label: "Moderate clarity",
-      summary:
-        "One unknown is blocking everything else. Identify it and eliminate it before anything else.",
-      recommendations: [
-        "Write down the single question whose answer would unlock the decision. Answer only that.",
-        "Run a 1-week experiment instead of committing to the full path.",
-        "Check if the market has already answered your key question — with real signals, not opinion.",
-      ],
-    };
-  }
-
-  return {
-    band: "low",
-    score,
-    label: "Low clarity",
-    summary:
-      "You may have a framing problem, not a decision problem. The way the question is posed may be making it impossible to answer.",
-    recommendations: [
-      "Restate the goal from scratch. What does success actually look like in 6 months?",
-      "Break it into two sub-decisions you can make independently, this week.",
-      "Talk to 3 people who've faced a similar choice. Skip theory — get patterns.",
-    ],
-  };
-}
-
-const BAND_COLOR: Record<Band, string> = {
-  high: "var(--validated)",
-  medium: "var(--caution)",
-  low: "var(--kill)",
-};
+type Screen = "quiz" | "result";
 
 export function DecisionClarityClient() {
-  const [step, setStep] = useState<number>(0); // 0–4 = questions, 5 = results
-  const [scores, setScores] = useState<number[]>([]);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [current, setCurrent] = useState(0);
+  const [answers, setAnswers] = useState<(number | undefined)[]>(Array(QUESTIONS.length).fill(undefined));
+  const [screen, setScreen] = useState<Screen>("quiz");
+  const [pct, setPct] = useState(0);
 
-  const isResults = step >= QUESTIONS.length;
-  const totalScore = scores.reduce((a, b) => a + b, 0);
-  const result = isResults ? getResult(totalScore) : null;
+  const selected = answers[current];
 
-  function handleSelect(optionIndex: number) {
-    setSelected(optionIndex);
+  function select(i: number) {
+    setAnswers((prev) => {
+      const next = [...prev];
+      next[current] = i;
+      return next;
+    });
   }
 
-  function handleNext() {
-    if (selected === null) return;
-    const newScores = [...scores, QUESTIONS[step].options[selected].score];
-    setScores(newScores);
-    setSelected(null);
-    setStep(step + 1);
+  function next() {
+    if (selected === undefined) return;
+    if (current < QUESTIONS.length - 1) {
+      setCurrent((c) => c + 1);
+    } else {
+      const raw = answers.reduce<number>((sum, a, i) => {
+        if (a === undefined) return sum;
+        return sum + QUESTIONS[i].opts[a].s;
+      }, 0);
+      setPct(Math.round((raw / (QUESTIONS.length * 2)) * 100));
+      setScreen("result");
+    }
   }
 
-  function handleRestart() {
-    setStep(0);
-    setScores([]);
-    setSelected(null);
+  function prev() {
+    if (current > 0) setCurrent((c) => c - 1);
   }
 
-  if (isResults && result) {
+  function reset() {
+    setAnswers(Array(QUESTIONS.length).fill(undefined));
+    setCurrent(0);
+    setScreen("quiz");
+    setPct(0);
+  }
+
+  const level = LEVELS.find((l) => pct >= l.min) ?? LEVELS[LEVELS.length - 1];
+
+  if (screen === "result") {
     return (
-      <div
-        className="rounded-lg p-8 border"
-        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-      >
-        {/* Score */}
-        <div className="text-center mb-8">
-          <p
-            className="mono text-[11px] uppercase tracking-[0.14em] mb-3"
-            style={{ color: "var(--t3)" }}
-          >
-            Your clarity score
-          </p>
-          <p
-            className="font-serif text-7xl font-bold mb-2 tabular-nums"
-            style={{ color: BAND_COLOR[result.band] }}
-          >
-            {result.score}
-          </p>
-          <p
-            className="mono text-[11px] uppercase tracking-[0.12em]"
-            style={{ color: BAND_COLOR[result.band] }}
-          >
-            {result.label}
-          </p>
+      <>
+        <div className="quiz-prog">
+          {QUESTIONS.map((_, i) => (
+            <div key={i} className="quiz-dot done" />
+          ))}
         </div>
 
-        {/* Summary */}
-        <p
-          className="text-sm leading-relaxed mb-8 text-center"
-          style={{ color: "var(--t2)" }}
-        >
-          {result.summary}
+        <div className="result-score" style={{ color: level.color }}>{pct}</div>
+        <div className="mono" style={{ fontSize: "8.5px", letterSpacing: ".22em", textTransform: "uppercase", color: "var(--faint)", marginBottom: "16px" }}>
+          Decision-Clarity Score
+        </div>
+
+        <div className="result-bar">
+          <div className="result-fill" style={{ width: `${pct}%` }} />
+        </div>
+
+        <div className="result-verdict">{level.label}</div>
+        <p className="result-desc">{level.desc}</p>
+
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          <Link href="/ideas/new" className="btn-p">Validate this idea now &rarr;</Link>
+          <button className="btn-g" onClick={reset}>Retake the quiz</button>
+        </div>
+
+        <p className="mono" style={{ fontSize: "8px", letterSpacing: ".08em", color: "var(--faint)", marginTop: "14px" }}>
+          First validation free. No account required to try it.
         </p>
-
-        {/* Recommendations */}
-        <div className="mb-8">
-          <p
-            className="mono text-[10px] uppercase tracking-[0.14em] mb-4"
-            style={{ color: "var(--t3)" }}
-          >
-            3 next steps
-          </p>
-          <div className="flex flex-col gap-3">
-            {result.recommendations.map((rec, i) => (
-              <div
-                key={i}
-                className="flex gap-3 p-4 rounded border"
-                style={{
-                  background: "var(--canvas)",
-                  borderColor: "var(--border)",
-                }}
-              >
-                <span
-                  className="mono text-[11px] shrink-0 mt-0.5"
-                  style={{ color: "var(--t3)" }}
-                >
-                  0{i + 1}
-                </span>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--t1)" }}>
-                  {rec}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div
-          className="rounded-lg p-5 border mb-6"
-          style={{
-            background: "var(--canvas)",
-            borderColor: "var(--border)",
-          }}
-        >
-          <p className="text-sm mb-1" style={{ color: "var(--t1)" }}>
-            Want data-backed decisions?
-          </p>
-          <p className="text-sm mb-4" style={{ color: "var(--t2)" }}>
-            PledgeOFF validates your idea against real signals from Reddit, GitHub, and HN — so your next decision starts with evidence.
-          </p>
-          <Link
-            href="/login"
-            className="inline-block w-full text-center py-3 rounded font-medium text-sm mono uppercase tracking-[0.08em] transition-opacity hover:opacity-90"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-          >
-            Validate your idea free
-          </Link>
-        </div>
-
-        <button
-          onClick={handleRestart}
-          className="w-full text-sm py-2 transition-colors"
-          style={{ color: "var(--t3)" }}
-        >
-          Start over
-        </button>
-      </div>
+      </>
     );
   }
 
-  const q = QUESTIONS[step];
-  const progress = step / QUESTIONS.length;
+  const q = QUESTIONS[current];
 
   return (
-    <div
-      className="rounded-lg p-8 border"
-      style={{ background: "var(--surface)", borderColor: "var(--border)" }}
-    >
-      {/* Progress */}
-      <div className="mb-8">
-        <div className="flex justify-between mb-2">
-          <span
-            className="mono text-[10px] uppercase tracking-[0.12em]"
-            style={{ color: "var(--t3)" }}
+    <>
+      <div className="quiz-prog">
+        {QUESTIONS.map((_, i) => (
+          <div key={i} className={`quiz-dot${i < current ? " done" : ""}`} />
+        ))}
+      </div>
+
+      <div className="quiz-num">Question {current + 1} of {QUESTIONS.length}</div>
+      <div className="quiz-q">{q.q}</div>
+
+      <div className="quiz-opts">
+        {q.opts.map((opt, i) => (
+          <button
+            key={i}
+            className={`quiz-opt${selected === i ? " sel" : ""}`}
+            onClick={() => select(i)}
           >
-            Question {step + 1} of {QUESTIONS.length}
-          </span>
-          <span
-            className="mono text-[10px]"
-            style={{ color: "var(--t3)" }}
-          >
-            {Math.round(progress * 100)}%
-          </span>
-        </div>
-        <div
-          className="h-px w-full rounded"
-          style={{ background: "var(--border)" }}
+            {opt.t}
+          </button>
+        ))}
+      </div>
+
+      <div className="quiz-nav">
+        <button
+          className="btn-g"
+          onClick={prev}
+          style={{ visibility: current === 0 ? "hidden" : "visible" }}
         >
-          <div
-            className="h-px rounded transition-all duration-300"
-            style={{
-              width: `${progress * 100}%`,
-              background: "var(--accent)",
-            }}
-          />
-        </div>
+          &larr; Back
+        </button>
+        {selected !== undefined ? (
+          <button className="btn-p" onClick={next}>
+            {current === QUESTIONS.length - 1 ? "See my score" : "Next →"}
+          </button>
+        ) : (
+          <span />
+        )}
       </div>
-
-      {/* Question */}
-      <p
-        className="text-lg leading-snug mb-7"
-        style={{ color: "var(--t1)" }}
-      >
-        {q.text}
-      </p>
-
-      {/* Options */}
-      <div className="flex flex-col gap-2 mb-8">
-        {q.options.map((opt, i) => {
-          const isSelected = selected === i;
-          return (
-            <button
-              key={i}
-              onClick={() => handleSelect(i)}
-              className="w-full text-left px-4 py-3 rounded border text-sm transition-all"
-              style={{
-                background: isSelected ? "var(--accent)" : "var(--canvas)",
-                borderColor: isSelected ? "var(--accent)" : "var(--border)",
-                color: isSelected ? "var(--accent-fg)" : "var(--t1)",
-              }}
-            >
-              {opt.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Next */}
-      <button
-        onClick={handleNext}
-        disabled={selected === null}
-        className="w-full py-3 rounded font-medium text-sm mono uppercase tracking-[0.08em] transition-opacity disabled:opacity-30"
-        style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-      >
-        {step === QUESTIONS.length - 1 ? "See my results" : "Next"}
-      </button>
-    </div>
+    </>
   );
 }
