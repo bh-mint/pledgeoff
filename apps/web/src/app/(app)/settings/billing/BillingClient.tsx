@@ -29,6 +29,9 @@ type Props = {
   billingInterval?: "monthly" | "annual";
   availablePlans?: AvailablePlan[];
   currentVatId?: string | null;
+  ottoPurchased?: number;
+  verificationsPurchased?: number;
+  ottoUsedThisMonth?: number;
 };
 
 const PLAN_LABELS: Record<Plan, string> = {
@@ -47,6 +50,20 @@ function formatDate(iso: string): string {
   });
 }
 
+const VAL_PACKS = [
+  { name: "Starter", count: 10, price: 19, per: "€1.90 each" },
+  { name: "Builder", count: 25, price: 42, per: "€1.68 each" },
+  { name: "Sprint", count: 60, price: 85, per: "€1.42 each" },
+  { name: "Scale", count: 100, price: 120, per: "€1.20 each" },
+];
+
+const OTTO_PACKS = [
+  { name: "Spark", count: 10, price: 15, per: "€1.50 each" },
+  { name: "Boost", count: 25, price: 30, per: "€1.20 each" },
+  { name: "Fuel", count: 60, price: 60, per: "€1.00 each" },
+  { name: "Deep", count: 150, price: 120, per: "€0.80 each" },
+];
+
 export function BillingClient({
   plan,
   ideasThisMonth,
@@ -56,6 +73,9 @@ export function BillingClient({
   billingInterval = "monthly",
   availablePlans = [],
   currentVatId = null,
+  ottoPurchased = 0,
+  verificationsPurchased = 0,
+  ottoUsedThisMonth = 0,
 }: Props) {
   const router = useRouter();
   const isPaid = plan !== "free";
@@ -63,6 +83,10 @@ export function BillingClient({
   const ideasLimit = PLAN_LIMITS[plan].verificationsPerMonth;
   const isUnlimited = ideasLimit === Infinity;
   const usagePct = isUnlimited ? 0 : Math.min(1, ideasThisMonth / ideasLimit);
+
+  const ottoLimit = PLAN_LIMITS[plan].ottoQuestionsPerMonth;
+  const ottoUnlimited = ottoLimit === Infinity || ottoLimit === 0;
+  const ottoPct = ottoUnlimited ? 0 : Math.min(1, ottoUsedThisMonth / ottoLimit);
 
   const currentPriceId = (() => {
     const ap = availablePlans.find((p) => p.id === plan);
@@ -72,25 +96,19 @@ export function BillingClient({
 
   const [selectedPriceId, setSelectedPriceId] = useState(currentPriceId);
   const [seatExtra, setSeatExtra] = useState(initialExtraSeats);
-  const [seatState, setSeatState] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
-  const [billingAction, setBillingAction] = useState<
-    "idle" | "loading" | "error"
-  >("idle");
-  const [invoiceState, setInvoiceState] = useState<
-    "idle" | "loading" | "sent" | "error"
-  >("idle");
+  const [seatState, setSeatState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [billingAction, setBillingAction] = useState<"idle" | "loading" | "error">("idle");
+  const [invoiceState, setInvoiceState] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [cancelConfirm, setCancelConfirm] = useState(false);
-  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(
-    initialCancelAtPeriodEnd,
-  );
+  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(initialCancelAtPeriodEnd);
   const [modifyOpen, setModifyOpen] = useState(false);
   const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [vatId, setVatId] = useState(currentVatId ?? "");
   const [vatState, setVatState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [vatError, setVatError] = useState("");
+  const [buyingValPack, setBuyingValPack] = useState<number | null>(null);
+  const [buyingOttoPack, setBuyingOttoPack] = useState<number | null>(null);
 
   const handleChangePlan = async (priceId: string) => {
     setBillingAction("loading");
@@ -203,35 +221,71 @@ export function BillingClient({
     }
   };
 
+  const handleBuyValPack = async (count: number) => {
+    setBuyingValPack(count);
+    const token = await getAuthToken();
+    const res = await fetch("/api/v1/billing/validation-pack", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ validationCount: count }),
+    });
+    if (res.ok) {
+      const json = (await res.json()) as { data: { url: string } };
+      window.location.assign(json.data.url);
+    } else {
+      setBuyingValPack(null);
+    }
+  };
+
+  const handleBuyOttoPack = async (count: number) => {
+    setBuyingOttoPack(count);
+    const token = await getAuthToken();
+    const res = await fetch("/api/v1/billing/otto-pack", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ questionCount: count }),
+    });
+    if (res.ok) {
+      const json = (await res.json()) as { data: { url: string } };
+      window.location.assign(json.data.url);
+    } else {
+      setBuyingOttoPack(null);
+    }
+  };
+
+  const now = new Date();
+  const monthLabel = now.toLocaleString("en-GB", { month: "short", year: "numeric" });
+  const nextMonthLabel = new Date(now.getFullYear(), now.getMonth() + 1, 1).toLocaleString("en-GB", { month: "short", day: "numeric" });
+
   return (
     <div>
-      <h1 className="display text-[28px] font-semibold tracking-tight text-(--t1) mb-1">
-        Billing
-      </h1>
-      <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
-        {isPaid
-          ? `${PLAN_LABELS[plan]} · billed ${billingInterval}`
-          : "Free plan · no credit card required"}
-      </p>
-
-      {/* Cancel-at-period-end banner */}
+      {/* Cancel banner */}
       {cancelAtPeriodEnd && renewsAt && (
         <div
-          className="border rounded-md p-4 mb-5 flex items-center justify-between gap-4"
           style={{
-            borderColor: "var(--caution)",
-            background:
-              "color-mix(in srgb, var(--caution) 8%, transparent)",
+            border: "1px solid var(--pivot)",
+            background: "rgba(139,96,16,0.06)",
+            padding: "12px 18px",
+            marginBottom: 16,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
           }}
         >
-          <span className="mono text-[11px]" style={{ color: "var(--caution)" }}>
+          <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 11, color: "var(--pivot)" }}>
             Cancels on {formatDate(renewsAt)} — you&apos;ll drop to Free.
           </span>
           <button
+            className="btn-xs p"
             onClick={handleReactivate}
             disabled={billingAction === "loading"}
-            className="mono text-[11px] h-8 px-4 rounded-md transition-opacity hover:opacity-80 disabled:opacity-50 shrink-0"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
           >
             Reactivate
           </button>
@@ -241,580 +295,435 @@ export function BillingClient({
       {/* Error banner */}
       {billingAction === "error" && (
         <div
-          className="border rounded-md p-3 mb-5 mono text-[11px]"
           style={{
-            borderColor: "var(--kill)",
+            border: "1px solid var(--kill)",
             color: "var(--kill)",
-            background: "color-mix(in srgb, var(--kill) 8%, transparent)",
+            background: "rgba(158,42,26,0.05)",
+            padding: "10px 14px",
+            marginBottom: 16,
+            fontFamily: "var(--font-chivo-mono), monospace",
+            fontSize: 11,
           }}
         >
           Something went wrong. Please try again.
         </div>
       )}
 
-      {/* Current plan card */}
-      <div
-        className="border rounded-md p-5 mb-3"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div
-              className="mono text-[10px] uppercase tracking-[0.12em] mb-1"
-              style={{ color: "var(--t3)" }}
-            >
-              Current plan
-            </div>
-            <div className="display text-[22px] font-semibold text-(--t1)">
-              {PLAN_LABELS[plan]}
-            </div>
-            {isPaid && renewsAt && !cancelAtPeriodEnd && (
-              <div
-                className="mono text-[10px] mt-1"
-                style={{ color: "var(--t3)" }}
-              >
-                Billed {billingInterval} · renews {formatDate(renewsAt)}
-              </div>
-            )}
-            {!isPaid && (
-              <div
-                className="mono text-[10px] mt-1"
-                style={{ color: "var(--t3)" }}
-              >
-                1 validation / month · no credit card required
-              </div>
-            )}
-          </div>
-
-          {isPaid && !cancelAtPeriodEnd && (
-            <div className="flex gap-2 shrink-0 flex-wrap">
-              <button
-                onClick={handlePortal}
-                disabled={portalLoading}
-                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-(--accent) disabled:opacity-50"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                {portalLoading ? "Opening…" : "Manage billing →"}
-              </button>
-              <button
-                onClick={() => {
-                  setModifyOpen((v) => !v);
-                  setSelectedPriceId(currentPriceId);
-                }}
-                disabled={billingAction === "loading"}
-                className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-(--accent) disabled:opacity-50"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                Modify plan
-              </button>
-              {cancelConfirm ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleCancel}
-                    disabled={billingAction === "loading"}
-                    className="mono text-[11px] h-9 px-4 rounded-md disabled:opacity-50"
-                    style={{ background: "var(--kill)", color: "#fff" }}
-                  >
-                    Yes, cancel
-                  </button>
-                  <button
-                    onClick={() => setCancelConfirm(false)}
-                    className="mono text-[11px] h-9 px-3 rounded-md border"
-                    style={{
-                      borderColor: "var(--border)",
-                      color: "var(--t3)",
-                    }}
-                  >
-                    Never mind
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setCancelConfirm(true)}
-                  className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-(--kill) hover:text-(--kill)"
-                  style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          )}
-
-          {!isPaid && (
-            <Link
-              href="/pricing"
-              className="display text-[13px] font-semibold px-5 h-9 rounded-md inline-flex items-center transition-opacity hover:opacity-90 shrink-0"
-              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-            >
-              Upgrade →
-            </Link>
-          )}
-        </div>
-
-        {/* Modify panel */}
-        {modifyOpen && isPaid && (
-          <div
-            className="mt-5 pt-5 border-t"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <div
-              className="mono text-[10px] uppercase tracking-[0.12em] mb-3"
-              style={{ color: "var(--t3)" }}
-            >
-              Select plan
-            </div>
-            <div className="flex flex-col gap-2 mb-4">
-              {availablePlans
-                .flatMap((ap) => [
-                  {
-                    priceId: ap.monthlyPriceId,
-                    label: `${ap.label} — Monthly`,
-                    price: `€${ap.monthlyEur}/mo`,
-                  },
-                  {
-                    priceId: ap.annualPriceId,
-                    label: `${ap.label} — Annual`,
-                    price: `€${ap.annualEquivalentEur}/mo · €${ap.annualTotalEur}/yr · save ~20%`,
-                  },
-                ])
-                .map((opt) => {
-                  const isSelected = selectedPriceId === opt.priceId;
-                  const isCurrent = currentPriceId === opt.priceId;
-                  return (
-                    <label
-                      key={opt.priceId}
-                      className="flex items-center gap-3 p-3 rounded-md border cursor-pointer transition-colors"
-                      style={{
-                        borderColor: isSelected
-                          ? "var(--accent)"
-                          : "var(--border)",
-                        background: isSelected
-                          ? "color-mix(in srgb, var(--accent) 6%, transparent)"
-                          : "transparent",
-                      }}
-                    >
-                      <input
-                        type="radio"
-                        name="plan-select"
-                        value={opt.priceId}
-                        checked={isSelected}
-                        onChange={() => setSelectedPriceId(opt.priceId)}
-                        className="accent-(--accent)"
-                      />
-                      <div className="flex-1">
-                        <span className="text-[13px] text-(--t1)">
-                          {opt.label}
-                        </span>
-                        {isCurrent && (
-                          <span
-                            className="mono text-[9px] ml-2 px-1.5 py-0.5 rounded"
-                            style={{
-                              background: "var(--accent)",
-                              color: "var(--accent-fg)",
-                            }}
-                          >
-                            current
-                          </span>
-                        )}
-                        <div
-                          className="mono text-[10px] mt-0.5"
-                          style={{ color: "var(--t3)" }}
-                        >
-                          {opt.price}
-                        </div>
-                      </div>
-                    </label>
-                  );
-                })}
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={async () => {
-                  if (selectedPriceId && selectedPriceId !== currentPriceId) {
-                    await handleChangePlan(selectedPriceId);
-                    setModifyOpen(false);
-                  }
-                }}
-                disabled={
-                  billingAction === "loading" ||
-                  !selectedPriceId ||
-                  selectedPriceId === currentPriceId
-                }
-                className="mono text-[11px] h-9 px-5 rounded-md transition-opacity hover:opacity-80 disabled:opacity-40"
-                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-              >
-                {billingAction === "loading" ? "Applying…" : "Apply changes"}
-              </button>
-              <button
-                onClick={() => setModifyOpen(false)}
-                className="mono text-[11px] h-9 px-4 rounded-md border"
-                style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Free users: plan option cards */}
-      {!isPaid && (
-        <div className="flex flex-col gap-3 mb-3">
-          {availablePlans.map((ap) => (
-            <div
-              key={ap.id}
-              className="border rounded-md p-5"
-              style={{
-                borderColor: "var(--border)",
-                background: "var(--surface)",
-              }}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                  <div className="display text-[17px] font-semibold text-(--t1) mb-0.5">
-                    {ap.label}
-                  </div>
-                  <div
-                    className="mono text-[11px]"
-                    style={{ color: "var(--t2)" }}
-                  >
-                    €{ap.monthlyEur}/mo · or €{ap.annualEquivalentEur}/mo
-                    billed annually (€{ap.annualTotalEur}/yr)
-                  </div>
-                </div>
-                <div className="flex gap-2 shrink-0">
-                  <button
-                    onClick={() => handleCheckout(ap.monthlyPriceId)}
-                    disabled={
-                      billingAction === "loading" || !ap.monthlyPriceId
-                    }
-                    className="mono text-[11px] h-8 px-4 rounded-md transition-opacity hover:opacity-80 disabled:opacity-50"
-                    style={{
-                      background: "var(--accent)",
-                      color: "var(--accent-fg)",
-                    }}
-                  >
-                    Monthly →
-                  </button>
-                  <button
-                    onClick={() => handleCheckout(ap.annualPriceId)}
-                    disabled={
-                      billingAction === "loading" || !ap.annualPriceId
-                    }
-                    className="mono text-[11px] h-8 px-4 rounded-md border transition-colors hover:border-(--accent) disabled:opacity-50"
-                    style={{
-                      borderColor: "var(--border)",
-                      color: "var(--t2)",
-                    }}
-                  >
-                    Annual →
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Usage */}
-      <div
-        className="border rounded-md p-5 mb-5"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-      >
-        <div
-          className="mono text-[10px] uppercase tracking-[0.12em] mb-4"
-          style={{ color: "var(--t3)" }}
-        >
-          Usage this month
-        </div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[13px] text-(--t2)">Validations</span>
-          <span className="mono text-[11px] tnum text-(--t1)">
-            {ideasThisMonth} / {isUnlimited ? "∞" : ideasLimit}
+      {/* Current plan */}
+      <div className="sec">
+        <div className="sec-hd">
+          Current plan
+          <span className="r">
+            <span className={`bdg ${isPaid ? "bdg-go" : "bdg-faint"}`}>{PLAN_LABELS[plan]}</span>
           </span>
         </div>
-        {!isUnlimited && (
-          <div
-            className="h-1.5 rounded-full"
-            style={{ background: "var(--border)" }}
-          >
-            <div
-              className="h-1.5 rounded-full transition-all"
-              style={{
-                width: `${usagePct * 100}%`,
-                background:
-                  usagePct >= 0.9
-                    ? "var(--kill)"
-                    : usagePct >= 0.6
-                      ? "var(--caution)"
-                      : "var(--accent)",
-              }}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Invoice billing — Studio only */}
-      {(plan === "studio" || plan === "enterprise") && (
-        <div
-          className="border rounded-md p-5 mb-3"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-        >
-          <div
-            className="mono text-[10px] uppercase tracking-[0.12em] mb-1"
-            style={{ color: "var(--t3)" }}
-          >
-            Invoice billing
-          </div>
-          <p className="text-[12px] mb-5" style={{ color: "var(--t2)" }}>
-            Need to pay by invoice with NET30 terms? Send us a request and
-            we&apos;ll set it up within 24h.
-          </p>
-          <div className="flex items-center justify-between">
-            <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
-              {invoiceState === "sent" && (
-                <span style={{ color: "var(--validated)" }}>
-                  Request received — we&apos;ll reach out within 24h.
-                </span>
-              )}
-              {invoiceState === "error" && (
-                <span style={{ color: "var(--kill)" }}>
-                  Something went wrong. Try again.
-                </span>
+        <div className="sec-bd">
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, paddingBottom: isPaid ? 16 : 0, borderBottom: isPaid ? "1px solid var(--line-soft)" : "none", marginBottom: isPaid ? 16 : 0 }}>
+            <div>
+              {isPaid ? (
+                <>
+                  <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 22, fontWeight: 700, color: "var(--ink)", marginBottom: 3 }}>
+                    {PLAN_LABELS[plan]}
+                  </div>
+                  {renewsAt && !cancelAtPeriodEnd && (
+                    <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--faint)" }}>
+                      Billed {billingInterval} · renews {formatDate(renewsAt)}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 16, color: "var(--dim)" }}>
+                  Free — 1 validation / month · no credit card required
+                </div>
               )}
             </div>
-            <button
-              onClick={async () => {
-                if (invoiceState === "sent") return;
-                setInvoiceState("loading");
-                const token = await getAuthToken();
-                const res = await fetch("/api/v1/billing/request-invoice", {
-                  method: "POST",
-                  headers: token ? { Authorization: `Bearer ${token}` } : {},
-                });
-                setInvoiceState(res.ok ? "sent" : "error");
-              }}
-              disabled={
-                invoiceState === "loading" || invoiceState === "sent"
-              }
-              className="mono text-[11px] h-9 px-5 rounded-md border transition-colors disabled:opacity-50 shrink-0"
-              style={{
-                borderColor:
-                  invoiceState === "sent" ? "var(--validated)" : "var(--border)",
-                color:
-                  invoiceState === "sent" ? "var(--validated)" : "var(--t2)",
-              }}
-            >
-              {invoiceState === "loading"
-                ? "Sending…"
-                : invoiceState === "sent"
-                  ? "Request sent ✓"
-                  : "Request Invoice (NET30)"}
-            </button>
+
+            <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              {isPaid && !cancelAtPeriodEnd && (
+                <>
+                  <button
+                    className="btn-xs"
+                    onClick={handlePortal}
+                    disabled={portalLoading}
+                  >
+                    {portalLoading ? "Opening…" : "Manage billing →"}
+                  </button>
+                  <button
+                    className="btn-xs p"
+                    onClick={() => { setModifyOpen((v) => !v); setSelectedPriceId(currentPriceId); }}
+                    disabled={billingAction === "loading"}
+                  >
+                    Change plan
+                  </button>
+                  {cancelConfirm ? (
+                    <>
+                      <button className="btn-xs d" onClick={handleCancel} disabled={billingAction === "loading"}>
+                        Yes, cancel
+                      </button>
+                      <button className="btn-xs" onClick={() => setCancelConfirm(false)}>Never mind</button>
+                    </>
+                  ) : (
+                    <button className="btn-xs d" onClick={() => setCancelConfirm(true)}>
+                      Cancel
+                    </button>
+                  )}
+                </>
+              )}
+              {!isPaid && (
+                <Link href="/pricing" className="btn-xs p" style={{ padding: "5px 14px" }}>
+                  Upgrade →
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Billing interval toggle — paid only */}
+          {isPaid && !cancelAtPeriodEnd && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+              <div>
+                <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 1 }}>
+                  Annual billing
+                </div>
+                <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", letterSpacing: "0.06em", color: "var(--faint)" }}>
+                  Save ~20% vs monthly
+                </div>
+              </div>
+              <div className="tog">
+                <div className={`tog-t${billingInterval === "annual" ? " on" : ""}`}>
+                  <div className="tog-th" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modify plan panel */}
+          {modifyOpen && isPaid && (
+            <div style={{ marginTop: 18, paddingTop: 18, borderTop: "1px solid var(--line-soft)" }}>
+              <div className="flbl" style={{ marginBottom: 12 }}>Select plan</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+                {availablePlans
+                  .flatMap((ap) => [
+                    { priceId: ap.monthlyPriceId, label: `${ap.label} — Monthly`, price: `€${ap.monthlyEur}/mo` },
+                    { priceId: ap.annualPriceId, label: `${ap.label} — Annual`, price: `€${ap.annualEquivalentEur}/mo · €${ap.annualTotalEur}/yr · save ~20%` },
+                  ])
+                  .map((opt) => {
+                    const isSelected = selectedPriceId === opt.priceId;
+                    const isCurrent = currentPriceId === opt.priceId;
+                    return (
+                      <label
+                        key={opt.priceId}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          padding: "10px 14px",
+                          border: `1px solid ${isSelected ? "var(--ink)" : "var(--line)"}`,
+                          background: isSelected ? "var(--surface-2)" : "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="radio"
+                          name="plan-select"
+                          value={opt.priceId}
+                          checked={isSelected}
+                          onChange={() => setSelectedPriceId(opt.priceId)}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <span style={{ fontSize: 14, color: "var(--ink)" }}>{opt.label}</span>
+                          {isCurrent && <span className="bdg bdg-go" style={{ marginLeft: 8 }}>Current</span>}
+                          <div className="fine" style={{ marginTop: 2 }}>{opt.price}</div>
+                        </div>
+                      </label>
+                    );
+                  })}
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  className="btn-p"
+                  onClick={async () => {
+                    if (selectedPriceId && selectedPriceId !== currentPriceId) {
+                      await handleChangePlan(selectedPriceId);
+                      setModifyOpen(false);
+                    }
+                  }}
+                  disabled={billingAction === "loading" || !selectedPriceId || selectedPriceId === currentPriceId}
+                >
+                  {billingAction === "loading" ? "Applying…" : "Apply changes"}
+                </button>
+                <button className="btn-xs" onClick={() => setModifyOpen(false)}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {/* Free: show plan cards */}
+          {!isPaid && availablePlans.length > 0 && (
+            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+              {availablePlans.map((ap) => (
+                <div key={ap.id} style={{ border: "1px solid var(--line)", padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+                  <div>
+                    <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 16, fontWeight: 700, color: "var(--ink)", marginBottom: 2 }}>
+                      {ap.label}
+                    </div>
+                    <div className="fine" style={{ marginTop: 0 }}>
+                      €{ap.monthlyEur}/mo · or €{ap.annualEquivalentEur}/mo billed annually (€{ap.annualTotalEur}/yr)
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                    <button className="btn-xs p" onClick={() => handleCheckout(ap.monthlyPriceId)} disabled={!ap.monthlyPriceId}>Monthly →</button>
+                    <button className="btn-xs" onClick={() => handleCheckout(ap.annualPriceId)} disabled={!ap.annualPriceId}>Annual →</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Usage this month */}
+      <div className="sec">
+        <div className="sec-hd">
+          Usage this month
+          <span className="r">{monthLabel} · resets {nextMonthLabel}</span>
+        </div>
+        <div className="sec-bd">
+          <div className="meter-row">
+            <span className="meter-lbl">Validations</span>
+            <div className="meter">
+              {!isUnlimited && (
+                <div
+                  className={`mf${usagePct >= 0.85 ? " w" : ""}`}
+                  style={{ width: `${usagePct * 100}%` }}
+                />
+              )}
+            </div>
+            <span className="meter-val">
+              {ideasThisMonth} / {isUnlimited ? "∞" : ideasLimit}
+            </span>
+          </div>
+
+          {ottoLimit > 0 && (
+            <div className="meter-row">
+              <span className="meter-lbl">Otto questions</span>
+              <div className="meter">
+                {!ottoUnlimited && (
+                  <div
+                    className={`mf${ottoPct >= 0.85 ? " w" : ""}`}
+                    style={{ width: `${ottoPct * 100}%` }}
+                  />
+                )}
+              </div>
+              <span className="meter-val">
+                {ottoUsedThisMonth} / {ottoUnlimited ? "∞" : ottoLimit}
+              </span>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 32, flexWrap: "wrap", marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--line-soft)" }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 8, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 3 }}>
+                Validation pack balance
+              </div>
+              <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 15, fontWeight: 600, color: verificationsPurchased > 0 ? "var(--ink)" : "var(--faint)" }}>
+                {verificationsPurchased} remaining
+              </div>
+            </div>
+            {ottoLimit > 0 && (
+              <div>
+                <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 8, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 3 }}>
+                  Otto pack balance
+                </div>
+                <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 15, fontWeight: 600, color: ottoPurchased > 0 ? "var(--ink)" : "var(--kill)" }}>
+                  {ottoPurchased > 0 ? `${ottoPurchased} remaining` : "0 remaining"}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Validation Packs — Founder+ */}
+      {isPaid && (
+        <div className="sec">
+          <div className="sec-hd">
+            Validation Packs
+            <span className="r">Never expire · Founder+</span>
+          </div>
+          <div className="sec-bd">
+            <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 0 }}>
+              Top up your balance. Packs stack with monthly included validations and carry forward indefinitely.
+            </p>
+            <div className="pack-grid">
+              {VAL_PACKS.map((p) => (
+                <div key={p.count} className="pack-c">
+                  <div className="pack-nm">{p.name}</div>
+                  <div className="pack-q">{p.count} validations</div>
+                  <div className="pack-pr">€{p.price}</div>
+                  <div className="pack-per">{p.per}</div>
+                  <button
+                    className="btn-xs p"
+                    onClick={() => handleBuyValPack(p.count)}
+                    disabled={buyingValPack !== null}
+                  >
+                    {buyingValPack === p.count ? "…" : "Buy"}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Seat add-ons — Team and Studio */}
+      {/* Otto Packs — Founder+ with Otto enabled */}
+      {isPaid && PLAN_LIMITS[plan].ottoQuestionsPerMonth > 0 && (
+        <div className="sec">
+          <div className="sec-hd">
+            Otto Packs
+            <span className="r">Never expire · Founder+</span>
+          </div>
+          <div className="sec-bd">
+            <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 0 }}>
+              Add questions to Otto. Your balance hits zero at month end — packs cover the gap.
+            </p>
+            <div className="pack-grid">
+              {OTTO_PACKS.map((p) => (
+                <div key={p.count} className="pack-c">
+                  <div className="pack-nm">{p.name}</div>
+                  <div className="pack-q">{p.count} questions</div>
+                  <div className="pack-pr">€{p.price}</div>
+                  <div className="pack-per">{p.per}</div>
+                  <button
+                    className="btn-xs p"
+                    onClick={() => handleBuyOttoPack(p.count)}
+                    disabled={buyingOttoPack !== null}
+                  >
+                    {buyingOttoPack === p.count ? "…" : "Buy"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Billing details — VAT */}
+      <div className="sec">
+        <div className="sec-hd">Billing details</div>
+        <div className="sec-bd">
+          <div className="fg">
+            <label className="flbl" htmlFor="b-vat">
+              VAT number <span style={{ color: "var(--faint)" }}>(optional)</span>
+            </label>
+            <form onSubmit={handleVatSave} className="finp-row">
+              <input
+                id="b-vat"
+                className="finp"
+                type="text"
+                value={vatId}
+                onChange={(e) => { setVatId(e.target.value.toUpperCase()); if (vatState === "error") setVatState("idle"); }}
+                placeholder="e.g. DE123456789"
+                maxLength={20}
+                disabled={vatState === "loading"}
+                style={{ flex: 1, borderColor: vatState === "error" ? "rgba(158,42,26,0.4)" : undefined }}
+              />
+              <button
+                type="submit"
+                className="btn-xs p"
+                style={{ padding: "10px 14px" }}
+                disabled={vatState === "loading"}
+              >
+                {vatState === "loading" ? "…" : vatState === "success" ? "Saved ✓" : "Save"}
+              </button>
+            </form>
+            {vatState === "error" && vatError && (
+              <p className="fine" style={{ color: "var(--kill)" }}>{vatError}</p>
+            )}
+            <p className="fine">EU businesses: adds reverse charge to future invoices. Leave blank to remove.</p>
+          </div>
+
+          {/* NET30 — Studio/Enterprise */}
+          {(plan === "studio" || plan === "enterprise") ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginTop: 18, paddingTop: 18, borderTop: "1px solid var(--line-soft)" }}>
+              <div>
+                <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 1 }}>NET30 invoicing</div>
+                <div className="fine" style={{ marginTop: 0 }}>Pay invoices 30 days after issue date</div>
+              </div>
+              <button
+                className="btn-xs p"
+                onClick={async () => {
+                  if (invoiceState === "sent") return;
+                  setInvoiceState("loading");
+                  const token = await getAuthToken();
+                  const res = await fetch("/api/v1/billing/request-invoice", {
+                    method: "POST",
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                  });
+                  setInvoiceState(res.ok ? "sent" : "error");
+                }}
+                disabled={invoiceState === "loading" || invoiceState === "sent"}
+              >
+                {invoiceState === "loading" ? "Sending…" : invoiceState === "sent" ? "Request sent ✓" : "Request NET30 →"}
+              </button>
+            </div>
+          ) : (
+            <div style={{ marginTop: 18, paddingTop: 18, borderTop: "1px solid var(--line-soft)" }}>
+              <div style={{ opacity: 0.5 }}>
+                <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 1 }}>NET30 invoicing</div>
+                <div className="fine" style={{ marginTop: 0 }}>Pay invoices 30 days after issue date</div>
+              </div>
+              <div className="plan-gate" style={{ marginTop: 10 }}>
+                <span className="pg-tag">Studio+</span>
+                <div>
+                  <div className="pg-ttl">Requires Studio or Enterprise</div>
+                  <p className="pg-desc">NET30 invoicing is available on Studio (€349/mo) and Enterprise plans.</p>
+                  <Link href="/pricing" className="btn-xs p">Upgrade to Studio</Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Extra seats — Team and Studio */}
       {(plan === "team" || plan === "studio") && (() => {
         const baseSeats = plan === "team" ? 3 : 8;
         const seatPrice = PRICING.seats.extraEurPerMonth;
         return (
-        <div
-          className="border rounded-md p-5"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-        >
-          <div
-            className="mono text-[10px] uppercase tracking-[0.12em] mb-1"
-            style={{ color: "var(--t3)" }}
-          >
-            {plan === "team" ? "Team" : "Studio"} seats
-          </div>
-          <p className="text-[12px] mb-5" style={{ color: "var(--t2)" }}>
-            {plan === "team" ? "Team" : "Studio"} includes {baseSeats} seats. Add extra seats at €{seatPrice}/seat/month, billed to
-            your subscription.
-          </p>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-5">
-            <div className="flex-1 flex items-center gap-3">
-              <div className="text-center">
-                <div className="mono text-[22px] font-semibold text-(--t1)">
-                  {baseSeats + seatExtra}
+          <div className="sec">
+            <div className="sec-hd">
+              Extra seats
+              <span className="r">€{seatPrice} / seat / month</span>
+            </div>
+            <div className="sec-bd">
+              <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 14 }}>
+                {PLAN_LABELS[plan]} includes {baseSeats} seats. Add more at €{seatPrice}/seat/month, pro-rated and billed with your next invoice.
+              </p>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+                <div style={{ width: 100 }}>
+                  <label className="flbl" htmlFor="t-seats">Add seats</label>
+                  <input
+                    id="t-seats"
+                    className="finp"
+                    type="number"
+                    value={seatExtra}
+                    onChange={(e) => setSeatExtra(Math.max(0, Math.min(97, parseInt(e.target.value) || 0)))}
+                    min={0}
+                    max={50}
+                  />
                 </div>
-                <div
-                  className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5"
-                  style={{ color: "var(--t3)" }}
+                <button
+                  className="btn-xs p"
+                  style={{ padding: "10px 14px" }}
+                  onClick={handleUpdateSeats}
+                  disabled={seatState === "loading" || seatExtra === initialExtraSeats}
                 >
-                  total seats
-                </div>
-              </div>
-              <div className="text-(--t3) text-[18px]">=</div>
-              <div className="text-center">
-                <div className="mono text-[16px] text-(--t2)">{baseSeats}</div>
-                <div
-                  className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5"
-                  style={{ color: "var(--t3)" }}
-                >
-                  included
-                </div>
-              </div>
-              <div className="text-(--t3)">+</div>
-              <div className="text-center">
-                <div
-                  className="mono text-[16px]"
-                  style={{ color: "var(--accent)" }}
-                >
-                  {seatExtra}
-                </div>
-                <div
-                  className="mono text-[9px] uppercase tracking-[0.12em] mt-0.5"
-                  style={{ color: "var(--t3)" }}
-                >
-                  extra
-                </div>
+                  {seatState === "loading" ? "Updating…" : seatState === "success" ? "Updated ✓" : seatExtra > 0 ? `Add — €${seatExtra * seatPrice}/mo` : "Update seats"}
+                </button>
               </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setSeatExtra((n) => Math.max(0, n - 1))}
-                disabled={seatExtra === 0}
-                className="w-10 h-10 rounded-md border mono text-[16px] flex items-center justify-center transition-colors disabled:opacity-30"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                −
-              </button>
-              <span className="mono text-[15px] w-8 text-center tnum text-(--t1)">
-                {seatExtra}
-              </span>
-              <button
-                onClick={() => setSeatExtra((n) => Math.min(97, n + 1))}
-                disabled={seatExtra >= 97}
-                className="w-10 h-10 rounded-md border mono text-[16px] flex items-center justify-center transition-colors disabled:opacity-30"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                +
-              </button>
-            </div>
           </div>
-
-          <div
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <div>
-              {seatExtra > 0 ? (
-                <span className="mono text-[12px] text-(--t2)">
-                  {seatExtra} × €{seatPrice} ={" "}
-                  <span className="text-(--t1) font-semibold">
-                    €{seatExtra * seatPrice}/month
-                  </span>{" "}
-                  added to your subscription
-                </span>
-              ) : (
-                <span
-                  className="mono text-[12px]"
-                  style={{ color: "var(--t3)" }}
-                >
-                  No extra seats — only the {baseSeats} included ones.
-                </span>
-              )}
-            </div>
-            <button
-              onClick={handleUpdateSeats}
-              disabled={seatState === "loading" || seatExtra === initialExtraSeats}
-              className="mono text-[11px] h-9 px-5 rounded-md border transition-colors disabled:opacity-40 shrink-0"
-              style={{
-                borderColor:
-                  seatState === "success"
-                    ? "var(--validated)"
-                    : "var(--border)",
-                color:
-                  seatState === "success"
-                    ? "var(--validated)"
-                    : seatState === "error"
-                      ? "var(--kill)"
-                      : "var(--t2)",
-              }}
-            >
-              {seatState === "loading"
-                ? "Updating…"
-                : seatState === "success"
-                  ? "Updated ✓"
-                  : seatState === "error"
-                    ? "Error — retry"
-                    : "Update seats"}
-            </button>
-          </div>
-        </div>
         );
       })()}
-
-      {/* VAT ID — only for paid plans */}
-      {isPaid && (
-        <div
-          className="rounded-md border p-5"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-        >
-          <div className="mb-4">
-            <h3 className="display text-[14px] font-semibold" style={{ color: "var(--t1)" }}>
-              VAT ID
-            </h3>
-            <p className="text-[12px] mt-0.5" style={{ color: "var(--t2)" }}>
-              EU businesses: add your VAT number to apply reverse charge on future invoices.
-            </p>
-          </div>
-
-          <form onSubmit={handleVatSave} className="flex items-start gap-2">
-            <div
-              className="flex-1 rounded-md border px-3 h-9 flex items-center"
-              style={{ borderColor: vatState === "error" ? "rgba(229,91,60,0.5)" : "var(--border)", background: "var(--canvas)" }}
-            >
-              <input
-                type="text"
-                value={vatId}
-                onChange={(e) => { setVatId(e.target.value.toUpperCase()); if (vatState === "error") setVatState("idle"); }}
-                placeholder="e.g. RO12345678"
-                maxLength={20}
-                disabled={vatState === "loading"}
-                className="w-full mono text-[12px] bg-transparent outline-none placeholder:text-(--t3)"
-                style={{ color: "var(--t1)" }}
-              />
-              {vatId && vatState !== "loading" && (
-                <button
-                  type="button"
-                  onClick={() => { setVatId(""); setVatState("idle"); setVatError(""); }}
-                  className="ml-1 mono text-[10px] shrink-0 hover:opacity-70"
-                  style={{ color: "var(--t3)" }}
-                >
-                  ×
-                </button>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={vatState === "loading"}
-              className="shrink-0 h-9 px-4 rounded-md mono text-[11px] transition-colors disabled:opacity-50"
-              style={{
-                borderWidth: 1,
-                borderStyle: "solid",
-                borderColor: vatState === "success" ? "var(--validated)" : "var(--border)",
-                color: vatState === "success" ? "var(--validated)" : vatState === "error" ? "var(--kill)" : "var(--t2)",
-                background: "transparent",
-              }}
-            >
-              {vatState === "loading" ? "Saving…" : vatState === "success" ? "Saved ✓" : "Save"}
-            </button>
-          </form>
-
-          {vatState === "error" && vatError && (
-            <p className="mono text-[10px] mt-2" style={{ color: "var(--kill)" }}>{vatError}</p>
-          )}
-          <p className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
-            Leave blank to remove. Changes apply to future invoices only.
-          </p>
-        </div>
-      )}
 
       {checkoutPriceId && (
         <CheckoutModal

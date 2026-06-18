@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-server";
-import { getUserPlan } from "@/server/billing/getUserPlan";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { ProfileClient } from "./ProfileClient";
 
@@ -15,13 +14,12 @@ export default async function ProfilePage() {
   const user = await requireUser();
   const supabase = createSupabaseServiceClient();
 
-  const [profileResult, plan] = await Promise.all([
+  const [profileResult] = await Promise.all([
     supabase
       .from("profiles")
       .select("first_name, last_name, username, company_name, avatar_url, marketing_emails_consent, marketing_emails_consented_at")
       .eq("id", user.id)
       .single(),
-    getUserPlan(user.id),
   ]);
 
   const profile = profileResult.data as {
@@ -46,7 +44,6 @@ export default async function ProfilePage() {
       username={profile?.username ?? null}
       companyName={profile?.company_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
-      plan={plan}
       marketingEmailsConsent={profile?.marketing_emails_consent ?? false}
       marketingEmailsConsentedAt={profile?.marketing_emails_consented_at ?? null}
     />

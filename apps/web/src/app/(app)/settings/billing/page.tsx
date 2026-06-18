@@ -93,6 +93,9 @@ export default async function BillingPage() {
       billingInterval={billingInterval}
       availablePlans={availablePlans}
       currentVatId={currentVatId}
+      ottoPurchased={sub?.ottoPurchased ?? 0}
+      verificationsPurchased={sub?.verificationsPurchased ?? 0}
+      ottoUsedThisMonth={sub?.ottoIncludedUsed ?? 0}
     />
   );
 }

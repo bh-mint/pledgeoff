@@ -7,9 +7,7 @@ type Props = { email: string };
 
 export function DataClient({ email }: Props) {
   const router = useRouter();
-  const [exportState, setExportState] = useState<
-    "idle" | "loading" | "done" | "error"
-  >("idle");
+  const [exportState, setExportState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState("");
 
@@ -21,143 +19,130 @@ export function DataClient({ email }: Props) {
 
   return (
     <div>
-      <h1
-        className="display text-[28px] font-semibold tracking-tight mb-1"
-        style={{ color: "var(--kill)" }}
-      >
-        Danger zone
-      </h1>
-      <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
-        Irreversible actions. Proceed with care.
-      </p>
-
-      {/* Data export */}
-      <div
-        className="border rounded-md p-5 mb-4"
-        style={{ borderColor: "var(--border)" }}
-      >
-        <div className="display text-[15px] font-semibold mb-1 text-(--t1)">
-          Export my data
+      {/* Export */}
+      <div className="sec">
+        <div className="sec-hd">
+          Export your data
+          <span className="r">GDPR</span>
         </div>
-        <p className="text-[12px] mb-4" style={{ color: "var(--t2)" }}>
-          Download a JSON file with all your ideas, decisions, signals, and
-          profile data.
-        </p>
-        {exportState === "done" ? (
-          <span className="mono text-[11px]" style={{ color: "var(--validated)" }}>
-            ✓ Download started
-          </span>
-        ) : exportState === "error" ? (
-          <span className="mono text-[11px]" style={{ color: "var(--kill)" }}>
-            Export failed. Try again.
-          </span>
-        ) : (
-          <button
-            disabled={exportState === "loading"}
-            onClick={async () => {
-              setExportState("loading");
-              try {
-                const res = await fetch("/api/v1/data-export", {
-                  method: "POST",
-                });
-                if (!res.ok) {
+        <div className="sec-bd">
+          <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 14, maxWidth: "56ch" }}>
+            Download a zip archive of all your ideas, verdicts, and intelligence tool results. We&apos;ll email you a link when it&apos;s ready — usually within a few minutes.
+          </p>
+
+          {exportState === "done" ? (
+            <span className="fine" style={{ color: "var(--go)" }}>✓ Export requested — check your email shortly.</span>
+          ) : exportState === "error" ? (
+            <span className="fine" style={{ color: "var(--kill)" }}>Export failed. Try again.</span>
+          ) : (
+            <button
+              className="btn-p"
+              disabled={exportState === "loading"}
+              onClick={async () => {
+                setExportState("loading");
+                try {
+                  const res = await fetch("/api/v1/data-export", { method: "POST" });
+                  if (!res.ok) { setExportState("error"); return; }
+                  const blob = await res.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  const cd = res.headers.get("Content-Disposition") ?? "";
+                  const match = /filename="([^"]+)"/.exec(cd);
+                  a.download = match?.[1] ?? "pledgeoff-export.json";
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  setExportState("done");
+                  setTimeout(() => setExportState("idle"), 4000);
+                } catch {
                   setExportState("error");
-                  return;
                 }
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                const cd = res.headers.get("Content-Disposition") ?? "";
-                const match = /filename="([^"]+)"/.exec(cd);
-                a.download = match?.[1] ?? "pledgeoff-export.json";
-                a.click();
-                URL.revokeObjectURL(url);
-                setExportState("done");
-                setTimeout(() => setExportState("idle"), 4000);
-              } catch {
-                setExportState("error");
-              }
-            }}
-            className="mono text-[11px] h-9 px-4 rounded-md border transition-colors disabled:opacity-50"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--t2)",
-              background: "var(--surface)",
-            }}
-          >
-            {exportState === "loading" ? "Preparing…" : "Export all data (JSON)"}
-          </button>
-        )}
+              }}
+            >
+              {exportState === "loading" ? "Preparing…" : "Request data export"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Audit log gate */}
+      <div className="sec">
+        <div className="sec-hd">
+          Audit log
+          <span className="r">Studio+</span>
+        </div>
+        <div className="sec-bd">
+          <div className="plan-gate">
+            <span className="pg-tag">Studio+</span>
+            <div>
+              <div className="pg-ttl">Requires Studio or Enterprise</div>
+              <p className="pg-desc">A tamper-evident log of every action on your account — who ran what, when, and from which IP. Exportable as a signed PDF.</p>
+              <a href="/pricing" className="btn-xs p">Upgrade to Studio</a>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Delete account */}
-      <div
-        className="border rounded-md p-5"
-        style={{
-          borderColor: "rgba(229,91,60,0.3)",
-          background: "rgba(229,91,60,0.02)",
-        }}
-      >
-        <div
-          className="display text-[15px] font-semibold mb-1"
-          style={{ color: "var(--kill)" }}
-        >
-          Delete account
-        </div>
-        <p className="text-[12px] mb-4" style={{ color: "var(--t2)" }}>
-          Permanently deletes your account and all data. Irreversible.
-        </p>
+      <div className="sec danger-sec">
+        <div className="sec-hd">Delete account</div>
+        <div className="sec-bd">
+          <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 16, maxWidth: "56ch" }}>
+            Permanently delete your account and all associated data — ideas, verdicts, tool results, and billing history. This cannot be undone. If you are a team owner, transfer ownership before deleting.
+          </p>
 
-        {!deleteConfirm ? (
-          <button
-            onClick={() => setDeleteConfirm(true)}
-            className="mono text-[11px] h-9 px-4 rounded-md border transition-colors hover:border-(--kill) hover:text-(--kill)"
-            style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-          >
-            Delete account
-          </button>
-        ) : (
-          <div className="space-y-3">
-            <p className="text-[13px] text-(--t2)">
-              Type your email{" "}
-              <span className="font-semibold text-(--t1)">{email}</span> to
-              confirm:
-            </p>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <input
-                value={deleteInput}
-                onChange={(e) => setDeleteInput(e.target.value)}
-                placeholder={email}
-                className="flex-1 bg-(--canvas) border rounded-md px-3 h-9 text-[13px] text-(--t1) outline-none"
-                style={{ borderColor: "rgba(229,91,60,0.4)" }}
-              />
+          {!deleteConfirm ? (
+            <button
+              className="btn-xs d"
+              style={{ padding: "8px 16px" }}
+              onClick={() => setDeleteConfirm(true)}
+            >
+              Delete my account
+            </button>
+          ) : (
+            <div>
               <button
-                onClick={handleDeleteAccount}
-                disabled={deleteInput !== email}
-                className="mono text-[11px] h-9 px-4 rounded-md transition-colors disabled:cursor-not-allowed"
-                style={{
-                  background:
-                    deleteInput === email ? "var(--kill)" : "var(--surface)",
-                  color: deleteInput === email ? "#fff" : "var(--t3)",
-                  border: `1px solid ${deleteInput === email ? "var(--kill)" : "var(--border)"}`,
-                }}
-              >
-                Confirm delete
-              </button>
-              <button
-                onClick={() => {
-                  setDeleteConfirm(false);
-                  setDeleteInput("");
-                }}
-                className="mono text-[11px] h-9 px-4 rounded-md border"
-                style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+                className="btn-xs d"
+                style={{ padding: "8px 16px", marginBottom: 14 }}
+                onClick={() => { setDeleteConfirm(false); setDeleteInput(""); }}
               >
                 Cancel
               </button>
+              <div style={{ background: "var(--bg)", border: "1px solid rgba(158,42,26,0.22)", padding: 14 }}>
+                <div
+                  style={{
+                    fontFamily: "var(--font-chivo-mono), monospace",
+                    fontSize: "8.5px",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    color: "var(--kill)",
+                    marginBottom: 8,
+                  }}
+                >
+                  Type your email to confirm
+                </div>
+                <div className="finp-row">
+                  <input
+                    className="finp"
+                    type="email"
+                    value={deleteInput}
+                    onChange={(e) => setDeleteInput(e.target.value)}
+                    placeholder={email}
+                    style={{ flex: 1, borderColor: "rgba(158,42,26,0.3)" }}
+                  />
+                  <button
+                    className="btn-xs d"
+                    style={{ padding: "10px 14px" }}
+                    onClick={handleDeleteAccount}
+                    disabled={deleteInput !== email}
+                  >
+                    Permanently delete
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

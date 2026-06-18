@@ -44,10 +44,15 @@ function formatConsentDate(iso: string): string {
   });
 }
 
-export function NotificationsClient({ marketingEmailsConsent, marketingEmailsConsentedAt }: Props) {
+export function NotificationsClient({
+  marketingEmailsConsent,
+  marketingEmailsConsentedAt,
+}: Props) {
   const [notifState, setNotifState] = useState<Record<string, boolean>>({});
   const [marketing, setMarketing] = useState(marketingEmailsConsent);
-  const [marketingConsentedAt, setMarketingConsentedAt] = useState<string | null>(marketingEmailsConsentedAt);
+  const [marketingConsentedAt, setMarketingConsentedAt] = useState<
+    string | null
+  >(marketingEmailsConsentedAt);
   const [marketingSaving, setMarketingSaving] = useState(false);
 
   useEffect(() => {
@@ -82,126 +87,67 @@ export function NotificationsClient({ marketingEmailsConsent, marketingEmailsCon
 
   return (
     <div>
-      <h1 className="display text-[28px] font-semibold tracking-tight text-(--t1) mb-1">
-        Notifications
-      </h1>
-      <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
-        Email preferences. Off by default for everything non-essential.
-      </p>
-
-      {/* Marketing emails — GDPR Art. 6(1)(a) consent */}
-      <div className="mb-6">
-        <div className="mono text-[10px] tracking-widest uppercase mb-3" style={{ color: "var(--t3)" }}>
-          Marketing communications
+      {/* Marketing emails */}
+      <div className="nrow">
+        <div>
+          <div className="nrow-ttl">Product updates &amp; tips</div>
+          <div className="nrow-desc">
+            Occasional emails about new features and product news.
+            {marketing && marketingConsentedAt && (
+              <span style={{ marginLeft: 6, color: "var(--faint)" }}>
+                Consent given {formatConsentDate(marketingConsentedAt)}
+              </span>
+            )}
+          </div>
         </div>
-        <div
-          className="border rounded-md overflow-hidden"
-          style={{ borderColor: "var(--border)" }}
+        <button
+          className="tog"
+          onClick={() => {
+            void handleMarketingToggle();
+          }}
+          disabled={marketingSaving}
+          role="switch"
+          aria-checked={marketing}
+          aria-label="Product updates and tips"
         >
-          <div className="px-5 py-4 flex items-start gap-5">
-            <div className="flex-1">
-              <div className="display text-[14px] font-semibold text-(--t1)">
-                Product updates &amp; tips
-              </div>
-              <div className="text-[12px] mt-1" style={{ color: "var(--t2)" }}>
-                Occasional emails about new features, validation tips, and product news. You can withdraw consent at any time.
-              </div>
-              {marketing && marketingConsentedAt && (
-                <div className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
-                  Consent given {formatConsentDate(marketingConsentedAt)}
-                </div>
-              )}
-            </div>
-            <button
-              onClick={() => { void handleMarketingToggle(); }}
-              disabled={marketingSaving}
-              role="switch"
-              aria-checked={marketing}
-              aria-label="Product updates and tips"
-              className="relative w-11 h-6 rounded-full border shrink-0 mt-0.5 disabled:opacity-60"
-              style={{
-                borderColor: "var(--border)",
-                background: marketing
-                  ? "color-mix(in srgb, var(--accent) 15%, transparent)"
-                  : "var(--surface)",
-              }}
-            >
-              <span
-                className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
-                style={{
-                  left: marketing ? "calc(100% - 18px)" : "2px",
-                  background: marketing ? "var(--accent)" : "var(--t3)",
-                }}
-              />
-            </button>
+          <div className={`tog-t${marketing ? " on" : ""}`}>
+            <div className="tog-th" />
           </div>
-        </div>
-        <p className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
-          Consent basis: GDPR Art. 6(1)(a). This does not affect account or transactional emails.
-        </p>
+        </button>
       </div>
 
-      {/* Product notifications — legitimate interest */}
-      <div className="mono text-[10px] tracking-widest uppercase mb-3" style={{ color: "var(--t3)" }}>
-        Product notifications
-      </div>
-      <div
-        className="border rounded-md overflow-hidden"
-        style={{ borderColor: "var(--border)" }}
-      >
-        {NOTIFICATION_ITEMS.map((item, i) => (
-          <div
-            key={item.key}
-            className={`px-5 py-4 flex items-start gap-5${i < NOTIFICATION_ITEMS.length - 1 ? " border-b" : ""}`}
-            style={{ borderColor: "var(--border)" }}
-          >
-            <div className="flex-1">
-              <div className="display text-[14px] font-semibold text-(--t1)">
-                {item.label}
-              </div>
-              <div
-                className="text-[12px] mt-1"
-                style={{ color: "var(--t2)" }}
-              >
-                {item.desc}
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                const next = !notifState[item.key];
-                setNotifState((prev) => ({ ...prev, [item.key]: next }));
-                void fetch("/api/v1/notification-preferences", {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ [item.key]: next }),
-                });
-              }}
-              role="switch"
-              aria-checked={notifState[item.key] ?? false}
-              aria-label={item.label}
-              className="relative w-11 h-6 rounded-full border shrink-0 mt-0.5"
-              style={{
-                borderColor: "var(--border)",
-                background: notifState[item.key]
-                  ? "color-mix(in srgb, var(--accent) 15%, transparent)"
-                  : "var(--surface)",
-              }}
-            >
-              <span
-                className="absolute top-0.5 w-4 h-4 rounded-full transition-all"
-                style={{
-                  left: notifState[item.key] ? "calc(100% - 18px)" : "2px",
-                  background: notifState[item.key]
-                    ? "var(--accent)"
-                    : "var(--t3)",
-                }}
-              />
-            </button>
+      {/* Product notifications */}
+      {NOTIFICATION_ITEMS.map((item) => (
+        <div className="nrow" key={item.key}>
+          <div>
+            <div className="nrow-ttl">{item.label}</div>
+            <div className="nrow-desc">{item.desc}</div>
           </div>
-        ))}
-      </div>
-      <p className="mono text-[10px] mt-4" style={{ color: "var(--t3)" }}>
-        Preferences saved to your account instantly.
+          <button
+            className="tog"
+            onClick={() => {
+              const next = !notifState[item.key];
+              setNotifState((prev) => ({ ...prev, [item.key]: next }));
+              void fetch("/api/v1/notification-preferences", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ [item.key]: next }),
+              });
+            }}
+            role="switch"
+            aria-checked={notifState[item.key] ?? false}
+            aria-label={item.label}
+          >
+            <div className={`tog-t${notifState[item.key] ? " on" : ""}`}>
+              <div className="tog-th" />
+            </div>
+          </button>
+        </div>
+      ))}
+
+      <p className="fine" style={{ marginTop: 12 }}>
+        GDPR Art. 6(1)(a) for marketing · 6(1)(f) for product notifications.
+        Preferences saved instantly.
       </p>
     </div>
   );

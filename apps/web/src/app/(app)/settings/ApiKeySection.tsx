@@ -17,6 +17,16 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+function formatRelative(iso: string | null): string {
+  if (!iso) return "Never used";
+  const diff = Date.now() - new Date(iso).getTime();
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) return "Used just now";
+  if (h < 24) return `Used ${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `Used ${d}d ago`;
+}
+
 export function ApiKeySection() {
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +42,7 @@ export function ApiKeySection() {
   useEffect(() => {
     let active = true;
     async function load() {
-      const token = await getAuthToken() ?? "";
+      const token = (await getAuthToken()) ?? "";
       const res = await fetch("/api/v1/api-keys", { headers: { Authorization: `Bearer ${token}` } });
       if (!active) return;
       if (res.ok) {
@@ -60,7 +70,7 @@ export function ApiKeySection() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${await getAuthToken() ?? ""}`,
+        Authorization: `Bearer ${(await getAuthToken()) ?? ""}`,
       },
       body: JSON.stringify({ name: newKeyName.trim() }),
     });
@@ -79,7 +89,7 @@ export function ApiKeySection() {
     setRevoking(id);
     const res = await fetch(`/api/v1/api-keys/${id}`, {
       method: "DELETE",
-      headers: { Authorization: `Bearer ${await getAuthToken() ?? ""}` },
+      headers: { Authorization: `Bearer ${(await getAuthToken()) ?? ""}` },
     });
     if (res.ok) {
       setKeys((prev) => prev.map((k) => k.id === id ? { ...k, revokedAt: new Date().toISOString() } : k));
@@ -97,193 +107,144 @@ export function ApiKeySection() {
   const revokedKeys = keys.filter((k) => k.revokedAt);
 
   return (
-    <div>
-      <h1 className="display text-[28px] font-semibold tracking-tight text-(--t1) mb-1">API</h1>
-      <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
-        Programmatic access to your validations and decisions.
-      </p>
-
+    <>
       {/* New key revealed — show once */}
       {newKey && (
-        <div
-          className="border rounded-md p-5 mb-6"
-          style={{ borderColor: "var(--accent)", background: "rgba(214,255,61,0.04)" }}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[13px] font-semibold" style={{ color: "var(--accent)" }}>
-              Key created — copy it now. It will not be shown again.
-            </p>
-            <button
-              onClick={() => setNewKey(null)}
-              className="text-[11px] px-3 h-7 rounded border"
-              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-            >
-              Dismiss
-            </button>
+        <div className="sec" style={{ borderColor: "rgba(26,106,60,0.4)" }}>
+          <div className="sec-hd" style={{ background: "var(--go-mid)", color: "var(--go)" }}>
+            Key created — copy it now
+            <span className="r">Will not be shown again</span>
           </div>
-          <p className="text-[12px] mb-3" style={{ color: "var(--t2)" }}>
-            <span className="mono" style={{ color: "var(--t3)" }}>Name:</span> {newKey.name}
-          </p>
-          <div
-            className="flex items-center gap-3 rounded p-3"
-            style={{ background: "var(--canvas)", border: "1px solid var(--border)" }}
-          >
-            <code className="mono text-[12px] flex-1 break-all" style={{ color: "var(--t1)" }}>
-              {newKey.key}
-            </code>
-            <button
-              onClick={() => handleCopy(newKey.key)}
-              className="shrink-0 text-[12px] px-3 h-7 rounded font-semibold display"
-              style={{
-                background: copied ? "var(--validated)" : "var(--accent)",
-                color: "#000",
-              }}
-            >
-              {copied ? "Copied" : "Copy"}
+          <div className="sec-bd">
+            <p className="fine" style={{ marginBottom: 12 }}>Name: {newKey.name}</p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, background: "var(--bg)", border: "1px solid var(--line)", padding: "10px 14px" }}>
+              <code style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 12, flex: 1, wordBreak: "break-all", color: "var(--ink)" }}>
+                {newKey.key}
+              </code>
+              <button
+                className={`btn-xs${copied ? "" : " p"}`}
+                onClick={() => handleCopy(newKey.key)}
+              >
+                {copied ? "Copied ✓" : "Copy"}
+              </button>
+            </div>
+            <button className="btn-xs" style={{ marginTop: 12 }} onClick={() => setNewKey(null)}>
+              Dismiss
             </button>
           </div>
         </div>
       )}
 
-      {/* Create form */}
-      <div
-        className="border rounded-md p-5 mb-6"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-      >
-        <h2 className="display text-[15px] font-semibold text-(--t1) mb-4">New API key</h2>
-        <form onSubmit={handleCreate} className="flex gap-3">
-          <input
-            type="text"
-            placeholder="Key name (e.g. Production)"
-            value={newKeyName}
-            onChange={(e) => setNewKeyName(e.target.value)}
-            maxLength={64}
-            className="flex-1 text-[13px] px-3 h-9 rounded border outline-none"
-            style={{
-              background: "var(--canvas)",
-              borderColor: "var(--border)",
-              color: "var(--t1)",
-            }}
-          />
-          <button
-            type="submit"
-            disabled={creating || !newKeyName.trim()}
-            className="display text-[13px] font-semibold px-5 h-9 rounded disabled:opacity-40"
-            style={{ background: "var(--accent)", color: "#000" }}
-          >
-            {creating ? "Creating…" : "Generate key"}
-          </button>
-        </form>
-        {error && (
-          <p className="text-[12px] mt-2" style={{ color: "var(--kill)" }}>{error}</p>
-        )}
-      </div>
-
       {/* Active keys */}
-      <div className="mb-2">
-        <div
-          className="mono text-[10px] uppercase tracking-[0.12em] mb-3"
-          style={{ color: "var(--t3)" }}
-        >
-          Active keys ({activeKeys.length} / 10)
+      <div className="sec">
+        <div className="sec-hd">
+          API keys
+          <span className="r">{activeKeys.length} active</span>
         </div>
+        <div className="sec-bd">
+          {loading ? (
+            <p className="fine">Loading…</p>
+          ) : activeKeys.length > 0 ? (
+            <div style={{ marginBottom: 20 }}>
+              {activeKeys.map((key) => (
+                <div key={key.id} className="krow">
+                  <div>
+                    <div className="knm">{key.name}</div>
+                    <div className="ksub">Created {formatDate(key.createdAt)}</div>
+                  </div>
+                  <span className="kpfx">{key.keyPrefix}···</span>
+                  <span className="kmeta">{formatRelative(key.lastUsedAt)}</span>
+                  <button
+                    className="btn-xs d"
+                    onClick={() => handleRevoke(key.id)}
+                    disabled={revoking === key.id}
+                  >
+                    {revoking === key.id ? "…" : "Revoke"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 16 }}>No active API keys.</p>
+          )}
 
-        {loading ? (
-          <p className="text-[13px]" style={{ color: "var(--t3)" }}>Loading…</p>
-        ) : activeKeys.length === 0 ? (
-          <div
-            className="border rounded-md p-6 text-center"
-            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-          >
-            <p className="text-[13px]" style={{ color: "var(--t2)" }}>No active API keys.</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {activeKeys.map((key) => (
-              <div
-                key={key.id}
-                className="border rounded-md px-4 py-3 flex items-center justify-between gap-4"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          {/* Create form */}
+          <div className="fg">
+            <label className="flbl">Create new key</label>
+            <form onSubmit={handleCreate} className="finp-row">
+              <input
+                className="finp"
+                type="text"
+                placeholder="Key name — e.g. staging, ci-pipeline"
+                value={newKeyName}
+                onChange={(e) => setNewKeyName(e.target.value)}
+                maxLength={64}
+              />
+              <button
+                type="submit"
+                className="btn-xs p"
+                style={{ padding: "10px 14px" }}
+                disabled={creating || !newKeyName.trim()}
               >
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium text-(--t1) truncate">{key.name}</p>
-                  <p className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
-                    {key.keyPrefix}••••••••••••••••••••••••••••••••••••••••••••••••••
-                  </p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[11px]" style={{ color: "var(--t3)" }}>
-                    Created {formatDate(key.createdAt)}
-                  </p>
-                  <p className="text-[11px]" style={{ color: "var(--t3)" }}>
-                    {key.lastUsedAt ? `Last used ${formatDate(key.lastUsedAt)}` : "Never used"}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleRevoke(key.id)}
-                  disabled={revoking === key.id}
-                  className="shrink-0 text-[12px] px-3 h-7 rounded border disabled:opacity-40"
-                  style={{ borderColor: "var(--border)", color: "var(--kill)" }}
-                >
-                  {revoking === key.id ? "Revoking…" : "Revoke"}
-                </button>
-              </div>
-            ))}
+                {creating ? "Creating…" : "Create key"}
+              </button>
+            </form>
+            {error && (
+              <p className="fine" style={{ color: "var(--kill)" }}>{error}</p>
+            )}
+            <p className="fine">New keys are shown once. Copy and store them immediately — they cannot be retrieved after creation.</p>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Revoked keys */}
       {revokedKeys.length > 0 && (
-        <div className="mt-6">
-          <div
-            className="mono text-[10px] uppercase tracking-[0.12em] mb-3"
-            style={{ color: "var(--t3)" }}
-          >
+        <div className="sec">
+          <div className="sec-hd">
             Revoked keys
+            <span className="r">{revokedKeys.length}</span>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="sec-bd">
             {revokedKeys.map((key) => (
-              <div
-                key={key.id}
-                className="border rounded-md px-4 py-3 flex items-center justify-between gap-4 opacity-50"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium text-(--t1) truncate line-through">{key.name}</p>
-                  <p className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
-                    {key.keyPrefix}••••••••••••••••••••••••••••••••••••••••••••••••••
-                  </p>
+              <div key={key.id} className="krow" style={{ opacity: 0.45 }}>
+                <div>
+                  <div className="knm" style={{ textDecoration: "line-through" }}>{key.name}</div>
+                  <div className="ksub">Revoked {formatDate(key.revokedAt)}</div>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[11px]" style={{ color: "var(--t3)" }}>
-                    Revoked {formatDate(key.revokedAt)}
-                  </p>
-                </div>
+                <span className="kpfx">{key.keyPrefix}···</span>
+                <span className="kmeta">—</span>
+                <span />
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Usage docs */}
-      <div
-        className="border rounded-md p-5 mt-6"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-      >
-        <h2 className="display text-[14px] font-semibold text-(--t1) mb-3">Usage</h2>
-        <p className="text-[13px] mb-3" style={{ color: "var(--t2)" }}>
-          Pass your key in the <code className="mono text-[12px] px-1.5 py-0.5 rounded" style={{ background: "var(--canvas)", color: "var(--t1)" }}>X-API-Key</code> header:
-        </p>
-        <pre
-          className="mono text-[12px] rounded p-4 overflow-x-auto"
-          style={{ background: "var(--canvas)", border: "1px solid var(--border)", color: "var(--t2)" }}
-        >{`curl https://pledgeoff.com/api/v1/ideas \\
+      {/* Docs */}
+      <div className="sec">
+        <div className="sec-hd">Documentation</div>
+        <div className="sec-bd">
+          <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 14 }}>
+            Pass your key in the <code style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 11 }}>X-API-Key</code> header:
+          </p>
+          <pre
+            style={{
+              fontFamily: "var(--font-chivo-mono), monospace",
+              fontSize: 11,
+              background: "var(--bg)",
+              border: "1px solid var(--line)",
+              padding: "12px 14px",
+              color: "var(--dim)",
+              overflowX: "auto",
+            }}
+          >{`curl https://pledgeoff.com/api/v1/ideas \\
   -H "X-API-Key: po_live_your_key_here"`}</pre>
-        <p className="text-[12px] mt-3" style={{ color: "var(--t3)" }}>
-          Full reference at <a href="/api-docs" target="_blank" style={{ color: "var(--accent)" }}>/api-docs</a>.
-        </p>
+          <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+            <a href="/api-docs" className="btn-g" target="_blank">API reference</a>
+            <a href="/changelog" className="btn-g">Changelog</a>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
