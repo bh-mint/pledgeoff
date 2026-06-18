@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Logo } from "@/components/brand/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CookiePreferencesButton } from "@/components/CookiePreferencesButton";
 
@@ -18,6 +17,24 @@ function IconGitHub() {
     </svg>
   );
 }
+
+const monoLabel: React.CSSProperties = {
+  fontFamily: "var(--font-chivo-mono), monospace",
+  fontSize: 8,
+  letterSpacing: "0.22em",
+  textTransform: "uppercase",
+  color: "var(--faint)",
+  marginBottom: 12,
+  display: "block",
+};
+
+const footerLink: React.CSSProperties = {
+  fontSize: 13,
+  color: "var(--dim)",
+  display: "block",
+  marginBottom: 10,
+  transition: "color 0.1s",
+};
 
 const NAV_COLS = [
   {
@@ -65,69 +82,126 @@ const NAV_COLS = [
 
 export function Footer() {
   return (
-    <footer className="border-t mt-auto" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
+    <footer
+      style={{
+        borderTop: "1px solid var(--line)",
+        marginTop: "auto",
+        background: "var(--surface)",
+      }}
+    >
       {/* Main grid */}
-      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 pt-10 pb-8 grid grid-cols-2 sm:grid-cols-12 gap-8">
-        {/* Col 1 — brand */}
-        <div className="col-span-2 sm:col-span-4 sm:pr-8">
-          <div className="flex items-center gap-2" style={{ color: "var(--t1)" }}>
-            <Logo size={20} />
-            <span className="display text-[15px] font-semibold tracking-tight">
-              Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-            </span>
+      <div
+        style={{
+          maxWidth: 1440,
+          margin: "0 auto",
+          padding: "48px 40px 36px",
+          gap: 32,
+        }}
+        className="grid grid-cols-2 sm:grid-cols-5"
+      >
+        {/* Brand col */}
+        <div style={{ gridColumn: "span 1" }}>
+          <div
+            style={{
+              fontFamily: "var(--font-chivo-mono), monospace",
+              fontSize: 13,
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--ink)",
+              marginBottom: 10,
+            }}
+          >
+            Pledge<em style={{ color: "var(--go)", fontStyle: "normal" }}>OFF</em>
           </div>
-          <p className="text-[13px] leading-relaxed mt-3" style={{ color: "var(--t2)" }}>
+          <p
+            style={{
+              fontSize: 13,
+              color: "var(--dim)",
+              lineHeight: 1.65,
+              marginBottom: 16,
+            }}
+          >
             Decision intelligence for founders who ship.
           </p>
-          <div className="mt-5">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
         </div>
 
         {/* Nav cols */}
         {NAV_COLS.map((col) => (
-          <div key={col.label} className="sm:col-span-2 xl:col-span-2">
-            <div className="mono text-[11px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>
-              {col.label}
-            </div>
-            <ul className="space-y-3">
-              {col.links.map((link) => (
-                <li key={link.href}>
-                  {link.external ? (
-                    <a
-                      href={link.href}
-                      className="text-[13px] transition-colors text-(--t2) hover:text-(--t1)"
-                    >
-                      {link.text}
-                    </a>
-                  ) : (
-                    <Link
-                      href={link.href}
-                      className="text-[13px] transition-colors text-(--t2) hover:text-(--t1)"
-                    >
-                      {link.text}
-                    </Link>
-                  )}
-                </li>
-              ))}
-            </ul>
+          <div key={col.label}>
+            <span style={monoLabel}>{col.label}</span>
+            {col.links.map((link) =>
+              link.external ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={footerLink}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--dim)")}
+                >
+                  {link.text}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={footerLink}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--dim)")}
+                >
+                  {link.text}
+                </Link>
+              )
+            )}
           </div>
         ))}
       </div>
 
-      {/* Legal + copyright row */}
-      <div className="border-t" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+      {/* Bottom row */}
+      <div style={{ borderTop: "1px solid var(--line)" }}>
+        <div
+          style={{
+            maxWidth: 1440,
+            margin: "0 auto",
+            padding: "14px 40px",
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <div>
+            <span
+              style={{
+                fontFamily: "var(--font-chivo-mono), monospace",
+                fontSize: 10,
+                color: "var(--faint)",
+                display: "block",
+                marginBottom: 4,
+              }}
+            >
               © 2026 S.C. PledgeOFF S.R.L. · CUI [TBD] · All rights reserved.
             </span>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mono text-[10px]" style={{ color: "var(--t3)" }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "0 12px",
+                fontFamily: "var(--font-chivo-mono), monospace",
+                fontSize: 9,
+                color: "var(--faint)",
+              }}
+            >
               <a
                 href="https://anpc.ro/ce-este-sal/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity underline underline-offset-2"
+                style={{ textDecoration: "underline", textUnderlineOffset: 2 }}
               >
                 ANPC — Alternative Dispute Resolution
               </a>
@@ -136,31 +210,41 @@ export function Footer() {
                 href="https://www.anspdcp.ro"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity underline underline-offset-2"
+                style={{ textDecoration: "underline", textUnderlineOffset: 2 }}
               >
-                ANSPDCP — National Supervisory Authority for Personal Data Processing
+                ANSPDCP
               </a>
               <span aria-hidden="true">·</span>
               <a
                 href="https://ec.europa.eu/consumers/odr/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:opacity-80 transition-opacity underline underline-offset-2"
+                style={{ textDecoration: "underline", textUnderlineOffset: 2 }}
               >
-                SOL — Online Dispute Resolution
+                SOL — ODR
               </a>
               <span aria-hidden="true">·</span>
               <CookiePreferencesButton />
             </div>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <a
               href="https://x.com/pledgeoffhq"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="X / Twitter"
-              className="w-7 h-7 rounded-md inline-flex items-center justify-center transition-colors text-(--t3) hover:text-(--t1)"
+              style={{
+                width: 28,
+                height: 28,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--faint)",
+                transition: "color 0.1s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--faint)")}
             >
               <IconX />
             </a>
@@ -169,7 +253,17 @@ export function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub"
-              className="w-7 h-7 rounded-md inline-flex items-center justify-center transition-colors text-(--t3) hover:text-(--t1)"
+              style={{
+                width: 28,
+                height: 28,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--faint)",
+                transition: "color 0.1s",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--ink)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--faint)")}
             >
               <IconGitHub />
             </a>

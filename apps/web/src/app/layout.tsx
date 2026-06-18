@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bitter, Chivo_Mono } from "next/font/google";
 import "./globals.css";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { CookieBanner } from "@/components/CookieBanner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const bitter = Bitter({
+  variable: "--font-bitter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const chivoMono = Chivo_Mono({
+  variable: "--font-chivo-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +29,7 @@ export const metadata: Metadata = {
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-    other: [{ rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#D6FF3D" }],
+    other: [{ rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#1A6A3C" }],
   },
   openGraph: {
     siteName: "PledgeOFF",
@@ -41,7 +43,7 @@ export const metadata: Metadata = {
     images: ["/og-default.png"],
   },
   other: {
-    "theme-color": "#0A0A0B",
+    "theme-color": "#F3EFE3",
   },
   robots: {
     index: true,
@@ -57,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${bitter.variable} ${chivoMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
