@@ -58,13 +58,13 @@ export default function IdeaValidationPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
+      <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
         <PublicNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
         <div className="max-w-2xl mx-auto px-6 pt-14 pb-24">
 
           {/* Breadcrumb */}
-          <div className="mono text-[10px] uppercase tracking-[0.1em] mb-6 flex items-center gap-2" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[10px] uppercase tracking-[0.1em] mb-6 flex items-center gap-2" style={{ color: "var(--faint)" }}>
             <Link href="/blog" className="hover:text-(--t2) transition-colors">Blog</Link>
             <span>›</span>
             <span style={{ color: TAG_COLOR }}>Idea Validation</span>
@@ -74,15 +74,15 @@ export default function IdeaValidationPage() {
           <h1 className="display font-bold leading-tight mb-3" style={{ fontSize: "36px", letterSpacing: "-0.03em" }}>
             Idea Validation
           </h1>
-          <p className="text-[15px] leading-relaxed mb-2" style={{ color: "var(--t2)" }}>
+          <p className="text-[15px] leading-relaxed mb-2" style={{ color: "var(--dim)" }}>
             {cluster.description}
           </p>
-          <p className="mono text-[11px] mb-10" style={{ color: "var(--t3)" }}>
+          <p className="mono text-[11px] mb-10" style={{ color: "var(--faint)" }}>
             {articles.length} articles
           </p>
 
           {/* Article list */}
-          <div className="rounded-md border divide-y" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <div className="rounded-md border divide-y" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
             {articles.map((a) => (
               <Link
                 key={a.slug}
@@ -90,29 +90,29 @@ export default function IdeaValidationPage() {
                 className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/5"
               >
                 <div>
-                  <div className="display text-[15px]" style={{ color: "var(--t1)" }}>{a.title}</div>
-                  <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+                  <div className="display text-[15px]" style={{ color: "var(--ink)" }}>{a.title}</div>
+                  <div className="mono text-[10px] mt-1" style={{ color: "var(--faint)" }}>
                     {formatDate(a.publishedAt).toUpperCase()} · {a.readingTime} MIN READ
                   </div>
                 </div>
-                <span className="mono text-[11px] flex-shrink-0 ml-4" style={{ color: "var(--t3)" }}>→</span>
+                <span className="mono text-[11px] flex-shrink-0 ml-4" style={{ color: "var(--faint)" }}>→</span>
               </Link>
             ))}
           </div>
 
           {/* CTA */}
-          <div className="mt-12 rounded-md border p-6" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+          <div className="mt-12 border p-6" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
             <div className="display font-semibold mb-2" style={{ fontSize: "20px" }}>
               Ready to validate your idea?
             </div>
-            <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--t2)" }}>
+            <p className="text-[13px] leading-relaxed mb-4" style={{ color: "var(--dim)" }}>
               Get a GO / KILL / PIVOT verdict in under 60 seconds using real Reddit and GitHub signals.
             </p>
             <ArticleCTAButton
               href="/ideas/new"
               location="hub_idea_validation"
-              className="inline-flex items-center h-9 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+              className="inline-flex items-center h-9 px-5 display text-[13px] font-semibold transition-opacity hover:opacity-90"
+              style={{ background: "var(--go)", color: "var(--accent-fg)" }}
             >
               Run a validation →
             </ArticleCTAButton>
@@ -120,17 +120,17 @@ export default function IdeaValidationPage() {
 
           {/* Also explore */}
           <div className="mt-12">
-            <div className="mono text-[10px] mb-4 uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>Also explore</div>
+            <div className="mono text-[10px] mb-4 uppercase tracking-[0.1em]" style={{ color: "var(--faint)" }}>Also explore</div>
             <div className="flex flex-col sm:flex-row gap-3">
               {others.map((o) => (
                 <Link
                   key={o.slug}
                   href={`/blog/${o.slug}`}
-                  className="flex-1 rounded-md border px-4 py-3 transition-colors hover:border-(--t3)"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                  className="flex-1 border px-4 py-3 transition-colors hover:border-(--t3)"
+                  style={{ borderColor: "var(--line)", background: "var(--surface)" }}
                 >
-                  <div className="display text-[14px] font-semibold mb-1" style={{ color: "var(--t1)" }}>{o.label}</div>
-                  <div className="mono text-[10px]" style={{ color: "var(--t3)" }}>{o.description.split(" — ")[0]}</div>
+                  <div className="display text-[14px] font-semibold mb-1" style={{ color: "var(--ink)" }}>{o.label}</div>
+                  <div className="mono text-[10px]" style={{ color: "var(--faint)" }}>{o.description.split(" — ")[0]}</div>
                 </Link>
               ))}
             </div>

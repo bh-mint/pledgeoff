@@ -78,42 +78,56 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   },
 ];
 
-const FAQ = [
+const FAQ: { q: string; a: string }[] = [
   {
-    q: "Where does the data actually come from?",
-    a: "Reddit, GitHub, Hacker News, Dev.to, and Brave Search. Every signal has a source link. Nothing is invented — data is fetched live when you submit your idea.",
+    q: "What counts as a validation?",
+    a: "Each time you submit an idea and receive a GO / PIVOT / KILL verdict, that's one validation. Viewing an existing verdict, sharing it, or running intelligence tools on it does not count.",
   },
   {
-    q: "Can I cancel anytime?",
-    a: "Yes — one click in Settings → Billing. You keep access until the end of the period. No retention emails, no \"are you sure\" gauntlet.",
+    q: "Do unused validations roll over?",
+    a: "Monthly allocations reset at the start of each billing period — they don't roll over. Validation Packs, however, never expire and stack on top of your monthly allocation.",
+  },
+  {
+    q: "What is Otto?",
+    a: "Otto is the decision co-pilot built into every verdict. You can ask it follow-up questions and it answers with awareness of your specific verdict and signals. Each question uses one Otto credit.",
+  },
+  {
+    q: "What are the intelligence tools?",
+    a: "Six tools you can run after a verdict: ICP Analysis, Competitive Landscape, Revenue Model, Build Spec, Page Brief, and GTM Brief. Founder plan includes five; Team and above gets all six.",
+  },
+  {
+    q: "Can I upgrade or downgrade at any time?",
+    a: "Yes. Upgrades are pro-rated and take effect immediately. Downgrades take effect at the end of your current billing period. You won't lose access to existing verdicts.",
   },
   {
     q: "Do you offer refunds?",
-    a: "7-day full refund on your first payment, no questions asked. Email billing@pledgeoff.com — done.",
-  },
-  {
-    q: "What's the catch on Free?",
-    a: "1 validation a month is enough to experience the product. If it's not for you, stay on Free forever. We mean it.",
-  },
-  {
-    q: "What's the difference between Founder and Team?",
-    a: "Founder gives you 20 validations/month, all 5 signal sources (HN, Dev.to, GitHub, Reddit, Brave), and 5 of the 6 intelligence tools — perfect for solo builders. Team raises the cap to 60 validations/month, adds GTM Brief (the 6th tool), 3 seats, 45 Otto questions, and early access to every new feature we ship.",
+    a: "7-day full refund on your first payment, no questions asked. Email billing@pledgeoff.com.",
   },
   {
     q: "Is the verdict really accurate?",
-    a: "It depends on what you mean by accurate. PledgeOFF doesn't predict the future — it surfaces real signals from Reddit, GitHub, HN, and more to show what the market is saying right now. Every source is linked so you can verify. We track your outcomes over time: GO verdicts where founders built and it worked, KILL verdicts where they didn't build and saved months. The accuracy rate is visible in your settings.",
+    a: "PledgeOFF doesn't predict the future — it surfaces real signals from Reddit, GitHub, HN, and more to show what the market is saying right now. Every source is linked so you can verify.",
   },
   {
     q: "What happens to my data?",
-    a: "Your idea text and validation results are stored in our EU-hosted database (Supabase, Frankfurt region). We don't sell your data, use it to train models, or share it with third parties — except the infrastructure providers listed in our Privacy Policy. You can export everything or delete your account at any time from Settings → Danger Zone.",
+    a: "Your idea text and validation results are stored in our EU-hosted database (Supabase, Frankfurt region). We don't sell your data or use it to train models. You can export or delete everything from Settings → Danger Zone.",
   },
 ];
 
 function SoonBadge() {
   return (
     <span
-      className="mono text-[9px] px-1.5 py-0.5 rounded uppercase tracking-[0.06em] ml-1.5 align-middle"
-      style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)", color: "var(--accent)", border: "1px solid color-mix(in srgb, var(--accent) 30%, transparent)" }}
+      className="mono"
+      style={{
+        fontSize: "8px",
+        padding: "2px 6px",
+        marginLeft: "6px",
+        verticalAlign: "middle",
+        background: "color-mix(in srgb, var(--pivot) 10%, transparent)",
+        color: "var(--pivot)",
+        border: "1px solid color-mix(in srgb, var(--pivot) 30%, transparent)",
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+      }}
     >
       soon
     </span>
@@ -121,12 +135,16 @@ function SoonBadge() {
 }
 
 function renderCell(val: string, emphasize = false, soon = false) {
-  if (val === "—") return <span style={{ color: "var(--t3)" }}>—</span>;
-  if (val === "✓") return <><span style={{ color: "var(--validated)" }}>✓</span>{soon && <SoonBadge />}</>;
+  if (val === "—") return <span style={{ color: "var(--faint)" }}>—</span>;
+  if (val === "✓") return <><span style={{ color: "var(--go)" }}>✓</span>{soon && <SoonBadge />}</>;
   return (
     <span
-      className={emphasize ? "display tnum text-[13px] font-semibold" : "text-[13px]"}
-      style={{ color: emphasize ? "var(--t1)" : "var(--t2)" }}
+      style={{
+        fontSize: "12px",
+        color: emphasize ? "var(--ink)" : "var(--dim)",
+        fontFamily: emphasize ? "var(--font-chivo-mono)" : undefined,
+        fontWeight: emphasize ? 600 : undefined,
+      }}
     >
       {val}{soon && <SoonBadge />}
     </span>
@@ -137,23 +155,17 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   const id = `faq-${q.slice(0, 20).replace(/\s+/g, "-").toLowerCase()}`;
   return (
-    <div className="border-b" style={{ borderColor: "var(--border)" }}>
+    <div className={`faq-item${open ? " open" : ""}`}>
       <button
+        className="faq-q"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
         aria-controls={id}
-        className="w-full text-left py-5 flex items-center justify-between gap-4"
       >
-        <span className="display text-[16px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
-          {q}
-        </span>
-        <span className="mono text-[14px] shrink-0" style={{ color: "var(--t3)" }} aria-hidden="true">
-          {open ? "−" : "+"}
-        </span>
+        <span className="faq-qt">{q}</span>
+        <span className="faq-ic" aria-hidden="true">+</span>
       </button>
-      <div id={id} style={{ maxHeight: open ? 400 : 0, overflow: "hidden", transition: "max-height 400ms cubic-bezier(0.16,1,0.3,1)" }}>
-        <p className="text-[14px] leading-[1.65] pb-5 max-w-170" style={{ color: "var(--t2)" }}>{a}</p>
-      </div>
+      <div id={id} className="faq-a">{a}</div>
     </div>
   );
 }
@@ -162,12 +174,10 @@ function UpgradeButton({
   priceId,
   label,
   primary = false,
-  variant,
 }: {
   priceId: string;
   label: string;
   primary?: boolean;
-  variant?: "text";
 }) {
   const router = useRouter();
   const [unavailable, setUnavailable] = useState(false);
@@ -176,65 +186,23 @@ function UpgradeButton({
   async function handleClick() {
     if (!priceId) { setUnavailable(true); return; }
     setUnavailable(false);
-
     const token = await getAuthToken();
-    if (!token) {
-      router.push("/login?next=/pricing");
-      return;
-    }
-
+    if (!token) { router.push("/login?next=/pricing"); return; }
     setModalOpen(true);
-  }
-
-  if (variant === "text") {
-    return (
-      <>
-        <button
-          onClick={handleClick}
-          className="mono text-[11px] transition-opacity hover:opacity-70"
-          style={{ color: "var(--t2)" }}
-        >
-          {label}
-        </button>
-        <CheckoutModal priceId={priceId} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
-      </>
-    );
-  }
-
-  if (primary) {
-    return (
-      <>
-        <div className="w-full sm:w-auto">
-          <button
-            onClick={handleClick}
-            className="display w-full sm:w-auto px-6 h-10 flex items-center justify-center rounded-md text-[13px] font-semibold hover:opacity-90 transition-opacity"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-          >
-            {label}
-          </button>
-          {unavailable && (
-            <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
-              Plan unavailable — contact support
-            </p>
-          )}
-        </div>
-        <CheckoutModal priceId={priceId} isOpen={modalOpen} onClose={() => setModalOpen(false)} />
-      </>
-    );
   }
 
   return (
     <>
-      <div className="w-full">
+      <div style={{ width: "100%" }}>
         <button
           onClick={handleClick}
-          className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors"
-          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
+          className={primary ? "btn-p" : "btn-g"}
+          style={{ width: "100%", justifyContent: "center" }}
         >
           {label}
         </button>
         {unavailable && (
-          <p className="mono text-[10px] mt-1 text-center" style={{ color: "var(--kill)" }}>
+          <p className="mono" style={{ fontSize: "10px", marginTop: "4px", color: "var(--kill)" }}>
             Plan unavailable — contact support
           </p>
         )}
@@ -245,368 +213,335 @@ function UpgradeButton({
 }
 
 export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team" | "studio" | null }) {
-  const [billing, setBilling] = useState<"month" | "year">("month");
+  const [annual, setAnnual] = useState(false);
 
-  const founderPrice = billing === "month" ? String(PRICING.founder.monthly.eur) : String(PRICING.founder.monthly.annual_equivalent);
-  const founderSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.founder.monthly.annual_total}/yr`;
-  const founderPriceId = billing === "month" ? FOUNDER_MONTHLY_PRICE_ID : FOUNDER_ANNUAL_PRICE_ID;
+  const founderPrice = annual ? PRICING.founder.monthly.annual_equivalent : PRICING.founder.monthly.eur;
+  const founderNote  = annual ? `billed €${PRICING.founder.monthly.annual_total}/yr` : "";
+  const founderPriceId = annual ? FOUNDER_ANNUAL_PRICE_ID : FOUNDER_MONTHLY_PRICE_ID;
 
-  const teamPrice = billing === "month" ? String(PRICING.team.monthly.eur) : String(PRICING.team.monthly.annual_equivalent);
-  const teamSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.team.monthly.annual_total}/yr`;
-  const teamPriceId = billing === "month" ? TEAM_MONTHLY_PRICE_ID : TEAM_ANNUAL_PRICE_ID;
+  const teamPrice = annual ? PRICING.team.monthly.annual_equivalent : PRICING.team.monthly.eur;
+  const teamNote  = annual ? `billed €${PRICING.team.monthly.annual_total}/yr` : "";
+  const teamPriceId = annual ? TEAM_ANNUAL_PRICE_ID : TEAM_MONTHLY_PRICE_ID;
 
-  const studioPrice = billing === "month" ? String(PRICING.studio.monthly.eur) : String(PRICING.studio.monthly.annual_equivalent);
-  const studioSub = billing === "month" ? "/mo" : `/mo · billed annually · €${PRICING.studio.monthly.annual_total}/yr`;
-  const studioPriceId = billing === "month" ? STUDIO_MONTHLY_PRICE_ID : STUDIO_ANNUAL_PRICE_ID;
+  const studioPrice = annual ? PRICING.studio.monthly.annual_equivalent : PRICING.studio.monthly.eur;
+  const studioNote  = annual ? `billed €${PRICING.studio.monthly.annual_total}/yr` : "";
+  const studioPriceId = annual ? STUDIO_ANNUAL_PRICE_ID : STUDIO_MONTHLY_PRICE_ID;
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
+    <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
       <PublicNav />
 
-      {/* Hero */}
-      <div className="border-b" style={{ borderColor: "var(--border)" }}>
-        <div className="max-w-360 mx-auto px-4 sm:px-10 py-10 sm:py-16 flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-end gap-6">
-          <div className="sm:col-span-7">
-            <div className="mono text-[10px] uppercase tracking-[0.14em] mb-4" style={{ color: "var(--t3)" }}>
-              upgrade
-            </div>
-            <h1 className="display text-[36px] sm:text-[56px] font-semibold tracking-tight leading-[0.95]" style={{ color: "var(--t1)" }}>
-              Start free.
-              <br />
-              <span style={{ color: "var(--t3)" }}>Pay when it saves you a month of work.</span>
-            </h1>
-            <p className="mt-6 max-w-130 text-[14px] sm:text-[15px] leading-[1.6]" style={{ color: "var(--t2)" }}>
-              Validate ideas with real signals from Reddit, GitHub, HN, Dev.to, and more.{" "}
-              <span style={{ color: "var(--t3)" }}>Cancel anytime — really.</span>
-            </p>
-          </div>
-          {/* Billing toggle — pill buttons */}
-          <div className="sm:col-span-5 flex sm:justify-end items-center gap-2">
-            <div className="flex rounded-md border overflow-hidden" style={{ borderColor: "var(--border)" }} role="group" aria-label="Billing interval">
-              <button
-                onClick={() => setBilling("month")}
-                className="mono text-[11px] px-4 h-9 transition-colors"
-                style={billing === "month"
-                  ? { background: "var(--accent)", color: "var(--accent-fg)" }
-                  : { background: "var(--surface)", color: "var(--t2)" }}
-                aria-pressed={billing === "month"}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setBilling("year")}
-                className="mono text-[11px] px-4 h-9 transition-colors"
-                style={billing === "year"
-                  ? { background: "var(--accent)", color: "var(--accent-fg)" }
-                  : { background: "var(--surface)", color: "var(--t2)" }}
-                aria-pressed={billing === "year"}
-              >
-                Annual
-              </button>
-            </div>
-            <span className="mono text-[10px] tnum" style={{ color: "var(--accent)" }}>save ~20%</span>
-          </div>
-        </div>
+      {/* Masthead strip */}
+      <div
+        className="mono"
+        style={{
+          background: "var(--ink)",
+          color: "var(--bg)",
+          padding: "8px 60px",
+          fontSize: "8px",
+          letterSpacing: "0.22em",
+          textTransform: "uppercase",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span>PledgeOFF Bulletin · Pricing</span>
+        <span style={{ color: "rgba(243,239,227,0.35)" }}>Straightforward plans · no long-term commitment</span>
       </div>
 
-      <div className="max-w-360 mx-auto px-4 sm:px-10 py-8 sm:py-12">
-        {/* Plans — 4 columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 border rounded-md overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="w-page" style={{ paddingTop: "52px", paddingBottom: "20px" }}>
+        <span className="eye">Pricing</span>
+        <h1 className="mkt-h2" style={{ marginBottom: "8px" }}>Straightforward plans.</h1>
+        <p className="mkt-lead" style={{ marginBottom: "28px" }}>
+          Start free. Upgrade when you need more. No long-term commitment.
+        </p>
 
+        {/* Annual toggle */}
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "32px" }}>
+          <div
+            className="ann-tog"
+            onClick={() => setAnnual(!annual)}
+            role="switch"
+            aria-checked={annual}
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" || e.key === " " ? setAnnual(!annual) : undefined}
+          >
+            <span className={`ann-tog-lbl${!annual ? " on" : ""}`}>Monthly</span>
+            <div className={`ann-track${annual ? " on" : ""}`}><div className="ann-thumb" /></div>
+            <span className={`ann-tog-lbl${annual ? " on" : ""}`}>
+              Annual <span style={{ color: "var(--go)", marginLeft: "4px" }}>−20%</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Main 3 tiers: Free · Founder · Team */}
+        <div className="plan-row">
           {/* Free */}
-          <div className="p-6 border-b sm:border-b-0 sm:border-r flex flex-col" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-            <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>Free</div>
-            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>before you commit</div>
-            <div className="display text-[42px] tnum font-semibold mb-0.5 leading-none" style={{ color: "var(--t1)" }}>€0</div>
-            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>forever</div>
-            <Link
-              href="/login"
-              className="w-full h-10 flex items-center justify-center rounded-md border text-[13px] transition-colors mb-5"
-              style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-            >
-              Get started
-            </Link>
-            <ul className="space-y-2 flex-1">
-              {[
-                "1 validation / month",
-                "Reddit · GitHub signals",
-                "ICP Analysis (limited)",
-                "7-day idea history",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--t3)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f}</span>
-                </li>
-              ))}
-              <li className="flex items-start gap-2">
-                <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
-                <span className="text-[12px]" style={{ color: "var(--t3)" }}>Intelligence tools <span className="mono text-[10px]">Founder+</span></span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
-                <span className="text-[12px]" style={{ color: "var(--t3)" }}>PDF / JSON export <span className="mono text-[10px]">Founder+</span></span>
-              </li>
-            </ul>
-            <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
-              <p className="text-[11px] leading-[1.55]" style={{ color: "var(--t3)" }}>
-                Hit your free validation?{" "}
-                <span style={{ color: "var(--t2)" }}>You&apos;re building seriously.</span>
-              </p>
-              <a
-                href="#founder"
-                className="mono text-[10px] mt-1 inline-block transition-opacity hover:opacity-70"
-                style={{ color: "var(--accent)" }}
-              >
-                Upgrade to Founder →
-              </a>
+          <div className="plan-c">
+            <div className="plan-hd">
+              <div className="plan-nm">Free</div>
+              <div className="plan-desc">Try before you commit.</div>
+              <div className="plan-pr"><span className="plan-amt">€0</span></div>
+              <div className="plan-annual-note">&nbsp;</div>
+            </div>
+            <div className="plan-features">
+              <div className="pf yes">1 validation per month</div>
+              <div className="pf yes">Full verdict — GO / PIVOT / KILL</div>
+              <div className="pf yes">4 scored dimensions</div>
+              <div className="pf yes">Reddit · GitHub signals</div>
+              <div className="pf no">Intelligence tools</div>
+              <div className="pf no">Otto co-pilot</div>
+              <div className="pf no">API access</div>
+            </div>
+            <div className="plan-foot">
+              <Link href="/login" className="btn-g" style={{ width: "100%", justifyContent: "center" }}>
+                Start free
+              </Link>
             </div>
           </div>
 
           {/* Founder */}
-          <div id="founder" className="p-6 border-b sm:border-b-0 sm:border-r relative flex flex-col" style={{ borderColor: "var(--border)", background: "var(--canvas)" }}>
-            <div className="absolute top-0 left-0 right-0 h-0.5" style={{ background: "var(--accent)" }} />
-            <div className="flex items-baseline justify-between mb-1">
-              <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Founder</div>
-              <span className="mono text-[10px]" style={{ color: "var(--accent)" }}>
-                {popularPlan === "founder" ? "● most popular" : "● best value"}
-              </span>
+          <div className={`plan-c${popularPlan === "founder" || !popularPlan ? " feat" : ""}`}>
+            <div className="plan-hd">
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+                <div className="plan-nm">Founder</div>
+                <span className="mono" style={{ fontSize: "8.5px", color: "var(--go)" }}>
+                  {popularPlan === "founder" ? "● most popular" : "● best value"}
+                </span>
+              </div>
+              <div className="plan-desc">For solo founders and individuals.</div>
+              <div className="plan-pr">
+                <span className="plan-amt">€{founderPrice}</span>
+                <span className="plan-per">&nbsp;/&nbsp;mo</span>
+              </div>
+              <div className="plan-annual-note">{founderNote || " "}</div>
             </div>
-            <div className="text-[12px] mb-4" style={{ color: "var(--t3)" }}>solo builder</div>
-            <div className="flex items-baseline gap-1">
-              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{founderPrice}</span>
+            <div className="plan-features">
+              <div className="pf yes">20 validations / month</div>
+              <div className="pf yes">All 5 signal sources</div>
+              <div className="pf yes">5 of 6 intelligence tools</div>
+              <div className="pf yes">15 Otto questions / mo</div>
+              <div className="pf yes">1-year history · PDF + JSON export</div>
+              <div className="pf yes">Outgoing webhooks · 24h SLA</div>
+              <div className="pf no">GTM Brief <span className="mono" style={{ fontSize: "8px" }}>Team+</span></div>
             </div>
-            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{founderSub}</div>
-            <div className="mb-5">
-              <UpgradeButton priceId={founderPriceId} label="Upgrade to Founder" primary />
-              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
+            <div className="plan-foot">
+              <UpgradeButton priceId={founderPriceId} label="Start Founder" primary />
+              <p className="mono" style={{ fontSize: "8px", marginTop: "6px", color: "var(--faint)" }}>
+                cancel anytime · 7-day refund
+              </p>
             </div>
-            <div className="mono text-[10px] mb-2" style={{ color: "var(--t3)" }}>Everything in Free, plus:</div>
-            <ul className="space-y-2 flex-1">
-              {([
-                { label: "20 validations / month" },
-                { label: "All 5 signal sources" },
-                { label: "5 of 6 intelligence tools" },
-                { label: "15 Otto questions / mo" },
-                { label: "1-year history · PDF + JSON export" },
-                { label: "Outgoing webhooks · 24h SLA" },
-              ] as { label: string; soon?: boolean }[]).map((f) => (
-                <li key={f.label} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f.label}{f.soon && <SoonBadge />}</span>
-                </li>
-              ))}
-              <li className="flex items-start gap-2">
-                <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--border)" }}>—</span>
-                <span className="text-[12px]" style={{ color: "var(--t3)" }}>GTM Brief <span className="mono text-[10px]">Team+</span></span>
-              </li>
-            </ul>
           </div>
 
           {/* Team */}
-          <div className="p-6 border-b sm:border-b-0 sm:border-r flex flex-col" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-            <div className="flex items-baseline justify-between">
-              <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Team</div>
-              {popularPlan === "team" && (
-                <span className="mono text-[10px]" style={{ color: "var(--validated)" }}>● most popular</span>
-              )}
+          <div className={`plan-c${popularPlan === "team" ? " feat" : ""}`}>
+            <div className="plan-hd">
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+                <div className="plan-nm">Team</div>
+                {popularPlan === "team" && (
+                  <span className="mono" style={{ fontSize: "8.5px", color: "var(--go)" }}>● most popular</span>
+                )}
+              </div>
+              <div className="plan-desc">For small teams validating together.</div>
+              <div className="plan-pr">
+                <span className="plan-amt">€{teamPrice}</span>
+                <span className="plan-per">&nbsp;/&nbsp;mo</span>
+              </div>
+              <div className="plan-annual-note">{teamNote || " "}</div>
             </div>
-            <div className="text-[12px] mb-4 mt-1" style={{ color: "var(--t3)" }}>for teams that ship fast</div>
-            <div className="flex items-baseline gap-1">
-              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{teamPrice}</span>
+            <div className="plan-features">
+              <div className="pf yes">60 validations / month</div>
+              <div className="pf yes">All 6 intelligence tools</div>
+              <div className="pf yes">45 Otto questions / mo</div>
+              <div className="pf yes">3 team seats · add more at €{PRICING.seats.extraEurPerMonth}/seat</div>
+              <div className="pf yes">Shared team library · early access</div>
+              <div className="pf yes">API access · Signal Feed</div>
+              <div className="pf yes">Validation + Otto Packs</div>
             </div>
-            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{teamSub}</div>
-            <div className="mb-5">
-              <UpgradeButton priceId={teamPriceId} label="Upgrade to Team" primary />
-              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
+            <div className="plan-foot">
+              <UpgradeButton priceId={teamPriceId} label="Start Team" primary />
+              <p className="mono" style={{ fontSize: "8px", marginTop: "6px", color: "var(--faint)" }}>
+                cancel anytime · 7-day refund
+              </p>
             </div>
-            <div className="mono text-[10px] mb-2" style={{ color: "var(--t3)" }}>Everything in Founder, plus:</div>
-            <ul className="space-y-2 flex-1">
-              {([
-                { label: "60 validations / month" },
-                { label: "GTM Brief (6th intelligence tool)" },
-                { label: "3 seats · 45 Otto questions / mo" },
-                { label: "Unlimited idea history" },
-                { label: "API access · Signal Feed" },
-                { label: "Early access to features" },
-              ] as { label: string; soon?: boolean }[]).map((f) => (
-                <li key={f.label} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t1)" }}>{f.label}{f.soon && <SoonBadge />}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Studio */}
-          <div className="p-6 flex flex-col" style={{ background: "var(--canvas)" }}>
-            <div className="flex items-baseline justify-between">
-              <div className="display text-[18px] font-semibold" style={{ color: "var(--t1)" }}>Studio</div>
-              {popularPlan === "studio" && (
-                <span className="mono text-[10px]" style={{ color: "var(--t2)" }}>● most popular</span>
-              )}
-            </div>
-            <div className="text-[12px] mb-4 mt-1" style={{ color: "var(--t3)" }}>agencies & studios</div>
-            <div className="flex items-baseline gap-1">
-              <span className="display text-[42px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>€{studioPrice}</span>
-            </div>
-            <div className="mono text-[11px] mb-5" style={{ color: "var(--t3)" }}>{studioSub}</div>
-            <div className="mb-5">
-              <UpgradeButton priceId={studioPriceId} label="Upgrade to Studio" />
-              <div className="mono text-[10px] mt-2 text-center" style={{ color: "var(--t3)" }}>cancel anytime · 7-day refund</div>
-            </div>
-            <div className="mono text-[10px] mb-2" style={{ color: "var(--t3)" }}>Everything in Team, plus:</div>
-            <ul className="space-y-2 flex-1">
-              {([
-                { label: "100 validations / month" },
-                { label: "All 5 sources + custom" },
-                { label: "8 seats · 120 Otto questions / mo" },
-                { label: "White-label reports", soon: true },
-                { label: "Activity log · NET30 invoicing" },
-                { label: "4h dedicated SLA" },
-              ] as { label: string; soon?: boolean }[]).map((f) => (
-                <li key={f.label} className="flex items-start gap-2">
-                  <span className="mono text-[11px] mt-0.5 shrink-0" style={{ color: "var(--validated)" }}>✓</span>
-                  <span className="text-[12px]" style={{ color: "var(--t2)" }}>{f.label}{f.soon && <SoonBadge />}</span>
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
 
-        {/* Enterprise nudge */}
-        <div
-          className="mt-4 border rounded-md px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-        >
-          <div>
-            <span className="text-[13px] text-(--t1)">Need custom signal sources, SSO, DPA, or invoice billing?</span>
-            <span className="text-[12px] ml-2" style={{ color: "var(--t3)" }}>10+ seats · annual contract</span>
+        {/* Studio + Enterprise — 2-col */}
+        <div className="plan-row-2">
+          {/* Studio */}
+          <div className={`plan-c${popularPlan === "studio" ? " feat" : ""}`}>
+            <div className="plan-hd">
+              <div className="plan-nm">Studio</div>
+              <div className="plan-desc">For agencies and power users.</div>
+              <div className="plan-pr">
+                <span className="plan-amt">€{studioPrice}</span>
+                <span className="plan-per">&nbsp;/&nbsp;mo</span>
+              </div>
+              <div className="plan-annual-note">{studioNote || " "}</div>
+            </div>
+            <div className="plan-features" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+              <div className="pf yes">100 validations / month</div>
+              <div className="pf yes">All tools · 120 Otto questions</div>
+              <div className="pf yes">8 team seats</div>
+              <div className="pf yes">All 5 sources + custom</div>
+              <div className="pf yes">Audit log · NET30 invoicing</div>
+              <div className="pf yes">4h dedicated SLA</div>
+            </div>
+            <div className="plan-foot">
+              <UpgradeButton priceId={studioPriceId} label="Start Studio" />
+            </div>
           </div>
-          <a
-            href="/enterprise"
-            className="mono text-[11px] px-4 h-10 rounded-md border inline-flex items-center shrink-0 transition-colors"
-            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-          >
-            Enterprise →
-          </a>
+
+          {/* Enterprise */}
+          <div className="plan-c">
+            <div className="plan-hd">
+              <div className="plan-nm">Enterprise</div>
+              <div className="plan-desc">Custom limits, SSO, and a dedicated account manager.</div>
+              <div className="plan-pr">
+                <span className="plan-amt" style={{ fontSize: "22px" }}>Custom pricing</span>
+              </div>
+              <div className="plan-annual-note">&nbsp;</div>
+            </div>
+            <div className="plan-features" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+              <div className="pf yes">Everything in Studio</div>
+              <div className="pf yes">SSO / SAML (coming)</div>
+              <div className="pf yes">Domain allowlist</div>
+              <div className="pf yes">SLA guarantee</div>
+              <div className="pf yes">Custom contract · DPA</div>
+              <div className="pf yes">Dedicated support</div>
+            </div>
+            <div className="plan-foot">
+              <Link href="/enterprise" className="btn-g" style={{ width: "100%", justifyContent: "center" }}>
+                Talk to sales
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* Validation Packs */}
-        <div className="mt-8">
-          <div className="flex items-baseline gap-3 mb-1">
-            <h2 className="display text-[18px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
-              Validation Packs
-            </h2>
-            <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>Founder+ · never expire</span>
+        <div className="sec">
+          <div className="sec-hd">
+            Validation Packs
+            <span className="r">Never expire · Founder+</span>
           </div>
-          <p className="text-[13px] mb-4" style={{ color: "var(--t2)" }}>
-            Need more validations this month? Top up — credits stack with your plan quota.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            {PRICING.validationPacks.packs.map((pack) => (
-              <div
-                key={pack.count}
-                className="border rounded-md px-5 py-4 flex items-center justify-between"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-              >
-                <div>
-                  <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>
-                    {pack.label}
-                    <span className="mono text-[11px] font-normal ml-2" style={{ color: "var(--t3)" }}>
-                      {pack.count} validations
-                    </span>
-                  </div>
+          <div className="sec-bd">
+            <p style={{ fontSize: "13.5px", color: "var(--dim)", marginBottom: 0 }}>
+              Top up beyond your monthly allocation. Packs stack with included validations and carry forward indefinitely.
+            </p>
+            <div className="pack-grid">
+              {PRICING.validationPacks.packs.map((pack) => (
+                <div key={pack.count} className="pack-c">
+                  <div className="pack-nm">{pack.label}</div>
+                  <div className="pack-qty">{pack.count} validations</div>
+                  <div className="pack-pr">€{pack.eur}</div>
+                  <div className="pack-per">€{(pack.eur / pack.count).toFixed(2)} each</div>
                 </div>
-                <div className="display text-[22px] tnum font-semibold shrink-0" style={{ color: "var(--t1)" }}>
-                  €{pack.eur}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <p className="mono" style={{ fontSize: "8px", marginTop: "8px", color: "var(--faint)" }}>
+              Purchase from Settings → Billing · one-time · no subscription
+            </p>
           </div>
-          <p className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
-            Purchase from Settings → Billing · one-time · no subscription
-          </p>
         </div>
 
         {/* Otto Packs */}
-        <div className="mt-8">
-          <div className="flex items-baseline gap-3 mb-1">
-            <h2 className="display text-[18px] font-semibold tracking-tight" style={{ color: "var(--t1)" }}>
-              Otto Packs
-            </h2>
-            <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>Founder+ · never expire</span>
+        <div className="sec">
+          <div className="sec-hd">
+            Otto Packs
+            <span className="r">Never expire · Founder+</span>
           </div>
-          <p className="text-[13px] mb-4" style={{ color: "var(--t2)" }}>
-            Need more Otto questions this month? Top up — credits stack with your plan quota.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            {PRICING.otto.packs.map((pack) => (
-              <div
-                key={pack.count}
-                className="border rounded-md px-5 py-4 flex items-center justify-between"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-              >
-                <div>
-                  <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>
-                    <span className="mono text-[11px] font-normal" style={{ color: "var(--t3)" }}>
-                      {pack.count} questions
-                    </span>
-                  </div>
+          <div className="sec-bd">
+            <p style={{ fontSize: "13.5px", color: "var(--dim)", marginBottom: 0 }}>
+              Need more Otto questions? Top up — credits stack with your plan quota.
+            </p>
+            <div className="pack-grid">
+              {PRICING.otto.packs.map((pack) => (
+                <div key={pack.count} className="pack-c">
+                  <div className="pack-nm">{pack.count} questions</div>
+                  <div className="pack-pr">€{pack.eur}</div>
                 </div>
-                <div className="display text-[22px] tnum font-semibold shrink-0" style={{ color: "var(--t1)" }}>
-                  €{pack.eur}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            <p className="mono" style={{ fontSize: "8px", marginTop: "8px", color: "var(--faint)" }}>
+              Purchase from Settings → Billing · one-time · no subscription
+            </p>
           </div>
-          <p className="mono text-[10px] mt-2" style={{ color: "var(--t3)" }}>
-            Purchase from Settings → Billing · one-time · no subscription
-          </p>
         </div>
 
-        {/* VAT footnote */}
-        <p className="mono text-[10px] mt-4 text-center" style={{ color: "var(--t3)" }}>
+        <p className="mono" style={{ fontSize: "9px", marginTop: "8px", marginBottom: "40px", color: "var(--faint)" }}>
           All prices in EUR · excl. VAT where applicable
         </p>
 
         {/* Feature comparison table */}
-        <div className="mt-12 sm:mt-16">
-          <h2 className="display text-[24px] sm:text-[28px] font-semibold tracking-tight mb-2" style={{ color: "var(--t1)" }}>
-            What&apos;s actually included.
+        <div style={{ marginTop: "24px" }}>
+          <span className="eye" style={{ marginBottom: "8px" }}>What&apos;s included</span>
+          <h2 className="mkt-h2" style={{ fontSize: "clamp(20px,3vw,32px)", marginBottom: "6px" }}>
+            Specific features, not &ldquo;Full access&rdquo;.
           </h2>
-          <p className="text-[13px] mb-6 sm:mb-8" style={{ color: "var(--t2)" }}>
-            Specific features, not &ldquo;Limited&rdquo; vs &ldquo;Full access&rdquo;.
+          <p style={{ fontSize: "13px", marginBottom: "24px", color: "var(--dim)" }}>
+            Every row, every plan.
           </p>
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <div className="border rounded-md overflow-hidden min-w-160 mx-4 sm:mx-0" style={{ borderColor: "var(--border)" }}>
-              {/* Column headers */}
+          <div style={{ overflowX: "auto", margin: "0 -24px" }}>
+            <div className="sec" style={{ minWidth: "640px", margin: "0 24px" }}>
+              {/* Header */}
               <div
-                className="grid grid-cols-12 gap-3 px-6 py-3 mono text-[10px] uppercase tracking-[0.14em] border-b"
-                style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--t3)" }}
+                className="mono"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 80px 80px 80px 80px",
+                  gap: "8px",
+                  padding: "9px 16px",
+                  fontSize: "8.5px",
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  background: "var(--surface-2)",
+                  borderBottom: "1px solid var(--line)",
+                  color: "var(--faint)",
+                }}
               >
-                <div className="col-span-4">Feature</div>
-                <div className="col-span-2">Free</div>
-                <div className="col-span-2" style={{ color: "var(--accent)" }}>Founder</div>
-                <div className="col-span-2">Team</div>
-                <div className="col-span-2">Studio</div>
+                <div>Feature</div>
+                <div>Free</div>
+                <div style={{ color: "var(--go)" }}>Founder</div>
+                <div>Team</div>
+                <div>Studio</div>
               </div>
               {FEATURES.map((g) => (
                 <div key={g.group}>
                   <div
-                    className="px-6 py-2.5 mono text-[10px] uppercase tracking-[0.14em] border-b"
-                    style={{ borderColor: "var(--border)", color: "var(--t2)", background: "var(--surface)" }}
+                    className="mono"
+                    style={{
+                      padding: "7px 16px",
+                      fontSize: "8.5px",
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      background: "var(--surface)",
+                      borderBottom: "1px solid var(--line)",
+                      color: "var(--dim)",
+                    }}
                   >
                     {g.group}
                   </div>
                   {g.rows.map((r) => (
-                    <div key={r.k} className="grid grid-cols-12 gap-3 px-6 py-3 border-b items-center" style={{ borderColor: "var(--border)" }}>
-                      <div className="col-span-4 text-[13px]" style={{ color: "var(--t1)" }}>
+                    <div
+                      key={r.k}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 80px 80px 80px 80px",
+                        gap: "8px",
+                        padding: "9px 16px",
+                        borderBottom: "1px solid var(--line-soft)",
+                        alignItems: "center",
+                      }}
+                    >
+                      <div style={{ fontSize: "12px", color: "var(--ink)" }}>
                         {r.k}{r.soon && <SoonBadge />}
                       </div>
-                      <div className="col-span-2">{renderCell(r.f)}</div>
-                      <div className="col-span-2">{renderCell(r.fo, true)}</div>
-                      <div className="col-span-2">{renderCell(r.t)}</div>
-                      <div className="col-span-2">{renderCell(r.s)}</div>
+                      <div>{renderCell(r.f)}</div>
+                      <div>{renderCell(r.fo, true)}</div>
+                      <div>{renderCell(r.t)}</div>
+                      <div>{renderCell(r.s, false, r.soon)}</div>
                     </div>
                   ))}
                 </div>
@@ -619,88 +554,29 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
         <ROICalculator />
 
         {/* FAQ */}
-        <div className="mt-16">
-          <h2 className="display text-[28px] font-semibold tracking-tight mb-2" style={{ color: "var(--t1)" }}>
-            Real questions.
-          </h2>
-          <p className="text-[13px] mb-6" style={{ color: "var(--t2)" }}>
-            If something&apos;s missing, email us. No bots, no tickets.
-          </p>
+        <div style={{ marginTop: "48px", marginBottom: "52px" }}>
+          <span className="eye" style={{ marginBottom: "16px" }}>Frequently asked</span>
           <div>
             {FAQ.map((f) => (
               <FAQItem key={f.q} {...f} />
             ))}
           </div>
         </div>
+      </div>
 
-        {/* Final CTA */}
-        <div
-          className="mt-16 mb-10 border-t pt-10"
-          style={{ borderColor: "var(--border)" }}
-        >
-          <div className="display text-[28px] font-semibold tracking-tight mb-1" style={{ color: "var(--t1)" }}>
-            Ready when you are.
+      {/* CTA band */}
+      <div className="cta-band">
+        <div style={{ maxWidth: "820px", margin: "0 auto" }}>
+          <span className="cta-eye">No long-term commitment</span>
+          <h2 className="cta-h">Start with one free validation.</h2>
+          <p className="cta-sub">See a GO, PIVOT, or KILL verdict on your own idea before paying anything.</p>
+          <div className="btns">
+            <Link href="/login" className="btn-inv">Create free account →</Link>
           </div>
-          <div className="mono text-[11px] mb-8" style={{ color: "var(--t3)" }}>
-            still on Free?{" "}
-            <Link href="/dashboard" className="transition-colors" style={{ color: "var(--t1)" }}>
-              back to dashboard →
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Founder mini-card */}
-            <div
-              className="relative rounded-md p-5 flex flex-col gap-3"
-              style={{ background: "var(--surface)", border: "1px solid var(--accent)" }}
-            >
-              <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-md" style={{ background: "var(--accent)" }} />
-              <div>
-                <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>Founder</div>
-                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>solo builder</div>
-              </div>
-              <div className="display text-[28px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>
-                €{founderPrice}<span className="text-[13px] font-normal ml-1" style={{ color: "var(--t3)" }}>/mo</span>
-              </div>
-              <UpgradeButton priceId={founderPriceId} label="Upgrade to Founder →" primary />
-            </div>
-
-            {/* Team mini-card */}
-            <div
-              className="rounded-md p-5 flex flex-col gap-3"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-            >
-              <div>
-                <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>Team</div>
-                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>for teams that ship fast</div>
-              </div>
-              <div className="display text-[28px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>
-                €{teamPrice}<span className="text-[13px] font-normal ml-1" style={{ color: "var(--t3)" }}>/mo</span>
-              </div>
-              <UpgradeButton priceId={teamPriceId} label="Upgrade to Team →" />
-            </div>
-
-            {/* Studio mini-card */}
-            <div
-              className="rounded-md p-5 flex flex-col gap-3"
-              style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
-            >
-              <div>
-                <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>Studio</div>
-                <div className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>agencies &amp; studios</div>
-              </div>
-              <div className="display text-[28px] tnum font-semibold leading-none" style={{ color: "var(--t1)" }}>
-                €{studioPrice}<span className="text-[13px] font-normal ml-1" style={{ color: "var(--t3)" }}>/mo</span>
-              </div>
-              <UpgradeButton priceId={studioPriceId} label="Upgrade to Studio →" />
-            </div>
-          </div>
-
-          <div className="mono text-[10px] mt-4" style={{ color: "var(--t3)" }}>
-            cancel anytime · 7-day refund on first payment
-          </div>
+          <p className="cta-note">Free forever · No card · Upgrade when ready</p>
         </div>
       </div>
+
       <Footer />
     </div>
   );

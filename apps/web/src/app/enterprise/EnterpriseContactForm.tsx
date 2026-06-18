@@ -6,8 +6,10 @@ type Status = "idle" | "loading" | "success" | "error";
 
 export function EnterpriseContactForm() {
   const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
   const [email, setEmail] = useState("");
   const [companySize, setCompanySize] = useState("");
+  const [message, setMessage] = useState("");
   const [status, setStatus] = useState<Status>("idle");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -19,11 +21,7 @@ export function EnterpriseContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, companySize }),
       });
-      if (res.ok) {
-        setStatus("success");
-      } else {
-        setStatus("error");
-      }
+      setStatus(res.ok ? "success" : "error");
     } catch {
       setStatus("error");
     }
@@ -31,100 +29,67 @@ export function EnterpriseContactForm() {
 
   if (status === "success") {
     return (
-      <div
-        className="border rounded-md p-8 text-center"
-        style={{ borderColor: "color-mix(in srgb, var(--validated) 30%, transparent)", background: "color-mix(in srgb, var(--validated) 5%, transparent)" }}
-      >
-        <div className="display text-[18px] font-semibold mb-2" style={{ color: "var(--validated)" }}>
+      <div style={{ padding: "32px", textAlign: "center", border: "1px solid var(--go-line)", background: "var(--go-light)" }}>
+        <div className="display" style={{ fontSize: "18px", fontWeight: 700, color: "var(--go)", marginBottom: "6px" }}>
           Message sent.
         </div>
-        <p className="text-[13px]" style={{ color: "var(--t2)" }}>
-          We&apos;ll get back to you within 4 hours, weekdays.
+        <p className="mono" style={{ fontSize: "12px", color: "var(--dim)" }}>
+          We&apos;ll get back to you within one business day.
         </p>
       </div>
     );
   }
 
   return (
-    <form
-      id="contact"
-      onSubmit={handleSubmit}
-      className="border rounded-md p-6 sm:p-8 flex flex-col gap-4"
-      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-    >
-      <div className="display text-[18px] font-semibold mb-1" style={{ color: "var(--t1)" }}>
-        Get in touch
+    <form id="contact" onSubmit={handleSubmit}>
+      <div className="fg2">
+        <div className="fg">
+          <label className="flbl" htmlFor="e-nm">Full name</label>
+          <input id="e-nm" type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" className="finp" />
+        </div>
+        <div className="fg">
+          <label className="flbl" htmlFor="e-co">Company</label>
+          <input id="e-co" type="text" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company name" className="finp" />
+        </div>
       </div>
-      <p className="text-[13px] mb-2" style={{ color: "var(--t2)" }}>
-        We respond within 4 hours, weekdays. No sales call if you don&apos;t want one.
-      </p>
-
-      <div className="flex flex-col gap-1">
-        <label className="mono text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>
-          Your name
-        </label>
-        <input
-          type="text"
-          required
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Ada Lovelace"
-          className="h-10 px-3 rounded-md border bg-transparent text-[13px] outline-none focus:border-[var(--accent)] transition-colors"
-          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-          aria-label="Your name"
-        />
+      <div className="fg2">
+        <div className="fg">
+          <label className="flbl" htmlFor="e-em">Work email</label>
+          <input id="e-em" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" className="finp" />
+        </div>
+        <div className="fg">
+          <label className="flbl" htmlFor="e-sz">Team size</label>
+          <select id="e-sz" required value={companySize} onChange={(e) => setCompanySize(e.target.value)} className="finp" style={{ color: companySize ? "var(--ink)" : "var(--faint)" }}>
+            <option value="" disabled>Select size</option>
+            <option value="6-20">6–20 people</option>
+            <option value="21-100">21–100 people</option>
+            <option value="101-500">101–500 people</option>
+            <option value="500+">500+ people</option>
+          </select>
+        </div>
       </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="mono text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>
-          Work email
-        </label>
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="ada@example.com"
-          className="h-10 px-3 rounded-md border bg-transparent text-[13px] outline-none focus:border-[var(--accent)] transition-colors"
-          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-          aria-label="Work email"
-        />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label className="mono text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>
-          Team size
-        </label>
-        <select
-          required
-          value={companySize}
-          onChange={(e) => setCompanySize(e.target.value)}
-          className="h-10 px-3 rounded-md border bg-transparent text-[13px] outline-none focus:border-[var(--accent)] transition-colors"
-          style={{ borderColor: "var(--border)", color: companySize ? "var(--t1)" : "var(--t3)" }}
-          aria-label="Team size"
-        >
-          <option value="" disabled>Select team size</option>
-          <option value="1-10">1–10 people</option>
-          <option value="10-50">10–50 people</option>
-          <option value="50-200">50–200 people</option>
-          <option value="200+">200+ people</option>
-        </select>
+      <div className="fg" style={{ marginBottom: "20px" }}>
+        <label className="flbl" htmlFor="e-msg">What are you validating?</label>
+        <textarea id="e-msg" value={message} onChange={(e) => setMessage(e.target.value)} rows={3} placeholder="Tell us about your use case — types of ideas, frequency, team workflow" className="finp" />
       </div>
 
       {status === "error" && (
-        <p className="mono text-[11px]" style={{ color: "var(--kill)" }}>
-          Something went wrong. Email us directly at contact@pledgeoff.com
+        <p className="mono" style={{ fontSize: "11px", color: "var(--kill)", marginBottom: "12px" }}>
+          Something went wrong. Email us directly at hello@pledgeoff.com
         </p>
       )}
 
       <button
         type="submit"
         disabled={status === "loading"}
-        className="display text-[13px] font-semibold h-10 rounded-md flex items-center justify-center transition-opacity hover:opacity-90 disabled:opacity-60 mt-1"
-        style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+        className="btn-p"
+        style={{ opacity: status === "loading" ? 0.6 : 1 }}
       >
-        {status === "loading" ? "Sending…" : "Send message →"}
+        {status === "loading" ? "Sending…" : "Send to sales team"}
       </button>
+      <p className="mono" style={{ fontSize: "8px", letterSpacing: "0.06em", color: "var(--faint)", marginTop: "12px" }}>
+        We respond within one business day.
+      </p>
     </form>
   );
 }

@@ -31,25 +31,25 @@ const TERMS_TOC = [
 
 export default function TermsPage() {
   return (
-    <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
+    <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
       <PublicNav extraLink={{ href: "/privacy", label: "Privacy" }} />
 
       {/* Heading band — sticky below PreLoginNav */}
       <section
         className="border-b sticky top-12 z-40"
-        style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+        style={{ borderColor: "var(--line)", background: "var(--bg)" }}
       >
         <div className="max-w-275 mx-auto px-8 py-4">
-          <div className="mono text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--faint)" }}>
             LEGAL · DOC_02
           </div>
           <h1
             className="display font-semibold leading-tight"
-            style={{ fontSize: "22px", letterSpacing: "-0.04em", color: "var(--t1)" }}
+            style={{ fontSize: "22px", letterSpacing: "-0.04em", color: "var(--ink)" }}
           >
             Terms of Service
           </h1>
-          <div className="mt-1.5 flex items-center gap-3 mono text-[10px]" style={{ color: "var(--t3)" }}>
+          <div className="mt-1.5 flex items-center gap-3 mono text-[10px]" style={{ color: "var(--faint)" }}>
             <span>UPDATED · MAY 27 2026</span>
             <span>·</span>
             <span>EFFECTIVE · MAY 27 2026</span>
@@ -65,7 +65,7 @@ export default function TermsPage() {
         {/* TOC sidebar */}
         <aside className="w-55 hidden md:block shrink-0">
           <div className="sticky top-36">
-            <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
+            <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--faint)" }}>
               CONTENTS
             </div>
             <LegalTOC items={TERMS_TOC} />
@@ -78,13 +78,13 @@ export default function TermsPage() {
 
           {/* TL;DR */}
           <div
-            className="mb-10 rounded-md border p-5"
-            style={{ borderColor: "var(--accent)", background: "rgba(var(--accent-rgb, 99,102,241),0.06)" }}
+            className="mb-10 border p-5"
+            style={{ borderColor: "var(--go)", background: "var(--go-light)" }}
           >
-            <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{ color: "var(--accent)" }}>
+            <div className="mono text-[10px] uppercase tracking-wider mb-2" style={{ color: "var(--go)" }}>
               In plain English
             </div>
-            <p className="text-[14px] leading-relaxed" style={{ color: "var(--t2)" }}>
+            <p className="text-[14px] leading-relaxed" style={{ color: "var(--dim)" }}>
               Use PledgeOFF to validate ideas. Don&apos;t abuse the platform or use AI verdicts as
               professional advice — they&apos;re signals, not guarantees. We can suspend accounts that
               violate these rules. Cancel anytime from{" "}

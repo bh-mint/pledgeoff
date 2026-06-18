@@ -21,64 +21,42 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <PublicNav />
-      <main className="max-w-360 mx-auto px-4 sm:px-10 py-16 sm:py-24">
-        <div className="max-w-xl">
-          <div
-            className="mono text-[10px] uppercase tracking-[0.12em] mb-3"
-            style={{ color: "var(--t3)" }}
-          >
-            Contact
-          </div>
-          <h1
-            className="display text-[36px] sm:text-[48px] font-semibold tracking-tight mb-4"
-            style={{ color: "var(--t1)", lineHeight: 1.1 }}
-          >
-            Get in touch.
-          </h1>
-          <p className="text-[15px] mb-10" style={{ color: "var(--t2)", lineHeight: 1.6 }}>
-            We reply within 24 hours on weekdays. For enterprise enquiries,{" "}
-            <Link
-              href="/enterprise#contact"
-              className="underline underline-offset-2 hover:opacity-70 transition-opacity"
-              style={{ color: "var(--t1)" }}
-            >
-              use the enterprise form
+      <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
+        <PublicNav />
+        <div className="w-page-xs" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
+          <span className="eye">Contact</span>
+          <h1 className="mkt-h2" style={{ marginBottom: "10px" }}>Get in touch.</h1>
+          <p className="mkt-lead" style={{ marginBottom: "32px" }}>
+            We read everything. We respond to most things. Enterprise inquiries go{" "}
+            <Link href="/enterprise" style={{ color: "var(--ink)", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+              here
             </Link>
             .
           </p>
 
-          <ContactClient />
+          <div className="sec">
+            <div className="sec-hd">Send a message</div>
+            <div className="sec-bd">
+              <ContactClient />
+            </div>
+          </div>
 
-          <div
-            className="mt-10 pt-8 border-t flex flex-col sm:flex-row gap-6"
-            style={{ borderColor: "var(--border)" }}
-          >
+          <div style={{ marginTop: "24px", display: "flex", gap: "24px", flexWrap: "wrap" }}>
             {[
-              { label: "Support", href: "mailto:contact@pledgeoff.com", text: "contact@pledgeoff.com" },
-              { label: "Billing", href: "mailto:billing@pledgeoff.com", text: "billing@pledgeoff.com" },
-              { label: "Press", href: "mailto:contact@pledgeoff.com", text: "contact@pledgeoff.com" },
-            ].map(({ label, href, text }) => (
+              { label: "Email",         text: "hello@pledgeoff.com" },
+              { label: "Response time", text: "1–2 business days" },
+            ].map(({ label, text }) => (
               <div key={label}>
-                <div
-                  className="mono text-[10px] uppercase tracking-[0.12em] mb-1"
-                  style={{ color: "var(--t3)" }}
-                >
+                <div className="mono" style={{ fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--faint)", marginBottom: "4px" }}>
                   {label}
                 </div>
-                <a
-                  href={href}
-                  className="mono text-[12px] underline underline-offset-2 hover:opacity-70 transition-opacity"
-                  style={{ color: "var(--t2)" }}
-                >
-                  {text}
-                </a>
+                <div className="mono" style={{ fontSize: "12px", color: "var(--dim)" }}>{text}</div>
               </div>
             ))}
           </div>
         </div>
-      </main>
-      <Footer />
+        <Footer />
+      </div>
     </>
   );
 }

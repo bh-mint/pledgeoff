@@ -7,8 +7,8 @@ import { PRICING } from "@/lib/pricing.config";
 const COMMISSION_RATE = 0.3;
 const PLANS = [
   { plan: "Founder", monthly: PRICING.founder.monthly.eur },
-  { plan: "Team", monthly: PRICING.team.monthly.eur },
-  { plan: "Studio", monthly: PRICING.studio.monthly.eur },
+  { plan: "Team",    monthly: PRICING.team.monthly.eur },
+  { plan: "Studio",  monthly: PRICING.studio.monthly.eur },
 ] as const;
 
 export const metadata: Metadata = {
@@ -18,8 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://pledgeoff.com/affiliate" },
   openGraph: {
     title: "Affiliate Program — PledgeOFF",
-    description:
-      "Earn 30% recurring commission for every paid user you refer to PledgeOFF. No cap, no expiry.",
+    description: "Earn 30% recurring commission for every paid user you refer to PledgeOFF. No cap, no expiry.",
     url: "https://pledgeoff.com/affiliate",
     type: "website",
   },
@@ -34,240 +33,115 @@ const jsonLd = {
 };
 
 const STEPS = [
-  {
-    step: "01",
-    label: "Apply",
-    desc: "Email us at partnerships@pledgeoff.com. No minimum audience required — we work with newsletters, blogs, YouTube channels, communities, and founders with an email list.",
-  },
-  {
-    step: "02",
-    label: "Get your link",
-    desc: "We generate a unique referral link for you. Share it in your content, emails, or community.",
-  },
-  {
-    step: "03",
-    label: "Earn",
-    desc: "You earn 30% of every payment made by users who signed up through your link. Monthly and annual plans both count. As long as they stay subscribed, you keep earning.",
-  },
-  {
-    step: "04",
-    label: "Get paid",
-    desc: "Payouts processed monthly via Stripe. Minimum threshold: €50. No setup fees, no hidden cuts.",
-  },
+  { step: "01", label: "Apply",          desc: "Email us at partnerships@pledgeoff.com. No minimum audience required — we work with newsletters, blogs, YouTube, communities, and founders with an email list." },
+  { step: "02", label: "Get your link",  desc: "We generate a unique referral link for you. Share it in your content, emails, or community." },
+  { step: "03", label: "Earn",           desc: "You earn 30% of every payment made by users who signed up through your link. Monthly and annual plans both count. As long as they stay subscribed, you keep earning." },
+  { step: "04", label: "Get paid",       desc: "Payouts processed monthly via Stripe. Minimum threshold: €50. No setup fees, no hidden cuts." },
 ];
 
 const FAQ = [
-  {
-    q: "Is there a minimum audience size?",
-    a: "No. We work with anyone who has a relevant audience — whether that's 100 email subscribers or 100,000 Twitter followers.",
-  },
-  {
-    q: "How long does the referral cookie last?",
-    a: "90 days. If someone clicks your link and subscribes within 90 days, the commission is yours.",
-  },
-  {
-    q: "Does the commission apply to all plans?",
-    a: `Yes — Founder (€${PRICING.founder.monthly.eur}/mo), Team (€${PRICING.team.monthly.eur}/mo), and Studio (€${PRICING.studio.monthly.eur}/mo). Annual plans are also included. Enterprise deals are handled separately.`,
-  },
-  {
-    q: "What if a referred user upgrades their plan?",
-    a: "Your commission scales with the plan. If they upgrade from Founder to Team, you earn 30% of the higher amount from the next billing cycle.",
-  },
-  {
-    q: "Can I use PledgeOFF myself and still affiliate?",
-    a: "Yes. Many of our best affiliates are active users who recommend it because they use it.",
-  },
+  { q: "Is there a minimum audience size?",           a: "No. We work with anyone who has a relevant audience — whether that's 100 email subscribers or 100,000 Twitter followers." },
+  { q: "How long does the referral cookie last?",     a: "90 days. If someone clicks your link and subscribes within 90 days, the commission is yours." },
+  { q: "Does the commission apply to all plans?",     a: `Yes — Founder (€${PRICING.founder.monthly.eur}/mo), Team (€${PRICING.team.monthly.eur}/mo), and Studio (€${PRICING.studio.monthly.eur}/mo). Annual plans included. Enterprise handled separately.` },
+  { q: "What if a referred user upgrades?",           a: "Your commission scales with the plan. If they upgrade from Founder to Team, you earn 30% of the higher amount from the next billing cycle." },
+  { q: "Can I use PledgeOFF and still affiliate?",   a: "Yes. Many of our best affiliates are active users who recommend it because they use it." },
 ];
 
 export default function AffiliatePage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
         <PublicNav />
 
-        <main className="max-w-360 mx-auto px-4 sm:px-10 pt-20 pb-32">
-          <div className="max-w-3xl">
-            {/* Label */}
-            <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
-              Affiliate program
-            </div>
+        <div className="w-page-sm" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
+          <span className="eye">Affiliate program</span>
+          <h1 className="mkt-h2" style={{ marginBottom: "10px" }}>Earn 30% recurring commission.</h1>
+          <p className="mkt-lead" style={{ marginBottom: "32px" }}>
+            Refer founders, PMs, and agencies. Every paid user you bring in earns you 30% of their subscription — for as long as they stay. No cap. No expiry.
+          </p>
 
-            <h1
-              className="display font-bold leading-[1.05]"
-              style={{ fontSize: "40px", letterSpacing: "-0.04em", color: "var(--t1)" }}
-            >
-              Earn 30% recurring commission.
-            </h1>
-
-            <p className="mt-6 text-[16px] leading-relaxed" style={{ color: "var(--t2)" }}>
-              Refer founders, PMs, and agencies to PledgeOFF.
-              Every paid user you bring in earns you 30% of their subscription — for as long as they stay.
-              No cap. No expiry.
-            </p>
-
-            {/* Commission cards */}
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {PLANS.map(({ plan, monthly }) => (
-                <div
-                  key={plan}
-                  className="rounded-md border p-4"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-                >
-                  <div className="display font-semibold text-[14px] mb-1" style={{ color: "var(--t1)" }}>
-                    {plan}
+          {/* Commission cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", marginBottom: "32px" }}>
+            {PLANS.map(({ plan, monthly }) => (
+              <div key={plan} className="bc">
+                <div className="bc-hd">{plan} <span className="r">€{monthly}/mo</span></div>
+                <div className="bc-bd">
+                  <div className="display" style={{ fontSize: "22px", fontWeight: 700, color: "var(--go)", lineHeight: 1 }}>
+                    €{(monthly * COMMISSION_RATE).toFixed(2)}
                   </div>
-                  <div className="mono text-[11px] mb-3" style={{ color: "var(--t3)" }}>
-                    €{monthly}/mo
-                  </div>
-                  <div className="text-[13px] font-semibold" style={{ color: "var(--validated)" }}>
-                    €{(monthly * COMMISSION_RATE).toFixed(2)}/mo per user
+                  <div className="mono" style={{ fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--faint)", marginTop: "4px" }}>
+                    per user · per month
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
-            {/* Divider */}
-            <div className="my-12 h-px" style={{ background: "var(--border)" }} />
-
-            {/* How it works */}
-            <h2
-              className="display font-semibold mb-6"
-              style={{ fontSize: "22px", color: "var(--t1)" }}
-            >
-              How it works
-            </h2>
-
-            <div className="space-y-6">
+          {/* How it works */}
+          <div className="sec" style={{ marginBottom: "28px" }}>
+            <div className="sec-hd">How it works</div>
+            <div className="sec-bd" style={{ padding: 0 }}>
               {STEPS.map(({ step, label, desc }) => (
-                <div key={step} className="flex gap-5">
-                  <div className="mono text-[11px] pt-0.5 shrink-0" style={{ color: "var(--t3)" }}>
-                    {step}
-                  </div>
+                <div key={step} className="aff-step" style={{ padding: "16px 22px" }}>
+                  <div className="aff-no">{step}</div>
                   <div>
-                    <div className="display text-[15px] font-semibold mb-1" style={{ color: "var(--t1)" }}>
-                      {label}
-                    </div>
-                    <div className="text-[13px] leading-relaxed" style={{ color: "var(--t2)" }}>
-                      {desc}
-                    </div>
+                    <div className="aff-nm">{label}</div>
+                    <div className="aff-desc">{desc}</div>
                   </div>
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* CTA */}
-            <div className="mt-10">
-              <a
-                href="mailto:partnerships@pledgeoff.com"
-                className="inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-              >
-                Apply to join →
-              </a>
-            </div>
-
-            {/* Divider */}
-            <div className="my-12 h-px" style={{ background: "var(--border)" }} />
-
-            {/* Who it's for */}
-            <h2
-              className="display font-semibold mb-6"
-              style={{ fontSize: "22px", color: "var(--t1)" }}
-            >
-              Who it&apos;s for
-            </h2>
-
-            <div className="space-y-4">
+          {/* Who it's for */}
+          <div className="sec" style={{ marginBottom: "28px" }}>
+            <div className="sec-hd">Who it&apos;s for</div>
+            <div className="sec-bd" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {[
-                { label: "Founder newsletters", desc: "IndieHackers, Substack, Beehiiv writers with an audience of builders." },
+                { label: "Founder newsletters",   desc: "IndieHackers, Substack, Beehiiv writers with an audience of builders." },
                 { label: "Product blogs & YouTube", desc: "Content about product strategy, validation, building SaaS, or founder life." },
-                { label: "Developer communities", desc: "Discord servers, Slack groups, forums where PMs and founders hang out." },
-                { label: "Accelerators & incubators", desc: "You introduce us to your cohort. Every founder they refer earns both of you." },
-                { label: "Consultants & coaches", desc: "If you advise founders on product decisions, PledgeOFF is a natural recommendation." },
+                { label: "Developer communities",  desc: "Discord servers, Slack groups, forums where PMs and founders hang out." },
+                { label: "Accelerators",            desc: "Introduce us to your cohort. Every founder they refer earns both of you." },
+                { label: "Consultants & coaches",  desc: "If you advise founders on product decisions, PledgeOFF is a natural recommendation." },
               ].map(({ label, desc }) => (
-                <div key={label} className="flex gap-4">
-                  <div className="text-[13px] shrink-0 pt-0.5" style={{ color: "var(--t3)" }}>—</div>
-                  <div>
-                    <span className="display text-[13px] font-semibold" style={{ color: "var(--t1)" }}>
-                      {label}
-                      {" "}
-                    </span>
-                    <span className="text-[13px]" style={{ color: "var(--t2)" }}>{desc}</span>
-                  </div>
+                <div key={label} style={{ display: "flex", gap: "12px" }}>
+                  <span className="mono" style={{ fontSize: "11px", color: "var(--faint)", flexShrink: 0, paddingTop: "2px" }}>—</span>
+                  <span style={{ fontSize: "13.5px", color: "var(--dim)" }}>
+                    <strong style={{ color: "var(--ink)" }}>{label}</strong>{" "}{desc}
+                  </span>
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* Divider */}
-            <div className="my-12 h-px" style={{ background: "var(--border)" }} />
-
-            {/* FAQ */}
-            <h2
-              className="display font-semibold mb-6"
-              style={{ fontSize: "22px", color: "var(--t1)" }}
-            >
-              Frequently asked
-            </h2>
-
-            <div className="space-y-6">
+          {/* FAQ */}
+          <div className="sec" style={{ marginBottom: "32px" }}>
+            <div className="sec-hd">Frequently asked</div>
+            <div className="sec-bd" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {FAQ.map(({ q, a }) => (
                 <div key={q}>
-                  <div className="display text-[14px] font-semibold mb-1" style={{ color: "var(--t1)" }}>
-                    {q}
-                  </div>
-                  <div className="text-[13px] leading-relaxed" style={{ color: "var(--t2)" }}>
-                    {a}
-                  </div>
+                  <div className="display" style={{ fontSize: "14px", fontWeight: 700, color: "var(--ink)", marginBottom: "4px" }}>{q}</div>
+                  <div style={{ fontSize: "13px", color: "var(--dim)", lineHeight: 1.75 }}>{a}</div>
                 </div>
               ))}
             </div>
+          </div>
 
-            {/* Divider */}
-            <div className="my-12 h-px" style={{ background: "var(--border)" }} />
-
-            {/* Bottom CTA */}
-            <div
-              className="rounded-md border p-6"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-            >
-              <div className="display font-semibold leading-tight" style={{ fontSize: "20px", color: "var(--t1)" }}>
-                Ready to earn?
-              </div>
-              <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-                Email{" "}
-                <a
-                  href="mailto:partnerships@pledgeoff.com"
-                  className="underline underline-offset-2 hover:opacity-70"
-                  style={{ color: "var(--t1)" }}
-                >
-                  partnerships@pledgeoff.com
-                </a>{" "}
-                with a short description of your audience.
-                We review every application and respond within 2 business days.
+          {/* Bottom CTA */}
+          <div className="bc">
+            <div className="bc-hd">Ready to earn? <span className="r">partnerships@pledgeoff.com</span></div>
+            <div className="bc-bd">
+              <p style={{ fontSize: "13.5px", color: "var(--dim)", lineHeight: 1.75, marginBottom: "16px" }}>
+                Email us with a short description of your audience. We review every application and respond within 2 business days.
               </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <a
-                  href="mailto:partnerships@pledgeoff.com"
-                  className="inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-                  style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-                >
-                  Apply now →
-                </a>
-                <Link
-                  href="/pricing"
-                  className="inline-flex items-center gap-2 h-10 px-4 rounded-md display text-[13px] font-medium transition-opacity hover:opacity-80 border"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--t1)" }}
-                >
-                  See pricing
-                </Link>
+              <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                <a href="mailto:partnerships@pledgeoff.com" className="btn-p">Apply now →</a>
+                <Link href="/pricing" className="btn-g">See pricing</Link>
               </div>
             </div>
           </div>
-        </main>
+        </div>
 
         <Footer />
       </div>

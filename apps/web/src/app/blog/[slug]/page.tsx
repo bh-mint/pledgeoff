@@ -61,7 +61,7 @@ const TAG_LABELS: Record<string, string> = {
 
 const TAG_COLORS: Record<string, string> = {
   "idea-validation": "var(--validated)",
-  "product-decisions": "var(--accent)",
+  "product-decisions": "var(--go)",
   "founder": "var(--caution)",
 };
 
@@ -123,21 +123,21 @@ export default async function ArticlePage({ params }: Props) {
       <ReadingProgress />
       <ArticleViewTracker slug={slug} tag={article.tag} />
 
-      <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
+      <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
         <PublicNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
         {/* Article */}
         <article className="max-w-2xl mx-auto px-6 pt-16 pb-24">
 
           {/* Category */}
-          <div className="mono text-[10px] uppercase tracking-wider" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[10px] uppercase tracking-wider" style={{ color: "var(--faint)" }}>
             {TAG_LABELS[article.tag] ?? article.tag}
           </div>
 
           {/* Title */}
           <h1
             className="display font-bold mt-3 leading-[1.05]"
-            style={{ fontSize: "40px", letterSpacing: "-0.04em", color: "var(--t1)" }}
+            style={{ fontSize: "40px", letterSpacing: "-0.04em", color: "var(--ink)" }}
           >
             {article.title}
           </h1>
@@ -145,11 +145,11 @@ export default async function ArticlePage({ params }: Props) {
           {/* Meta row */}
           <div
             className="mt-6 pb-6 flex items-center gap-3 mono text-[11px] flex-wrap"
-            style={{ color: "var(--t3)", borderBottom: "1px solid var(--border)" }}
+            style={{ color: "var(--faint)", borderBottom: "1px solid var(--line)" }}
           >
             <span>{formatDate(article.publishedAt).toUpperCase()}</span>
             <span>·</span>
-            <span style={{ color: "var(--t2)" }}>PledgeOFF</span>
+            <span style={{ color: "var(--dim)" }}>PledgeOFF</span>
             <span>·</span>
             <span>{article.readingTime} min read</span>
             {article.affiliateDisclosure && (
@@ -160,10 +160,10 @@ export default async function ArticlePage({ params }: Props) {
             )}
             <span className="ml-auto inline-flex items-center gap-1.5">
               <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ background: TAG_COLORS[article.tag] ?? "var(--t3)" }}
+                className="w-1.5 h-1.5"
+                style={{ background: TAG_COLORS[article.tag] ?? "var(--faint)" }}
               />
-              <span style={{ color: TAG_COLORS[article.tag] ?? "var(--t3)" }}>
+              <span style={{ color: TAG_COLORS[article.tag] ?? "var(--faint)" }}>
                 {TAG_LABELS[article.tag] ?? article.tag}
               </span>
             </span>
@@ -187,9 +187,9 @@ export default async function ArticlePage({ params }: Props) {
 
           {/* Affiliate disclosure */}
           {article.affiliateDisclosure && (
-            <div className="mt-12 pt-6" style={{ borderTop: "1px solid var(--border)" }}>
-              <p className="mono text-[11px] leading-relaxed" style={{ color: "var(--t3)" }}>
-                <strong style={{ color: "var(--t2)" }}>Affiliate disclosure:</strong>{" "}
+            <div className="mt-12 pt-6" style={{ borderTop: "1px solid var(--line)" }}>
+              <p className="mono text-[11px] leading-relaxed" style={{ color: "var(--faint)" }}>
+                <strong style={{ color: "var(--dim)" }}>Affiliate disclosure:</strong>{" "}
                 This article contains affiliate links marked with rel=&quot;nofollow sponsored&quot;. If you
                 purchase through them, we may earn a commission at no extra cost to you. We only recommend
                 tools we&apos;ve evaluated and believe in.
@@ -199,19 +199,19 @@ export default async function ArticlePage({ params }: Props) {
 
           {/* End-of-article CTA */}
           <div
-            className="mt-16 rounded-md border p-6"
-            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            className="mt-16 border p-6"
+            style={{ borderColor: "var(--line)", background: "var(--surface)" }}
           >
-            <div className="mono text-[10px] mb-3" style={{ color: "var(--t3)" }}>
+            <div className="mono text-[10px] mb-3" style={{ color: "var(--faint)" }}>
               You just learned how.
             </div>
             <div
               className="display font-semibold leading-tight"
-              style={{ fontSize: "22px", color: "var(--t1)" }}
+              style={{ fontSize: "22px", color: "var(--ink)" }}
             >
               Now let the data decide.
             </div>
-            <p className="text-[14px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
+            <p className="text-[14px] mt-2 leading-relaxed" style={{ color: "var(--dim)" }}>
               PledgeOFF scans thousands of live signals from Reddit and GitHub and returns GO / KILL / PIVOT in under 60 seconds.
               No surveys. No guesswork. Just evidence.
             </p>
@@ -219,12 +219,12 @@ export default async function ArticlePage({ params }: Props) {
               <ArticleCTAButton
                 href="/ideas/new"
                 location="article_end"
-                className="inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+                className="inline-flex items-center gap-2 h-10 px-5 display text-[13px] font-semibold transition-opacity hover:opacity-90"
+                style={{ background: "var(--go)", color: "var(--accent-fg)" }}
               >
                 Validate your idea →
               </ArticleCTAButton>
-              <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+              <span className="mono text-[11px]" style={{ color: "var(--faint)" }}>
                 Free to start · 1 validation/month · No credit card
               </span>
             </div>
@@ -233,26 +233,26 @@ export default async function ArticlePage({ params }: Props) {
           {/* Author */}
           <div
             className="mt-10 pt-8 flex items-start gap-4"
-            style={{ borderTop: "1px solid var(--border)" }}
+            style={{ borderTop: "1px solid var(--line)" }}
           >
             <div
-              className="w-10 h-10 rounded-full border shrink-0 flex items-center justify-center mono text-[11px]"
-              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--t3)" }}
+              className="w-10 h-10 border shrink-0 flex items-center justify-center mono text-[11px]"
+              style={{ borderColor: "var(--line)", background: "var(--surface)", color: "var(--faint)" }}
             >
               PO
             </div>
             <div className="flex-1">
-              <div className="text-[14px]" style={{ color: "var(--t1)" }}>
+              <div className="text-[14px]" style={{ color: "var(--ink)" }}>
                 PledgeOFF Team{" "}
-                <Link href="/about" className="mono text-[11px] underline" style={{ color: "var(--t3)" }}>
+                <Link href="/about" className="mono text-[11px] underline" style={{ color: "var(--faint)" }}>
                   About us →
                 </Link>
               </div>
-              <div className="mono text-[11px] mt-0.5" style={{ color: "var(--t3)" }}>
+              <div className="mono text-[11px] mt-0.5" style={{ color: "var(--faint)" }}>
                 Writes on idea validation, market timing &amp; founder strategy
               </div>
             </div>
-            <Link href="/blog" className="mono text-[11px] underline shrink-0" style={{ color: "var(--t3)" }}>
+            <Link href="/blog" className="mono text-[11px] underline shrink-0" style={{ color: "var(--faint)" }}>
               All posts →
             </Link>
           </div>
@@ -260,9 +260,9 @@ export default async function ArticlePage({ params }: Props) {
           {/* Share */}
           <div
             className="mt-8 pt-6 flex items-center gap-4"
-            style={{ borderTop: "1px solid var(--border)" }}
+            style={{ borderTop: "1px solid var(--line)" }}
           >
-            <span className="mono text-[11px] uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+            <span className="mono text-[11px] uppercase tracking-[0.08em]" style={{ color: "var(--faint)" }}>
               Share:
             </span>
             <a
@@ -270,7 +270,7 @@ export default async function ArticlePage({ params }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               className="mono text-[11px] uppercase tracking-[0.06em] transition-colors hover:opacity-70"
-              style={{ color: "var(--t3)" }}
+              style={{ color: "var(--faint)" }}
             >
               Share on X
             </a>
@@ -279,7 +279,7 @@ export default async function ArticlePage({ params }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               className="mono text-[11px] uppercase tracking-[0.06em] transition-colors hover:opacity-70"
-              style={{ color: "var(--t3)" }}
+              style={{ color: "var(--faint)" }}
             >
               LinkedIn
             </a>
@@ -291,10 +291,10 @@ export default async function ArticlePage({ params }: Props) {
           {/* Related — same cluster */}
           {related.length > 0 && (
             <div className="mt-16">
-              <div className="mono text-[10px] mb-4" style={{ color: "var(--t3)" }}>CONTINUE READING · {cluster.label.toUpperCase()}</div>
+              <div className="mono text-[10px] mb-4" style={{ color: "var(--faint)" }}>CONTINUE READING · {cluster.label.toUpperCase()}</div>
               <div
                 className="rounded-md border divide-y"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                style={{ borderColor: "var(--line)", background: "var(--surface)" }}
               >
                 {related.map((a) => (
                   <Link
@@ -303,19 +303,19 @@ export default async function ArticlePage({ params }: Props) {
                     className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/5"
                   >
                     <div>
-                      <div className="display text-[15px]" style={{ color: "var(--t1)" }}>{a.title}</div>
-                      <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+                      <div className="display text-[15px]" style={{ color: "var(--ink)" }}>{a.title}</div>
+                      <div className="mono text-[10px] mt-1" style={{ color: "var(--faint)" }}>
                         {TAG_LABELS[a.tag] ?? a.tag} · {a.readingTime} MIN
                       </div>
                     </div>
-                    <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>→</span>
+                    <span className="mono text-[11px]" style={{ color: "var(--faint)" }}>→</span>
                   </Link>
                 ))}
                 <Link
                   href={`/blog/${cluster.slug}`}
                   className="flex items-center justify-between px-5 py-3 transition-colors hover:bg-white/5"
                 >
-                  <span className="mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--t3)" }}>
+                  <span className="mono text-[10px] uppercase tracking-[0.08em]" style={{ color: "var(--faint)" }}>
                     All {cluster.label} articles →
                   </span>
                 </Link>
@@ -326,10 +326,10 @@ export default async function ArticlePage({ params }: Props) {
           {/* See also — cross-cluster */}
           {seeAlso.length > 0 && (
             <div className="mt-8">
-              <div className="mono text-[10px] mb-4" style={{ color: "var(--t3)" }}>SEE ALSO</div>
+              <div className="mono text-[10px] mb-4" style={{ color: "var(--faint)" }}>SEE ALSO</div>
               <div
                 className="rounded-md border divide-y"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                style={{ borderColor: "var(--line)", background: "var(--surface)" }}
               >
                 {seeAlso.map((a) => (
                   <Link
@@ -338,12 +338,12 @@ export default async function ArticlePage({ params }: Props) {
                     className="flex items-center justify-between px-5 py-4 transition-colors hover:bg-white/5"
                   >
                     <div>
-                      <div className="display text-[15px]" style={{ color: "var(--t1)" }}>{a.title}</div>
-                      <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+                      <div className="display text-[15px]" style={{ color: "var(--ink)" }}>{a.title}</div>
+                      <div className="mono text-[10px] mt-1" style={{ color: "var(--faint)" }}>
                         {TAG_LABELS[a.tag] ?? a.tag} · {a.readingTime} MIN
                       </div>
                     </div>
-                    <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>→</span>
+                    <span className="mono text-[11px]" style={{ color: "var(--faint)" }}>→</span>
                   </Link>
                 ))}
               </div>

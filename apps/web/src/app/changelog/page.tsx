@@ -363,69 +363,50 @@ const TAG_COLORS: Record<string, string> = {
 
 export default function ChangelogPage() {
   return (
-    <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
+    <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
       <PublicNav />
 
-      {/* Heading — sticky below PreLoginNav */}
-      <section
-        className="border-b sticky top-12 z-40"
-        style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
+      {/* Masthead strip — sticky */}
+      <div
+        className="bc-hd"
+        style={{ position: "sticky", top: 0, zIndex: 40, padding: "9px 60px" }}
       >
-        <div className="max-w-275 mx-auto px-8 py-12">
-          <div className="mono text-[10px] uppercase tracking-wider mb-3" style={{ color: "var(--t3)" }}>
-            CHANGELOG · RELEASES
-          </div>
-          <h1
-            className="display font-semibold"
-            style={{ fontSize: "32px", letterSpacing: "-0.04em", color: "var(--t1)" }}
-          >
-            What&apos;s shipped.
-          </h1>
-          <p className="mt-3 text-[13px] max-w-120" style={{ color: "var(--t2)" }}>
-            Every meaningful change — features, fixes, and improvements — in reverse chronological order.
-          </p>
-        </div>
-      </section>
+        <span>PledgeOFF Bulletin · Changelog &amp; Releases</span>
+        <span className="r">in reverse chronological order</span>
+      </div>
 
-      {/* Releases */}
-      <div className="max-w-275 mx-auto px-8 py-12 space-y-0">
-        {RELEASES.map((r, i) => (
-          <div
-            key={r.version}
-            className="grid grid-cols-12 gap-8 py-8"
-            style={{ borderBottom: i < RELEASES.length - 1 ? "1px solid var(--border)" : "none" }}
-          >
-            {/* Left — version + date */}
-            <div className="col-span-3">
-              <div className="mono text-[11px] font-semibold" style={{ color: "var(--t1)" }}>
+      <div className="w-page-sm" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
+        <span className="eye">Changelog · Releases</span>
+        <h1 className="mkt-h2" style={{ marginBottom: "6px" }}>What&apos;s shipped.</h1>
+        <p style={{ fontSize: "13px", color: "var(--dim)", marginBottom: "40px" }}>
+          Every meaningful change — features, fixes, and improvements — in reverse chronological order.
+        </p>
+
+        <div>
+          {RELEASES.map((r) => (
+            <div key={r.version} className="cl-entry">
+              <div className="cl-meta">{r.date}</div>
+              <div className="cl-v">
                 v{r.version}
+                <span
+                  className="cl-tag"
+                  style={{
+                    color: TAG_COLORS[r.tag] ?? "var(--faint)",
+                    borderColor: `color-mix(in srgb, ${TAG_COLORS[r.tag] ?? "var(--faint)"} 30%, transparent)`,
+                    background: `color-mix(in srgb, ${TAG_COLORS[r.tag] ?? "var(--faint)"} 10%, transparent)`,
+                  }}
+                >
+                  {r.tag}
+                </span>
               </div>
-              <div className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
-                {r.date}
+              <div className="cl-items">
+                {r.items.map((item) => (
+                  <div key={item} className="cl-item">{item}</div>
+                ))}
               </div>
-              <span
-                className="inline-block mt-3 mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded"
-                style={{
-                  color: TAG_COLORS[r.tag] ?? "var(--t3)",
-                  background: `color-mix(in srgb, ${TAG_COLORS[r.tag] ?? "var(--t3)"} 12%, transparent)`,
-                  border: `1px solid color-mix(in srgb, ${TAG_COLORS[r.tag] ?? "var(--t3)"} 30%, transparent)`,
-                }}
-              >
-                {r.tag}
-              </span>
             </div>
-
-            {/* Right — items */}
-            <ul className="col-span-9 space-y-2">
-              {r.items.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-[13px]" style={{ color: "var(--t2)" }}>
-                  <span className="mt-1.25 w-1 h-1 rounded-full shrink-0" style={{ background: "var(--accent)" }} />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       <Footer />
     </div>

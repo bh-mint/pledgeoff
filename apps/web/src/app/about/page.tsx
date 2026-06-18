@@ -6,12 +6,12 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
   title: { absolute: "About — PledgeOFF" },
   description:
-    "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in under 60 seconds.",
+    "PledgeOFF exists because validation should take 15 seconds, not 15 weeks. Real signals from Hacker News, Dev.to, GitHub, Reddit, and the web — with every source cited.",
   alternates: { canonical: "https://pledgeoff.com/about" },
   openGraph: {
     title: "About — PledgeOFF",
     description:
-      "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in under 60 seconds.",
+      "PledgeOFF exists because validation should take 15 seconds, not 15 weeks. Real signals, traceable sources, a verdict you can act on.",
     url: "https://pledgeoff.com/about",
     type: "website",
   },
@@ -22,7 +22,7 @@ const webPageJsonLd = {
   "@type": "WebPage",
   name: "About PledgeOFF",
   description:
-    "PledgeOFF is a decision intelligence tool for founders. We fetch real signals from Reddit and GitHub, then give you a GO / KILL / PIVOT verdict in under 60 seconds.",
+    "PledgeOFF is a decision intelligence platform for founders. Real signals from Hacker News, Dev.to, GitHub, Reddit, and the web — a GO / PIVOT / KILL verdict in ~15 seconds.",
   url: "https://pledgeoff.com/about",
   publisher: {
     "@type": "Organization",
@@ -38,121 +38,92 @@ export default function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageJsonLd) }}
       />
-      <div style={{ background: "var(--canvas)", color: "var(--t1)" }}>
+      <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
         <PublicNav />
 
-        <main className="max-w-360 mx-auto px-4 sm:px-10 pt-20 pb-32">
-          <div className="max-w-3xl">
-            {/* Label */}
-            <div className="mono text-[10px] uppercase tracking-wider mb-4" style={{ color: "var(--t3)" }}>
-              About
-            </div>
+        <div className="w-page-sm" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
+          <span className="eye">About</span>
+          <h1 className="mkt-h2" style={{ marginBottom: "20px" }}>
+            We got tired of building the wrong things.
+          </h1>
 
-            <h1
-              className="display font-bold leading-[1.05]"
-              style={{ fontSize: "40px", letterSpacing: "-0.04em", color: "var(--t1)" }}
-            >
-              Built to kill bad ideas early.
-            </h1>
-
-            <p className="mt-6 text-[16px] leading-relaxed" style={{ color: "var(--t2)" }}>
-              Most founders spend months building something nobody wants.
-              Not because they&apos;re lazy — because validation is slow, scattered, and uncomfortable.
+          <div className="art-body" style={{ marginBottom: "40px" }}>
+            <p>
+              PledgeOFF exists because the standard advice — &ldquo;talk to customers&rdquo;, &ldquo;build a landing page&rdquo;, &ldquo;find ten paying users&rdquo; — takes weeks and requires skills most early-stage founders don&apos;t have yet. By the time you&apos;ve done it right, you&apos;ve either lost momentum or built too much to pivot.
             </p>
-
-            <p className="mt-4 text-[16px] leading-relaxed" style={{ color: "var(--t2)" }}>
-              PledgeOFF fixes that. You write your idea. We fetch real signals from Reddit and GitHub —
-              complaints, feature requests, demand patterns — and an AI returns a single verdict:
-              <span style={{ color: "var(--validated)" }}> GO</span>,
-              <span style={{ color: "var(--kill)" }}> KILL</span>, or
-              <span style={{ color: "var(--caution)" }}> PIVOT</span>.
-              In under 60 seconds. With sources.
+            <p>
+              The question &ldquo;is this a real problem?&rdquo; has always had an answer buried in public data. Hacker News threads, GitHub issue trackers, Reddit complaints, developer forums, industry blogs. The signal is there. It just takes hours to find and weeks to synthesise honestly.
             </p>
-
-            <p className="mt-4 text-[16px] leading-relaxed" style={{ color: "var(--t2)" }}>
-              No surveys. No landing pages. No guessing.
-              Just the evidence that already exists — surfaced and structured for you.
+            <p>
+              PledgeOFF automates that synthesis. You get a structured verdict — not a chatbot&apos;s guess, not an AI hallucination, but a scoring system grounded in real public signals with every source cited. GO, PIVOT, or KILL. In fifteen seconds.
             </p>
+            <blockquote>
+              &ldquo;The goal is never to tell founders what to do. It&apos;s to remove the excuse for not knowing what the evidence says.&rdquo;
+            </blockquote>
+            <p>
+              We charge for it because the infrastructure to scrape, parse, weight, and summarise signals at this quality has real costs. The free tier exists because we want the verdict to be available to everyone before they decide to commit. If you never upgrade, that&apos;s fine — one honest verdict per month is still more than most people get.
+            </p>
+          </div>
 
-            {/* Divider */}
-            <div className="my-12 h-px" style={{ background: "var(--border)" }} />
-
-            {/* How it works */}
-            <h2
-              className="display font-semibold mb-6"
-              style={{ fontSize: "22px", color: "var(--t1)" }}
-            >
-              How it works
-            </h2>
-
-            <div className="space-y-5">
-              {[
-                { step: "01", label: "You describe your idea", desc: "Free text. No format required. One sentence or a paragraph — both work." },
-                { step: "02", label: "We fetch the signals", desc: "Reddit threads, GitHub issues, complaint patterns, demand signals. Real data, not synthetic." },
-                { step: "03", label: "AI generates the verdict", desc: "GO / KILL / PIVOT — with a confidence score, reasoning, and per-source breakdown." },
-                { step: "04", label: "You decide in seconds", desc: "Kill the idea before you waste months. Or validate it before you talk to investors." },
-              ].map(({ step, label, desc }) => (
-                <div key={step} className="flex gap-5">
-                  <div className="mono text-[11px] pt-0.5 shrink-0" style={{ color: "var(--t3)" }}>{step}</div>
-                  <div>
-                    <div className="display text-[15px] font-semibold" style={{ color: "var(--t1)" }}>{label}</div>
-                    <div className="text-[13px] mt-1 leading-relaxed" style={{ color: "var(--t2)" }}>{desc}</div>
-                  </div>
+          <div className="sec" style={{ marginBottom: "32px" }}>
+            <div className="sec-hd">What we believe</div>
+            <div className="sec-bd" style={{ padding: 0 }}>
+              <div className="how-row">
+                <div className="how-no">—</div>
+                <div className="how-body">
+                  <div className="how-title">Evidence over intuition</div>
+                  <div className="how-desc">Your instincts matter. But they&apos;re incomplete. The verdict uses both.</div>
                 </div>
-              ))}
-            </div>
-
-            {/* Divider */}
-            <div className="my-12 h-px" style={{ background: "var(--border)" }} />
-
-            {/* Contact */}
-            <h2
-              className="display font-semibold mb-4"
-              style={{ fontSize: "22px", color: "var(--t1)" }}
-            >
-              Get in touch
-            </h2>
-
-            <div className="space-y-3">
-              {[
-                { label: "General", email: "contact@pledgeoff.com" },
-                { label: "Partnerships & affiliate", email: "partnerships@pledgeoff.com" },
-                { label: "Press", email: "contact@pledgeoff.com" },
-              ].map(({ label, email }) => (
-                <div key={email} className="flex items-center gap-4">
-                  <span className="mono text-[11px] w-40" style={{ color: "var(--t3)" }}>{label}</span>
-                  <a
-                    href={`mailto:${email}`}
-                    className="text-[13px] underline transition-colors hover:opacity-70"
-                    style={{ color: "var(--t2)" }}
-                  >
-                    {email}
-                  </a>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div
-              className="mt-16 rounded-md border p-6"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-            >
-              <div className="display font-semibold leading-tight" style={{ fontSize: "20px", color: "var(--t1)" }}>
-                Validate your idea now.
               </div>
-              <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-                1 free validation every month. No card required.
-              </p>
-              <Link
-                href="/ideas/new"
-                className="mt-5 inline-flex items-center gap-2 h-10 px-5 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
-                style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-              >
-                Run a validation →
-              </Link>
+              <div className="how-row">
+                <div className="how-no">—</div>
+                <div className="how-body">
+                  <div className="how-title">Sources, always</div>
+                  <div className="how-desc">Every signal in a verdict links to its source. You can read the thread, the GitHub issue, the forum post. Nothing is asserted without a citation.</div>
+                </div>
+              </div>
+              <div className="how-row">
+                <div className="how-no">—</div>
+                <div className="how-body">
+                  <div className="how-title">KILL is not failure</div>
+                  <div className="how-desc">A KILL verdict is the product working correctly. Finding out early — before you&apos;ve built anything — is the entire point.</div>
+                </div>
+              </div>
             </div>
           </div>
-        </main>
+
+          {/* Contact */}
+          <div style={{ marginTop: "32px", display: "flex", gap: "24px", flexWrap: "wrap" }}>
+            {[
+              { label: "General", email: "hello@pledgeoff.com" },
+              { label: "Billing", email: "billing@pledgeoff.com" },
+              { label: "Press", email: "hello@pledgeoff.com" },
+            ].map(({ label, email }) => (
+              <div key={email}>
+                <div className="mono" style={{ fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--faint)", marginBottom: "4px" }}>
+                  {label}
+                </div>
+                <a href={`mailto:${email}`} className="mono" style={{ fontSize: "12px", color: "var(--dim)", textDecoration: "underline", textUnderlineOffset: "3px" }}>
+                  {email}
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA band */}
+        <div className="cta-band">
+          <div style={{ maxWidth: "820px", margin: "0 auto" }}>
+            <span className="cta-eye">PledgeOFF · Decision intelligence</span>
+            <h2 className="cta-h">Know before you build.</h2>
+            <p className="cta-sub">Your next idea is a 15-second validation away. The first one is always free.</p>
+            <div className="btns">
+              <Link href="/login" className="btn-inv">Create free account →</Link>
+              <Link href="/pricing" className="btn-inv-g">Compare plans</Link>
+            </div>
+            <p className="cta-note">No credit card · No setup · Cancel any time</p>
+          </div>
+        </div>
 
         <Footer />
       </div>
