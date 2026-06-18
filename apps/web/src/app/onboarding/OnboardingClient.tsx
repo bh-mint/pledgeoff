@@ -66,7 +66,7 @@ export function OnboardingClient() {
     <>
     <div
       className="min-h-screen flex flex-col relative overflow-hidden"
-      style={{ background: "var(--canvas)" }}
+      style={{ background: "var(--bg)" }}
     >
       {/* Ambient glow */}
       <div
@@ -80,21 +80,21 @@ export function OnboardingClient() {
       {/* Nav minimal */}
       <div
         className="relative px-6 sm:px-10 h-14 flex items-center justify-between border-b"
-        style={{ borderColor: "var(--border)" }}
+        style={{ borderColor: "var(--line)" }}
       >
-        <Link href="/" className="flex items-center gap-2" style={{ color: "var(--t1)" }}>
+        <Link href="/" className="flex items-center gap-2" style={{ color: "var(--ink)" }}>
           <Logo size={22} />
           <span className="display text-[15px] font-semibold tracking-tight">
-            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+            Pledge<span style={{ color: "var(--go)" }}>OFF</span>
           </span>
         </Link>
         <div className="flex items-center gap-4">
           <ThemeToggle />
-          <div className="w-px h-4" style={{ background: "var(--border)" }} />
+          <div className="w-px h-4" style={{ background: "var(--line)" }} />
           <Link
             href="/dashboard"
             className="mono text-[11px] transition-colors hover:opacity-80"
-            style={{ color: "var(--t3)" }}
+            style={{ color: "var(--faint)" }}
           >
             skip →
           </Link>
@@ -108,17 +108,17 @@ export function OnboardingClient() {
           <div className="mb-10">
             <div
               className="mono text-[10px] uppercase tracking-[0.14em] mb-4"
-              style={{ color: "var(--accent)" }}
+              style={{ color: "var(--go)" }}
             >
               Welcome to PledgeOFF
             </div>
             <h1
               className="display text-[32px] sm:text-[44px] font-bold leading-[1.05] mb-4"
-              style={{ color: "var(--t1)" }}
+              style={{ color: "var(--ink)" }}
             >
               Validate before you build.
             </h1>
-            <p className="text-[15px] leading-relaxed" style={{ color: "var(--t2)" }}>
+            <p className="text-[15px] leading-relaxed" style={{ color: "var(--dim)" }}>
               Stop wasting months on ideas nobody wants. Get a data-driven verdict in under 60 seconds.
             </p>
           </div>
@@ -128,15 +128,15 @@ export function OnboardingClient() {
             {STEPS.map((step) => (
               <div
                 key={step.num}
-                className="flex items-start gap-5 rounded-md border p-5"
+                className="flex items-start gap-5 border p-5"
                 style={{
-                  borderColor: "var(--border)",
+                  borderColor: "var(--line)",
                   background: "var(--surface)",
                 }}
               >
                 <div
                   className="mono text-[10px] uppercase tracking-[0.1em] pt-0.5 shrink-0 w-5"
-                  style={{ color: "var(--t3)" }}
+                  style={{ color: "var(--faint)" }}
                 >
                   {step.num}
                 </div>
@@ -144,16 +144,16 @@ export function OnboardingClient() {
                   <div className="flex items-center gap-2 mb-1">
                     <span
                       className="text-[14px] font-semibold"
-                      style={{ color: "var(--t1)" }}
+                      style={{ color: "var(--ink)" }}
                     >
                       {step.title}
                     </span>
                     <span
                       className="mono text-[9px] uppercase tracking-[0.12em] px-1.5 py-0.5 rounded"
                       style={{
-                        color: "var(--t3)",
+                        color: "var(--faint)",
                         background: "var(--surface)",
-                        border: "1px solid var(--border)",
+                        border: "1px solid var(--line)",
                       }}
                     >
                       {step.tag}
@@ -161,7 +161,7 @@ export function OnboardingClient() {
                   </div>
                   <p
                     className="text-[13px] leading-relaxed"
-                    style={{ color: "var(--t2)" }}
+                    style={{ color: "var(--dim)" }}
                   >
                     {step.desc}
                   </p>
@@ -172,7 +172,7 @@ export function OnboardingClient() {
 
           {/* Role selector */}
           <div className="mb-10">
-            <div className="mono text-[10px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>
+            <div className="mono text-[10px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--faint)" }}>
               Who are you building for?
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -182,17 +182,17 @@ export function OnboardingClient() {
                   <button
                     key={r.value}
                     onClick={() => handleRoleSelect(r.value)}
-                    className="flex-1 text-left rounded-md border p-3 transition-all"
+                    className="flex-1 text-left border p-3 transition-all"
                     style={{
-                      borderColor: active ? "var(--accent)" : "var(--border)",
-                      background: active ? "color-mix(in srgb, var(--accent) 8%, transparent)" : "var(--surface)",
+                      borderColor: active ? "var(--go)" : "var(--line)",
+                      background: active ? "color-mix(in srgb, var(--go) 8%, transparent)" : "var(--surface)",
                     }}
                   >
                     <div className="flex items-center gap-2 mb-0.5">
-                      {active && <span className="mono text-[9px]" style={{ color: "var(--accent)" }}>●</span>}
-                      <span className="text-[13px] font-semibold" style={{ color: "var(--t1)" }}>{r.label}</span>
+                      {active && <span className="mono text-[9px]" style={{ color: "var(--go)" }}>●</span>}
+                      <span className="text-[13px] font-semibold" style={{ color: "var(--ink)" }}>{r.label}</span>
                     </div>
-                    <p className="text-[11px]" style={{ color: "var(--t3)" }}>{r.desc}</p>
+                    <p className="text-[11px]" style={{ color: "var(--faint)" }}>{r.desc}</p>
                   </button>
                 );
               })}
@@ -203,15 +203,15 @@ export function OnboardingClient() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <Link
               href="/ideas/new"
-              className="display text-[14px] font-semibold px-6 h-12 rounded-md flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
-              style={{ background: "var(--accent)", color: "#000" }}
+              className="display text-[14px] font-semibold px-6 h-12 flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+              style={{ background: "var(--go)", color: "#000" }}
             >
               Validate your first idea →
             </Link>
             <Link
               href="/dashboard"
-              className="mono text-[11px] h-12 flex items-center justify-center px-4 rounded-md border transition-colors hover:border-(--t2)"
-              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+              className="mono text-[11px] h-12 flex items-center justify-center px-4 border transition-colors hover:border-(--t2)"
+              style={{ borderColor: "var(--line)", color: "var(--faint)" }}
             >
               Go to Dashboard
             </Link>
@@ -219,7 +219,7 @@ export function OnboardingClient() {
 
           <p
             className="mt-6 text-center mono text-[10px]"
-            style={{ color: "var(--t3)" }}
+            style={{ color: "var(--faint)" }}
           >
             1 free validation per month · no credit card required
           </p>

@@ -61,11 +61,11 @@ export function AcceptInviteClient({ token }: { token: string }) {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "var(--canvas)", color: "var(--t1)" }}
+      style={{ background: "var(--bg)", color: "var(--ink)" }}
     >
       <div
-        className="w-full max-w-sm rounded-md border p-8 text-center"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        className="w-full max-w-sm border p-8 text-center"
+        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
       >
         <div className="display font-bold mb-3" style={{ fontSize: "22px" }}>
           {status === "checking" && "Checking invite…"}
@@ -77,13 +77,13 @@ export function AcceptInviteClient({ token }: { token: string }) {
 
         {status === "login" && (
           <>
-            <p className="text-[14px] mb-6" style={{ color: "var(--t2)" }}>
+            <p className="text-[14px] mb-6" style={{ color: "var(--dim)" }}>
               You need to be signed in to accept this invite.
             </p>
             <a
               href={`/login?next=${encodeURIComponent(`/accept-invite?token=${token}`)}`}
-              className="inline-flex items-center h-9 px-5 rounded-md display text-[13px] font-semibold"
-              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+              className="inline-flex items-center h-9 px-5 display text-[13px] font-semibold"
+              style={{ background: "var(--go)", color: "var(--accent-fg)" }}
             >
               Sign in or create account →
             </a>
@@ -91,7 +91,7 @@ export function AcceptInviteClient({ token }: { token: string }) {
         )}
 
         {status === "done" && (
-          <p className="text-[14px]" style={{ color: "var(--t2)" }}>
+          <p className="text-[14px]" style={{ color: "var(--dim)" }}>
             Redirecting to dashboard…
           </p>
         )}
@@ -103,7 +103,7 @@ export function AcceptInviteClient({ token }: { token: string }) {
         )}
 
         {(status === "checking" || status === "accepting") && (
-          <div className="mono text-[11px] mt-2" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[11px] mt-2" style={{ color: "var(--faint)" }}>
             Please wait…
           </div>
         )}

@@ -1,9 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { LoginClient } from "./LoginClient";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { FooterMicro } from "@/components/FooterMicro";
 
 export const metadata: Metadata = {
   title: { absolute: "Sign in — PledgeOFF" },
@@ -12,53 +10,74 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div
-      className="min-h-screen flex flex-col relative overflow-hidden"
-      style={{ background: "var(--canvas)", color: "var(--t1)" }}
-    >
-      {/* Subtle dot grid */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(circle, var(--t3) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-          opacity: 0.05,
-        }}
-      />
-      {/* Minimal auth nav — logo centered, toggle right */}
-      <nav
-        className="relative h-14 border-b flex items-center px-4 sm:px-8 flex-shrink-0"
-        style={{ borderColor: "var(--border)" }}
-      >
-        <div className="absolute left-1/2 -translate-x-1/2">
-          <Link
-            href="/"
-            className="display text-[15px] font-semibold"
-            style={{ color: "var(--t1)" }}
-          >
-            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-          </Link>
+    <div className="auth-shell">
+
+      {/* Left brand panel */}
+      <aside className="auth-panel">
+        <div className="ap-mark">
+          <span className="ap-mark-name">Pledge<em>OFF</em></span>
+          <div className="ap-mark-rule" />
+          <span className="ap-mark-sub">Bulletin</span>
         </div>
-        <div className="ml-auto">
+
+        <h1 className="ap-headline">Know before<br />you build.</h1>
+
+        {/* Mock verdict card */}
+        <div className="mc">
+          <div className="mc-head">
+            <span>Field Report · No. 2184</span>
+            <span className="go">GO</span>
+          </div>
+          <div className="mc-body">
+            <div className="mc-dims">
+              {[
+                { label: "Market Demand", pct: 88 },
+                { label: "Competition",   pct: 69 },
+                { label: "Feasibility",   pct: 91 },
+                { label: "Timing",        pct: 79 },
+              ].map(({ label, pct }) => (
+                <div key={label} className="mc-dim">
+                  <span className="mc-lbl">{label}</span>
+                  <div className="mc-bar"><div className="mc-fill" style={{ width: `${pct}%` }} /></div>
+                  <span className="mc-n">{pct}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mc-foot">
+            {[
+              { k: "Score",        v: "82",  go: true },
+              { k: "Confidence",   v: "91%" },
+              { k: "Signals",      v: "34"  },
+              { k: "Category avg", v: "68"  },
+            ].map(({ k, v, go }) => (
+              <div key={k} className="mc-fi">
+                <span className="mc-fk">{k}</span>
+                <span className={`mc-fv${go ? " go" : ""}`}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="ap-footer">
+          Real signals from Hacker News, Dev.to, GitHub, and the wider web. Every verdict cites its sources.
+        </p>
+      </aside>
+
+      {/* Right form panel */}
+      <main className="auth-main">
+        <div className="auth-bar">
+          <span className="auth-m-brand">Pledge<em>OFF</em></span>
           <ThemeToggle />
         </div>
-      </nav>
-
-      {/* Centered form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <Suspense
-          fallback={
-            <div
-              className="rounded-md border p-8 w-full max-w-sm animate-pulse"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-            />
-          }
-        >
-          <LoginClient />
-        </Suspense>
-      </div>
-
-      <FooterMicro />
+        <div className="auth-body">
+          <Suspense
+            fallback={<div className="auth-form" style={{ height: "300px" }} />}
+          >
+            <LoginClient />
+          </Suspense>
+        </div>
+      </main>
     </div>
   );
 }

@@ -1,52 +1,60 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const ERROR_MESSAGES: Record<string, string> = {
   missing_code: "Authentication failed. Please try again.",
-  auth_failed: "Authentication failed. Please try again.",
+  auth_failed:  "Authentication failed. Please try again.",
 };
 
-type Mode = "signin" | "signup";
+type Mode  = "signin" | "signup";
 type State = "idle" | "loading" | "error" | "check_email" | "reset_sent" | "mfa_required";
 
-export function LoginClient() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const errorKey = searchParams.get("error") ?? "";
-  const urlError = ERROR_MESSAGES[errorKey] ?? "";
+const GOOGLE_SVG = (
+  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+);
 
-  const [mode, setMode] = useState<Mode>(searchParams.get("mode") === "signup" ? "signup" : "signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [uiState, setUiState] = useState<State>(urlError ? "error" : "idle");
-  const [errorMsg, setErrorMsg] = useState(urlError);
-  const [mfaCode, setMfaCode] = useState("");
+const GITHUB_SVG = (
+  <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style={{ fill: "currentColor" }}>
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+  </svg>
+);
+
+export function LoginClient() {
+  const router      = useRouter();
+  const searchParams = useSearchParams();
+  const errorKey    = searchParams.get("error") ?? "";
+  const urlError    = ERROR_MESSAGES[errorKey] ?? "";
+
+  const [mode,        setMode]        = useState<Mode>(searchParams.get("mode") === "signup" ? "signup" : "signin");
+  const [email,       setEmail]       = useState("");
+  const [password,    setPassword]    = useState("");
+  const [uiState,     setUiState]     = useState<State>(urlError ? "error" : "idle");
+  const [errorMsg,    setErrorMsg]    = useState(urlError);
+  const [mfaCode,     setMfaCode]     = useState("");
   const [mfaFactorId, setMfaFactorId] = useState("");
 
-  const handleEmailAuth = async (e: { preventDefault(): void }) => {
+  const handleEmailAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMsg("");
     setUiState("loading");
-
     const supabase = createSupabaseBrowserClient();
 
     if (mode === "signup") {
       const { error } = await supabase.auth.signUp({
-        email,
-        password,
+        email, password,
         options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding` },
       });
-      if (error) {
-        setErrorMsg(error.message);
-        setUiState("error");
-      } else {
-        setUiState("check_email");
-      }
+      if (error) { setErrorMsg(error.message); setUiState("error"); }
+      else        { setUiState("check_email"); }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
@@ -54,87 +62,42 @@ export function LoginClient() {
           router.push(`/verify-email?email=${encodeURIComponent(email)}`);
           return;
         }
-        const isCredentialsError =
-          error.message.toLowerCase().includes("invalid login") ||
-          error.message.toLowerCase().includes("invalid credentials");
-        setErrorMsg(
-          isCredentialsError
-            ? "Sign-in failed. If you registered with Google, use 'Continue with Google' below."
-            : error.message,
-        );
+        const isCreds = error.message.toLowerCase().includes("invalid login") || error.message.toLowerCase().includes("invalid credentials");
+        setErrorMsg(isCreds ? "Sign-in failed. If you registered with Google, use 'Continue with Google' below." : error.message);
         setUiState("error");
       } else {
-        // Check if MFA upgrade is required
         const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aalData?.nextLevel === "aal2" && aalData.nextLevel !== aalData.currentLevel) {
           const { data: factorsData } = await supabase.auth.mfa.listFactors();
           const totpFactor = factorsData?.totp?.[0];
-          if (totpFactor) {
-            setMfaFactorId(totpFactor.id);
-            setUiState("mfa_required");
-            return;
-          }
+          if (totpFactor) { setMfaFactorId(totpFactor.id); setUiState("mfa_required"); return; }
         }
-        const next = searchParams.get("next") ?? "/dashboard";
-        router.push(next);
+        router.push(searchParams.get("next") ?? "/dashboard");
         router.refresh();
       }
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const handleOAuth = async (provider: "google" | "github") => {
     setUiState("loading");
-    const supabase = createSupabaseBrowserClient();
-    // Pass next param only if explicitly set (e.g. from middleware redirect).
-    // Without next, /auth/callback auto-detects new vs returning user.
-    const nextParam = searchParams.get("next");
-    const redirectTo = nextParam
+    const supabase    = createSupabaseBrowserClient();
+    const nextParam   = searchParams.get("next");
+    const redirectTo  = nextParam
       ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextParam)}`
       : `${window.location.origin}/auth/callback`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo },
-    });
-    if (error) {
-      setErrorMsg(error.message);
-      setUiState("error");
-    }
-  };
-
-  const handleGitHubLogin = async () => {
-    setUiState("loading");
-    const supabase = createSupabaseBrowserClient();
-    const nextParam = searchParams.get("next");
-    const redirectTo = nextParam
-      ? `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextParam)}`
-      : `${window.location.origin}/auth/callback`;
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: { redirectTo },
-    });
-    if (error) {
-      setErrorMsg(error.message);
-      setUiState("error");
-    }
+    const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo } });
+    if (error) { setErrorMsg(error.message); setUiState("error"); }
   };
 
   const handleForgotPassword = async () => {
-    if (!email) {
-      setErrorMsg("Enter your email address above, then click Forgot.");
-      setUiState("error");
-      return;
-    }
+    if (!email) { setErrorMsg("Enter your email address above, then click Forgot."); setUiState("error"); return; }
     setUiState("loading");
     const supabase = createSupabaseBrowserClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
-    if (error) {
-      setErrorMsg(error.message);
-      setUiState("error");
-    } else {
-      setUiState("reset_sent");
-    }
+    if (error) { setErrorMsg(error.message); setUiState("error"); }
+    else        { setUiState("reset_sent"); }
   };
 
   const handleMfaVerify = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -144,363 +107,171 @@ export function LoginClient() {
     const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId });
     if (challengeError || !challengeData) {
       setErrorMsg(challengeError?.message ?? "Failed to start MFA challenge.");
-      setUiState("mfa_required");
-      return;
+      setUiState("mfa_required"); return;
     }
-    const { error: verifyError } = await supabase.auth.mfa.verify({
-      factorId: mfaFactorId,
-      challengeId: challengeData.id,
-      code: mfaCode,
-    });
-    if (verifyError) {
-      setErrorMsg("Invalid code. Try again.");
-      setUiState("mfa_required");
-      return;
-    }
-    const next = searchParams.get("next") ?? "/dashboard";
-    router.push(next);
+    const { error: verifyError } = await supabase.auth.mfa.verify({ factorId: mfaFactorId, challengeId: challengeData.id, code: mfaCode });
+    if (verifyError) { setErrorMsg("Invalid code. Try again."); setUiState("mfa_required"); return; }
+    router.push(searchParams.get("next") ?? "/dashboard");
     router.refresh();
   };
 
-  const switchMode = (m: Mode) => {
-    setMode(m);
-    setErrorMsg("");
-    setUiState("idle");
-  };
+  const switchMode = (m: Mode) => { setMode(m); setErrorMsg(""); setUiState("idle"); };
 
+  /* ── MFA screen ───────────────────────────────────── */
   if (uiState === "mfa_required") {
     return (
-      <div
-        className="rounded-md border p-8 w-full max-w-sm reveal"
-        style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
-      >
-        <div className="display text-[14px] font-semibold mb-4">
-          Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-        </div>
-        <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
-          Two-factor auth.
-        </h1>
-        <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
-          Enter the 6-digit code from your authenticator app.
-        </p>
-
-        {errorMsg && (
-          <div
-            className="rounded-md border p-3 mt-5"
-            style={{ borderColor: "rgba(229,91,60,0.4)", background: "rgba(229,91,60,0.06)" }}
-          >
-            <div className="text-[12px]" style={{ color: "var(--t1)" }}>{errorMsg}</div>
+      <div className="auth-form">
+        <p className="sc-eye">Authentication · Step 2</p>
+        <h1 className="sc-ttl">Two-factor verification.</h1>
+        <p className="sc-sub">Enter the 6-digit code from your authenticator app.</p>
+        {errorMsg && <div className="auth-err">{errorMsg}</div>}
+        <form onSubmit={handleMfaVerify}>
+          <div className="auth-field">
+            <label className="flbl" htmlFor="mfa-code">Authenticator code</label>
+            <input
+              id="mfa-code"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              value={mfaCode}
+              onChange={(e) => { setMfaCode(e.target.value.replace(/\D/g, "")); setErrorMsg(""); }}
+              placeholder="000000"
+              required
+              autoFocus
+              autoComplete="one-time-code"
+              className="finp"
+              style={{ letterSpacing: "0.25em" }}
+            />
           </div>
-        )}
-
-        <form onSubmit={handleMfaVerify} className="mt-6 space-y-3">
-          <label className="block">
-            <span className="mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>Authenticator code</span>
-            <div
-              className="mt-1.5 rounded-md border px-3 h-10 flex items-center"
-              style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
-            >
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                value={mfaCode}
-                onChange={(e) => { setMfaCode(e.target.value.replace(/\D/g, "")); setErrorMsg(""); }}
-                placeholder="000000"
-                required
-                autoFocus
-                autoComplete="one-time-code"
-                className="w-full text-[13px] tracking-[0.25em] bg-transparent outline-none placeholder:text-(--t3) placeholder:tracking-normal"
-                style={{ color: "var(--t1)" }}
-              />
-            </div>
-          </label>
-          <button
-            type="submit"
-            disabled={mfaCode.length !== 6}
-            className="display w-full h-10 rounded-md text-[13px] font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-50"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-          >
+          <button type="submit" disabled={mfaCode.length !== 6} className="btn-p" style={{ width: "100%", justifyContent: "center", opacity: mfaCode.length !== 6 ? 0.5 : 1 }}>
             Verify →
           </button>
         </form>
-
-        <p className="mono text-[10px] mt-5" style={{ color: "var(--t3)" }}>
-          <button
-            type="button"
-            onClick={() => { setUiState("idle"); setMfaCode(""); setErrorMsg(""); }}
-            className="underline"
-            style={{ color: "var(--t2)" }}
-          >
-            Back to sign in
+        <p className="auth-fine">
+          <button type="button" onClick={() => { setUiState("idle"); setMfaCode(""); setErrorMsg(""); }} className="auth-sl">
+            ← Back to sign in
           </button>
         </p>
       </div>
     );
   }
 
+  /* ── Reset sent screen ────────────────────────────── */
   if (uiState === "reset_sent") {
     return (
-      <div
-        className="rounded-md border p-8 w-full max-w-sm reveal"
-        style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
-      >
-        <div className="display text-[14px] font-semibold mb-4">
-          Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+      <div className="auth-form">
+        <p className="sc-eye">Account recovery</p>
+        <h1 className="sc-ttl">Check your inbox.</h1>
+        <p className="sc-sub" style={{ marginBottom: "20px" }}>
+          We sent a reset link to <strong style={{ color: "var(--ink)" }}>{email}</strong>. It expires in 30 minutes.
+        </p>
+        <div className="stat-row">
+          <div className="stat-dot green" />
+          <span className="stat-txt">Email sent — check your spam folder if you don&apos;t see it</span>
         </div>
-        <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
-          Check your email.
-        </h1>
-        <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-          We sent a password reset link to{" "}
-          <span style={{ color: "var(--t1)" }}>{email}</span>. Click it to set a new password.
-        </p>
-        <button
-          onClick={() => switchMode("signin")}
-          className="mt-6 w-full h-10 rounded-md border display text-[13px] transition-colors hover:bg-white/5"
-          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-        >
-          Back to sign in
-        </button>
-        <p className="mono text-[10px] mt-4" style={{ color: "var(--t3)" }}>
-          Didn&apos;t get it? Check spam or try again.
-        </p>
+        <div className="auth-foot">
+          <button className="auth-sl" onClick={() => setUiState("idle")}>Resend link</button>
+          <button className="auth-sl" onClick={() => switchMode("signin")}>Back to sign in</button>
+        </div>
       </div>
     );
   }
 
+  /* ── Check email screen ───────────────────────────── */
   if (uiState === "check_email") {
     return (
-      <div
-        className="rounded-md border p-8 w-full max-w-sm reveal"
-        style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
-      >
-        <div className="display text-[14px] font-semibold mb-4">
-          Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+      <div className="auth-form">
+        <p className="sc-eye">Account setup</p>
+        <h1 className="sc-ttl">Check your email.</h1>
+        <div className="em-chip">
+          <span>{email}</span>
+          <button onClick={() => switchMode("signup")}>Change</button>
         </div>
-
-        <div
-          className="rounded-md border p-4 mb-5"
-          style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--validated)" }} />
-            <span className="mono text-[10px]" style={{ color: "var(--validated)" }}>SENT</span>
-            <span className="mono text-[10px] ml-auto" style={{ color: "var(--t3)" }}>
-              {new Date().toISOString().slice(11, 19)} UTC
-            </span>
-          </div>
-          <div className="mono text-[11px]" style={{ color: "var(--t2)" }}>to: {email}</div>
-          <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>subj: Confirm your PledgeOFF account</div>
+        <div className="stat-row" style={{ marginBottom: 0 }}>
+          <div className="stat-dot amber pulse" />
+          <span className="stat-txt">Waiting for verification — check your spam folder</span>
         </div>
-
-        <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
-          Check your email.
-        </h1>
-        <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-          We sent a confirmation link to{" "}
-          <span style={{ color: "var(--t1)" }}>{email}</span>. Click it to activate your account, then sign in.
-        </p>
-
-        <div className="grid grid-cols-2 gap-2 mt-6">
-          <button
-            onClick={() => setUiState("idle")}
-            className="h-10 rounded-md border display text-[13px] transition-colors hover:bg-white/5"
-            style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-          >
-            Back to sign in
-          </button>
-          <button
-            onClick={() => setUiState("idle")}
-            className="h-10 rounded-md display text-[13px] font-semibold flex items-center justify-center transition-opacity hover:opacity-90"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-          >
-            Sign in →
-          </button>
+        <div className="auth-foot" style={{ marginTop: "20px" }}>
+          <button className="auth-sl" onClick={() => setUiState("idle")}>Back to sign in</button>
+          <button className="auth-sl" onClick={() => switchMode("signup")}>Use a different email</button>
         </div>
-
-        <p className="mono text-[10px] mt-5" style={{ color: "var(--t3)" }}>
-          Didn&apos;t get it? Check spam, or{" "}
-          <button onClick={() => switchMode("signup")} className="underline" style={{ color: "var(--t2)" }}>
-            use a different email
-          </button>.
-        </p>
       </div>
     );
   }
 
   const isLoading = uiState === "loading";
 
+  /* ── Main form (signin / signup) ──────────────────── */
   return (
-    <div
-      className="rounded-md border p-8 w-full max-w-sm reveal"
-      style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
-    >
+    <div className="auth-form">
       {/* Tab switcher */}
-      <div
-        className="grid grid-cols-2 rounded-md border p-1 mb-6"
-        style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
-      >
+      <div className="auth-tabs">
         {(["signin", "signup"] as Mode[]).map((m) => (
-          <button
-            key={m}
-            onClick={() => switchMode(m)}
-            disabled={isLoading}
-            className="h-9 rounded-md text-[12px] font-semibold display transition-colors"
-            style={
-              mode === m
-                ? { background: "var(--accent)", color: "var(--accent-fg)" }
-                : { color: "var(--t2)" }
-            }
-          >
+          <button key={m} onClick={() => switchMode(m)} disabled={isLoading} className={`auth-tab${mode === m ? " active" : ""}`}>
             {m === "signin" ? "Sign in" : "Sign up"}
           </button>
         ))}
       </div>
 
-      <h1 id="login-heading" className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
-        {mode === "signin" ? "Welcome back." : "Start validating."}
-      </h1>
-      <p className="text-[13px] mt-1" style={{ color: "var(--t2)" }}>
+      <p className="sc-eye">{mode === "signin" ? "Authentication" : "Create account"}</p>
+      <h1 className="sc-ttl">{mode === "signin" ? "Welcome back." : "Start free."}</h1>
+      <p className="sc-sub">
         {mode === "signin"
-          ? "Validate your next idea in under 60 seconds."
-          : "1 free validation every month. No card."}
+          ? <>No account? <button className="lnk" onClick={() => switchMode("signup")}>Start free.</button></>
+          : <>Already have an account? <button className="lnk" onClick={() => switchMode("signin")}>Sign in.</button></>}
       </p>
 
-      {/* Error banner */}
-      {uiState === "error" && errorMsg && (
-        <div
-          className="rounded-md border p-3 flex gap-3 mt-5"
-          style={{ borderColor: "rgba(229,91,60,0.4)", background: "rgba(229,91,60,0.06)" }}
-        >
-          <div className="flex-1">
-            <div className="text-[12px]" style={{ color: "var(--t1)" }}>{errorMsg}</div>
-          </div>
-        </div>
-      )}
+      {uiState === "error" && errorMsg && <div className="auth-err">{errorMsg}</div>}
 
-      {/* OAuth buttons — primary, above email form */}
-      <div className="mt-6 space-y-2">
-        <button
-          onClick={handleGoogleLogin}
-          disabled={isLoading}
-          className="w-full h-10 rounded-md border flex items-center justify-center gap-2 text-[13px] transition-colors hover:bg-white/5 disabled:opacity-50"
-          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
+      {/* OAuth */}
+      <div className="oa-stack">
+        <button onClick={() => handleOAuth("google")} disabled={isLoading} className="oa-btn">
+          {GOOGLE_SVG} Continue with Google
         </button>
-
-        <button
-          onClick={handleGitHubLogin}
-          disabled={isLoading}
-          className="w-full h-10 rounded-md border flex items-center justify-center gap-2 text-[13px] transition-colors hover:bg-white/5 disabled:opacity-50"
-          style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" className="fill-current">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-          </svg>
-          Continue with GitHub
+        <button onClick={() => handleOAuth("github")} disabled={isLoading} className="oa-btn">
+          {GITHUB_SVG} Continue with GitHub
         </button>
       </div>
 
       {/* Divider */}
-      <div className="flex items-center gap-3 my-5">
-        <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
-        <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>OR</span>
-        <div className="flex-1 h-px" style={{ background: "var(--border)" }} />
+      <div className="oa-div">
+        <div className="oa-div-line" />
+        <span className="oa-div-txt">{mode === "signin" ? "or continue with email" : "or sign up with email"}</span>
+        <div className="oa-div-line" />
       </div>
 
-      <form onSubmit={handleEmailAuth} aria-labelledby="login-heading" className="space-y-3">
-        <label className="block">
-          <span className="mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>Email</span>
-          <div
-            className="mt-1.5 rounded-md border px-3 h-10 flex items-center"
-            style={
-              uiState === "error"
-                ? { borderColor: "rgba(229,91,60,0.5)", background: "var(--canvas)" }
-                : { borderColor: "var(--border)", background: "var(--canvas)" }
-            }
-          >
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              disabled={isLoading}
-              className="w-full text-[13px] bg-transparent outline-none placeholder:text-(--t3)"
-              style={{ color: "var(--t1)" }}
-            />
-          </div>
-        </label>
+      {/* Email + password form */}
+      <form onSubmit={handleEmailAuth}>
+        <div className="auth-field">
+          <label className="flbl" htmlFor="auth-email">Email address</label>
+          <input id="auth-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" disabled={isLoading} className="finp" />
+        </div>
+        <div className="auth-field" style={{ marginBottom: "22px" }}>
+          <label className="flbl" htmlFor="auth-password">Password</label>
+          <input id="auth-password" type="password" required minLength={mode === "signup" ? 8 : 6} autoComplete={mode === "signup" ? "new-password" : "current-password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={mode === "signup" ? "Minimum 8 characters" : "••••••••"} disabled={isLoading} className="finp" />
+          {mode === "signup" && <span className="mono" style={{ fontSize: "8px", letterSpacing: "0.08em", color: "var(--faint)", marginTop: "5px", display: "block" }}>Minimum 8 characters</span>}
+        </div>
 
-        <label className="block">
-          <div className="flex items-center justify-between">
-            <span className="mono text-[10px] uppercase" style={{ color: "var(--t3)" }}>Password</span>
-            {mode === "signin" && (
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="mono text-[10px] underline transition-opacity hover:opacity-70"
-                style={{ color: "var(--t3)" }}
-              >
-                Forgot?
-              </button>
-            )}
-          </div>
-          <div
-            className="mt-1.5 rounded-md border px-3 h-10 flex items-center"
-            style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
-          >
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder={mode === "signup" ? "At least 8 characters" : "••••••••••"}
-              required
-              minLength={mode === "signup" ? 8 : 6}
-              disabled={isLoading}
-              className="w-full text-[13px] bg-transparent outline-none placeholder:text-(--t3)"
-              style={{ color: "var(--t1)" }}
-            />
-          </div>
-          {mode === "signup" && (
-            <span className="mono text-[10px] mt-1.5 block" style={{ color: "var(--t3)" }}>
-              8+ chars · 1 number · 1 symbol
-            </span>
-          )}
-        </label>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="display w-full h-10 rounded-md text-[13px] font-semibold flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-50"
-          style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-        >
-          {isLoading ? (
-            <>
-              <span className="inline-block w-3 h-3 rounded-full border-2 border-black/30 border-t-black/90 animate-spin" />
-              {mode === "signin" ? "Signing in…" : "Creating account…"}
-            </>
-          ) : (
-            mode === "signin" ? "Sign in" : "Create account"
-          )}
+        <button type="submit" disabled={isLoading} className="btn-p" style={{ width: "100%", justifyContent: "center", opacity: isLoading ? 0.6 : 1, marginBottom: mode === "signin" ? "16px" : "4px" }}>
+          {isLoading
+            ? (mode === "signin" ? "Signing in…" : "Creating account…")
+            : (mode === "signin" ? "Sign in" : "Create account")}
         </button>
       </form>
 
-      <p className="mono text-[10px] mt-6 leading-relaxed" style={{ color: "var(--t3)" }}>
-        By continuing, you agree to our{" "}
-        <Link href="/terms" className="underline" style={{ color: "var(--t2)" }}>Terms</Link>
-        {" "}and{" "}
-        <Link href="/privacy" className="underline" style={{ color: "var(--t2)" }}>Privacy Policy</Link>.
-      </p>
+      {mode === "signin" && (
+        <div className="auth-foot">
+          <button className="auth-sl" onClick={handleForgotPassword} disabled={isLoading}>Forgot password</button>
+        </div>
+      )}
+
+      {mode === "signup" && (
+        <p className="auth-fine">
+          By creating an account you agree to our{" "}
+          <Link href="/terms">Terms of Service</Link> and <Link href="/privacy">Privacy Policy</Link>.
+        </p>
+      )}
     </div>
   );
 }

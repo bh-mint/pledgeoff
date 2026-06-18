@@ -7,9 +7,9 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 const COOLDOWN_SECONDS = 60;
 
 export function VerifyEmailClient({ email }: { email: string }) {
-  const [sent, setSent] = useState(false);
+  const [sent,    setSent]    = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error,   setError]   = useState("");
   const [cooldown, setCooldown] = useState(0);
 
   useEffect(() => {
@@ -19,8 +19,7 @@ export function VerifyEmailClient({ email }: { email: string }) {
   }, [cooldown]);
 
   const handleResend = useCallback(async () => {
-    setLoading(true);
-    setError("");
+    setLoading(true); setError("");
     try {
       const res = await fetch("/api/v1/auth/resend-verification", {
         method: "POST",
@@ -28,8 +27,7 @@ export function VerifyEmailClient({ email }: { email: string }) {
         body: JSON.stringify({ email }),
       });
       if (!res.ok) throw new Error("Request failed");
-      setSent(true);
-      setCooldown(COOLDOWN_SECONDS);
+      setSent(true); setCooldown(COOLDOWN_SECONDS);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -44,79 +42,33 @@ export function VerifyEmailClient({ email }: { email: string }) {
   };
 
   return (
-    <div
-      className="rounded-md border p-8 w-full max-w-sm reveal"
-      style={{ borderColor: "var(--border)", background: "var(--surface)", animationDelay: "200ms" }}
-    >
-      <div className="display text-[14px] font-semibold mb-6">
-        Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+    <div className="auth-form">
+      <p className="sc-eye">Account setup</p>
+      <h1 className="sc-ttl">Verify your email.</h1>
+
+      <div className="em-chip">
+        <span>{email || "your email"}</span>
+        <button onClick={handleSignOut}>Change</button>
       </div>
 
-      <div
-        className="rounded-md border p-4 mb-5"
-        style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
-      >
-        <div className="flex items-center gap-2 mb-2">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--validated)" }} />
-          <span className="mono text-[10px]" style={{ color: "var(--validated)" }}>SENT</span>
-        </div>
-        <div className="mono text-[11px]" style={{ color: "var(--t2)" }}>to: {email || "your email"}</div>
-        <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>subj: Confirm your PledgeOFF account</div>
+      <div className="stat-row" style={{ marginBottom: sent ? "16px" : 0 }}>
+        <div className="stat-dot amber pulse" />
+        <span className="stat-txt">Waiting for verification — check your spam folder</span>
       </div>
 
-      <h1 className="display text-[24px] font-semibold leading-tight" style={{ color: "var(--t1)" }}>
-        Verify your email.
-      </h1>
-      <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--t2)" }}>
-        Click the link we sent to{" "}
-        <span style={{ color: "var(--t1)" }}>{email || "your email address"}</span>{" "}
-        to activate your account.
-      </p>
+      {sent && <div className="auth-ok">New confirmation email sent. Check your inbox.</div>}
+      {error && <div className="auth-err">{error}</div>}
 
-      {sent && (
-        <div
-          className="rounded-md border p-3 mt-4"
-          style={{ borderColor: "rgba(74,222,128,0.3)", background: "rgba(74,222,128,0.06)" }}
+      <div className="auth-foot" style={{ marginTop: "20px" }}>
+        <button
+          onClick={handleResend}
+          disabled={loading || cooldown > 0}
+          className="auth-sl"
         >
-          <p className="text-[12px]" style={{ color: "var(--validated)" }}>
-            New confirmation email sent. Check your inbox.
-          </p>
-        </div>
-      )}
-
-      {error && (
-        <div
-          className="rounded-md border p-3 mt-4"
-          style={{ borderColor: "rgba(229,91,60,0.4)", background: "rgba(229,91,60,0.06)" }}
-        >
-          <p className="text-[12px]" style={{ color: "var(--t1)" }}>{error}</p>
-        </div>
-      )}
-
-      <button
-        onClick={handleResend}
-        disabled={loading || cooldown > 0}
-        className="mt-5 w-full h-10 rounded-md border display text-[13px] transition-colors hover:bg-white/5 disabled:opacity-50"
-        style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-      >
-        {loading
-          ? "Sending…"
-          : cooldown > 0
-            ? `Resend in ${cooldown}s`
-            : "Resend confirmation email"}
-      </button>
-
-      <p className="mono text-[10px] mt-5 leading-relaxed" style={{ color: "var(--t3)" }}>
-        Wrong email?{" "}
-        <button onClick={handleSignOut} className="underline" style={{ color: "var(--t2)" }}>
-          Sign out
-        </button>{" "}
-        and create a new account, or{" "}
-        <Link href="/login" className="underline" style={{ color: "var(--t2)" }}>
-          sign in
-        </Link>{" "}
-        with a different address.
-      </p>
+          {loading ? "Sending…" : cooldown > 0 ? `Resend in ${cooldown}s` : "Resend verification email"}
+        </button>
+        <Link href="/login" className="auth-sl">Use a different account</Link>
+      </div>
     </div>
   );
 }

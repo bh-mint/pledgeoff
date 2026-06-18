@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ResetPasswordClient } from "./ResetPasswordClient";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
   title: "Reset Password — PledgeOFF",
@@ -10,10 +11,15 @@ export const metadata: Metadata = {
 
 export default function ResetPasswordPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--canvas)" }}>
-      <Suspense fallback={null}>
-        <ResetPasswordClient />
-      </Suspense>
-    </main>
+    <div className="auth-main" style={{ minHeight: "100vh" }}>
+      <div className="auth-bar">
+        <ThemeToggle />
+      </div>
+      <div className="auth-body">
+        <Suspense fallback={null}>
+          <ResetPasswordClient />
+        </Suspense>
+      </div>
+    </div>
   );
 }
