@@ -3,26 +3,85 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { container } from "@/lib/container";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
-import { Logo } from "@/components/brand/Logo";
-import { VerdictMark } from "@/components/brand/VerdictMark";
-import { FooterMicro } from "@/components/FooterMicro";
-import type { Decision } from "@pledgeoff/core";
+import { PublicNav } from "@/components/PublicNav";
+import type { Decision, Signal } from "@pledgeoff/core";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-const VERDICT_CONFIG = {
-  GO:    { label: "GO",    color: "var(--validated)", desc: "Strong signal. Build it." },
-  KILL:  { label: "KILL",  color: "var(--kill)",      desc: "Weak signal. Don't build it." },
-  PIVOT: { label: "PIVOT", color: "var(--caution)",   desc: "Mixed signal. Change direction." },
-} as const;
+const SOURCE_GROUP: Record<string, string> = {
+  hn: "Hacker News",
+  devto: "Dev.to",
+  github: "GitHub",
+  brave: "Web",
+  google: "Web",
+  reddit: "Web",
+  producthunt: "Product Hunt",
+};
 
 function computeScore(decision: Decision): number {
   if (decision.dimensions && decision.dimensions.length > 0) {
     return Math.round(decision.dimensions.reduce((s, d) => s + d.weight * d.score, 0));
   }
   return Math.round(decision.confidence * 100);
+}
+
+function verdictChars(verdict: string): string[] {
+  return verdict.split("");
+}
+
+function verdictColorClass(verdict: string): string {
+  if (verdict === "GO") return "go-c";
+  if (verdict === "KILL") return "kll-c";
+  return "piv-c";
+}
+
+function verdictChipClass(verdict: string): string {
+  if (verdict === "GO") return "go";
+  if (verdict === "KILL") return "kill";
+  return "piv";
+}
+
+function sentimentClass(s: string): string {
+  if (s === "positive") return "pos";
+  if (s === "negative") return "neg";
+  return "neu";
+}
+
+function sentimentLabel(s: string): string {
+  if (s === "positive") return "Positive";
+  if (s === "negative") return "Negative";
+  return "Neutral";
+}
+
+function groupSignals(signals: Signal[]): Array<{ group: string; items: Signal[] }> {
+  const order = ["Hacker News", "Dev.to", "GitHub", "Product Hunt", "Web"];
+  const map = new Map<string, Signal[]>();
+  for (const sig of signals) {
+    const group = SOURCE_GROUP[sig.source] ?? "Web";
+    if (!map.has(group)) map.set(group, []);
+    map.get(group)!.push(sig);
+  }
+  return order
+    .filter((g) => map.has(g))
+    .map((g) => ({ group: g, items: map.get(g)! }));
+}
+
+function extractDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+function ottoObservation(reasoning: string): string {
+  const trimmed = reasoning.trim();
+  if (trimmed.length <= 300) return trimmed;
+  const cut = trimmed.slice(0, 300);
+  const lastSpace = cut.lastIndexOf(" ");
+  return cut.slice(0, lastSpace > 200 ? lastSpace : 300) + "…";
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -35,12 +94,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const decision = decisionResult.isOk() ? decisionResult.value : null;
 
   if (!idea || !decision) {
-    return { title: "Validation — PledgeOFF" };
+    return { title: "Field Report — PledgeOFF" };
   }
 
   const score = computeScore(decision);
-  const title = `${decision.verdict} · ${score}/100 — ${idea.text.slice(0, 60)}`;
-  const description = `PledgeOFF verdict: ${decision.verdict}. Score: ${score}/100. ${decision.reasoning.slice(0, 120)}`;
+  const ideaTitle = idea.text.split("\n\n")[0].slice(0, 60);
+  const title = `${decision.verdict} · ${score}/100 — ${ideaTitle} — PledgeOFF`;
+  const description = `PledgeOFF verdict: ${decision.verdict}. Score: ${score}/100. ${decision.reasoning.slice(0, 130)}`;
   const ogImageUrl = `https://pledgeoff.com/api/og?type=verdict&verdict=${encodeURIComponent(decision.verdict)}&score=${score}&text=${encodeURIComponent(idea.text.slice(0, 80))}`;
 
   return {
@@ -60,15 +120,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: [ogImageUrl],
     },
     alternates: { canonical: `https://pledgeoff.com/v/${id}` },
+    robots: { index: true, follow: true },
   };
 }
 
-export default async function SharePage({ params }: Props) {
+export default async function PublicVerdictPage({ params }: Props) {
   const { id } = await params;
 
-  const [ideaResult, decisionResult] = await Promise.all([
+  const [ideaResult, decisionResult, signalsResult] = await Promise.all([
     container.ideaRepo.findById(id),
     container.decisionRepo.findByIdeaId(id),
+    container.signalRepo.findByIdeaId(id),
   ]);
 
   const idea = ideaResult.isOk() ? ideaResult.value : null;
@@ -76,216 +138,272 @@ export default async function SharePage({ params }: Props) {
 
   if (!idea || !decision) notFound();
 
+  const signals = signalsResult.isOk() ? signalsResult.value : [];
+
   const supabase = createSupabaseServiceClient();
   const { data: authorProfile } = await supabase
-    .from('profiles')
-    .select('username, first_name')
-    .eq('id', idea.userId)
+    .from("profiles")
+    .select("username, first_name, last_name")
+    .eq("id", idea.userId)
     .single();
 
-  const authorHandle = authorProfile?.username
-    ? `@${authorProfile.username}`
+  const authorUsername = authorProfile?.username ?? null;
+  const authorHandle = authorUsername
+    ? `@${authorUsername}`
     : authorProfile?.first_name ?? null;
 
-  const cfg = VERDICT_CONFIG[decision.verdict];
   const score = computeScore(decision);
-  const hasDimensions = decision.dimensions && decision.dimensions.length > 0;
-  const valId = `val_${id.slice(0, 8)}`;
+  const chars = verdictChars(decision.verdict);
+  const colorClass = verdictColorClass(decision.verdict);
+  const chipClass = verdictChipClass(decision.verdict);
+  const hasDimensions = !!decision.dimensions?.length;
+  const signalGroups = groupSignals(signals);
+  const validatedDate = new Date(decision.createdAt).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
-  const verdictDaysAgo = Math.floor(
-    (new Date().getTime() - new Date(decision.createdAt).getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const TOOLS = [
+    { name: "ICP Analysis",          stage: "Understand", lock: "Founder+", desc: "Customer segments, pain points ranked by signal frequency, and direct quotes from evidence." },
+    { name: "Competitive Landscape", stage: "Understand", lock: "Founder+", desc: "Named competitors, positioning gaps, and market openings drawn from signal data." },
+    { name: "Revenue Model",         stage: "Plan",       lock: "Founder+", desc: "TAM estimate with 3 revenue scenarios — conservative, moderate, optimistic — and break-even timeline." },
+    { name: "Build Spec",            stage: "Plan",       lock: "Founder+", desc: "Stack recommendations with build / buy / OSS decisions, library options, and confidence tiers." },
+    { name: "Page Brief",            stage: "Launch",     lock: "Founder+", desc: "Landing page headline, features list, and waitlist CTA copy — ready to paste into your builder." },
+    { name: "GTM Brief",             stage: "Launch",     lock: "Team+",    desc: "Email sequence, A/B headline set, and pricing recommendation with anchoring rationale." },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--canvas)" }}>
-      {/* Top bar */}
-      <div className="border-b px-4 sm:px-10 h-14 flex items-center justify-between" style={{ borderColor: "var(--border)" }}>
-        <Link href="/" className="flex items-center gap-2" style={{ color: "var(--t1)" }}>
-          <Logo size={20} />
-          <span className="display text-[14px] font-semibold tracking-tight">
-            Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
-          </span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
-            signal verdict · {valId}
-          </span>
-          <Link
-            href="/login"
-            className="mono text-[11px] px-3 h-10 rounded border flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
-            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-          >
-            Validate your idea →
-          </Link>
-        </div>
-      </div>
+    <div style={{ minHeight: "100vh", background: "var(--bg)" }}>
+      <PublicNav />
 
-      {/* Content */}
-      <div className="flex-1 max-w-[680px] mx-auto w-full px-4 sm:px-8 py-10 sm:py-16">
+      <div className="pub-pw" style={{ paddingTop: 44, paddingBottom: 80 }}>
+
+        {/* Board card */}
+        <div className="bc" style={{ marginBottom: 32 }}>
+          <div className="bc-hd">
+            <span>Field Report &middot; {id.slice(0, 8).toUpperCase()}</span>
+            <span style={{ color: "rgba(243,239,226,0.35)" }}>PledgeOFF &middot; Bulletin</span>
+          </div>
+          <div className="bc-bd">
+            <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+              {chars.map((ch, i) => (
+                <div key={i} className={`fc fcl ${colorClass}`}>{ch}</div>
+              ))}
+            </div>
+            <div className="bstats">
+              <div className="bstat">
+                <div className="bs-k">Score</div>
+                <div className={`bs-v ${chipClass === "go" ? "go" : ""}`}>{score}</div>
+              </div>
+              <div className="bstat">
+                <div className="bs-k">Confidence</div>
+                <div className="bs-v">{Math.round(decision.confidence * 100)}%</div>
+              </div>
+              {signals.length > 0 && (
+                <div className="bstat">
+                  <div className="bs-k">Signals</div>
+                  <div className="bs-v">{signals.length}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Idea */}
-        <div className="mb-8 pb-8 border-b" style={{ borderColor: "var(--border)" }}>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
-              Idea validated
+        <div style={{ marginBottom: 36 }}>
+          <h1 style={{ fontFamily: "var(--font-bitter), serif", fontSize: "clamp(24px, 4vw, 38px)", fontWeight: 700, letterSpacing: "-0.025em", lineHeight: 1.15, color: "var(--ink)", marginBottom: 10 }}>
+            {idea.text.split("\n\n")[0]}
+          </h1>
+          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
+            <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--faint)" }}>
+              Validated {validatedDate}
             </span>
             {authorHandle && (
               <>
-                <span className="mono text-[10px]" style={{ color: "var(--border)" }}>·</span>
-                {authorProfile?.username ? (
+                <span style={{ width: 1, height: 10, background: "var(--line)", flexShrink: 0 }} />
+                {authorUsername ? (
                   <Link
-                    href={`/@${authorProfile.username}`}
-                    className="mono text-[10px] transition-opacity hover:opacity-70"
-                    style={{ color: "var(--t3)" }}
+                    href={`/profile/${authorUsername}`}
+                    style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--dim)", textDecoration: "underline", textUnderlineOffset: 2 }}
                   >
                     {authorHandle}
                   </Link>
                 ) : (
-                  <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+                  <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", color: "var(--faint)" }}>
                     {authorHandle}
                   </span>
                 )}
               </>
             )}
           </div>
-          <p className="text-[17px] font-medium leading-snug" style={{ color: "var(--t1)" }}>
-            {idea.text.split("\n\n")[0]}
-          </p>
         </div>
 
-        {/* Verdict card */}
-        <div
-          className="rounded-md border overflow-hidden relative"
-          style={{ borderColor: `${cfg.color}30`, background: "var(--surface)" }}
-        >
-          {/* Ambient glow */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `radial-gradient(ellipse 60% 40% at 20% 50%, ${cfg.color}18 0%, transparent 70%)`,
-            }}
-          />
-
-          <div className="relative p-8">
-            {/* Score + verdict */}
-            <div className="flex items-end gap-8 mb-8">
-              <div
-                className="display tnum font-semibold"
-                style={{ fontSize: "clamp(80px, 12vw, 160px)", lineHeight: 0.85, color: cfg.color }}
-                aria-label={`Score: ${score} out of 100`}
-              >
-                {score}
-              </div>
-              <div className="pb-2">
-                <div className="flex items-center gap-3 mb-2">
-                  <VerdictMark verdict={decision.verdict} size={36} />
-                  <div className="display text-[26px] font-semibold" style={{ color: cfg.color }}>
-                    {cfg.label}
-                  </div>
-                </div>
-                <div className="text-[13px]" style={{ color: "var(--t3)" }}>{cfg.desc}</div>
-                <div className="mono text-[10px] mt-2 uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>
-                  {hasDimensions ? `${decision.dimensions!.length} dimensions` : "confidence"} · {Math.round(decision.confidence * 100)}%
-                </div>
-                {decision.verdict === "GO" && (
-                  <Link
-                    href="/login?mode=signup"
-                    className="mt-3 mono text-[11px] px-3 h-8 rounded border inline-flex items-center transition-colors hover:border-(--accent) hover:text-(--accent)"
-                    style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-                  >
-                    Validate your idea in 60s →
-                  </Link>
-                )}
-              </div>
+        {/* Dimensions */}
+        {hasDimensions && (
+          <div className="sec" style={{ marginBottom: 20 }}>
+            <div className="sec-hd">
+              4 dimensions
+              <span className="r">Weighted verdict &middot; GO ≥ 75</span>
             </div>
-
-            {/* Score bars */}
-            {hasDimensions && (
-              <div className="mb-6">
-                <p className="mono text-[10px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>
-                  Score breakdown
-                </p>
-                <div>
-                  {decision.dimensions!.map((d) => {
-                    const dimColor = d.score >= 75 ? "var(--validated)" : d.score >= 50 ? "var(--caution)" : "var(--kill)";
-                    return (
+            <div className="sec-bd">
+              {decision.dimensions!.map((d) => {
+                const isWeak = d.score < 70;
+                return (
+                  <div className="dim-r" key={d.name}>
+                    <span className="dim-nm">
+                      {d.name}
+                      {isWeak && (
+                        <span style={{ color: "var(--pivot)", fontSize: 8, marginLeft: 4 }}>↓ weakest</span>
+                      )}
+                    </span>
+                    <div className="dim-bar">
                       <div
-                        key={d.name}
-                        className="py-2 border-b"
-                        style={{ borderColor: "var(--border)" }}
-                        role="meter"
-                        aria-valuenow={d.score}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-label={d.name}
-                      >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <div className="text-[12px]" style={{ color: "var(--t1)" }}>{d.name}</div>
-                          <div className="flex items-center gap-2">
-                            <span className="mono text-[9px]" style={{ color: "var(--t3)" }}>{Math.round(d.weight * 100)}%</span>
-                            <span className="mono tnum text-[11px]" style={{ color: dimColor }}>{d.score}</span>
-                          </div>
-                        </div>
-                        <div className="h-[3px] rounded-full" style={{ background: "var(--border)" }}>
-                          <div className="h-[3px] rounded-full" style={{ width: `${d.score}%`, background: dimColor }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Reasoning */}
-            <div>
-              <p className="mono text-[10px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--t3)" }}>
-                Reasoning
-              </p>
-              <p className="text-[14px] leading-relaxed" style={{ color: "var(--t2)" }}>
-                {decision.reasoning}
-              </p>
+                        className="dim-fill"
+                        style={{
+                          width: `${d.score}%`,
+                          background: isWeak ? "var(--pivot)" : "var(--go)",
+                        }}
+                      />
+                    </div>
+                    <span className="dim-sc">{d.score}</span>
+                    <span className="dim-wt">&times;{d.weight.toFixed(2)} = {(d.weight * d.score).toFixed(1)}</span>
+                  </div>
+                );
+              })}
             </div>
+          </div>
+        )}
 
-            {verdictDaysAgo >= 7 && (
-              <div
-                className="mt-6 pt-5 border-t mono text-[11px]"
-                style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-              >
-                This verdict was generated {verdictDaysAgo} day{verdictDaysAgo !== 1 ? "s" : ""} ago. Signals may have changed.
-              </div>
-            )}
+        {/* Reasoning */}
+        <div className="sec" style={{ marginBottom: 20 }}>
+          <div className="sec-hd">
+            Reasoning
+            <span className="r">Cites signal sources</span>
+          </div>
+          <div className="sec-bd">
+            <div style={{ borderTop: `2px solid var(--${chipClass === "go" ? "go" : chipClass === "kill" ? "kill" : "pivot"})`, paddingTop: 10, marginBottom: 14 }}>
+              <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "9.5px", letterSpacing: "0.18em", textTransform: "uppercase", color: `var(--${chipClass === "go" ? "go" : chipClass === "kill" ? "kill" : "pivot"})`, fontWeight: 600 }}>
+                {decision.verdict} &mdash; Score {score} &mdash; Confidence {Math.round(decision.confidence * 100)}%
+              </span>
+            </div>
+            <p style={{ fontSize: "14.5px", color: "var(--dim)", lineHeight: 1.88 }}>
+              {decision.reasoning}
+            </p>
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="mt-10 pt-8 border-t text-center" style={{ borderColor: "var(--border)" }}>
-          <p className="text-[14px] mb-4" style={{ color: "var(--t2)" }}>
-            Validate your own startup idea — GO, KILL, or PIVOT in under 60 seconds.
-          </p>
-          <Link
-            href="/login"
-            className="display text-[14px] font-semibold px-6 h-11 rounded-md inline-flex items-center gap-2 transition-opacity hover:opacity-90"
-            style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-          >
-            Start free →
-          </Link>
-          <p className="mt-3 mono text-[10px]" style={{ color: "var(--t3)" }}>
-            Free · No credit card · 1 free validation / month
-          </p>
+        {/* Evidence */}
+        {signalGroups.length > 0 && (
+          <div className="sec" style={{ marginBottom: 32 }}>
+            <div className="sec-hd">
+              Evidence
+              <span className="r">{signals.length} signals &mdash; {signalGroups.map((g) => g.group).join(" · ")}</span>
+            </div>
+            <div className="sec-bd">
+              {signalGroups.map(({ group, items }) => (
+                <div className="sig-g" key={group}>
+                  <div className="sig-g-hd">
+                    <span>{group}</span>
+                    <span className="sc">{items.length} signal{items.length !== 1 ? "s" : ""}</span>
+                  </div>
+                  {items.slice(0, 4).map((sig) => (
+                    <div className="sig-itm" key={sig.id}>
+                      <span className={`sig-sent ${sentimentClass(sig.sentiment)}`}>
+                        {sentimentLabel(sig.sentiment)}
+                      </span>
+                      <div>
+                        <div className="sig-ttl">
+                          <a href={sig.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>
+                            {sig.title}
+                          </a>
+                        </div>
+                        <div className="sig-meta">{extractDomain(sig.url)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 6 Intelligence Tools */}
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>6 Intelligence Tools</span>
+            <span style={{ color: "var(--go)" }}>Sign up to run these on your own ideas</span>
+          </div>
+          <div className="tools-grid">
+            {TOOLS.map((tool) => (
+              <div className="tc" key={tool.name}>
+                <div className="tc-hd">
+                  <span>{tool.name}</span>
+                  <span className="stage">{tool.stage}</span>
+                </div>
+                <div className="tc-body">
+                  <div className="tc-nm">{tool.name}</div>
+                  <div className="tc-desc">{tool.desc}</div>
+                  <div className="tc-skel">
+                    <div className="sk" style={{ width: "80%" }} />
+                    <div className="sk" style={{ width: "60%" }} />
+                    <div className="sk" style={{ width: "72%" }} />
+                  </div>
+                </div>
+                <div className="tc-foot">
+                  <span className="tc-lock">{tool.lock}</span>
+                  <Link href="/login?mode=signup" className="tc-cta">Sign up free &rarr;</Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Otto */}
+        <div className="sec" style={{ marginBottom: 0 }}>
+          <div className="sec-hd">
+            Otto &middot; Decision co-pilot
+            <span className="r">Proactive insight &mdash; always visible</span>
+          </div>
+          <div className="sec-bd">
+            <div className="otto-insight">
+              <div className="oi-label">Otto &middot; Field observation</div>
+              <p className="oi-text">&ldquo;{ottoObservation(decision.reasoning)}&rdquo;</p>
+            </div>
+            <div className="otto-gate">
+              <div className="og-left">
+                <div className="og-prompt">Ask Otto anything about this idea&hellip;</div>
+                <div className="og-dots">
+                  <div className="og-dot" />
+                  <div className="og-dot" />
+                  <div className="og-dot" />
+                </div>
+              </div>
+              <Link
+                href="/login?mode=signup"
+                style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "10px", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", padding: "9px 16px", background: "var(--ink)", color: "var(--bg)", display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none", flexShrink: 0 }}
+              >
+                Sign up to ask Otto &rarr;
+              </Link>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* CTA band — full width */}
+      <div className="cta-band">
+        <div className="cta-inner">
+          <span className="cta-eyebrow">PledgeOFF &middot; Decision intelligence for founders</span>
+          <h2 className="cta-h">Validate your own idea.</h2>
+          <p className="cta-sub">Real signals, traceable sources, a verdict in ~15 seconds. First validation free, no card required.</p>
+          <div className="cta-btns">
+            <Link href="/login?mode=signup" className="btn-cta-p">Create free account &rarr;</Link>
+            <Link href="/pricing" className="btn-cta-g">See what&rsquo;s included</Link>
+          </div>
+          <p className="cta-note">1 free validation per month &middot; No credit card &middot; No hype</p>
         </div>
       </div>
-
-      {/* Branding strip */}
-      <div className="border-t py-4 flex items-center justify-center" style={{ borderColor: "var(--border)" }}>
-        <Link
-          href="/"
-          className="mono text-[11px] transition-opacity hover:opacity-70"
-          style={{ color: "var(--t2)" }}
-        >
-          Validated with PledgeOFF →
-        </Link>
-      </div>
-
-      <FooterMicro />
     </div>
   );
 }
