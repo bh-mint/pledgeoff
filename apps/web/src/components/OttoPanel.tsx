@@ -11,23 +11,58 @@ export function OttoPanel({ children }: OttoPanelProps) {
 
   return (
     <>
-      {/* Floating button — bottom right */}
+      {/* Pill button — fixed bottom right */}
       <button
-        onClick={() => setOpen((o) => !o)}
-        aria-label={open ? "Close Otto chat" : "Open Otto chat"}
-        className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-2.5 rounded-full shadow-lg transition-all hover:scale-105"
-        style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+        onClick={() => setOpen(true)}
+        aria-label="Open Otto AI analyst"
+        className="otto-pill-btn"
       >
-        <div className="w-2 h-2 rounded-full otto-dot flex-shrink-0" style={{ background: "var(--accent-fg)" }} aria-hidden="true" />
-        <span className="mono text-[11px] font-medium">{open ? "Close" : "Ask Otto"}</span>
+        <span
+          className="otto-dot"
+          style={{
+            display: "inline-block",
+            width: 7,
+            height: 7,
+            borderRadius: "50%",
+            background: "currentColor",
+            opacity: 0.7,
+            flexShrink: 0,
+          }}
+          aria-hidden="true"
+        />
+        Ask Otto
       </button>
 
-      {/* Panel — always rendered for RSC children, toggled with hidden */}
+      {/* Overlay */}
       <div
-        className={`fixed bottom-20 right-6 z-40 w-96 max-w-[calc(100vw-48px)] rounded-2xl shadow-2xl overflow-hidden${open ? "" : " hidden"}`}
-        style={{ border: "1px solid var(--border)" }}
+        className={`otto-drawer-overlay${open ? " open" : ""}`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Drawer */}
+      <div
+        className={`otto-drawer${open ? " open" : ""}`}
+        role="dialog"
+        aria-label="Otto AI analyst"
+        aria-modal="true"
       >
-        {children}
+        <div className="otto-drawer-hd">
+          <div>
+            <div className="otto-drawer-name">Otto</div>
+            <div className="otto-drawer-sub">Chief Analyst</div>
+          </div>
+          <button
+            onClick={() => setOpen(false)}
+            className="otto-drawer-close"
+            aria-label="Close Otto"
+          >
+            Close ×
+          </button>
+        </div>
+        <div className="otto-drawer-body">
+          {children}
+        </div>
       </div>
     </>
   );

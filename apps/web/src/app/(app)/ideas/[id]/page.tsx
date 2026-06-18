@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
-import { IdeaPageClient } from "./IdeaPageClient";
-import { formatDate } from "@/lib/mdx-utils";
+import { VerdictPageClient } from "./VerdictPageClient";
 import { ExportButtons } from "./ExportButtons";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { OutcomeButton } from "@/components/OutcomeButton";
@@ -111,7 +110,7 @@ export default async function IdeaPage({ params }: Props) {
     : null;
   const showRevalidate = isOwn && decision && signalAgeDays !== null && signalAgeDays >= 7;
 
-  const { title, description, category } = parseIdeaText(idea.text);
+  const { title, category } = parseIdeaText(idea.text);
 
   // Category average score — query other decisions platform-wide for same category
   let categoryAvg: number | null = null;
@@ -125,94 +124,53 @@ export default async function IdeaPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-(--canvas)">
-{showOutcomeBanner && <OutcomeBanner ideaId={id} daysOld={daysOld} />}
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+      {showOutcomeBanner && <OutcomeBanner ideaId={id} daysOld={daysOld} />}
 
-      <div className="max-w-360 mx-auto px-4 sm:px-8 py-8 sm:py-12">
-        {/* Back + Idea header */}
-        <Link
-          href="/dashboard"
-          aria-label="Back to Dashboard"
-          className="mono text-[11px] text-(--t3) hover:text-(--t2) transition-colors uppercase tracking-[0.08em] mb-8 inline-block"
-        >
-          ← Back to Dashboard
-        </Link>
-
-        <div className="mb-10 pb-10 border-b border-(--border)">
-            <div className="flex items-center justify-between gap-3 mb-3">
-            <div className="flex items-center gap-3">
-              <p className="mono text-[10px] text-(--t3) uppercase tracking-[0.12em]">
-                Signal Verdict · {formatDate(idea.createdAt)}
-              </p>
-              {category && (
-                <span
-                  className="mono text-[9px] uppercase tracking-widest px-2 py-0.5 rounded"
-                  style={{
-                    color: "var(--accent)",
-                    background: "color-mix(in srgb, var(--accent) 8%, transparent)",
-                    border: "1px solid color-mix(in srgb, var(--accent) 20%, transparent)",
-                  }}
-                >
-                  {category}
-                </span>
-              )}
-            </div>
-              {/* Desktop action buttons */}
-              <div className="hidden sm:flex items-center gap-2 flex-wrap">
-                {decision && <ShareVerdictButton ideaId={id} />}
-                {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
-                {isOwn && isOlderThan30Days && (
-                  <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
-                )}
-                <ExportButtons ideaId={id} plan={plan} />
-              </div>
-              {/* Mobile actions dropdown */}
-              <details className="sm:hidden relative">
-                <summary
-                  className="list-none mono text-[11px] h-9 px-3 rounded-md border cursor-pointer inline-flex items-center select-none"
-                  style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-                >
-                  ⋯ More
-                </summary>
-                <div
-                  className="absolute right-0 top-full mt-1 z-50 flex flex-col gap-1 rounded-md border p-2"
-                  style={{ borderColor: "var(--border)", background: "var(--canvas)", minWidth: "160px" }}
-                >
-                  {decision && <ShareVerdictButton ideaId={id} />}
-                  {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
-                  {isOwn && isOlderThan30Days && (
-                    <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
-                  )}
-                  <ExportButtons ideaId={id} plan={plan} />
-                </div>
-              </details>
-            </div>
-            <h1 className="display text-[22px] font-semibold tracking-tight text-(--t1) leading-snug mb-3">
-              {title}
-            </h1>
-            {description && (
-              <p className="text-[14px] text-(--t2) leading-relaxed">
-                {description}
-              </p>
+      {/* Page-level header bar: back + title + actions */}
+      <div style={{ borderBottom: "1px solid var(--line)", background: "var(--surface)" }}>
+        <div style={{ maxWidth: 1600, margin: "0 auto", padding: "10px 28px", display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+          <Link
+            href="/dashboard"
+            className="mono"
+            style={{ fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--faint)", textDecoration: "none", flexShrink: 0 }}
+          >
+            ← Dashboard
+          </Link>
+          <span style={{ color: "var(--line)" }}>|</span>
+          <h1
+            className="display"
+            style={{ fontSize: 14, fontWeight: 700, color: "var(--ink)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}
+          >
+            {title}
+          </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
+            {decision && <ShareVerdictButton ideaId={id} />}
+            {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
+            {isOwn && isOlderThan30Days && (
+              <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
             )}
+            <ExportButtons ideaId={id} plan={plan} />
+          </div>
         </div>
-
-        {/* Decision + Signals — two-column */}
-        <IdeaPageClient
-          idea={idea}
-          initialDecision={decision}
-          initialSignals={signals}
-          initialSimulation={initialSimulation}
-          initialLanding={initialLanding}
-          initialCustomers={initialCustomers}
-          initialBuild={initialBuild}
-          initialCompetitors={initialCompetitors}
-          initialLaunchKit={initialLaunchKit}
-          plan={plan}
-          categoryAvg={categoryAvg}
-        />
-
       </div>
+
+      <VerdictPageClient
+        idea={idea}
+        initialDecision={decision}
+        initialSignals={signals}
+        initialSimulation={initialSimulation}
+        initialLanding={initialLanding}
+        initialCustomers={initialCustomers}
+        initialBuild={initialBuild}
+        initialCompetitors={initialCompetitors}
+        initialLaunchKit={initialLaunchKit}
+        plan={plan}
+        categoryAvg={categoryAvg}
+        ideaTitle={title}
+        ideaCategory={category}
+      />
+
     </div>
   );
 }

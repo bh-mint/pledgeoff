@@ -199,15 +199,7 @@ export function NewIdeaClient({
     if (json.data?.id) {
       setIdeaId(json.data.id);
     }
-    setScreen("analysis");
-    setSubmitting(false);
-  }, [text, cat, context, teamId, submitting, validationsLeft, router]);
-
-  // Analysis animation
-  useEffect(() => {
-    if (screen !== "analysis") return;
-
-    // Reset
+    // Reset animation state before transitioning (event handler — no cascading re-render issue)
     setFlap(["·", "·", "·", "·"]);
     setFlapGreen(false);
     setElapsed(0);
@@ -219,6 +211,14 @@ export function NewIdeaClient({
     setShowAnStatus(false);
     setIsDone(false);
     setIsDoneVisible(false);
+    setScreen("analysis");
+    setSubmitting(false);
+  }, [text, cat, context, teamId, submitting, validationsLeft, router]);
+
+  // Analysis animation
+  useEffect(() => {
+    if (screen !== "analysis") return;
+
     clearTimers();
 
     // Flap cycling
@@ -292,7 +292,6 @@ export function NewIdeaClient({
     }, 15000));
 
     return () => clearTimers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen]);
 
   // Derived
