@@ -3,11 +3,10 @@
 import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { VerdictMark } from "@/components/brand/VerdictMark";
 import { getAuthToken } from "@/lib/auth-client";
 import { TeamAnalytics } from "@/components/TeamAnalytics";
-import { DecisionQueueView } from "./DecisionQueueView";
 import { TeamActivityFeed } from "@/components/TeamActivityFeed";
+import { DecisionQueueView } from "./DecisionQueueView";
 import type { Plan } from "@pledgeoff/core";
 import type { TeamActivityEvent } from "@/server/team/getTeamActivity";
 
@@ -45,22 +44,30 @@ export type TeamFeedRow = {
   reactions: { agree: number; disagree: number; myReaction: "agree" | "disagree" | null };
 };
 
-const VERDICT_COLOR: Record<string, string> = {
-  GO:    "var(--validated)",
-  KILL:  "var(--kill)",
-  PIVOT: "var(--caution)",
-};
-
 type SortKey = "date" | "score";
 
 function shortDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+  });
 }
 
 function isToday(iso: string) {
   const d = new Date(iso);
   const now = new Date();
-  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}
+
+function verdictClass(v: string | null): string {
+  if (v === "GO") return "go";
+  if (v === "KILL") return "kill";
+  if (v === "PIVOT") return "pivot";
+  return "";
 }
 
 interface DashboardClientProps {
@@ -73,6 +80,7 @@ interface DashboardClientProps {
   teamId?: string | null;
   plan?: Plan;
   isWorkspace?: boolean;
+  displayName?: string;
 }
 
 export function DashboardClient({
@@ -89,21 +97,25 @@ export function DashboardClient({
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortKey>("date");
   const searchRef = useRef<HTMLInputElement>(null);
-  const initialTab = (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("tab") === "priority") ? "priority" as const : "all" as const;
+  const initialTab =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("tab") === "priority"
+      ? ("priority" as const)
+      : ("all" as const);
   const [tab, setTab] = useState<"all" | "team" | "priority">(initialTab);
   const [verdictFilter, setVerdictFilter] = useState<string>("all");
   const [memberFilter, setMemberFilter] = useState<string>("all");
   const searchParams = useSearchParams();
   const billingSuccess = searchParams.get("billing") === "success";
   const [showBillingBanner, setShowBillingBanner] = useState(billingSuccess);
-
-  // reactions state: map ideaId → { agree, disagree, myReaction }
-  const [reactionState, setReactionState] = useState<Record<string, TeamFeedRow["reactions"]>>(
-    () => Object.fromEntries(teamFeedRows.map((r) => [r.id, r.reactions]))
+  const [reactionState, setReactionState] = useState<
+    Record<string, TeamFeedRow["reactions"]>
+  >(() =>
+    Object.fromEntries(teamFeedRows.map((r) => [r.id, r.reactions]))
   );
-
   const hasTeam = !!teamId;
   const isPaid = plan !== "free";
+  const showTeamTab = isPaid;
   const router = useRouter();
   const [quickText, setQuickText] = useState("");
   const [quickStatus, setQuickStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -118,10 +130,16 @@ export function DashboardClient({
     setQuickStatus("loading");
     setQuickError("");
     const token = await getAuthToken();
-    if (!token) { router.push("/login"); return; }
+    if (!token) {
+      router.push("/login");
+      return;
+    }
     const res = await fetch("/api/v1/ideas", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ text: quickText.trim() }),
     });
     const json = await res.json();
@@ -132,13 +150,12 @@ export function DashboardClient({
     }
     router.push(`/ideas/${json.data.id}`);
   };
-  const showTeamTab = isPaid;
 
   useEffect(() => {
     if (!billingSuccess) return;
     const t = setTimeout(() => setShowBillingBanner(false), 5000);
     return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -158,20 +175,28 @@ export function DashboardClient({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [router]);
 
-  const handleReact = useCallback(async (ideaId: string, reaction: "agree" | "disagree") => {
-    const current = reactionState[ideaId];
-    const newReaction = current?.myReaction === reaction ? null : reaction;
-    const token = await getAuthToken();
-    const res = await fetch(`/api/v1/ideas/${ideaId}/reactions`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      body: JSON.stringify({ reaction: newReaction }),
-    });
-    if (res.ok) {
-      const { data } = await res.json() as { data: { agree: number; disagree: number; myReaction: "agree" | "disagree" | null } };
-      setReactionState((prev) => ({ ...prev, [ideaId]: data }));
-    }
-  }, [reactionState]);
+  const handleReact = useCallback(
+    async (ideaId: string, reaction: "agree" | "disagree") => {
+      const current = reactionState[ideaId];
+      const newReaction = current?.myReaction === reaction ? null : reaction;
+      const token = await getAuthToken();
+      const res = await fetch(`/api/v1/ideas/${ideaId}/reactions`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ reaction: newReaction }),
+      });
+      if (res.ok) {
+        const { data } = (await res.json()) as {
+          data: { agree: number; disagree: number; myReaction: "agree" | "disagree" | null };
+        };
+        setReactionState((prev) => ({ ...prev, [ideaId]: data }));
+      }
+    },
+    [reactionState]
+  );
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -187,11 +212,14 @@ export function DashboardClient({
     setSelectedIds(new Set());
   }
 
-  const verdictCounts = useMemo(() => ({
-    GO:    rows.filter((r) => r.verdict === "GO").length,
-    KILL:  rows.filter((r) => r.verdict === "KILL").length,
-    PIVOT: rows.filter((r) => r.verdict === "PIVOT").length,
-  }), [rows]);
+  const verdictCounts = useMemo(
+    () => ({
+      GO: rows.filter((r) => r.verdict === "GO").length,
+      KILL: rows.filter((r) => r.verdict === "KILL").length,
+      PIVOT: rows.filter((r) => r.verdict === "PIVOT").length,
+    }),
+    [rows]
+  );
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -217,473 +245,433 @@ export function DashboardClient({
     if (deleting || selectedIds.size === 0) return;
     const count = selectedIds.size;
     if (!confirm(`Delete ${count} idea${count > 1 ? "s" : ""}? This cannot be undone.`)) return;
-
     setDeleting(true);
     const token = await getAuthToken();
-    if (!token) { setDeleting(false); return; }
-
+    if (!token) {
+      setDeleting(false);
+      return;
+    }
     await Promise.all(
       [...selectedIds].map((id) =>
         fetch(`/api/v1/ideas/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
-        }),
-      ),
+        })
+      )
     );
-
     setDeleting(false);
     exitSelectMode();
     router.refresh();
   }
 
-  return (
-    <>
-      {showBillingBanner && (
-        <div
-          className="rounded-md border px-5 py-3.5 flex items-center justify-between mb-4"
-          style={{ background: "color-mix(in srgb, var(--accent) 6%, transparent)", borderColor: "color-mix(in srgb, var(--accent) 25%, transparent)" }}
+  // ── Billing success banner ──
+  const billingBanner = showBillingBanner && (
+    <div
+      className="bc"
+      style={{
+        background: "color-mix(in srgb, var(--go) 6%, transparent)",
+        borderColor: "color-mix(in srgb, var(--go) 25%, transparent)",
+        padding: "10px 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 20,
+      }}
+    >
+      <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 11, color: "var(--go)", letterSpacing: ".06em" }}>
+        Upgrade successful! Your new plan is now active.
+      </span>
+      <button
+        onClick={() => setShowBillingBanner(false)}
+        style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 10, color: "var(--faint)", background: "none", border: "none", cursor: "pointer", marginLeft: 16 }}
+      >
+        ✕
+      </button>
+    </div>
+  );
+
+  // ── View tabs ──
+  const tabs = (
+    <div className="db-view-tabs">
+      <div className="db-vtabs-left">
+        <button
+          className={`db-vtab${tab === "all" ? " on" : ""}`}
+          onClick={() => setTab("all")}
         >
-          <span className="text-[13px]" style={{ color: "var(--accent)" }}>
-            Upgrade successful! Your new plan is now active.
+          All ideas{" "}
+          <span className="db-vtab-badge">{totalCount}</span>
+        </button>
+        {showTeamTab && (
+          <button
+            className={`db-vtab${tab === "team" ? " on" : ""}`}
+            onClick={() => setTab("team")}
+          >
+            Team{" "}
+            <span className="db-vtab-plus">Team+</span>
+          </button>
+        )}
+        <button
+          className={`db-vtab${tab === "priority" ? " on" : ""}`}
+          onClick={() => setTab("priority")}
+        >
+          Priority
+        </button>
+      </div>
+      <div className="db-vtabs-right">
+        <span className="db-vt-count">
+          {tab === "all"
+            ? `${totalCount} surveys`
+            : tab === "team"
+            ? `${teamFeedRows.length} items`
+            : "ranked by signals"}
+        </span>
+        <Link href="/ideas/new" className="db-btn-new">
+          New survey →
+        </Link>
+      </div>
+    </div>
+  );
+
+  // ── ALL TAB ──
+  const allTab = tab === "all" && (
+    <>
+      {/* Search + sort + filter row */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12, alignItems: "center" }}>
+        <input
+          ref={searchRef}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="search ideas…"
+          aria-label="Search ideas"
+          aria-keyshortcuts="/"
+          style={{
+            fontFamily: "var(--font-chivo-mono), monospace",
+            fontSize: 11,
+            letterSpacing: ".04em",
+            background: "transparent",
+            outline: "none",
+            padding: "5px 10px",
+            border: "1px solid var(--line)",
+            color: "var(--ink)",
+            width: 180,
+          }}
+        />
+        {/* Sort buttons */}
+        <div style={{ display: "flex", border: "1px solid var(--line)" }}>
+          {(["date", "score"] as SortKey[]).map((key) => (
+            <button
+              key={key}
+              onClick={() => setSort(key)}
+              style={{
+                fontFamily: "var(--font-chivo-mono), monospace",
+                fontSize: 9,
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                padding: "5px 10px",
+                background: sort === key ? "var(--surface-2)" : "transparent",
+                color: sort === key ? "var(--ink)" : "var(--faint)",
+                border: "none",
+                cursor: "pointer",
+              }}
+            >
+              {key}
+            </button>
+          ))}
+        </div>
+        {/* Verdict chips */}
+        {([
+          { key: "all", label: "All" },
+          { key: "GO", label: "GO" },
+          { key: "KILL", label: "KILL" },
+          { key: "PIVOT", label: "PIVOT" },
+        ] as const).map(({ key, label }) => {
+          const count = key === "all" ? rows.length : verdictCounts[key];
+          const active = verdictFilter === key;
+          const vc = verdictClass(key === "all" ? null : key);
+          return (
+            <button
+              key={key}
+              onClick={() => setVerdictFilter(key)}
+              style={{
+                fontFamily: "var(--font-chivo-mono), monospace",
+                fontSize: 9,
+                letterSpacing: ".1em",
+                textTransform: "uppercase",
+                padding: "5px 10px",
+                border: `1px solid ${active && vc ? `var(--${vc})` : "var(--line)"}`,
+                color: active && vc ? `var(--${vc})` : "var(--faint)",
+                background: active && vc ? `color-mix(in srgb, var(--${vc}) 8%, transparent)` : "transparent",
+                cursor: "pointer",
+              }}
+            >
+              {label} {count > 0 && count}
+            </button>
+          );
+        })}
+        {/* Select toggle */}
+        {rows.length > 0 && (
+          <button
+            onClick={() => { setSelectMode((v) => !v); setSelectedIds(new Set()); }}
+            style={{
+              fontFamily: "var(--font-chivo-mono), monospace",
+              fontSize: 9,
+              letterSpacing: ".1em",
+              textTransform: "uppercase",
+              padding: "5px 10px",
+              border: `1px solid ${selectMode ? "var(--kill)" : "var(--line)"}`,
+              color: selectMode ? "var(--kill)" : "var(--faint)",
+              background: "transparent",
+              cursor: "pointer",
+            }}
+          >
+            {selectMode ? "Cancel" : "Select"}
+          </button>
+        )}
+      </div>
+
+      {/* Bulk delete bar */}
+      {selectMode && selectedIds.size > 0 && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            padding: "8px 20px",
+            background: "color-mix(in srgb, var(--kill) 6%, transparent)",
+            border: "1px solid var(--line)",
+            borderBottom: "none",
+            marginBottom: -1,
+          }}
+        >
+          <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 11, color: "var(--dim)" }}>
+            {selectedIds.size} selected
           </span>
           <button
-            onClick={() => setShowBillingBanner(false)}
-            className="mono text-[11px] ml-4 shrink-0"
-            style={{ color: "var(--t3)" }}
+            onClick={handleBulkDelete}
+            disabled={deleting}
+            style={{
+              fontFamily: "var(--font-chivo-mono), monospace",
+              fontSize: 11,
+              letterSpacing: ".08em",
+              textTransform: "uppercase",
+              padding: "4px 10px",
+              border: "1px solid var(--kill)",
+              color: "var(--kill)",
+              background: "transparent",
+              cursor: "pointer",
+              opacity: deleting ? .5 : 1,
+            }}
           >
-            ✕
+            {deleting ? "Deleting…" : `Delete ${selectedIds.size} →`}
           </button>
         </div>
       )}
 
-      {/* Tab bar + contextual new validation */}
-      <div className="flex items-center justify-between mb-4 gap-3">
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setTab("all")}
-            className="mono text-[11px] px-3 h-10 rounded-md border transition-colors"
-            style={{
-              background: tab === "all" ? "var(--accent)" : "transparent",
-              color: tab === "all" ? "var(--accent-fg)" : "var(--t2)",
-              borderColor: tab === "all" ? "var(--accent)" : "var(--border)",
-            }}
-          >
-            All
-          </button>
-          {showTeamTab && (
-            <button
-              onClick={() => setTab("team")}
-              className="mono text-[11px] px-3 h-10 rounded-md border transition-colors"
-              style={{
-                background: tab === "team" ? "var(--accent)" : "transparent",
-                color: tab === "team" ? "var(--accent-fg)" : "var(--t2)",
-                borderColor: tab === "team" ? "var(--accent)" : "var(--border)",
-              }}
-            >
-              Team {teamName ? `· ${teamName}` : ""}
-            </button>
+      {/* Board card */}
+      <div className="bc">
+        <div className="bc-hd">
+          {isWorkspace && teamLogoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={teamLogoUrl} alt="" style={{ width: 16, height: 16, borderRadius: "50%", objectFit: "cover", marginRight: 8 }} aria-hidden />
           )}
-          <button
-            onClick={() => setTab("priority")}
-            className="mono text-[11px] px-3 h-10 rounded-md border transition-colors"
-            style={{
-              background: tab === "priority" ? "var(--accent)" : "transparent",
-              color: tab === "priority" ? "var(--accent-fg)" : "var(--t2)",
-              borderColor: tab === "priority" ? "var(--accent)" : "var(--border)",
-            }}
-          >
-            Priority
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="hidden sm:inline mono text-[10px] px-2 py-1 rounded border" style={{ borderColor: "var(--border)", color: "var(--t3)" }}>
-            [N] new · [/] search
+          {isWorkspace ? (teamName ? `${teamName} workspace` : "Workspace") : "Idea History Board"}
+          <span className="r">
+            {plan} plan
+            {" · "}
+            {totalCount} {totalCount === 1 ? "survey" : "surveys"}
           </span>
-          {(plan === "free" || plan === "founder") && (
-            <Link
-              href="/pricing"
-              className="hidden sm:inline-flex mono text-[11px] px-3 h-8 rounded-md border items-center transition-colors hover:border-(--accent) hover:text-(--accent) shrink-0"
-              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-            >
-              Upgrade →
-            </Link>
-          )}
-          {tab === "all" && rows.length > 0 && (
-            <button
-              onClick={() => { setSelectMode((v) => !v); setSelectedIds(new Set()); }}
-              className="mono text-[11px] px-3 h-8 rounded-md border transition-colors shrink-0"
-              style={{
-                borderColor: selectMode ? "var(--kill)" : "var(--border)",
-                color: selectMode ? "var(--kill)" : "var(--t3)",
-              }}
-            >
-              {selectMode ? "Cancel" : "Select"}
-            </button>
-          )}
-          <Link
-            href="/ideas/new"
-            aria-keyshortcuts="n"
-            className="mono text-[11px] px-3 h-8 rounded-md border inline-flex items-center gap-1.5 transition-colors hover:border-(--accent) hover:text-(--accent) shrink-0"
-            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-          >
-            + New validation
-          </Link>
         </div>
-      </div>
 
-      {/* ── All tab ── */}
-      {tab === "all" && (
-        <div
-          className="rounded-md border"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-        >
-          {/* Table header */}
-          <div
-            className="px-4 sm:px-6 py-4 border-b flex flex-wrap gap-3 items-center"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1) flex items-center gap-2">
-              {isWorkspace && teamLogoUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={teamLogoUrl} alt="" className="w-5 h-5 rounded object-cover shrink-0" aria-hidden="true" />
-              )}
-              {isWorkspace ? (teamName ? `${teamName} workspace` : "Workspace") : "My validations"}
-            </h2>
-            <span className="mono text-[10px] text-(--t3)">
-              {totalCount}
-            </span>
-            <div
-              className="ml-auto flex rounded border overflow-hidden"
-              style={{ borderColor: "var(--border)" }}
-            >
-              {(["date", "score"] as SortKey[]).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setSort(key)}
-                  className="mono text-[9px] px-2.5 h-8 uppercase tracking-[0.08em] transition-colors"
-                  style={{
-                    background: sort === key ? "var(--border)" : "transparent",
-                    color: sort === key ? "var(--t1)" : "var(--t3)",
-                  }}
-                >
-                  {key}
-                </button>
-              ))}
-            </div>
-            <input
-              ref={searchRef}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="search ideas…"
-              aria-label="Search ideas"
-              aria-keyshortcuts="/"
-              className="w-full sm:w-44 bg-transparent outline-none px-3 h-8 sm:h-7 text-[12px] rounded-md border"
-              style={{ borderColor: "var(--border)", color: "var(--t1)" }}
-            />
-            {/* Verdict filter chips */}
-            <div className="flex items-center gap-1 w-full sm:w-auto">
-              {([
-                { key: "all",   label: "All",  color: "var(--t2)" },
-                { key: "GO",    label: "GO",   color: "var(--validated)" },
-                { key: "KILL",  label: "KILL", color: "var(--kill)" },
-                { key: "PIVOT", label: "PIVOT",color: "var(--caution)" },
-              ] as const).map(({ key, label, color }) => {
-                const count = key === "all" ? rows.length : verdictCounts[key];
-                const active = verdictFilter === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setVerdictFilter(key)}
-                    className="mono text-[9px] px-2.5 h-9 rounded border transition-colors shrink-0"
-                    style={{
-                      borderColor: active ? color : "var(--border)",
-                      color: active ? color : "var(--t3)",
-                      background: active ? `color-mix(in srgb, ${color} 8%, transparent)` : "transparent",
-                    }}
-                  >
-                    {label} {count > 0 && <span style={{ opacity: 0.7 }}>{count}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Bulk action bar */}
-          {selectMode && selectedIds.size > 0 && (
-            <div
-              className="px-4 sm:px-6 py-2.5 border-b flex items-center gap-3"
-              style={{ borderColor: "var(--border)", background: "color-mix(in srgb, var(--kill) 6%, transparent)" }}
-            >
-              <span className="mono text-[11px] text-(--t2)">
-                {selectedIds.size} selected
-              </span>
-              <button
-                onClick={handleBulkDelete}
-                disabled={deleting}
-                className="mono text-[11px] px-3 h-7 rounded border transition-colors disabled:opacity-50"
-                style={{ borderColor: "var(--kill)", color: "var(--kill)" }}
-              >
-                {deleting ? "Deleting…" : `Delete ${selectedIds.size} →`}
-              </button>
-            </div>
-          )}
-
-          {/* Column headers — desktop only */}
-          <div
-            className="hidden sm:grid px-6 py-2.5 grid-cols-12 gap-3 border-b mono text-[10px] uppercase tracking-[0.14em]"
-            style={{ borderColor: "var(--border)", color: "var(--t3)" }}
-          >
-            <div className="col-span-1 flex items-center">
+        <div className="db-idea-tbl">
+          {/* Column headers */}
+          <div className="db-idea-col-head">
+            <span className="db-ich">
               {selectMode ? (
                 <button
                   onClick={toggleSelectAll}
-                  className="w-4 h-4 rounded border flex items-center justify-center"
                   style={{
-                    borderColor: selectedIds.size === filtered.length && filtered.length > 0 ? "var(--accent)" : "var(--t3)",
-                    background: selectedIds.size === filtered.length && filtered.length > 0 ? "var(--accent)" : "transparent",
-                    color: "var(--accent-fg)",
-                    fontSize: "9px",
+                    width: 14,
+                    height: 14,
+                    border: `1px solid ${selectedIds.size === filtered.length && filtered.length > 0 ? "var(--go)" : "var(--faint)"}`,
+                    background: selectedIds.size === filtered.length && filtered.length > 0 ? "var(--go)" : "transparent",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 9,
+                    color: "var(--bg)",
                   }}
                 >
                   {selectedIds.size === filtered.length && filtered.length > 0 ? "✓" : ""}
                 </button>
-              ) : null}
-            </div>
-            <div className="col-span-4">Idea</div>
-            <div className="col-span-2">Score</div>
-            <div className="col-span-1">Verdict</div>
-            <div className="col-span-3">Tools</div>
-            <div className="col-span-1 text-right">Date</div>
+              ) : "Verdict"}
+            </span>
+            <span className="db-ich">Score</span>
+            <span className="db-ich">Idea</span>
+            <span className="db-ich">Category</span>
+            <span className="db-ich">Date</span>
+            <span className="db-ich">Tools</span>
+            <span className="db-ich" />
           </div>
 
           {/* Rows */}
           {filtered.map((row) => {
-            const color = row.verdict ? (VERDICT_COLOR[row.verdict] ?? "var(--t3)") : "var(--t3)";
-            const toolList = [
-              { key: "simulate" as const, label: "Sim" },
-              { key: "landing" as const, label: "Land" },
-              { key: "customers" as const, label: "Cust" },
-              { key: "build" as const, label: "Build" },
-            ];
+            const vc = verdictClass(row.verdict);
+            const toolKeys: (keyof ToolStatus)[] = ["simulate", "landing", "customers", "build"];
             return (
               <div
                 key={row.id}
-                className="relative border-b"
-                style={{
-                  borderColor: "var(--border)",
-                  background: selectedIds.has(row.id) ? "color-mix(in srgb, var(--accent) 6%, transparent)" : isToday(row.createdAt) ? "rgba(var(--accent-rgb,99,102,241),0.04)" : undefined,
-                  borderLeft: isToday(row.createdAt) ? "2px solid var(--accent)" : undefined,
-                }}
+                style={{ position: "relative", background: selectedIds.has(row.id) ? "color-mix(in srgb, var(--go) 5%, transparent)" : undefined }}
               >
-              <Link
-                href={`/ideas/${row.id}`}
-                className="block px-4 sm:px-6 py-3 sm:grid sm:grid-cols-12 sm:gap-3 items-center transition-colors"
-                style={{
-                  pointerEvents: selectMode ? "none" : undefined,
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "rgba(255,255,255,0.015)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "transparent")
-                }
-              >
-                {/* Verdict icon */}
-                <div className="hidden sm:flex sm:col-span-1 items-center" style={{ color: "var(--t1)" }}>
-                  {row.verdict && (row.verdict === "GO" || row.verdict === "PIVOT" || row.verdict === "KILL") ? (
-                    <VerdictMark verdict={row.verdict} size={24} />
-                  ) : (
-                    <span className="w-6 h-6" />
-                  )}
-                </div>
-
-                {/* Idea */}
-                <div className="sm:col-span-4 min-w-0 mb-1.5 sm:mb-0">
-                  <div className="flex items-center gap-2 min-w-0">
+                <Link href={`/ideas/${row.id}`} className="db-idea-row" style={{ pointerEvents: selectMode ? "none" : undefined }}>
+                  {/* Verdict */}
+                  <div className="db-ir-verdict">
+                    <div className={`db-ir-v ${vc}`} />
+                    <span className={`db-ir-vt ${vc}`}>{row.verdict ?? "—"}</span>
+                  </div>
+                  {/* Score */}
+                  <div className={`db-ir-score ${vc}`}>
+                    {row.score ?? "—"}
+                  </div>
+                  {/* Title */}
+                  <div className="db-ir-title">
                     {!row.isOwn && row.memberInitials && (
                       <span
-                        className="w-5 h-5 rounded-full border flex items-center justify-center mono text-[8px] font-semibold shrink-0"
                         title={`By ${row.memberInitials}`}
                         style={{
-                          borderColor: "var(--border)",
-                          background: "var(--canvas)",
-                          color: "var(--t2)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 18,
+                          height: 18,
+                          borderRadius: "50%",
+                          border: "1px solid var(--line)",
+                          fontFamily: "var(--font-chivo-mono), monospace",
+                          fontSize: 7,
+                          fontWeight: 600,
+                          color: "var(--dim)",
+                          marginRight: 6,
+                          flexShrink: 0,
+                          verticalAlign: "middle",
                         }}
                       >
                         {row.memberInitials}
                       </span>
                     )}
-                    <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
+                    {row.text.slice(0, 120)}{row.text.length > 120 ? "…" : ""}
+                  </div>
+                  {/* Category placeholder (not in row data, skip) */}
+                  <div className="db-ir-cat">
                     {row.needsOutcome && (
-                      <span
-                        className="mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0"
-                        style={{
-                          color: "var(--caution)",
-                          background: "color-mix(in srgb, var(--caution) 10%, transparent)",
-                          border: "1px solid color-mix(in srgb, var(--caution) 25%, transparent)",
-                        }}
-                      >
+                      <span style={{ color: "var(--pivot)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>
                         how did it go?
                       </span>
                     )}
-                    {row.outcomeType && (
-                      <span
-                        className="mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0"
-                        style={{
-                          color: row.outcomeType === "built_worked" ? "var(--validated)" : row.outcomeType === "not_built" ? "var(--t3)" : "var(--kill)",
-                          background: row.outcomeType === "built_worked" ? "color-mix(in srgb, var(--validated) 10%, transparent)" : "color-mix(in srgb, var(--border) 40%, transparent)",
-                          border: `1px solid ${row.outcomeType === "built_worked" ? "color-mix(in srgb, var(--validated) 25%, transparent)" : "var(--border)"}`,
-                        }}
-                      >
+                    {row.outcomeType && !row.needsOutcome && (
+                      <span style={{ color: row.outcomeType === "built_worked" ? "var(--go)" : "var(--kill)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>
                         {row.outcomeType === "built_worked" ? "built ✓" : row.outcomeType === "built_failed" ? "built ✗" : "not built"}
                       </span>
                     )}
-                    {row.signalsStale && !row.needsOutcome && (
-                      <span
-                        className="mono text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded shrink-0"
-                        style={{
-                          color: "var(--t3)",
-                          background: "color-mix(in srgb, var(--border) 40%, transparent)",
-                          border: "1px solid var(--border)",
-                        }}
-                      >
-                        signals outdated
+                    {row.signalsStale && !row.needsOutcome && !row.outcomeType && (
+                      <span style={{ color: "var(--faint)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>
+                        outdated
                       </span>
                     )}
                   </div>
-                </div>
-
-                {/* Mobile meta row */}
-                <div className="sm:contents flex items-center gap-3">
-                  {/* Score + mini bar */}
-                  <div className="sm:col-span-2 flex items-center gap-2 flex-1 sm:flex-none">
-                    {row.score !== null ? (
-                      <>
-                        <span
-                          className="display tnum text-[14px] sm:text-[16px] font-semibold w-7 shrink-0"
-                          style={{ color }}
-                        >
-                          {row.score}
-                        </span>
-                        <div
-                          className="flex-1 h-[3px] rounded-full"
-                          style={{ background: "var(--border)" }}
-                        >
-                          <div
-                            className="h-[3px] rounded-full"
-                            style={{ width: `${row.score}%`, background: color }}
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <span className="mono text-[10px] text-(--t3)">—</span>
-                    )}
-                  </div>
-
-                  {/* Verdict */}
-                  <div
-                    className="sm:col-span-1 mono text-[10px] shrink-0"
-                    style={{ color }}
-                  >
-                    {row.verdict ?? "—"}
-                  </div>
-
-                  {/* Tools pills */}
-                  <div className="sm:col-span-3 hidden sm:flex items-center gap-1">
-                    {toolList.map(({ key, label }) => (
-                      <span
-                        key={key}
-                        className="mono text-[9px] px-1.5 py-0.5 rounded"
-                        style={{
-                          background: row.tools[key] ? "rgba(125,214,107,0.12)" : "rgba(255,255,255,0.04)",
-                          color: row.tools[key] ? "var(--validated)" : "var(--t3)",
-                          border: `1px solid ${row.tools[key] ? "rgba(125,214,107,0.3)" : "var(--border)"}`,
-                        }}
-                      >
-                        {row.tools[key] ? "✓" : "○"} {label}
-                      </span>
-                    ))}
-                  </div>
-
                   {/* Date */}
-                  <div className="sm:col-span-1 ml-auto sm:ml-0 sm:text-right mono text-[10px] shrink-0" style={{ color: "var(--t3)" }}>
+                  <div className="db-ir-date">
                     {isToday(row.createdAt) ? (
-                      <span style={{ color: "var(--accent)" }}>Today</span>
+                      <span style={{ color: "var(--go)" }}>Today</span>
                     ) : (
                       shortDate(row.createdAt)
                     )}
                   </div>
-                </div>
-              </Link>
-              {selectMode && (
-                <div
-                  className="absolute inset-0 z-10 cursor-pointer flex items-center pl-4 sm:pl-6"
-                  onClick={() => toggleSelect(row.id)}
-                >
-                  <span
-                    className="w-4 h-4 rounded border flex items-center justify-center text-[9px] shrink-0"
-                    style={{
-                      borderColor: selectedIds.has(row.id) ? "var(--accent)" : "var(--t3)",
-                      background: selectedIds.has(row.id) ? "var(--accent)" : "transparent",
-                      color: "var(--accent-fg)",
-                    }}
+                  {/* Tools */}
+                  <div className="db-ir-tools">
+                    {toolKeys.map((k) => (
+                      <div key={k} className={`db-tool-dot ${row.tools[k] ? "run" : "idle"}`} />
+                    ))}
+                  </div>
+                  {/* Arrow */}
+                  <div className="db-ir-arrow">→</div>
+                </Link>
+                {selectMode && (
+                  <div
+                    style={{ position: "absolute", inset: 0, zIndex: 10, cursor: "pointer", display: "flex", alignItems: "center", paddingLeft: 20 }}
+                    onClick={() => toggleSelect(row.id)}
                   >
-                    {selectedIds.has(row.id) ? "✓" : ""}
-                  </span>
-                </div>
-              )}
+                    <span
+                      style={{
+                        width: 14,
+                        height: 14,
+                        border: `1px solid ${selectedIds.has(row.id) ? "var(--go)" : "var(--faint)"}`,
+                        background: selectedIds.has(row.id) ? "var(--go)" : "transparent",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 9,
+                        color: "var(--bg)",
+                      }}
+                    >
+                      {selectedIds.has(row.id) ? "✓" : ""}
+                    </span>
+                  </div>
+                )}
               </div>
             );
           })}
 
-          {/* Empty */}
+          {/* Empty filtered state */}
           {filtered.length === 0 && (
-            <div className="px-6 py-16">
+            <div style={{ padding: "48px 28px" }}>
               {search ? (
-                <p className="text-center text-[13px] text-(--t3)">No results for &ldquo;{search}&rdquo;.</p>
+                <p style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 12, color: "var(--faint)", textAlign: "center" }}>
+                  No results for &ldquo;{search}&rdquo;.
+                </p>
               ) : (
-                <div className="max-w-[560px] mx-auto">
-                  <p className="mono text-[10px] uppercase tracking-[0.14em] text-(--t3) mb-4">
-                    step 01 · signal verdict
+                <div style={{ maxWidth: 480, margin: "0 auto" }}>
+                  <p style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 14 }}>
+                    Step 01 · Signal verdict
                   </p>
-                  <h2 className="display text-[28px] sm:text-[36px] font-semibold tracking-tight leading-[1.05] text-(--t1) mb-2">
+                  <h2 style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 28, fontWeight: 700, color: "var(--ink)", marginBottom: 8, lineHeight: 1.1 }}>
                     What are you building?
                   </h2>
-                  <p className="text-[13px] text-(--t2) mb-6">
+                  <p style={{ fontSize: 14, color: "var(--dim)", marginBottom: 20, lineHeight: 1.65 }}>
                     One sentence. Get a GO / KILL / PIVOT verdict in under 60 seconds.
                   </p>
-                  <form onSubmit={handleQuickValidate} className="space-y-3">
+                  <form onSubmit={handleQuickValidate} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     <textarea
                       value={quickText}
                       onChange={(e) => setQuickText(e.target.value)}
                       placeholder="AI-powered meal planner that adapts to your gym schedule…"
                       rows={3}
                       disabled={quickStatus === "loading"}
-                      className="w-full bg-transparent outline-none border rounded-md p-4 text-[14px] leading-[1.6] resize-none transition-colors"
                       style={{
-                        borderColor: quickText.length >= 10 ? "var(--accent)" : "var(--border)",
-                        color: "var(--t1)",
+                        fontFamily: "var(--font-bitter), Georgia, serif",
+                        fontSize: 14,
+                        lineHeight: 1.6,
+                        background: "transparent",
+                        outline: "none",
+                        border: `1px solid ${quickText.length >= 10 ? "var(--go)" : "var(--line)"}`,
+                        padding: 14,
+                        color: "var(--ink)",
+                        resize: "none",
+                        transition: "border-color .12s",
                       }}
                     />
                     {quickError && (
-                      <p className="text-[12px]" style={{ color: "var(--kill)" }}>{quickError}</p>
+                      <p style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 11, color: "var(--kill)" }}>{quickError}</p>
                     )}
-                    <div className="flex items-center gap-4">
+                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                       <button
                         type="submit"
                         disabled={quickText.trim().length < 10 || quickStatus === "loading"}
-                        className="display text-[13px] font-semibold px-5 h-10 rounded-md flex items-center gap-2 transition-all disabled:opacity-40"
-                        style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
+                        className="db-btn-new"
+                        style={{ opacity: quickText.trim().length < 10 || quickStatus === "loading" ? .45 : 1 }}
                       >
-                        {quickStatus === "loading" ? (
-                          <>
-                            <span className="inline-block w-3 h-3 rounded-full border-2 border-black/30 border-t-black/90 animate-spin" />
-                            Analyzing…
-                          </>
-                        ) : "Validate →"}
+                        {quickStatus === "loading" ? "Analyzing…" : "Validate →"}
                       </button>
-                      <span className="mono text-[10px] text-(--t3)">
+                      <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, color: "var(--faint)", letterSpacing: ".1em", textTransform: "uppercase" }}>
                         {quickText.length < 10 ? `${10 - quickText.length} chars min` : "ready"}
                       </span>
                     </div>
@@ -693,253 +681,216 @@ export function DashboardClient({
             </div>
           )}
         </div>
+      </div>
+    </>
+  );
+
+  // ── TEAM TAB ──
+  const teamTab = tab === "team" && showTeamTab && (
+    <>
+      {!hasTeam && (
+        <div className="bc" style={{ padding: "48px 28px", textAlign: "center" }}>
+          <p style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 18, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>
+            No team yet.
+          </p>
+          <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 20, lineHeight: 1.65 }}>
+            Create a team and invite colleagues in Settings → Team.
+          </p>
+          <Link href="/settings" className="db-btn-new">
+            Go to Settings →
+          </Link>
+        </div>
       )}
 
-      {/* ── Team tab ── */}
-      {tab === "team" && showTeamTab && (
-        <>
-          {/* No team yet */}
-          {!hasTeam && (
-            <div
-              className="rounded-md border px-6 py-16 text-center"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-            >
-              <div className="display text-[18px] font-semibold tracking-tight text-(--t1) mb-2">No team yet.</div>
-              <p className="text-[13px] mb-5" style={{ color: "var(--t2)" }}>
-                Create a team and invite colleagues in Settings → Team.
-              </p>
-              <Link
-                href="/settings"
-                className="mono text-[11px] px-4 h-9 rounded-md border inline-flex items-center transition-colors hover:border-(--accent)"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                Go to Settings →
-              </Link>
-            </div>
-          )}
+      {hasTeam && (() => {
+        const withVerdict = teamFeedRows.filter((r) => r.verdict);
+        const goCount = teamFeedRows.filter((r) => r.verdict === "GO").length;
+        const goRate = withVerdict.length > 0
+          ? Math.round((goCount / withVerdict.length) * 100)
+          : null;
+        const memberCounts = teamFeedRows.reduce<
+          Record<string, { initials: string; count: number }>
+        >((acc, r) => {
+          if (!acc[r.userId]) acc[r.userId] = { initials: r.memberInitials, count: 0 };
+          acc[r.userId].count++;
+          return acc;
+        }, {});
+        const mostActive = Object.values(memberCounts).sort((a, b) => b.count - a.count)[0] ?? null;
+        const members = Object.entries(memberCounts).map(([uid, v]) => ({ uid, ...v }));
+        const filteredFeed = teamFeedRows.filter((r) => {
+          if (verdictFilter !== "all" && r.verdict !== verdictFilter) return false;
+          if (memberFilter !== "all" && r.userId !== memberFilter) return false;
+          return true;
+        });
 
-          {hasTeam && (() => {
-            // Team pulse stats
-            const withVerdict = teamFeedRows.filter((r) => r.verdict);
-            const goCount = teamFeedRows.filter((r) => r.verdict === "GO").length;
-            const goRate = withVerdict.length > 0 ? Math.round((goCount / withVerdict.length) * 100) : null;
-            const memberCounts = teamFeedRows.reduce<Record<string, { initials: string; count: number }>>((acc, r) => {
-              if (!acc[r.userId]) acc[r.userId] = { initials: r.memberInitials, count: 0 };
-              acc[r.userId].count++;
-              return acc;
-            }, {});
-            const mostActive = Object.values(memberCounts).sort((a, b) => b.count - a.count)[0] ?? null;
-
-            // Unique members for filter
-            const members = Object.entries(memberCounts).map(([uid, v]) => ({ uid, ...v }));
-
-            // Filtered feed
-            const filteredFeed = teamFeedRows.filter((r) => {
-              if (verdictFilter !== "all" && r.verdict !== verdictFilter) return false;
-              if (memberFilter !== "all" && r.userId !== memberFilter) return false;
-              return true;
-            });
-
-            return (
-              <>
-                {/* Team pulse */}
-                <div
-                  className="rounded-md border p-4 mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-                >
-                  <div className="border-l pl-3" style={{ borderColor: "var(--border)" }}>
-                    <div className="mono text-[9px] uppercase tracking-[0.14em] text-(--t3)">Total validations</div>
-                    <div className="display text-[24px] tnum font-semibold text-(--t1) mt-1">{teamFeedRows.length}</div>
-                  </div>
-                  <div className="border-l pl-3" style={{ borderColor: "var(--border)" }}>
-                    <div className="mono text-[9px] uppercase tracking-[0.14em] text-(--t3)">GO rate</div>
-                    <div className="display text-[24px] tnum font-semibold mt-1" style={{ color: "var(--validated)" }}>
-                      {goRate !== null ? `${goRate}%` : "—"}
-                    </div>
-                  </div>
-                  <div className="border-l pl-3" style={{ borderColor: "var(--border)" }}>
-                    <div className="mono text-[9px] uppercase tracking-[0.14em] text-(--t3)">Pending</div>
-                    <div className="display text-[24px] tnum font-semibold text-(--t1) mt-1">
-                      {teamFeedRows.filter((r) => !r.verdict).length}
-                    </div>
-                  </div>
-                  <div className="border-l pl-3" style={{ borderColor: "var(--border)" }}>
-                    <div className="mono text-[9px] uppercase tracking-[0.14em] text-(--t3)">Most active</div>
-                    {mostActive ? (
-                      <div className="flex items-center gap-2 mt-1">
-                        <div
-                          className="w-6 h-6 rounded-full border flex items-center justify-center mono text-[9px] font-semibold shrink-0"
-                          style={{ borderColor: "var(--border)", background: "var(--canvas)", color: "var(--t2)" }}
-                        >
-                          {mostActive.initials}
-                        </div>
-                        <span className="mono text-[11px] text-(--t1)">{mostActive.count}</span>
+        return (
+          <>
+            {/* Team pulse stats */}
+            <div className="stats-strip" style={{ marginBottom: 20, border: "1px solid var(--line)" }}>
+              <div className="stats-i" style={{ gridTemplateColumns: "repeat(4,1fr)" }}>
+                <div className="stat-cell">
+                  <span className="stat-lbl">Total validations</span>
+                  <div className="stat-val">{teamFeedRows.length}</div>
+                </div>
+                <div className="stat-cell">
+                  <span className="stat-lbl">GO rate</span>
+                  <div className="stat-val go">{goRate !== null ? `${goRate}%` : "—"}</div>
+                </div>
+                <div className="stat-cell">
+                  <span className="stat-lbl">Pending</span>
+                  <div className="stat-val">{teamFeedRows.filter((r) => !r.verdict).length}</div>
+                </div>
+                <div className="stat-cell">
+                  <span className="stat-lbl">Most active</span>
+                  {mostActive ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                      <div style={{ width: 28, height: 28, borderRadius: "50%", background: "var(--ink)", color: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, fontWeight: 600, flexShrink: 0 }}>
+                        {mostActive.initials}
                       </div>
-                    ) : (
-                      <div className="display text-[24px] tnum font-semibold text-(--t1) mt-1">—</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Activity feed */}
-                <div className="rounded-md border mb-4" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                  <div className="px-4 sm:px-6 py-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border)" }}>
-                    <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">
-                      Recent activity
-                    </h2>
-                    {teamActivityEvents.length > 0 && (
-                      <span className="mono text-[10px] text-(--t3)">{teamActivityEvents.length}</span>
-                    )}
-                  </div>
-                  <TeamActivityFeed events={teamActivityEvents} />
-                </div>
-
-                {/* Feed */}
-                <div className="rounded-md border" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-                  {/* Filters header */}
-                  <div className="px-4 sm:px-6 py-3 border-b flex flex-wrap items-center gap-3" style={{ borderColor: "var(--border)" }}>
-                    <h2 className="display text-[15px] font-semibold tracking-tight text-(--t1)">
-                      {teamName ?? "Team"} feed
-                    </h2>
-                    <span className="mono text-[10px] text-(--t3)">{filteredFeed.length}</span>
-                    <div className="ml-auto flex items-center gap-2">
-                      {/* Verdict filter */}
-                      <select
-                        value={verdictFilter}
-                        onChange={(e) => setVerdictFilter(e.target.value)}
-                        className="mono text-[10px] h-7 px-2 rounded-md border bg-transparent outline-none"
-                        style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-                      >
-                        <option value="all">All verdicts</option>
-                        <option value="GO">GO</option>
-                        <option value="KILL">KILL</option>
-                        <option value="PIVOT">PIVOT</option>
-                        <option value="">Pending</option>
-                      </select>
-                      {/* Member filter */}
-                      {members.length > 1 && (
-                        <select
-                          value={memberFilter}
-                          onChange={(e) => setMemberFilter(e.target.value)}
-                          className="mono text-[10px] h-7 px-2 rounded-md border bg-transparent outline-none"
-                          style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-                        >
-                          <option value="all">All members</option>
-                          {members.map((m) => (
-                            <option key={m.uid} value={m.uid}>{m.initials} ({m.count})</option>
-                          ))}
-                        </select>
-                      )}
+                      <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 13, color: "var(--ink)", fontWeight: 600 }}>
+                        {mostActive.count}
+                      </span>
                     </div>
-                  </div>
-
-                  {/* Empty filtered */}
-                  {filteredFeed.length === 0 && (
-                    <div className="px-6 py-12 text-center">
-                      <div className="mono text-[12px] text-(--t3)">No validations match the current filters.</div>
-                    </div>
+                  ) : (
+                    <div className="stat-val">—</div>
                   )}
-
-                  {/* Feed rows */}
-                  {filteredFeed.map((row) => {
-                    const color = row.verdict ? (VERDICT_COLOR[row.verdict] ?? "var(--t3)") : "var(--t3)";
-                    const rxn = reactionState[row.id] ?? row.reactions;
-                    return (
-                      <div
-                        key={row.id}
-                        className="px-4 sm:px-6 py-3.5 border-b"
-                        style={{ borderColor: "var(--border)" }}
-                      >
-                        <div className="flex items-start gap-3">
-                          {/* Avatar */}
-                          <div
-                            className="w-7 h-7 rounded-full border flex items-center justify-center mono text-[10px] font-semibold shrink-0 mt-0.5"
-                            style={{
-                              borderColor: row.isOwn ? "var(--accent)" : "var(--border)",
-                              background: row.isOwn ? "color-mix(in srgb, var(--accent) 12%, transparent)" : "var(--canvas)",
-                              color: row.isOwn ? "var(--accent)" : "var(--t2)",
-                            }}
-                          >
-                            {row.memberInitials}
-                          </div>
-
-                          {/* Main content */}
-                          <div className="flex-1 min-w-0">
-                            <Link href={`/ideas/${row.id}`} className="block hover:underline underline-offset-2">
-                              <div className="text-[13px] text-(--t1) truncate">{row.text}</div>
-                            </Link>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="mono text-[10px] text-(--t3)">
-                                {shortDate(row.createdAt)}{row.isOwn ? " · you" : ""}
-                              </span>
-                              {row.score !== null && (
-                                <span className="display tnum text-[12px] font-semibold" style={{ color }}>
-                                  {row.score}
-                                </span>
-                              )}
-                              {row.verdict && (row.verdict === "GO" || row.verdict === "PIVOT" || row.verdict === "KILL") && (
-                                <VerdictMark verdict={row.verdict} size={18} />
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Reactions */}
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <button
-                              onClick={() => handleReact(row.id, "agree")}
-                              className="flex items-center gap-1 mono text-[10px] px-2 py-1 rounded-md border transition-colors"
-                              style={{
-                                borderColor: rxn.myReaction === "agree" ? "var(--validated)" : "var(--border)",
-                                color: rxn.myReaction === "agree" ? "var(--validated)" : "var(--t3)",
-                                background: rxn.myReaction === "agree" ? "color-mix(in srgb, var(--validated) 8%, transparent)" : "transparent",
-                              }}
-                            >
-                              ↑ {rxn.agree > 0 ? rxn.agree : ""}
-                            </button>
-                            <button
-                              onClick={() => handleReact(row.id, "disagree")}
-                              className="flex items-center gap-1 mono text-[10px] px-2 py-1 rounded-md border transition-colors"
-                              style={{
-                                borderColor: rxn.myReaction === "disagree" ? "var(--kill)" : "var(--border)",
-                                color: rxn.myReaction === "disagree" ? "var(--kill)" : "var(--t3)",
-                                background: rxn.myReaction === "disagree" ? "color-mix(in srgb, var(--kill) 8%, transparent)" : "transparent",
-                              }}
-                            >
-                              ↓ {rxn.disagree > 0 ? rxn.disagree : ""}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
                 </div>
+              </div>
+            </div>
 
-                {/* Team analytics */}
-                <TeamAnalytics rows={teamFeedRows} plan={plan} />
-              </>
-            );
-          })()}
-        </>
-      )}
+            {/* Activity */}
+            <div className="bc" style={{ marginBottom: 20 }}>
+              <div className="bc-hd">
+                Recent activity
+                {teamActivityEvents.length > 0 && (
+                  <span className="r">{teamActivityEvents.length} events</span>
+                )}
+              </div>
+              <TeamActivityFeed events={teamActivityEvents} />
+            </div>
 
-      {/* ── Priority tab ── */}
-      {tab === "priority" && (
-        plan === "free" ? (
-          <div className="border rounded-md p-8 text-center" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-            <p className="display text-[18px] font-semibold text-(--t1) mb-2">Decision Queue</p>
-            <p className="text-[13px] mb-5" style={{ color: "var(--t2)" }}>
-              Automatically surfaces which stale ideas need a decision. Available on Founder and above.
-            </p>
-            <Link
-              href="/pricing"
-              className="mono text-[11px] px-4 h-9 rounded-md inline-flex items-center transition-opacity hover:opacity-90"
-              style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
-            >
-              Upgrade to Founder →
-            </Link>
-          </div>
-        ) : <DecisionQueueView />
-      )}
+            {/* Team feed */}
+            <div className="bc">
+              <div className="bc-hd">
+                {teamName ?? "Team"} feed
+                <span className="r">{filteredFeed.length} items</span>
+              </div>
+              {/* Filters */}
+              <div style={{ display: "flex", gap: 8, padding: "8px 20px", borderBottom: "1px solid var(--line)", flexWrap: "wrap" }}>
+                <select
+                  value={verdictFilter}
+                  onChange={(e) => setVerdictFilter(e.target.value)}
+                  style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 10, padding: "4px 8px", border: "1px solid var(--line)", background: "transparent", color: "var(--dim)", outline: "none" }}
+                >
+                  <option value="all">All verdicts</option>
+                  <option value="GO">GO</option>
+                  <option value="KILL">KILL</option>
+                  <option value="PIVOT">PIVOT</option>
+                  <option value="">Pending</option>
+                </select>
+                {members.length > 1 && (
+                  <select
+                    value={memberFilter}
+                    onChange={(e) => setMemberFilter(e.target.value)}
+                    style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 10, padding: "4px 8px", border: "1px solid var(--line)", background: "transparent", color: "var(--dim)", outline: "none" }}
+                  >
+                    <option value="all">All members</option>
+                    {members.map((m) => (
+                      <option key={m.uid} value={m.uid}>{m.initials} ({m.count})</option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              {/* Feed rows */}
+              {filteredFeed.length === 0 && (
+                <div style={{ padding: "28px", textAlign: "center" }}>
+                  <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 12, color: "var(--faint)" }}>
+                    No validations match the current filters.
+                  </span>
+                </div>
+              )}
+              {filteredFeed.map((row) => {
+                const vc = verdictClass(row.verdict);
+                const rxn = reactionState[row.id] ?? row.reactions;
+                return (
+                  <div key={row.id} style={{ padding: "12px 20px", borderBottom: "1px solid var(--line-soft)", display: "flex", gap: 12, alignItems: "flex-start" }}>
+                    <div style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${row.isOwn ? "var(--go)" : "var(--line)"}`, background: row.isOwn ? "color-mix(in srgb, var(--go) 10%, transparent)" : "var(--bg)", color: row.isOwn ? "var(--go)" : "var(--dim)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, fontWeight: 600, flexShrink: 0, marginTop: 2 }}>
+                      {row.memberInitials}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <Link href={`/ideas/${row.id}`} style={{ textDecoration: "none" }}>
+                        <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 13.5, fontWeight: 600, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {row.text}
+                        </div>
+                      </Link>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+                        <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, color: "var(--faint)" }}>
+                          {shortDate(row.createdAt)}{row.isOwn ? " · you" : ""}
+                        </span>
+                        {row.score !== null && (
+                          <span style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 14, fontWeight: 700, color: vc ? `var(--${vc})` : "var(--ink)" }}>
+                            {row.score}
+                          </span>
+                        )}
+                        {row.verdict && (
+                          <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, fontWeight: 600, color: vc ? `var(--${vc})` : "var(--faint)", letterSpacing: ".1em", textTransform: "uppercase" }}>
+                            {row.verdict}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      <button
+                        onClick={() => handleReact(row.id, "agree")}
+                        style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${rxn.myReaction === "agree" ? "rgba(26,106,60,.4)" : "var(--line)"}`, color: rxn.myReaction === "agree" ? "var(--go)" : "var(--faint)", background: rxn.myReaction === "agree" ? "var(--go-light)" : "transparent", cursor: "pointer", transition: "all .12s" }}
+                      >
+                        ↑ {rxn.agree > 0 ? rxn.agree : ""}
+                      </button>
+                      <button
+                        onClick={() => handleReact(row.id, "disagree")}
+                        style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${rxn.myReaction === "disagree" ? "rgba(158,42,26,.4)" : "var(--line)"}`, color: rxn.myReaction === "disagree" ? "var(--kill)" : "var(--faint)", background: rxn.myReaction === "disagree" ? "color-mix(in srgb, var(--kill) 8%, transparent)" : "transparent", cursor: "pointer", transition: "all .12s" }}
+                      >
+                        ↓ {rxn.disagree > 0 ? rxn.disagree : ""}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <TeamAnalytics rows={teamFeedRows} plan={plan} />
+          </>
+        );
+      })()}
+    </>
+  );
+
+  // ── PRIORITY TAB ──
+  const priorityTab = tab === "priority" && (
+    plan === "free" ? (
+      <div className="bc" style={{ padding: "48px 28px", textAlign: "center" }}>
+        <p style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 18, fontWeight: 700, color: "var(--ink)", marginBottom: 8 }}>
+          Decision Queue
+        </p>
+        <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 20, lineHeight: 1.65 }}>
+          Automatically surfaces which stale ideas need a decision. Available on Founder and above.
+        </p>
+        <Link href="/pricing" className="db-btn-new">
+          Upgrade to Founder →
+        </Link>
+      </div>
+    ) : (
+      <DecisionQueueView variant="main" />
+    )
+  );
+
+  return (
+    <>
+      {billingBanner}
+      {tabs}
+      {allTab}
+      {teamTab}
+      {priorityTab}
     </>
   );
 }
