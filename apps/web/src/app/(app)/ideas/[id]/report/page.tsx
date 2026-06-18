@@ -1,14 +1,16 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
+import { getUserPlan } from "@/server/billing/getUserPlan";
 import { logger } from "@pledgeoff/observability";
 import { PrintTrigger } from "./PrintTrigger";
 import { ReportActions } from "./ReportActions";
 
 export const metadata: Metadata = {
-  title: "Validation Report — PledgeOFF",
+  title: { absolute: "Field Report — PledgeOFF" },
   robots: { index: false, follow: false },
 };
 
@@ -17,10 +19,22 @@ interface Props {
   searchParams: Promise<{ print?: string }>;
 }
 
-const VERDICT_COLOR: Record<string, string> = {
-  GO: "#16a34a",
-  PIVOT: "#d97706",
-  KILL: "#dc2626",
+const PLAN_LABELS: Record<string, string> = {
+  free: "Free",
+  founder: "Founder",
+  team: "Team",
+  studio: "Studio",
+  enterprise: "Enterprise",
+};
+
+const SOURCE_LABEL: Record<string, string> = {
+  hn: "HN",
+  reddit: "Reddit",
+  github: "GitHub",
+  devto: "Dev.to",
+  brave: "Web",
+  google: "Web",
+  producthunt: "Product Hunt",
 };
 
 function formatCurrency(n: number): string {
@@ -38,6 +52,26 @@ function parseIdeaText(text: string): { title: string; description: string } {
   return { title, description: descParts.join("\n\n").trim() };
 }
 
+function dimFlag(score: number): { label: string; cls: "go" | "watch" | "kill" } {
+  if (score >= 75) return { label: `STRONG · +${score - 75} above threshold`, cls: "go" };
+  if (score >= 60) return { label: `OPEN · +${score - 60} above threshold`, cls: "go" };
+  if (score >= 50) return { label: `WATCH · ${score - 75} below threshold`, cls: "watch" };
+  return { label: `WEAK · ${score - 75} below threshold`, cls: "kill" };
+}
+
+function dimScoreClass(score: number): "go" | "watch" | "kill" {
+  return score >= 60 ? "go" : score >= 45 ? "watch" : "kill";
+}
+
+function toolStatus(
+  hasData: boolean,
+  planAllows: boolean,
+): { dot: "run" | "idle" | "lock"; tag: "run" | "idle" | "lock"; label: string } {
+  if (!planAllows) return { dot: "lock", tag: "lock", label: "Plan locked" };
+  if (hasData) return { dot: "run", tag: "run", label: "Complete" };
+  return { dot: "idle", tag: "idle", label: "Idle" };
+}
+
 export default async function ReportPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { print: autoPrint } = await searchParams;
@@ -45,7 +79,10 @@ export default async function ReportPage({ params, searchParams }: Props) {
 
   const ideaResult = await container.ideaRepo.findById(id);
   if (ideaResult.isErr()) {
-    logger.error({ traceId: "report", ideaId: id, error: String(ideaResult.error), outcome: "error" as const }, "report: ideaRepo.findById failed");
+    logger.error(
+      { traceId: "report", ideaId: id, error: String(ideaResult.error), outcome: "error" as const },
+      "report: ideaRepo.findById failed",
+    );
     throw new Error("Failed to load idea");
   }
   if (!ideaResult.value) notFound();
@@ -53,6 +90,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
   if (idea.userId !== user.id) notFound();
 
   const supabase = createSupabaseServiceClient();
+
   const [
     decisionResult,
     signalsResult,
@@ -60,7 +98,10 @@ export default async function ReportPage({ params, searchParams }: Props) {
     customersResult,
     buildResult,
     competitorsResult,
+    landingResult,
+    launchKitResult,
     profileResult,
+    plan,
   ] = await Promise.all([
     container.decisionRepo.findByIdeaId(id),
     container.signalRepo.findByIdeaId(id),
@@ -68,7 +109,14 @@ export default async function ReportPage({ params, searchParams }: Props) {
     container.customerAnalysisRepo.findByIdeaId(id),
     container.buildAnalysisRepo.findByIdeaId(id),
     container.competitorAnalysisRepo.findByIdeaId(id),
-    supabase.from("profiles").select("first_name, last_name, company_name").eq("id", user.id).single(),
+    container.landingPageRepo.findByIdeaId(id),
+    container.launchKitRepo.findByIdeaId(id),
+    supabase
+      .from("profiles")
+      .select("first_name, last_name, company_name")
+      .eq("id", user.id)
+      .single(),
+    getUserPlan(user.id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -77,12 +125,136 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const customers = customersResult.isOk() ? customersResult.value : null;
   const build = buildResult.isOk() ? buildResult.value : null;
   const competitors = competitorsResult.isOk() ? competitorsResult.value : null;
-  const profileData = profileResult.data as { first_name?: string | null; last_name?: string | null; company_name?: string | null } | null;
+  const landing = landingResult.isOk() ? landingResult.value : null;
+  const launchKit = launchKitResult.isOk() ? launchKitResult.value : null;
+  const profileData = profileResult.data as {
+    first_name?: string | null;
+    last_name?: string | null;
+    company_name?: string | null;
+  } | null;
   const companyName = profileData?.company_name ?? null;
 
   const { title, description } = parseIdeaText(idea.text);
-  const verdictColor = decision ? (VERDICT_COLOR[decision.verdict] ?? "#000") : "#000";
-  const generatedAt = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const ideaCategory = (() => {
+    const parts = idea.text.split("\n\n");
+    const last = parts[parts.length - 1]?.trim() ?? "";
+    return last.startsWith("Category:") ? last.replace("Category:", "").trim() : null;
+  })();
+
+  const canExport = plan !== "free";
+  const isWhiteLabel =
+    (plan === "studio" || plan === "enterprise") && !!companyName;
+  const showLock = !canExport;
+
+  const caseRef = idea.id.slice(0, 8).toUpperCase();
+  const generatedAt = new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const planLabel = PLAN_LABELS[plan] ?? plan;
+
+  const verdictV = decision?.verdict ?? "GO";
+  const verdictCls = verdictV === "GO" ? "go" : verdictV === "PIVOT" ? "pivot" : "kill";
+  const score = decision?.score ?? Math.round((decision?.confidence ?? 0) * 100);
+  const confidence = Math.round((decision?.confidence ?? 0) * 100);
+
+  // Tools section
+  const founderPlus = plan !== "free";
+  const teamPlus = plan === "team" || plan === "studio" || plan === "enterprise";
+
+  type ToolEntry = {
+    name: string;
+    dot: "run" | "idle" | "lock";
+    tag: "run" | "idle" | "lock";
+    label: string;
+    result: string;
+  };
+
+  const tools: ToolEntry[] = [
+    (() => {
+      const s = toolStatus(!!customers, true);
+      return {
+        name: "ICP Analysis",
+        ...s,
+        result: customers
+          ? `${customers.segments.length} segments identified`
+          : "Not yet run",
+      };
+    })(),
+    (() => {
+      const s = toolStatus(!!competitors, founderPlus);
+      return {
+        name: "Competitive",
+        ...s,
+        result:
+          !founderPlus
+            ? "Founder+ plan required to run this instrument"
+            : competitors
+              ? `${competitors.competitors.length} competitors mapped`
+              : "Not yet run — competitive landscape analysis",
+      };
+    })(),
+    (() => {
+      const s = toolStatus(!!simulation, founderPlus);
+      return {
+        name: "Revenue Model",
+        ...s,
+        result:
+          !founderPlus
+            ? "Founder+ plan required to run this instrument"
+            : simulation
+              ? `TAM ${formatCurrency(simulation.tamLow)}–${formatCurrency(simulation.tamHigh)} · ${simulation.breakEvenMonths}mo break-even`
+              : "Not yet run — TAM, pricing scenarios, break-even",
+      };
+    })(),
+    (() => {
+      const s = toolStatus(!!build, founderPlus);
+      return {
+        name: "Build Spec",
+        ...s,
+        result:
+          !founderPlus
+            ? "Founder+ plan required to run this instrument"
+            : build
+              ? `${build.stack.length} stack components · MVP scope defined`
+              : "Not yet run — stack, MVP scope, delivery estimate",
+      };
+    })(),
+    (() => {
+      const s = toolStatus(!!landing, founderPlus);
+      return {
+        name: "Page Brief",
+        ...s,
+        result:
+          !founderPlus
+            ? "Founder+ plan required to run this instrument"
+            : landing
+              ? "Page brief generated — headline, value prop, CTA"
+              : "Not yet run — headline, value prop, CTA from sightings",
+      };
+    })(),
+    (() => {
+      const s = toolStatus(!!launchKit, teamPlus);
+      return {
+        name: "GTM Brief",
+        ...s,
+        result:
+          !teamPlus
+            ? "Team+ plan required to run this instrument"
+            : launchKit
+              ? "GTM strategy generated — channels, messaging, launch sequence"
+              : "Not yet run — GTM strategy, launch sequence",
+      };
+    })(),
+  ];
+
+  // Signals: sort positive first, then neutral, then negative; cap at 6
+  const sortedSignals = [...signals].sort((a, b) => {
+    const order = { positive: 0, neutral: 1, negative: 2 };
+    return (order[a.sentiment] ?? 1) - (order[b.sentiment] ?? 1);
+  });
+  const topSignals = sortedSignals.slice(0, 6);
 
   return (
     <>
@@ -90,212 +262,242 @@ export default async function ReportPage({ params, searchParams }: Props) {
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          body { margin: 0; }
+          .rpt-stage { background: white !important; padding: 0 !important; }
+          .rpt-bar { display: none !important; }
+          .rpt-doc { padding: 0 !important; max-width: 100% !important; }
+          .rpt-doc-inner { border: none !important; box-shadow: none !important; }
+          .doc-lock-overlay { display: none !important; }
+          body { background: white !important; }
         }
-        @page { margin: 20mm 18mm; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #111; background: #fff; }
+        @page { margin: 16mm 14mm; }
       `}</style>
 
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "32px 24px", background: "#fff", color: "#111" }}>
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, paddingBottom: 20, borderBottom: "2px solid #e5e5e5" }}>
+      <div className="rpt-stage">
+        {/* Action bar */}
+        <div className="rpt-bar no-print">
           <div>
-            <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
-              Validation Report
-            </div>
-            <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.02em" }}>
-              {companyName ?? "PledgeOFF"}
-            </div>
+            <span className="rpt-bar-eye">Intelligence Report · In-app preview</span>
+            <span className="rpt-bar-title">{title.slice(0, 60)}</span>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 11, color: "#888" }}>Generated</div>
-            <div style={{ fontSize: 13, color: "#555" }}>{generatedAt}</div>
-            {companyName && (
-              <div style={{ fontSize: 10, color: "#aaa", marginTop: 4 }}>Powered by PledgeOFF</div>
-            )}
+          <div className="rpt-bar-right">
+            <span className={`rpt-plan-badge${canExport ? " active" : ""}`}>{planLabel} plan</span>
+            <ReportActions canExport={canExport} />
           </div>
         </div>
 
-        {/* Idea */}
-        <div style={{ marginBottom: 28 }}>
-          <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
-            Idea
-          </div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", margin: "0 0 8px" }}>{title}</h1>
-          {description && (
-            <p style={{ fontSize: 14, color: "#555", lineHeight: 1.6, margin: 0 }}>{description}</p>
-          )}
+        {/* Back link */}
+        <div className="rpt-bar no-print" style={{ paddingTop: 0, marginTop: -8, marginBottom: 8 }}>
+          <Link
+            href={`/ideas/${idea.id}`}
+            style={{
+              fontFamily: "var(--font-chivo-mono), monospace",
+              fontSize: 9,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--faint)",
+              textDecoration: "none",
+            }}
+          >
+            ← Back to verdict
+          </Link>
         </div>
 
-        {/* Verdict */}
-        {decision && (
-          <div style={{ marginBottom: 28, padding: "20px 24px", border: `2px solid ${verdictColor}`, borderRadius: 8, background: `${verdictColor}08` }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
-              <span style={{ fontSize: 28, fontWeight: 800, color: verdictColor, letterSpacing: "-0.03em" }}>
-                {decision.verdict}
-              </span>
-              {decision.score !== undefined && (
-                <span style={{ fontSize: 13, color: "#555" }}>
-                  Score: <strong style={{ color: "#111" }}>{decision.score}/100</strong>
-                </span>
-              )}
-              <span style={{ fontSize: 13, color: "#555" }}>
-                Confidence: <strong style={{ color: "#111" }}>{Math.round(decision.confidence * 100)}%</strong>
-              </span>
-            </div>
-            <p style={{ fontSize: 14, color: "#333", lineHeight: 1.65, margin: 0 }}>{decision.reasoning}</p>
-          </div>
-        )}
-
-        {/* Dimensions */}
-        {decision?.dimensions && decision.dimensions.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
-              Evaluation Dimensions
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              {decision.dimensions.map((d) => (
-                <div key={d.name} style={{ padding: "10px 14px", border: "1px solid #e5e5e5", borderRadius: 6 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                    <span style={{ fontSize: 13, color: "#333" }}>{d.name}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#111" }}>{d.score}/100</span>
-                  </div>
-                  <div style={{ height: 4, background: "#eee", borderRadius: 2 }}>
-                    <div style={{ height: 4, width: `${d.score}%`, background: d.score >= 60 ? "#16a34a" : d.score >= 40 ? "#d97706" : "#dc2626", borderRadius: 2 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Signals summary */}
-        {signals.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
-              Market Signals · {signals.length}
-            </div>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
-              {(["reddit", "github", "hn", "devto", "brave"] as const).map((src) => {
-                const count = signals.filter((s) => s.source === src).length;
-                if (!count) return null;
-                return (
-                  <span key={src} style={{ fontSize: 11, padding: "3px 10px", border: "1px solid #e5e5e5", borderRadius: 4, color: "#555" }}>
-                    {src} · {count}
-                  </span>
-                );
-              })}
-            </div>
-            <div style={{ fontSize: 13, color: "#555" }}>
-              Top signals:
-            </div>
-            <ul style={{ margin: "8px 0 0", padding: "0 0 0 18px" }}>
-              {signals.slice(0, 5).map((s, i) => (
-                <li key={i} style={{ fontSize: 13, color: "#333", lineHeight: 1.5, marginBottom: 4 }}>
-                  {s.title ?? s.summary?.slice(0, 120)}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Revenue simulation */}
-        {simulation && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
-              Revenue Simulation
-            </div>
-            <div style={{ display: "flex", gap: 12, alignItems: "baseline", marginBottom: 12 }}>
-              <span style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(simulation.tamLow)}</span>
-              <span style={{ color: "#888" }}>–</span>
-              <span style={{ fontSize: 28, fontWeight: 700 }}>{formatCurrency(simulation.tamHigh)}</span>
-              <span style={{ fontSize: 13, color: "#888" }}>TAM</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 12 }}>
-              {simulation.scenarios.map((sc) => (
-                <div key={sc.name} style={{ padding: "12px 14px", border: "1px solid #e5e5e5", borderRadius: 6 }}>
-                  <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "#888", marginBottom: 6 }}>{sc.name}</div>
-                  <div style={{ fontSize: 13, color: "#333", marginBottom: 4 }}>${sc.pricePerUser}/mo per user</div>
-                  <div style={{ fontSize: 12, color: "#555" }}>12 mo: {formatCurrency(sc.mrr12)}/mo</div>
-                </div>
-              ))}
-            </div>
-            <div style={{ fontSize: 13, color: "#555" }}>
-              Break-even estimate: <strong style={{ color: "#111" }}>{simulation.breakEvenMonths} months</strong>
-            </div>
-          </div>
-        )}
-
-        {/* Customer segments */}
-        {customers && customers.segments.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
-              Customer Segments
-            </div>
-            {customers.segments.map((seg, i) => (
-              <div key={i} style={{ marginBottom: 8, padding: "10px 14px", border: "1px solid #e5e5e5", borderRadius: 6 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>{seg.name}</div>
-                <div style={{ fontSize: 13, color: "#555" }}>{seg.description}</div>
+        {/* Document */}
+        <div className="rpt-doc">
+          <div className="rpt-doc-inner">
+            {/* Document header */}
+            <div className="doc-hd">
+              <div className="dh-logo">
+                {isWhiteLabel ? (
+                  <>
+                    <div className="dh-wl-box">
+                      <span className="dh-wl-lbl">Team logo</span>
+                    </div>
+                    <div className="dh-wl-name">{companyName}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="dh-brand">
+                      Pledge<em>OFF</em>
+                    </div>
+                    <div className="dh-tagline">Bulletin · Intelligence Platform</div>
+                  </>
+                )}
               </div>
-            ))}
-            {customers.painPoints.length > 0 && (
-              <div style={{ marginTop: 12 }}>
-                <div style={{ fontSize: 12, color: "#888", marginBottom: 6 }}>Top pain points:</div>
-                {customers.painPoints.slice(0, 3).map((p, i) => (
-                  <div key={i} style={{ fontSize: 13, color: "#333", marginBottom: 4 }}>#{p.rank} — {p.text}</div>
+              <div className="dh-right">
+                <div className="dh-case">Field Report {caseRef}</div>
+                <div className="dh-meta">
+                  {ideaCategory ?? "Idea"} · Validated {generatedAt}
+                </div>
+                <div className="dh-conf">
+                  CONFIDENTIAL{isWhiteLabel && companyName ? ` · ${companyName.toUpperCase()}` : ""}
+                </div>
+              </div>
+            </div>
+
+            {/* Verdict section */}
+            {decision && (
+              <div className="doc-verdict">
+                <div className="dv-left">
+                  <span className="dv-eye">Overall verdict</span>
+                  <div className={`dv-score ${verdictCls}`}>
+                    {score} <span>/ 100</span>
+                  </div>
+                  <div className={`dv-chip ${verdictCls}`}>● {verdictV}</div>
+                </div>
+                <div className="dv-right">
+                  <div className="dv-idea-title">{title}</div>
+                  <div className="dv-idea-meta">
+                    {caseRef} · {ideaCategory ?? "Idea"} · {planLabel} plan
+                  </div>
+                  {description && (
+                    <div className="dv-idea-desc">{description.slice(0, 300)}</div>
+                  )}
+                  <div className="dv-metas">
+                    <div>
+                      <span className="dv-mk">Verdict</span>
+                      <span className={`dv-mv ${verdictCls}`}>{verdictV}</span>
+                    </div>
+                    <div>
+                      <span className="dv-mk">Score</span>
+                      <span className="dv-mv">{score} / 100</span>
+                    </div>
+                    <div>
+                      <span className="dv-mk">Confidence</span>
+                      <span className="dv-mv">{confidence}%</span>
+                    </div>
+                    <div>
+                      <span className="dv-mk">Sightings</span>
+                      <span className="dv-mv">{signals.length}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Lockable section */}
+            <div className="doc-lockable">
+              {/* Dimensions */}
+              {decision?.dimensions && decision.dimensions.length > 0 && (
+                <div className="doc-dims">
+                  <span className="doc-sec-lbl">
+                    Dimension analysis · Weighted verdict breakdown
+                  </span>
+                  <div className="rdims-grid">
+                    {decision.dimensions.map((d) => {
+                      const flag = dimFlag(d.score);
+                      const sCls = dimScoreClass(d.score);
+                      const isWatch = d.score < 60 && d.score >= 45;
+                      return (
+                        <div key={d.name} className={`rdim${isWatch ? " watch" : ""}`}>
+                          <div className="rdim-h">
+                            <span className={`rdim-n${isWatch ? " watch" : ""}`}>{d.name}</span>
+                            <span className="rdim-wt">Wt {Math.round(d.weight * 100)}%</span>
+                          </div>
+                          <div className={`rdim-sc ${sCls === "go" ? "go" : isWatch ? "watch" : "kill"}`}>
+                            {d.score}
+                          </div>
+                          <div className="rdim-bar">
+                            <div
+                              className={`rdim-fill ${sCls === "go" ? "go" : isWatch ? "watch" : "kill"}`}
+                              style={{ width: `${d.score}%` }}
+                            />
+                            <div className="rdim-gl" />
+                          </div>
+                          <div className={`rdim-flag ${flag.cls}`}>{flag.label}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Reasoning */}
+              {decision?.reasoning && (
+                <div className="doc-reasoning">
+                  <span className="doc-sec-lbl">Analyst reasoning · Otto, Chief Analyst</span>
+                  <div className="doc-reasoning-text">
+                    {decision.reasoning.split("\n\n").map((p, i) => (
+                      <p key={i}>{p}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Evidence */}
+              {topSignals.length > 0 && (
+                <div className="doc-evidence">
+                  <span className="doc-sec-lbl">
+                    Key signals · {signals.length} sightings reviewed ·{" "}
+                    {new Set(signals.map((s) => SOURCE_LABEL[s.source] ?? s.source)).size} sources
+                  </span>
+                  {topSignals.map((s, i) => (
+                    <div key={i} className="ev-item">
+                      <span
+                        className={`ev-fl ${s.sentiment === "positive" ? "p" : s.sentiment === "negative" ? "n" : "u"}`}
+                      >
+                        {s.sentiment === "positive" ? "+" : s.sentiment === "negative" ? "–" : "·"}
+                      </span>
+                      <div>
+                        <div className="ev-title">{s.title}</div>
+                        {s.summary && <div className="ev-sum">{s.summary.slice(0, 120)}</div>}
+                      </div>
+                      <span className="ev-src">
+                        {SOURCE_LABEL[s.source] ?? s.source}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Tools summary */}
+              <div className="doc-tools">
+                <span className="doc-sec-lbl">Intelligence instruments · Run status</span>
+                {tools.map((t) => (
+                  <div key={t.name} className="tool-sum-row">
+                    <div className={`tsr-dot ${t.dot}`} />
+                    <span className="tsr-name">{t.name}</span>
+                    <span className="tsr-result">{t.result}</span>
+                    <span className={`tsr-tag ${t.tag}`}>{t.label}</span>
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-        )}
 
-        {/* Competitors */}
-        {competitors && competitors.competitors.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
-              Competitor Landscape
-            </div>
-            {competitors.competitors.map((c, i) => (
-              <div key={i} style={{ marginBottom: 8, padding: "10px 14px", border: "1px solid #e5e5e5", borderRadius: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>{c.name}</span>
-                  {c.url && <span style={{ fontSize: 11, color: "#888" }}>{c.url.replace(/^https?:\/\//, "")}</span>}
+              {/* Lock overlay (Free plan) */}
+              {showLock && (
+                <div className="doc-lock-overlay show">
+                  <div className="lock-card">
+                    <span className="lock-eye">Report export</span>
+                    <div className="lock-title">Export requires Founder+</div>
+                    <p className="lock-desc">
+                      The full report — dimensions, reasoning, evidence, and tool results — is
+                      visible in preview on all plans. Export to PDF requires Founder+ or above.
+                    </p>
+                    <div className="lock-hr" />
+                    <div className="lock-plan">Founder+</div>
+                    <div className="lock-sub">€49 / month · All instruments</div>
+                    <Link className="lock-cta" href="/settings/billing">
+                      Upgrade to Founder+ →
+                    </Link>
+                    <p className="lock-note">Cancel any time</p>
+                  </div>
                 </div>
-                <div style={{ fontSize: 13, color: "#555" }}>{c.positioning}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Engineering stack */}
-        {build && build.stack.length > 0 && (
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 11, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
-              Recommended Tech Stack
+              )}
             </div>
-            {build.stack.map((comp, i) => (
-              <div key={i} style={{ marginBottom: 8, padding: "10px 14px", border: "1px solid #e5e5e5", borderRadius: 6 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>{comp.name}</span>
-                  <span style={{ fontSize: 11, textTransform: "uppercase", color: "#888" }}>{comp.decision}</span>
-                </div>
-                <div style={{ fontSize: 13, color: "#555" }}>{comp.rationale}</div>
-              </div>
-            ))}
-          </div>
-        )}
 
-        {/* Footer */}
-        <div style={{ marginTop: 40, paddingTop: 16, borderTop: "1px solid #e5e5e5", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 11, color: "#aaa" }}>
-            {companyName ? `${companyName} · Powered by PledgeOFF` : "Generated by PledgeOFF · pledgeoff.com"}
-          </span>
-          <span style={{ fontSize: 11, color: "#aaa" }}>
-            {idea.id.slice(0, 8)}
-          </span>
+            {/* Document footer */}
+            <div className="doc-footer">
+              <span className="df-left">
+                {isWhiteLabel && companyName
+                  ? `Confidential · ${companyName} Intelligence Report · ${generatedAt}`
+                  : `Generated by PledgeOFF Bulletin · ${planLabel} plan · ${generatedAt}`}
+              </span>
+              <span className="df-right">
+                {caseRef} · pledgeoff.com
+              </span>
+            </div>
+          </div>
         </div>
-
-        <ReportActions />
       </div>
     </>
   );
