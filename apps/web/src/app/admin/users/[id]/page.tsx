@@ -1,108 +1,250 @@
-import { requireAdminServer } from '@/lib/admin-auth';
-import { createSupabaseServiceClient } from '@/lib/supabase-server';
-import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { AdminUserActions } from './AdminUserActions';
+import { requireAdminServer } from "@/lib/admin-auth";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { AdminUserActions } from "./AdminUserActions";
 
 function fmt(iso: string | null | undefined) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <tr style={{ borderBottom: '1px solid var(--border)' }}>
-      <td style={{ padding: '10px 16px', fontSize: 12, color: 'var(--t3)', fontFamily: 'monospace', width: 180 }}>{label}</td>
-      <td style={{ padding: '10px 16px', fontSize: 13, color: 'var(--t1)' }}>{value}</td>
-    </tr>
-  );
+function fmtDate(iso: string | null | undefined) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-export default async function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function UserDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   await requireAdminServer();
   const { id } = await params;
   const supabase = createSupabaseServiceClient();
 
   const [
-    { data: { user } },
+    {
+      data: { user },
+    },
     { data: profile },
     { data: sub },
     { data: ideas },
   ] = await Promise.all([
     supabase.auth.admin.getUserById(id),
-    supabase.from('profiles').select('*').eq('id', id).maybeSingle(),
-    supabase.from('subscriptions').select('*').eq('user_id', id).maybeSingle(),
-    supabase.from('ideas').select('id, text, created_at').eq('user_id', id).order('created_at', { ascending: false }),
+    supabase.from("profiles").select("*").eq("id", id).maybeSingle(),
+    supabase.from("subscriptions").select("*").eq("user_id", id).maybeSingle(),
+    supabase
+      .from("ideas")
+      .select("id, text, created_at")
+      .eq("user_id", id)
+      .order("created_at", { ascending: false })
+      .limit(10),
   ]);
 
   if (!user) notFound();
 
   const isBanned = !!user.banned_until && new Date(user.banned_until) > new Date();
+  const hasOverride = false;
+  const plan = sub?.plan ?? "free";
+  const name =
+    profile?.first_name || profile?.last_name
+      ? `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim()
+      : user.email ?? id.slice(0, 8);
+  const initials = name
+    .split(" ")
+    .map((w: string) => w[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const statusCls = isBanned
+    ? "adm-bs adm-bs-kll"
+    : hasOverride
+    ? "adm-bs adm-bs-over"
+    : "adm-bs adm-bs-go";
+  const statusLabel = isBanned ? "Suspended" : hasOverride ? "Override" : "Active";
 
   return (
-    <div>
-      <div style={{ marginBottom: 24 }}>
-        <Link href="/admin/users" style={{ fontSize: 12, color: 'var(--t3)', textDecoration: 'none' }}>← Users</Link>
-        <h1 style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em', marginTop: 8, marginBottom: 4, fontFamily: '"Inter Tight", system-ui' }}>
-          {profile?.first_name || profile?.last_name
-            ? `${profile?.first_name ?? ''} ${profile?.last_name ?? ''}`.trim()
-            : user.email}
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--t3)', fontFamily: 'monospace' }}>{user.id}</p>
+    <div style={{ maxWidth: 720 }}>
+      <div style={{ marginBottom: 20 }}>
+        <Link
+          href="/admin/users"
+          style={{
+            fontSize: 10,
+            color: "var(--faint)",
+            textDecoration: "none",
+            fontFamily: "var(--font-chivo-mono), monospace",
+            letterSpacing: ".08em",
+          }}
+        >
+          ← Users
+        </Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
-        {/* Profile */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--t3)' }}>Profile</div>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <tbody>
-              <Row label="email" value={user.email} />
-              <Row label="company" value={profile?.company_name ?? '—'} />
-              <Row label="username" value={profile?.username ?? '—'} />
-              <Row label="joined" value={fmt(user.created_at)} />
-              <Row label="last sign in" value={fmt(user.last_sign_in_at)} />
-              <Row label="status" value={isBanned ? <span style={{ color: 'var(--kill)' }}>SUSPENDED</span> : <span style={{ color: 'var(--validated)' }}>Active</span>} />
-            </tbody>
-          </table>
+      {hasOverride && (
+        <div className="u-banner-override">
+          ⚠ Admin override active — Stripe billing bypassed — granted{" "}
+          <strong>{(sub?.admin_override ?? "").toUpperCase()}</strong> access
         </div>
+      )}
 
-        {/* Subscription */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--t3)' }}>Subscription</div>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <tbody>
-              <Row label="plan" value={<span style={{ fontWeight: 600, color: 'var(--accent)' }}>{sub?.plan ?? 'free'}</span>} />
-              <Row label="status" value={sub?.status ?? 'active'} />
-              <Row label="period end" value={fmt(sub?.current_period_end)} />
-              <Row label="otto used" value={`${sub?.otto_included_used ?? 0} included + ${sub?.otto_purchased ?? 0} purchased`} />
-              <Row label="extra seats" value={sub?.extra_seats ?? 0} />
-              <Row label="past due since" value={fmt(sub?.past_due_since)} />
-            </tbody>
-          </table>
+      {/* User header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <div
+          className="u-av"
+          style={{ borderColor: hasOverride ? "var(--pivot)" : "var(--line)" }}
+        >
+          {initials}
+        </div>
+        <div>
+          <div
+            style={{
+              fontFamily: "var(--font-bitter), serif",
+              fontSize: 20,
+              fontWeight: 700,
+              color: "var(--ink)",
+              marginBottom: 2,
+            }}
+          >
+            {name}
+          </div>
+          <div style={{ fontSize: 11, color: "var(--faint)", fontFamily: "var(--font-chivo-mono), monospace" }}>
+            {user.email}
+          </div>
         </div>
       </div>
 
-      {/* Actions */}
-      <AdminUserActions userId={id} isBanned={isBanned} currentPlan={sub?.plan ?? 'free'} />
+      {/* Profile card */}
+      <div className="acard">
+        <div className="acard-hd">Profile</div>
+        <div className="acard-bd">
+          <div className="u-grid">
+            <div className="u-kv">
+              <div className="u-k">Plan (Stripe)</div>
+              <div className="u-v">
+                <span className={`pp ${plan}`}>{plan.charAt(0).toUpperCase() + plan.slice(1)}</span>
+              </div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Status</div>
+              <div className="u-v"><span className={statusCls}>{statusLabel}</span></div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Company</div>
+              <div className="u-v">{profile?.company_name ?? "—"}</div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Username</div>
+              <div className="u-v">{profile?.username ? `@${profile.username}` : "—"}</div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Joined</div>
+              <div className="u-v">{fmt(user.created_at)}</div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Last sign in</div>
+              <div className="u-v">{fmt(user.last_sign_in_at)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Subscription card */}
+      <div className="acard">
+        <div className="acard-hd">
+          Subscription
+          {sub?.stripe_subscription_id && (
+            <span className="r td-mono">{sub.stripe_subscription_id.slice(0, 20)}…</span>
+          )}
+        </div>
+        <div className="acard-bd">
+          <div className="u-grid">
+            <div className="u-kv">
+              <div className="u-k">Sub status</div>
+              <div className="u-v">{sub?.status ?? "—"}</div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Period end</div>
+              <div className="u-v">{fmtDate(sub?.current_period_end)}</div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Otto used</div>
+              <div className="u-v">
+                {sub?.otto_included_used ?? 0} included + {sub?.otto_purchased ?? 0} purchased
+              </div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Verifications purchased</div>
+              <div className="u-v">{sub?.verifications_purchased ?? 0}</div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Extra seats</div>
+              <div className="u-v">{sub?.extra_seats ?? 0}</div>
+            </div>
+            <div className="u-kv">
+              <div className="u-k">Past due since</div>
+              <div className="u-v" style={{ color: sub?.past_due_since ? "var(--kill)" : undefined }}>
+                {fmtDate(sub?.past_due_since)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Admin actions */}
+      <div className="acard">
+        <div className="acard-hd">Admin actions</div>
+        <div className="acard-bd">
+          <AdminUserActions
+            userId={id}
+            isBanned={isBanned}
+            currentPlan={plan}
+            hasOverride={hasOverride}
+            overridePlanValue={null}
+          />
+        </div>
+      </div>
 
       {/* Ideas */}
-      <div style={{ marginTop: 24, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--t3)' }}>
-          Ideas ({ideas?.length ?? 0})
+      <div className="acard">
+        <div className="acard-hd">
+          Recent ideas
+          <span className="r">{ideas?.length ?? 0} shown</span>
         </div>
-        {!ideas?.length ? (
-          <div style={{ padding: 16, fontSize: 13, color: 'var(--t3)' }}>No ideas yet.</div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {ideas.map((idea) => (
-              <div key={idea.id} style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)', fontSize: 13, color: 'var(--t2)' }}>
-                <span style={{ color: 'var(--t3)', fontFamily: 'monospace', fontSize: 11, marginRight: 12 }}>{fmt(idea.created_at)}</span>
-                {idea.text.slice(0, 120)}{idea.text.length > 120 ? '…' : ''}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="acard-bd" style={{ padding: 0 }}>
+          {!ideas?.length ? (
+            <div style={{ padding: 16, fontSize: 12, color: "var(--faint)", fontFamily: "var(--font-chivo-mono), monospace" }}>
+              No ideas yet.
+            </div>
+          ) : (
+            <table className="at">
+              <tbody>
+                {ideas.map((idea) => (
+                  <tr key={idea.id} className="no-click">
+                    <td className="td-mono" style={{ width: 130, color: "var(--faint)" }}>
+                      {fmtDate(idea.created_at)}
+                    </td>
+                    <td style={{ fontSize: 12, color: "var(--ink)", whiteSpace: "normal" }}>
+                      {idea.text.slice(0, 120)}
+                      {idea.text.length > 120 ? "…" : ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );

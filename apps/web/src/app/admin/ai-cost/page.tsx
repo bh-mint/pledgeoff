@@ -1,24 +1,24 @@
-import { requireAdminServer } from '@/lib/admin-auth';
-import { createSupabaseServiceClient } from '@/lib/supabase-server';
+import { requireAdminServer } from "@/lib/admin-auth";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-type AggRow = { feature: string; model: string; total_input: number; total_output: number; total_cost: number; call_count: number };
+type AggRow = {
+  feature: string;
+  model: string;
+  total_input: number;
+  total_output: number;
+  total_cost: number;
+  call_count: number;
+};
 type DailyRow = { day: string; total_cost: number };
 type TopUserRow = { user_id: string; email: string | null; total_cost: number; call_count: number };
 
 function fmt(n: number, decimals = 2): string {
-  return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-}
-
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '20px 24px', minWidth: 160 }}>
-      <div style={{ fontSize: 12, color: 'var(--t3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-display)', color: 'var(--t1)', letterSpacing: '-0.04em' }}>{value}</div>
-      {sub && <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 4 }}>{sub}</div>}
-    </div>
-  );
+  return n.toLocaleString("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
 }
 
 export default async function AiCostPage() {
@@ -26,19 +26,25 @@ export default async function AiCostPage() {
   const supabase = createSupabaseServiceClient();
 
   const now = new Date();
-  const todayStart = new Date(now); todayStart.setUTCHours(0, 0, 0, 0);
-  const weekStart = new Date(now); weekStart.setUTCDate(now.getUTCDate() - 6); weekStart.setUTCHours(0, 0, 0, 0);
-  const monthStart = new Date(now); monthStart.setUTCDate(1); monthStart.setUTCHours(0, 0, 0, 0);
+  const todayStart = new Date(now);
+  todayStart.setUTCHours(0, 0, 0, 0);
+  const weekStart = new Date(now);
+  weekStart.setUTCDate(now.getUTCDate() - 6);
+  weekStart.setUTCHours(0, 0, 0, 0);
+  const monthStart = new Date(now);
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
 
-  const [todayRes, weekRes, monthRes, totalRes, byFeatureRes, dailyRes, topUsersRes] = await Promise.all([
-    supabase.rpc('admin_ai_usage_total', { since: todayStart.toISOString() }),
-    supabase.rpc('admin_ai_usage_total', { since: weekStart.toISOString() }),
-    supabase.rpc('admin_ai_usage_total', { since: monthStart.toISOString() }),
-    supabase.rpc('admin_ai_usage_total_all'),
-    supabase.rpc('admin_ai_usage_by_feature', { since: monthStart.toISOString() }),
-    supabase.rpc('admin_ai_usage_daily', { since: weekStart.toISOString() }),
-    supabase.rpc('admin_ai_top_users', { since: monthStart.toISOString(), limit_count: 10 }),
-  ]);
+  const [todayRes, weekRes, monthRes, totalRes, byFeatureRes, dailyRes, topUsersRes] =
+    await Promise.all([
+      supabase.rpc("admin_ai_usage_total", { since: todayStart.toISOString() }),
+      supabase.rpc("admin_ai_usage_total", { since: weekStart.toISOString() }),
+      supabase.rpc("admin_ai_usage_total", { since: monthStart.toISOString() }),
+      supabase.rpc("admin_ai_usage_total_all"),
+      supabase.rpc("admin_ai_usage_by_feature", { since: monthStart.toISOString() }),
+      supabase.rpc("admin_ai_usage_daily", { since: weekStart.toISOString() }),
+      supabase.rpc("admin_ai_top_users", { since: monthStart.toISOString(), limit_count: 10 }),
+    ]);
 
   const todayCost = Number(todayRes.data ?? 0);
   const weekCost = Number(weekRes.data ?? 0);
@@ -49,110 +55,151 @@ export default async function AiCostPage() {
   const daily: DailyRow[] = dailyRes.data ?? [];
   const topUsers: TopUserRow[] = topUsersRes.data ?? [];
 
-  const tdStyle: React.CSSProperties = { padding: '10px 14px', borderBottom: '1px solid var(--border)', fontSize: 13, color: 'var(--t2)' };
-  const thStyle: React.CSSProperties = { padding: '10px 14px', borderBottom: '1px solid var(--border)', fontSize: 11, color: 'var(--t3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: 'left' };
-
   return (
     <div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-display)', letterSpacing: '-0.04em', color: 'var(--t1)', marginBottom: 24 }}>
-        AI Cost
-      </h1>
-
-      {/* Summary cards */}
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 32 }}>
-        <StatCard label="Today" value={`$${fmt(todayCost, 4)}`} />
-        <StatCard label="Last 7 days" value={`$${fmt(weekCost, 4)}`} />
-        <StatCard label="This month" value={`$${fmt(monthCost, 4)}`} />
-        <StatCard label="All time" value={`$${fmt(totalCost, 4)}`} />
+      {/* Summary stat cards */}
+      <div className="adm-stat-grid">
+        <div className="sc">
+          <div className="sc-k">Today</div>
+          <div className="sc-v">${fmt(todayCost, 4)}</div>
+        </div>
+        <div className="sc">
+          <div className="sc-k">Last 7 days</div>
+          <div className="sc-v">${fmt(weekCost, 4)}</div>
+        </div>
+        <div className="sc">
+          <div className="sc-k">This month</div>
+          <div className="sc-v">${fmt(monthCost, 4)}</div>
+        </div>
+        <div className="sc">
+          <div className="sc-k">All time</div>
+          <div className="sc-v">${fmt(totalCost, 4)}</div>
+        </div>
       </div>
 
       {/* Daily breakdown */}
       {daily.length > 0 && (
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 12 }}>Daily (last 7 days)</h2>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={thStyle}>Date</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {daily.map((row) => (
-                  <tr key={row.day}>
-                    <td style={tdStyle}>{row.day}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right', fontFamily: 'monospace' }}>${fmt(Number(row.total_cost), 4)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="acard">
+          <div className="acard-hd">
+            Daily cost
+            <span className="r">Last 7 days</span>
           </div>
-        </section>
+          <div className="acard-bd" style={{ padding: 0 }}>
+            <div className="at-wrap">
+              <table className="at">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th style={{ textAlign: "right" }}>Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {daily.map((row) => (
+                    <tr key={row.day} className="no-click">
+                      <td className="td-main">{row.day}</td>
+                      <td className="td-mono" style={{ textAlign: "right" }}>
+                        ${fmt(Number(row.total_cost), 4)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* By feature */}
       {byFeature.length > 0 && (
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 12 }}>By feature (this month)</h2>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={thStyle}>Feature</th>
-                  <th style={thStyle}>Model</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>Calls</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>Input tk</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>Output tk</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {byFeature.map((row, i) => (
-                  <tr key={i}>
-                    <td style={tdStyle}>{row.feature}</td>
-                    <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: 12 }}>{row.model}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right' }}>{Number(row.call_count).toLocaleString()}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right', fontFamily: 'monospace' }}>{Number(row.total_input).toLocaleString()}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right', fontFamily: 'monospace' }}>{Number(row.total_output).toLocaleString()}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right', fontFamily: 'monospace' }}>${fmt(Number(row.total_cost), 4)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="acard">
+          <div className="acard-hd">
+            By feature
+            <span className="r">This month</span>
           </div>
-        </section>
+          <div className="acard-bd" style={{ padding: 0 }}>
+            <div className="at-wrap">
+              <table className="at">
+                <thead>
+                  <tr>
+                    <th>Feature</th>
+                    <th>Model</th>
+                    <th style={{ textAlign: "right" }}>Calls</th>
+                    <th style={{ textAlign: "right" }}>Input tk</th>
+                    <th style={{ textAlign: "right" }}>Output tk</th>
+                    <th style={{ textAlign: "right" }}>Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {byFeature.map((row, i) => (
+                    <tr key={i} className="no-click">
+                      <td className="td-main">{row.feature}</td>
+                      <td className="td-mono" style={{ fontSize: 10 }}>
+                        {row.model}
+                      </td>
+                      <td className="td-mono" style={{ textAlign: "right" }}>
+                        {Number(row.call_count).toLocaleString()}
+                      </td>
+                      <td className="td-mono" style={{ textAlign: "right" }}>
+                        {Number(row.total_input).toLocaleString()}
+                      </td>
+                      <td className="td-mono" style={{ textAlign: "right" }}>
+                        {Number(row.total_output).toLocaleString()}
+                      </td>
+                      <td className="td-mono" style={{ textAlign: "right" }}>
+                        ${fmt(Number(row.total_cost), 4)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Top users (Otto) */}
+      {/* Top users */}
       {topUsers.length > 0 && (
-        <section style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--t1)', marginBottom: 12 }}>Top users by cost (this month)</h2>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={thStyle}>User</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>Calls</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>Cost</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topUsers.map((row) => (
-                  <tr key={row.user_id}>
-                    <td style={tdStyle}>{row.email ?? row.user_id}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right' }}>{Number(row.call_count).toLocaleString()}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right', fontFamily: 'monospace' }}>${fmt(Number(row.total_cost), 4)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="acard">
+          <div className="acard-hd">
+            Top users by cost
+            <span className="r">This month</span>
           </div>
-        </section>
+          <div className="acard-bd" style={{ padding: 0 }}>
+            <div className="at-wrap">
+              <table className="at">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th style={{ textAlign: "right" }}>Calls</th>
+                    <th style={{ textAlign: "right" }}>Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topUsers.map((row) => (
+                    <tr key={row.user_id} className="no-click">
+                      <td className="td-main">{row.email ?? row.user_id.slice(0, 8)}</td>
+                      <td className="td-mono" style={{ textAlign: "right" }}>
+                        {Number(row.call_count).toLocaleString()}
+                      </td>
+                      <td className="td-mono" style={{ textAlign: "right" }}>
+                        ${fmt(Number(row.total_cost), 4)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       )}
 
       {byFeature.length === 0 && daily.length === 0 && (
-        <p style={{ color: 'var(--t3)', fontSize: 14 }}>No AI usage logged yet. Data appears once the Anthropic adapter processes its first request.</p>
+        <div className="acard">
+          <div className="acard-bd" style={{ color: "var(--faint)", fontSize: 13 }}>
+            No AI usage logged yet. Data appears once the Anthropic adapter processes its first
+            request.
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,142 +1,174 @@
-import { requireAdminServer } from '@/lib/admin-auth';
-import { createSupabaseServiceClient } from '@/lib/supabase-server';
-import Link from 'next/link';
-
-const PLAN_BADGE: Record<string, { label: string; color: string }> = {
-  free:       { label: 'Free',       color: 'var(--t3)' },
-  founder:    { label: 'Founder',    color: '#60a5fa' },
-  team:       { label: 'Team',       color: 'var(--accent)' },
-  studio:     { label: 'Studio',     color: 'var(--validated)' },
-  enterprise: { label: 'Enterprise', color: 'var(--caution)' },
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  active:     'var(--validated)',
-  past_due:   'var(--caution)',
-  canceled:   'var(--t3)',
-  trialing:   '#60a5fa',
-  incomplete: 'var(--kill)',
-};
+import { requireAdminServer } from "@/lib/admin-auth";
+import { createSupabaseServiceClient } from "@/lib/supabase-server";
+import Link from "next/link";
 
 function fmt(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-export default async function UsersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; plan?: string }>;
+}) {
   await requireAdminServer();
-  const { q } = await searchParams;
+  const { q, plan: planFilter } = await searchParams;
   const supabase = createSupabaseServiceClient();
 
-  const { data: { users } } = await supabase.auth.admin.listUsers({ perPage: 500 });
-  const { data: profiles } = await supabase.from('profiles').select('id, first_name, last_name, company_name, created_at');
-  const { data: subs } = await supabase.from('subscriptions').select('user_id, plan, status, past_due_since');
+  const {
+    data: { users },
+  } = await supabase.auth.admin.listUsers({ perPage: 500 });
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, company_name, created_at");
+  const { data: subs } = await supabase
+    .from("subscriptions")
+    .select("user_id, plan, status, past_due_since");
 
   const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
   const subMap = Object.fromEntries((subs ?? []).map((s) => [s.user_id, s]));
 
   const filtered = (users ?? []).filter((u) => {
-    if (!q) return true;
-    const search = q.toLowerCase();
-    return (
+    const search = (q ?? "").toLowerCase();
+    const p = profileMap[u.id];
+    const matchSearch =
+      !search ||
       u.email?.toLowerCase().includes(search) ||
-      profileMap[u.id]?.first_name?.toLowerCase().includes(search) ||
-      profileMap[u.id]?.last_name?.toLowerCase().includes(search) ||
-      profileMap[u.id]?.company_name?.toLowerCase().includes(search)
-    );
+      p?.first_name?.toLowerCase().includes(search) ||
+      p?.last_name?.toLowerCase().includes(search) ||
+      p?.company_name?.toLowerCase().includes(search);
+    const sub = subMap[u.id];
+    const plan = sub?.plan ?? "free";
+    const matchPlan = !planFilter || plan === planFilter;
+    return matchSearch && matchPlan;
+  });
+
+  const PLAN_ORDER = ["enterprise", "studio", "team", "founder", "free"];
+  filtered.sort((a, b) => {
+    const pa = subMap[a.id]?.plan ?? "free";
+    const pb = subMap[b.id]?.plan ?? "free";
+    return PLAN_ORDER.indexOf(pa) - PLAN_ORDER.indexOf(pb);
   });
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.04em', marginBottom: 4, fontFamily: '"Inter Tight", system-ui' }}>
-            Users
-          </h1>
-          <p style={{ fontSize: 13, color: 'var(--t2)' }}>{filtered.length} of {users?.length ?? 0} users</p>
+      <form className="adm-search" method="GET">
+        <input
+          name="q"
+          defaultValue={q}
+          className="adm-search-inp"
+          placeholder="Search name or email…"
+          style={{ maxWidth: 320 }}
+        />
+        <select
+          name="plan"
+          defaultValue={planFilter ?? ""}
+          className="adm-search-inp"
+          style={{ maxWidth: 160 }}
+        >
+          <option value="">All plans</option>
+          {["free", "founder", "team", "studio", "enterprise"].map((p) => (
+            <option key={p} value={p}>
+              {p.charAt(0).toUpperCase() + p.slice(1)}
+            </option>
+          ))}
+        </select>
+        <button type="submit" className="btn-g" style={{ fontSize: 10, padding: "8px 12px" }}>
+          Filter
+        </button>
+      </form>
+
+      <div className="acard">
+        <div className="acard-hd">
+          All users
+          <span className="r">{filtered.length.toLocaleString()} accounts</span>
         </div>
-        <form method="GET">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Search email, name, company…"
-            style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              padding: '8px 12px',
-              fontSize: 13,
-              color: 'var(--t1)',
-              outline: 'none',
-              width: 280,
-            }}
-          />
-        </form>
-      </div>
-
-      <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-              {['User', 'Plan', 'Status', 'Joined', ''].map((h) => (
-                <th key={h} style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--t3)' }}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((user) => {
-              const profile = profileMap[user.id];
-              const sub = subMap[user.id];
-              const plan = sub?.plan ?? 'free';
-              const badge = PLAN_BADGE[plan] ?? PLAN_BADGE.free;
-              const isBanned = !!user.banned_until && new Date(user.banned_until) > new Date();
-
-              return (
-                <tr key={user.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                  <td style={{ padding: '12px 16px' }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--t1)' }}>
-                      {profile?.first_name || profile?.last_name
-                        ? `${profile?.first_name ?? ''} ${profile?.last_name ?? ''}`.trim()
-                        : user.email}
-                    </div>
-                    {(profile?.first_name || profile?.last_name) && (
-                      <div style={{ fontSize: 12, color: 'var(--t3)', fontFamily: 'monospace' }}>{user.email}</div>
-                    )}
-                    {profile?.company_name && (
-                      <div style={{ fontSize: 11, color: 'var(--t3)' }}>{profile.company_name}</div>
-                    )}
-                    {isBanned && (
-                      <div style={{ fontSize: 10, color: 'var(--kill)', fontFamily: 'monospace', textTransform: 'uppercase', marginTop: 2 }}>SUSPENDED</div>
-                    )}
-                  </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <span style={{ fontSize: 11, fontFamily: 'monospace', fontWeight: 600, color: badge.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      {badge.label}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <span style={{ fontSize: 12, color: STATUS_COLOR[sub?.status ?? 'active'] ?? 'var(--t3)' }}>
-                      {sub?.status ?? 'active'}
-                      {sub?.past_due_since && <span style={{ color: 'var(--caution)', marginLeft: 6, fontSize: 11 }}>since {fmt(sub.past_due_since)}</span>}
-                    </span>
-                  </td>
-                  <td style={{ padding: '12px 16px', fontSize: 12, color: 'var(--t3)' }}>
-                    {fmt(user.created_at ?? profile?.created_at ?? '')}
-                  </td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <Link
-                      href={`/admin/users/${user.id}`}
-                      style={{ fontSize: 12, color: 'var(--accent)', textDecoration: 'none', fontWeight: 500 }}
-                    >
-                      View →
-                    </Link>
-                  </td>
+        <div className="acard-bd" style={{ padding: 0 }}>
+          <div className="at-wrap">
+            <table className="at">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Plan</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th />
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {filtered.map((user) => {
+                  const profile = profileMap[user.id];
+                  const sub = subMap[user.id];
+                  const plan = sub?.plan ?? "free";
+                  const isBanned =
+                    !!user.banned_until && new Date(user.banned_until) > new Date();
+                  const hasOverride = false;
+                  const statusCls = isBanned
+                    ? "adm-bs adm-bs-kll"
+                    : hasOverride
+                    ? "adm-bs adm-bs-over"
+                    : "adm-bs adm-bs-go";
+                  const statusLabel = isBanned ? "Suspended" : hasOverride ? "Override" : "Active";
+                  const name =
+                    profile?.first_name || profile?.last_name
+                      ? `${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim()
+                      : user.email ?? user.id.slice(0, 8);
+
+                  return (
+                    <tr key={user.id}>
+                      <td>
+                        <div className="td-main">{name}</div>
+                        {(profile?.first_name || profile?.last_name) && (
+                          <div className="td-sub">{user.email}</div>
+                        )}
+                        {profile?.company_name && (
+                          <div className="td-sub">{profile.company_name}</div>
+                        )}
+                      </td>
+                      <td>
+                        <span className={`pp ${plan}`}>
+                          {plan.charAt(0).toUpperCase() + plan.slice(1)}
+                        </span>
+                        {hasOverride && (
+                          <span
+                            style={{
+                              marginLeft: 6,
+                              fontSize: 8,
+                              color: "var(--pivot)",
+                              fontFamily: "var(--font-chivo-mono), monospace",
+                            }}
+                          >
+                            override
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        <span className={statusCls}>{statusLabel}</span>
+                        {sub?.past_due_since && (
+                          <div className="td-sub" style={{ color: "var(--pivot)" }}>
+                            past due
+                          </div>
+                        )}
+                      </td>
+                      <td className="td-mono">
+                        {fmt(user.created_at ?? profile?.created_at ?? "")}
+                      </td>
+                      <td>
+                        <Link href={`/admin/users/${user.id}`} className="btn-xs p">
+                          View
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
