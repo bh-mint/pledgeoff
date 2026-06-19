@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
+import { PLAN_LIMITS } from "@pledgeoff/core";
 import { VerdictPageClient } from "./VerdictPageClient";
 import { ExportButtons } from "./ExportButtons";
 import { getUserPlan } from "@/server/billing/getUserPlan";
@@ -50,10 +51,11 @@ export default async function IdeaPage({ params }: Props) {
   const user = await requireUser();
 
   // Parallel: idea + plan + team (plan needed for access check + gating; team for workspace access)
-  const [ideaResult, plan, teamResult] = await Promise.all([
+  const [ideaResult, plan, teamResult, allIdeasResult] = await Promise.all([
     container.ideaRepo.findById(id),
     getUserPlan(user.id),
     container.teamRepo.findByMemberId(user.id),
+    container.ideaRepo.findByUserId(user.id),
   ]);
 
   if (ideaResult.isErr() || !ideaResult.value) notFound();
@@ -112,6 +114,15 @@ export default async function IdeaPage({ params }: Props) {
 
   const { title, category } = parseIdeaText(idea.text);
 
+  // Validations left this month (for revalidation confirm modal)
+  const allIdeas = allIdeasResult.isOk() ? allIdeasResult.value : [];
+  const ideasThisMonth = allIdeas.filter((i) => {
+    const d = new Date(i.createdAt);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  }).length;
+  const validationLimit = PLAN_LIMITS[plan].verificationsPerMonth;
+  const validationsLeft = isFinite(validationLimit) ? Math.max(0, validationLimit - ideasThisMonth) : 999;
+
   // Category average score — query other decisions platform-wide for same category
   let categoryAvg: number | null = null;
   if (category && decision?.score !== null && decision?.score !== undefined) {
@@ -146,7 +157,15 @@ export default async function IdeaPage({ params }: Props) {
           </h1>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, flexWrap: "wrap" }}>
             {decision && <ShareVerdictButton ideaId={id} />}
-            {showRevalidate && <RevalidateButton ideaId={id} signalAgedays={signalAgeDays!} />}
+            {showRevalidate && (
+              <RevalidateButton
+                ideaId={id}
+                signalAgedays={signalAgeDays!}
+                validationsLeft={validationsLeft}
+                currentScore={decision?.score ?? null}
+                currentVerdict={decision?.verdict ?? null}
+              />
+            )}
             {isOwn && isOlderThan30Days && (
               <OutcomeButton ideaId={id} initialOutcome={existingOutcome?.outcomeType ?? null} />
             )}
