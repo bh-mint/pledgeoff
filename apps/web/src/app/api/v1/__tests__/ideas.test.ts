@@ -20,6 +20,10 @@ const mockSubscriptionRepo = {
 };
 const mockAuditLog = { log: vi.fn() };
 const mockEventBus = { processOutbox: vi.fn() };
+const mockTeamRepo = {
+  findByMemberId: vi.fn(),
+  findByOwnerId: vi.fn(),
+};
 
 vi.mock('@/lib/api-auth', () => ({ resolveUserId: mockResolveUserId, resolveUserIdFromRequest: mockResolveUserId }));
 vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: mockCheckRateLimit }));
@@ -36,6 +40,7 @@ vi.mock('@/lib/container', () => ({
     createIdeaUseCase: mockCreateIdeaUseCase,
     auditLog: mockAuditLog,
     eventBus: mockEventBus,
+    teamRepo: mockTeamRepo,
   },
 }));
 
@@ -60,6 +65,8 @@ describe('POST /api/v1/ideas', () => {
     mockIdempotencyStore.markAsProcessed.mockResolvedValue(ok(undefined));
     mockAuditLog.log.mockResolvedValue(undefined);
     mockEventBus.processOutbox.mockResolvedValue({ processed: 0 });
+    mockTeamRepo.findByMemberId.mockResolvedValue(ok(null));
+    mockTeamRepo.findByOwnerId.mockResolvedValue(ok(null));
   });
 
   it('returns 401 when Authorization header is missing', async () => {

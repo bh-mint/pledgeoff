@@ -73,8 +73,9 @@ const mockIdeaRepo: IIdeaRepository = {
   findByUserId: async () => ok([]),
   findByUserIds: async () => ok([]),
   findByUserIdPaginated: async () => ok({ ideas: [], hasMore: false, nextCursor: null }),
+  findByTeamId: async () => ok([]),
   countThisMonth: async () => ok(0),
-    delete: async () => ok(undefined),
+  delete: async () => ok(undefined),
 };
 
 // ── CreateIdeaUseCase ───────────────────────────────────────────────────────

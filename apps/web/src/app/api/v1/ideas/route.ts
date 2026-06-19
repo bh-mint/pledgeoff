@@ -126,10 +126,22 @@ export async function POST(req: Request) {
 
   const niche = classifyNiche(parsed.data.text);
 
+  // Auto-resolve teamId: if client didn't send one, inherit from the user's team
+  let teamId = parsed.data.teamId ?? null;
+  if (!teamId) {
+    const [memberResult, ownerResult] = await Promise.all([
+      container.teamRepo.findByMemberId(userId),
+      container.teamRepo.findByOwnerId(userId),
+    ]);
+    const memberTeam = memberResult.isOk() ? memberResult.value : null;
+    const ownerTeam = ownerResult.isOk() ? ownerResult.value : null;
+    teamId = memberTeam?.id ?? ownerTeam?.id ?? null;
+  }
+
   const result = await container.createIdeaUseCase.execute({
     userId,
     text: parsed.data.text,
-    teamId: parsed.data.teamId ?? null,
+    teamId,
     niche,
     traceId,
   });

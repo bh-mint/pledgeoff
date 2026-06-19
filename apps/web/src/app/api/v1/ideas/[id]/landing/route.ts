@@ -4,6 +4,7 @@ import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { checkAiRateLimit } from '@/lib/rate-limiter';
 import { checkPlanToolGate } from '@/server/billing/checkPlanToolGate';
+import { isTeamMember } from '@/lib/team-access';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -15,8 +16,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   const ideaResult = await container.ideaRepo.findById(ideaId);
-  if (ideaResult.isErr() || !ideaResult.value || ideaResult.value.userId !== userId) {
+  if (ideaResult.isErr() || !ideaResult.value) {
     return Response.json({ error: { code: 'NOT_FOUND' } }, { status: 404, headers: { 'X-Trace-Id': traceId } });
+  }
+  const idea = ideaResult.value;
+  if (idea.userId !== userId) {
+    const ok = await isTeamMember(idea.userId, userId);
+    if (!ok) return Response.json({ error: { code: 'NOT_FOUND' } }, { status: 404, headers: { 'X-Trace-Id': traceId } });
   }
 
   const result = await container.landingPageRepo.findByIdeaId(ideaId);

@@ -135,6 +135,18 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
     return ok(undefined);
   }
 
+  async findByTeamId(teamId: string): Promise<Result<Idea[], IdeaRepositoryError>> {
+    const { data, error } = await this.client
+      .from('ideas')
+      .select()
+      .eq('team_id', teamId)
+      .order('created_at', { ascending: false })
+      .returns<IdeaRow[]>();
+
+    if (error) return err(new IdeaRepositoryError(error.message));
+    return ok((data ?? []).map(rowToIdea));
+  }
+
   async countThisMonth(userId: string): Promise<Result<number, IdeaRepositoryError>> {
     const startOfMonth = new Date();
     startOfMonth.setUTCDate(1);

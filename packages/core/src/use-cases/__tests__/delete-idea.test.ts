@@ -21,6 +21,7 @@ function makeRepo(overrides?: Partial<IIdeaRepository>): IIdeaRepository {
     findByUserId: async () => ok([]),
     findByUserIds: async () => ok([]),
     findByUserIdPaginated: async () => ok<IdeasPage, IdeaRepositoryError>({ ideas: [], hasMore: false, nextCursor: null }),
+    findByTeamId: async () => ok([]),
     countThisMonth: async () => ok(0),
     delete: async () => ok(undefined),
     ...overrides,

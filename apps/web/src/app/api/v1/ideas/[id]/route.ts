@@ -1,6 +1,7 @@
 import { container } from '@/lib/container';
 import { getCachedIdea, setCachedIdea, invalidateCachedIdea } from '@/lib/idea-cache';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
+import { isTeamMember } from '@/lib/team-access';
 
 function unauthorizedResponse(traceId: string) {
   return Response.json(
@@ -41,12 +42,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     );
   }
 
-  // Authorization: user can only read their own ideas
   if (idea.userId !== userId) {
-    return Response.json(
-      { error: { code: 'NOT_FOUND', message: 'Idea not found' } },
-      { status: 404, headers: { 'X-Trace-Id': traceId } },
-    );
+    const ok = await isTeamMember(idea.userId, userId);
+    if (!ok) {
+      return Response.json(
+        { error: { code: 'NOT_FOUND', message: 'Idea not found' } },
+        { status: 404, headers: { 'X-Trace-Id': traceId } },
+      );
+    }
   }
 
   const [decisionResult, signalsResult] = await Promise.all([
