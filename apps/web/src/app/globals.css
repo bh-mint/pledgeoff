@@ -2901,3 +2901,28 @@ select.adm-search-inp { cursor: pointer; }
   .ck-acts { flex-direction: column; }
   .ck-acts .btn-p, .ck-acts .btn-g { text-align: center; }
 }
+
+/* ── Outcome section (verdict page — close the loop) ─────────── */
+.out-section { border: 1px solid var(--line); background: var(--surface); padding: 22px 24px; margin-top: 32px; }
+.out-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.out-eye { font-family: var(--font-chivo-mono), monospace; font-size: 9px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.out-edit { font-family: var(--font-chivo-mono), monospace; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); background: none; border: none; cursor: pointer; padding: 0; }
+.out-edit:hover { opacity: .75; }
+.out-q { font-size: 14px; font-weight: 600; color: var(--ink); margin: 0 0 14px; }
+.out-opts { display: flex; gap: 10px; flex-wrap: wrap; }
+.out-opt { display: flex; align-items: center; gap: 9px; padding: 10px 18px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; transition: border-color .18s, background .18s, color .18s; }
+.out-opt:hover:not(:disabled) { border-color: var(--accent); color: var(--ink); }
+.out-opt.selected { border-color: var(--go); background: var(--go-light); color: var(--go); }
+.out-opt:disabled { opacity: .5; cursor: wait; }
+.out-opt-icon { font-size: 16px; line-height: 1; }
+.out-opt-lbl { font-family: var(--font-chivo-mono), monospace; font-size: 11px; font-weight: 600; letter-spacing: .04em; color: inherit; }
+.out-done { display: flex; align-items: center; gap: 16px; }
+.out-done-icon { font-size: 26px; line-height: 1; }
+.out-done-lbl { font-size: 13px; font-weight: 600; color: var(--ink); }
+.out-done-sub { font-family: var(--font-chivo-mono), monospace; font-size: 9.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
+.out-err { font-size: 12px; color: var(--kill); margin-top: 10px; }
+.out-saving { font-family: var(--font-chivo-mono), monospace; font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); display: block; margin-top: 10px; }
+@media (max-width: 640px) {
+  .out-opts { flex-direction: column; }
+  .out-opt { width: 100%; }
+}

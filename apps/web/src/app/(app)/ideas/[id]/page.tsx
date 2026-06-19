@@ -188,6 +188,8 @@ export default async function IdeaPage({ params }: Props) {
         categoryAvg={categoryAvg}
         ideaTitle={title}
         ideaCategory={category}
+        existingOutcome={existingOutcome}
+        canReportOutcome={isOwn && !!decision}
       />
 
     </div>

@@ -22,6 +22,8 @@ import type {
   CompetitorAnalysis,
   LaunchKit,
   Dimension,
+  DecisionOutcome,
+  OutcomeType,
 } from "@pledgeoff/core";
 
 type Plan = "free" | "founder" | "team" | "studio" | "enterprise";
@@ -41,6 +43,8 @@ interface Props {
   categoryAvg?: number | null;
   ideaTitle: string;
   ideaCategory: string | null;
+  existingOutcome: DecisionOutcome | null;
+  canReportOutcome: boolean;
 }
 
 const POLL_INTERVAL_MS = 4000;
@@ -287,6 +291,92 @@ function SightingsSection({ signals, bySource }: { signals: Signal[]; bySource: 
   );
 }
 
+// ── Outcome section ─────────────────────────────────────────────
+
+const OUTCOME_OPTIONS: Array<{ type: OutcomeType; label: string; icon: string }> = [
+  { type: "built_worked", label: "Built it — worked",        icon: "✅" },
+  { type: "built_failed", label: "Built it — failed",        icon: "❌" },
+  { type: "not_built",    label: "Decided not to build",     icon: "⏸" },
+];
+
+function OutcomeSection({ ideaId, initialOutcome }: { ideaId: string; initialOutcome: OutcomeType | null }) {
+  const [current, setCurrent]   = useState<OutcomeType | null>(initialOutcome);
+  const [saving,  setSaving]    = useState(false);
+  const [error,   setError]     = useState(false);
+  const [editing, setEditing]   = useState(false);
+
+  const showOptions = !current || editing;
+  const active = OUTCOME_OPTIONS.find((o) => o.type === current);
+
+  async function report(type: OutcomeType) {
+    const prev = current;
+    setCurrent(type);   // optimistic update
+    setSaving(true);
+    setError(false);
+    setEditing(false);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch(`/api/v1/ideas/${ideaId}/outcome`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ outcomeType: type }),
+      });
+      if (!res.ok) {
+        setCurrent(prev);   // revert on error
+        setError(true);
+      }
+    } catch {
+      setCurrent(prev);     // revert on network failure
+      setError(true);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="out-section">
+      <div className="out-hd">
+        <span className="out-eye">OUTCOME · CLOSE THE LOOP</span>
+        {current && !editing && (
+          <button className="out-edit" onClick={() => setEditing(true)}>Edit →</button>
+        )}
+      </div>
+
+      {showOptions ? (
+        <>
+          <p className="out-q">What happened with this idea?</p>
+          <div className="out-opts">
+            {OUTCOME_OPTIONS.map((opt) => (
+              <button
+                key={opt.type}
+                className={`out-opt${current === opt.type ? " selected" : ""}`}
+                onClick={() => report(opt.type)}
+                disabled={saving}
+              >
+                <span className="out-opt-icon">{opt.icon}</span>
+                <span className="out-opt-lbl">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+          {error && <p className="out-err">Failed to save. Try again.</p>}
+          {saving && <span className="out-saving">Saving…</span>}
+        </>
+      ) : (
+        <div className="out-done">
+          <span className="out-done-icon">{active?.icon}</span>
+          <div>
+            <div className="out-done-lbl">{active?.label}</div>
+            <div className="out-done-sub">Reported · helps calibrate future verdicts</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main component ──────────────────────────────────────────────
 
 export function VerdictPageClient({
@@ -302,6 +392,8 @@ export function VerdictPageClient({
   plan,
   ideaTitle,
   ideaCategory,
+  existingOutcome,
+  canReportOutcome,
 }: Props) {
   const router = useRouter();
   const { openPlanModal } = useUpgradeModal();
@@ -656,6 +748,14 @@ export function VerdictPageClient({
 
           {/* Evidence wall */}
           <SightingsSection signals={signals} bySource={bySource} />
+
+          {/* Outcome section */}
+          {canReportOutcome && (
+            <OutcomeSection
+              ideaId={idea.id}
+              initialOutcome={existingOutcome?.outcomeType ?? null}
+            />
+          )}
 
           {/* Actions row */}
           <div style={{ marginTop: 36, paddingTop: 24, borderTop: "1px solid var(--line)", display: "flex", gap: 12, flexWrap: "wrap" }}>
