@@ -4,6 +4,7 @@ import "./globals.css";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { CookieBanner } from "@/components/CookieBanner";
 import { ToastProvider } from "@/components/ToastProvider";
+import { UpgradeModalProvider } from "@/components/UpgradeModal";
 
 const bitter = Bitter({
   variable: "--font-bitter",
@@ -77,7 +78,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <ToastProvider>
-          {children}
+          <UpgradeModalProvider>
+            {children}
+          </UpgradeModalProvider>
         </ToastProvider>
         <CookieBanner />
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID ?? ""} />

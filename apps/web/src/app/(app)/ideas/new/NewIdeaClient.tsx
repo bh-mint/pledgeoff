@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getAuthToken } from "@/lib/auth-client";
+import { useUpgradeModal } from "@/components/UpgradeModal";
 
 // ─── Static data ────────────────────────────────────────
 
@@ -91,6 +92,7 @@ export function NewIdeaClient({
   teamName?: string | null;
 }) {
   const router = useRouter();
+  const { openQuotaModal } = useUpgradeModal();
   const searchParams = useSearchParams();
   const fromId = searchParams.get("from");
 
@@ -571,9 +573,16 @@ export function NewIdeaClient({
         {validationsLeft === 0 && (
           <div className="auth-err" style={{ marginTop: "16px" }}>
             You&apos;ve used all your validations this month.{" "}
-            <Link href="/pricing" style={{ color: "var(--kill)", textDecoration: "underline", textUnderlineOffset: 2 }}>
-              Upgrade →
-            </Link>
+            <button
+              onClick={openQuotaModal}
+              style={{
+                background: "none", border: "none", cursor: "pointer", padding: 0,
+                color: "var(--kill)", textDecoration: "underline", textUnderlineOffset: 2,
+                font: "inherit", fontSize: "inherit",
+              }}
+            >
+              Top up or upgrade →
+            </button>
           </div>
         )}
 

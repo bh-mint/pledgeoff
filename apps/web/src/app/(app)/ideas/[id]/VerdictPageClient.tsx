@@ -10,6 +10,7 @@ import { BuildClient } from "./build/BuildClient";
 import { CompetitorsClient } from "./competitors/CompetitorsClient";
 import { LaunchKitClient } from "./launch-kit/LaunchKitClient";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
+import { useUpgradeModal } from "@/components/UpgradeModal";
 import type {
   Idea,
   Decision,
@@ -303,6 +304,7 @@ export function VerdictPageClient({
   ideaCategory,
 }: Props) {
   const router = useRouter();
+  const { openPlanModal } = useUpgradeModal();
   const [decision, setDecision] = useState<Decision | null>(initialDecision);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
   const [polls, setPolls] = useState(0);
@@ -382,7 +384,11 @@ export function VerdictPageClient({
           <div className="vrd-plock-plan">{lock.requiredLabel}</div>
           <div className="vrd-plock-acts">
             <button
-              onClick={() => router.push("/settings/billing")}
+              onClick={() => openPlanModal({
+                planKey: lock.requiredPlan as 'founder' | 'team' | 'studio',
+                planLabel: lock.requiredLabel,
+                toolLabel: TOOL_META[toolKey].label,
+              })}
               className="btn-p"
             >
               Upgrade →
