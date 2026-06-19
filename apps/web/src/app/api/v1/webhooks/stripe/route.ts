@@ -196,6 +196,11 @@ export async function POST(req: Request) {
           break;
         }
 
+        if (subResult.value.adminOverride) {
+          logger.info({ traceId, userId: subResult.value.userId }, 'webhook.stripe.subscription_updated_skipped_admin_override');
+          break;
+        }
+
         const extraSeatPriceId = process.env.STRIPE_EXTRA_SEAT_PRICE_ID;
         const allItems = sub.items?.data ?? [];
 
@@ -241,6 +246,11 @@ export async function POST(req: Request) {
         const subResult = await container.subscriptionRepo.findByStripeSubscriptionId(sub.id);
         if (subResult.isErr() || !subResult.value) {
           logger.warn({ traceId, id: sub.id }, 'webhook.stripe.subscription_deleted_not_found');
+          break;
+        }
+
+        if (subResult.value.adminOverride) {
+          logger.info({ traceId, userId: subResult.value.userId }, 'webhook.stripe.subscription_deleted_skipped_admin_override');
           break;
         }
 

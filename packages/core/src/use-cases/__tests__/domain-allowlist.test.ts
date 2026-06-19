@@ -32,6 +32,7 @@ function makeSub(plan: Subscription['plan'] = 'enterprise'): Subscription {
     stripeCustomerId: null, stripeSubscriptionId: null, currentPeriodEnd: null,
     extraSeats: 0, stripeExtraSeatItemId: null, pastDueSince: null,
     ottoIncludedUsed: 0, ottoIncludedResetAt: null, ottoPurchased: 0, verificationsPurchased: 0,
+    adminOverride: false,
     createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z',
   };
 }
@@ -80,6 +81,7 @@ function mockSubRepo(plan: Subscription['plan'] = 'enterprise'): ISubscriptionRe
     addVerificationsPurchased: async () => ok(undefined),
     resetOttoIncludedUsed: async () => ok(undefined),
     resetAllOttoIncludedUsed: async () => ok(undefined),
+    setAdminOverride: async () => ok(undefined),
   };
 }
 

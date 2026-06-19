@@ -22,6 +22,7 @@ const makeProSub = (overrides: Partial<Subscription> = {}): Subscription => ({
   ottoIncludedResetAt: null,
   ottoPurchased: 0,
   verificationsPurchased: 0,
+  adminOverride: false,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   ...overrides,
@@ -61,6 +62,7 @@ function makeRepos(subOverride?: Partial<Subscription>) {
     addVerificationsPurchased: vi.fn(),
     resetOttoIncludedUsed: vi.fn(),
     resetAllOttoIncludedUsed: vi.fn(),
+    setAdminOverride: vi.fn(),
   };
 
   const llm: ILLMClient = {

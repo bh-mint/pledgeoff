@@ -30,6 +30,7 @@ function makeSub(overrides: Partial<Subscription> = {}): Subscription {
     ottoIncludedResetAt: null,
     ottoPurchased: 0,
     verificationsPurchased: 0,
+    adminOverride: false,
     pastDueSince: null,
     createdAt: now,
     updatedAt: now,

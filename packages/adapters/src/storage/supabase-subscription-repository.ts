@@ -26,6 +26,7 @@ type SubscriptionRow = {
   otto_included_reset_at: string | null;
   otto_purchased: number;
   verifications_purchased: number;
+  admin_override: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -46,6 +47,7 @@ function rowToSubscription(row: SubscriptionRow): Subscription {
     ottoIncludedResetAt: row.otto_included_reset_at ?? null,
     ottoPurchased: row.otto_purchased ?? 0,
     verificationsPurchased: row.verifications_purchased ?? 0,
+    adminOverride: row.admin_override ?? false,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   });
@@ -253,6 +255,16 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
       .from('subscriptions')
       .update({ otto_included_used: 0, otto_included_reset_at: new Date().toISOString(), updated_at: new Date().toISOString() })
       .neq('plan', 'free');
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async setAdminOverride(userId: string, override: boolean): Promise<Result<void, SubscriptionRepositoryError>> {
+    const { error } = await this.client
+      .from('subscriptions')
+      .update({ admin_override: override, updated_at: new Date().toISOString() })
+      .eq('user_id', userId);
 
     if (error) return err(new SubscriptionRepositoryError(error.message));
     return ok(undefined);

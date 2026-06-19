@@ -55,4 +55,5 @@ export interface ISubscriptionRepository {
   addVerificationsPurchased(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>>;
   resetOttoIncludedUsed(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
   resetAllOttoIncludedUsed(): Promise<Result<void, SubscriptionRepositoryError>>;
+  setAdminOverride(userId: string, override: boolean): Promise<Result<void, SubscriptionRepositoryError>>;
 }

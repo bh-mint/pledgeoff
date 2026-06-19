@@ -1,9 +1,11 @@
 import { requireAdminApi } from '@/lib/admin-auth';
-import { createSupabaseServiceClient } from '@/lib/supabase-server';
+import { container } from '@/lib/container';
+import { logger } from '@pledgeoff/observability';
 import { z } from 'zod';
 
 const Schema = z.object({
-  plan: z.enum(['free', 'founder', 'team', 'studio', 'enterprise']),
+  // null = lift override (restore Stripe as authoritative)
+  plan: z.enum(['free', 'founder', 'team', 'studio', 'enterprise']).nullable(),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -15,11 +17,32 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const parsed = Schema.safeParse(await req.json());
   if (!parsed.success) return Response.json({ error: { code: 'VALIDATION_FAILED' } }, { status: 400 });
 
-  const supabase = createSupabaseServiceClient();
-  const { error } = await supabase
-    .from('subscriptions')
-    .upsert({ user_id: id, plan: parsed.data.plan, status: 'active' }, { onConflict: 'user_id' });
+  const { plan } = parsed.data;
 
-  if (error) return Response.json({ error: { code: 'INTERNAL', message: error.message } }, { status: 500 });
+  if (plan === null) {
+    // Lift override — Stripe becomes authoritative again
+    const result = await container.subscriptionRepo.setAdminOverride(id, false);
+    if (result.isErr()) {
+      logger.error({ traceId, userId: id }, 'admin.lift_override_failed');
+      return Response.json({ error: { code: 'INTERNAL' } }, { status: 500 });
+    }
+    logger.info({ traceId, userId: id, adminId }, 'admin.override_lifted');
+    return Response.json({ ok: true }, { headers: { 'X-Trace-Id': traceId } });
+  }
+
+  // Set override — upsert plan + mark override flag
+  const upsertResult = await container.subscriptionRepo.upsert({ userId: id, plan, status: 'active' });
+  if (upsertResult.isErr()) {
+    logger.error({ traceId, userId: id }, 'admin.override_plan_upsert_failed');
+    return Response.json({ error: { code: 'INTERNAL' } }, { status: 500 });
+  }
+
+  const flagResult = await container.subscriptionRepo.setAdminOverride(id, true);
+  if (flagResult.isErr()) {
+    logger.error({ traceId, userId: id }, 'admin.override_flag_failed');
+    return Response.json({ error: { code: 'INTERNAL' } }, { status: 500 });
+  }
+
+  logger.info({ traceId, userId: id, plan, adminId }, 'admin.override_plan_set');
   return Response.json({ ok: true }, { headers: { 'X-Trace-Id': traceId } });
 }

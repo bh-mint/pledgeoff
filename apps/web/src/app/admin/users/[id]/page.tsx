@@ -55,7 +55,7 @@ export default async function UserDetailPage({
   if (!user) notFound();
 
   const isBanned = !!user.banned_until && new Date(user.banned_until) > new Date();
-  const hasOverride = false;
+  const hasOverride = sub?.admin_override === true;
   const plan = sub?.plan ?? "free";
   const name =
     profile?.first_name || profile?.last_name
@@ -211,7 +211,7 @@ export default async function UserDetailPage({
             isBanned={isBanned}
             currentPlan={plan}
             hasOverride={hasOverride}
-            overridePlanValue={null}
+            overridePlanValue={hasOverride ? plan : null}
           />
         </div>
       </div>

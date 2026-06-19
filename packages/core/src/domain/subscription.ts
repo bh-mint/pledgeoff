@@ -28,6 +28,7 @@ export const SubscriptionSchema = z.object({
   ottoIncludedResetAt: z.string().datetime({ offset: true }).nullable().default(null),
   ottoPurchased: z.number().int().min(0).default(0),
   verificationsPurchased: z.number().int().min(0).default(0),
+  adminOverride: z.boolean().default(false),
   createdAt: z.string().datetime({ offset: true }),
   updatedAt: z.string().datetime({ offset: true }),
 });
