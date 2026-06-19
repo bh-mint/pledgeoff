@@ -1,92 +1,73 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { CookieModal } from "@/components/CookieModal";
-import {
-  getPreferences,
-  savePreferences,
-  clearPreferences,
-} from "@/lib/cookie-consent";
+import { getPreferences, savePreferences, clearPreferences } from "@/lib/cookie-consent";
 
 export function CookieBanner() {
-  const [visible, setVisible] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return getPreferences() === null;
-  });
+  const [shown, setShown] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const manageRef = useRef<HTMLButtonElement>(null);
 
-  const respond = (analytics: boolean) => {
-    savePreferences({ analytics });
-    setVisible(false);
+  useEffect(() => {
+    if (getPreferences() === null) {
+      const t = setTimeout(() => setShown(true), 450);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  const acceptAll = () => {
+    savePreferences({ analytics: true });
+    setShown(false);
   };
 
-  if (!visible && !modalOpen) return null;
+  const openModal = () => {
+    setModalOpen(true);
+  };
+
+  const handleModalClose = (saved: boolean) => {
+    setModalOpen(false);
+    if (saved) setShown(false);
+  };
 
   return (
     <>
-      {visible && (
-        <div
-          role="dialog"
-          aria-label="Cookie consent"
-          aria-modal="false"
-          className="fixed bottom-0 left-0 right-0 z-50 border-t"
-          style={{ borderColor: "var(--border)", background: "var(--canvas)" }}
-        >
-          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <p className="text-[12px] leading-relaxed max-w-[600px]" style={{ color: "var(--t2)" }}>
-              We use strictly necessary cookies to keep you signed in, and optional
-              analytics cookies (Google Analytics 4) to understand how the platform
-              is used — only with your consent.{" "}
-              <Link
-                href="/privacy#s8"
-                className="underline underline-offset-2 hover:opacity-80 transition-opacity"
-                style={{ color: "var(--accent)" }}
-              >
-                Cookie policy
-              </Link>
-              .
+      <div
+        className={`ck-banner${shown ? " show" : ""}`}
+        role="region"
+        aria-label="Cookie consent"
+        aria-hidden={!shown}
+      >
+        <div className="ck-inner">
+          <div className="ck-txt">
+            <div className="ck-eyebrow">Cookies · This site</div>
+            <p className="ck-copy">
+              <b>We use analytics to improve PledgeOFF.</b>{" "}
+              <span>No ads, no third-party data sales — just product telemetry to see what&apos;s working.</span>
             </p>
-            <div className="flex items-center gap-2 shrink-0 flex-wrap">
-              <button
-                onClick={() => setModalOpen(true)}
-                className="h-9 px-4 rounded-md text-[12px] transition-colors"
-                style={{ color: "var(--t3)" }}
-              >
-                Manage preferences
-              </button>
-              <button
-                onClick={() => respond(false)}
-                className="h-9 px-4 rounded-md border text-[12px] transition-colors"
-                style={{ borderColor: "var(--border)", color: "var(--t2)" }}
-              >
-                Reject non-essential
-              </button>
-              <button
-                onClick={() => respond(true)}
-                className="h-9 px-4 rounded-md text-[12px] font-semibold transition-opacity hover:opacity-90"
-                style={{ background: "var(--accent)", color: "var(--canvas)" }}
-              >
-                Accept all
-              </button>
-            </div>
+          </div>
+          <div className="ck-acts">
+            <button ref={manageRef} className="btn-g" type="button" onClick={openModal} tabIndex={shown ? 0 : -1}>
+              Manage preferences
+            </button>
+            <button className="btn-p" type="button" onClick={acceptAll} tabIndex={shown ? 0 : -1}>
+              Accept all
+            </button>
           </div>
         </div>
-      )}
+      </div>
 
       {modalOpen && (
         <CookieModal
-          onClose={() => {
-            setModalOpen(false);
-            setVisible(false);
-          }}
+          triggerRef={manageRef}
+          onClose={handleModalClose}
         />
       )}
     </>
   );
 }
 
-/** Call from Footer "Cookie preferences" to reset consent and re-show banner */
+/** Called from Footer "Cookie preferences" to re-open preferences */
 export function resetCookieConsent() {
   if (typeof window === "undefined") return;
   clearPreferences();

@@ -26,6 +26,7 @@ export function CookiePreferencesButton() {
       {open && (
         <CookieModal onClose={() => setOpen(false)} />
       )}
+
     </>
   );
 }
