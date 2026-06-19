@@ -53,7 +53,7 @@ export class StripeAdapter {
   private readonly taxEnabled: boolean;
 
   constructor(secretKey: string) {
-    this.stripe = new Stripe(secretKey, { apiVersion: '2026-04-22.dahlia' });
+    this.stripe = new Stripe(secretKey, { apiVersion: '2026-05-27.dahlia' });
     // automatic_tax requires Stripe Tax to be configured in the dashboard.
     // Enable only on live keys — test accounts typically don't have Stripe Tax set up.
     this.taxEnabled = secretKey.startsWith('sk_live_');

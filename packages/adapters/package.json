@@ -12,18 +12,19 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.93.0",
+    "@anthropic-ai/sdk": "^0.105.0",
     "@pledgeoff/core": "workspace:*",
     "@pledgeoff/observability": "workspace:*",
-    "@supabase/supabase-js": "^2.106.1",
+    "@supabase/supabase-js": "2.108.2",
     "@upstash/redis": "^1.38.0",
     "groq-sdk": "^0.9.1",
     "neverthrow": "^8.2.0",
-    "stripe": "^22.1.1",
+    "stripe": "^22.2.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "typescript": "^5.8.3",
-    "vitest": "^3.2.6"
+    "@vitest/coverage-v8": "4.1.9",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   }
 }

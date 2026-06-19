@@ -1,3 +1,31 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+
+allowBuilds:
+  '@sentry/cli': true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+
+minimumReleaseAgeExclude:
+  - '@anthropic-ai/sdk@0.105.0'
+  - '@sentry/browser-utils@10.59.0'
+  - '@sentry/browser@10.59.0'
+  - '@sentry/core@10.59.0'
+  - '@sentry/feedback@10.59.0'
+  - '@sentry/nextjs@10.59.0'
+  - '@sentry/node-core@10.59.0'
+  - '@sentry/node@10.59.0'
+  - '@sentry/opentelemetry@10.59.0'
+  - '@sentry/react@10.59.0'
+  - '@sentry/replay-canvas@10.59.0'
+  - '@sentry/replay@10.59.0'
+  - '@sentry/server-utils@10.59.0'
+  - '@sentry/vercel-edge@10.59.0'
+  - stripe@22.2.2
+
+overrides:
+  postcss: ">=8.5.10"
+  "brace-expansion@<1.1.13": "1.1.13"
+  "@supabase/supabase-js": "2.108.2"
