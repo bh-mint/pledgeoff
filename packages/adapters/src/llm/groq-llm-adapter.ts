@@ -7,7 +7,7 @@ import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observabilit
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
 import { buildSimulationPrompt, SIMULATION_PROMPT_VERSION } from './simulation-prompt.v1';
 import { buildLandingPrompt, LANDING_PROMPT_VERSION } from './landing-prompt.v1';
-import { buildCustomerPrompt, CUSTOMER_PROMPT_VERSION } from './customer-prompt.v1';
+import { buildCustomerPrompt, buildLimitedCustomerPrompt, CUSTOMER_PROMPT_VERSION, CUSTOMER_LIMITED_PROMPT_VERSION } from './customer-prompt.v1';
 import { buildBuildPrompt, BUILD_PROMPT_VERSION, ANALYZE_BUILD_MAX_TOKENS } from './build-prompt.v1';
 import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './search-queries-prompt.v1';
 import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
@@ -73,6 +73,11 @@ const LLMCustomerResponseSchema = z.object({
     source: z.enum(['reddit', 'hn', 'github']),
     url: z.string().min(1),
   })).max(10),
+});
+
+const LLMCustomerLimitedResponseSchema = z.object({
+  segments: z.array(CustomerSegmentSchema).min(1).max(1),
+  painPoints: z.array(z.object({ text: z.string().min(1).max(200), rank: z.number().int().min(1) })).min(1).max(3),
 });
 
 const TechLibrarySchema = z.object({
@@ -274,7 +279,23 @@ export class GroqLLMAdapter implements ILLMClient {
 
   async analyzeCustomers(request: LLMCustomerRequest): Promise<Result<LLMCustomerResponse, LLMClientError>> {
     return tracer.startActiveSpan('groq.analyze-customers', async (span) => {
-      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
+      span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model, 'icp.limited': request.limited ?? false });
+
+      if (request.limited) {
+        const limitedResult = await this._callGroq(
+          buildLimitedCustomerPrompt(request.ideaText),
+          `You are a customer intelligence analyst using prompt version ${CUSTOMER_LIMITED_PROMPT_VERSION}. Always respond with valid JSON only.`,
+          LLMCustomerLimitedResponseSchema,
+          'analyzeCustomers',
+          request.traceId,
+          512,
+        );
+        span.setStatus(limitedResult.isErr() ? { code: SpanStatusCode.ERROR, message: limitedResult.error.message } : { code: SpanStatusCode.OK });
+        span.end();
+        if (limitedResult.isErr()) return err(limitedResult.error);
+        return ok({ ...limitedResult.value, sentiment: { positive: 0, negative: 0, neutral: 0 }, quotes: [] });
+      }
+
       const result = await this._callGroq(
         buildCustomerPrompt(request.ideaText, request.signals),
         `You are a customer intelligence analyst using prompt version ${CUSTOMER_PROMPT_VERSION}. Always respond with valid JSON only.`,

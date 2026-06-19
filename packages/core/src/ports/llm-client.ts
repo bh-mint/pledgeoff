@@ -53,6 +53,7 @@ export interface LLMCustomerRequest {
   readonly ideaText: string;
   readonly signals: Signal[];
   readonly traceId: string;
+  readonly limited?: boolean;
 }
 
 export interface LLMCustomerResponse {

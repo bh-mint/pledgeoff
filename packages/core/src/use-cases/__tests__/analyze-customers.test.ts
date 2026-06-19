@@ -86,6 +86,30 @@ describe('AnalyzeCustomersUseCase', () => {
     expect(llm.analyzeCustomers).toHaveBeenCalledOnce();
   });
 
+  it('passes limited flag to LLM when free plan', async () => {
+    const repo = makeRepo();
+    const llm = makeLLM();
+    const useCase = new AnalyzeCustomersUseCase(repo, makeSignalRepo(), llm);
+
+    await useCase.execute({ ideaId, ideaText: 'idea validation tool', userId, traceId: 'trace-limited', limited: true });
+
+    expect(llm.analyzeCustomers).toHaveBeenCalledWith(
+      expect.objectContaining({ limited: true }),
+    );
+  });
+
+  it('passes limited: undefined when not set (full plan)', async () => {
+    const repo = makeRepo();
+    const llm = makeLLM();
+    const useCase = new AnalyzeCustomersUseCase(repo, makeSignalRepo(), llm);
+
+    await useCase.execute({ ideaId, ideaText: 'idea validation tool', userId, traceId: 'trace-full' });
+
+    expect(llm.analyzeCustomers).toHaveBeenCalledWith(
+      expect.objectContaining({ limited: undefined }),
+    );
+  });
+
   it('returns cached result if analysis already exists', async () => {
     const existing: CustomerAnalysis = {
       id: crypto.randomUUID(),

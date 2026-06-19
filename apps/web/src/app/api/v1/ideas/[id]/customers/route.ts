@@ -3,6 +3,7 @@ export const maxDuration = 60;
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { checkAiRateLimit } from '@/lib/rate-limiter';
+import { checkPlanToolGate } from '@/server/billing/checkPlanToolGate';
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -53,11 +54,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     );
   }
 
+  const fullIcpGate = await checkPlanToolGate(userId, 'icp');
+  const limited = !fullIcpGate.allowed;
+
   const result = await container.analyzeCustomersUseCase.execute({
     ideaId,
     ideaText: ideaResult.value.text,
     userId,
     traceId,
+    limited,
   });
 
   if (result.isErr()) {

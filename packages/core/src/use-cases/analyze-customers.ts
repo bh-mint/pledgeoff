@@ -9,6 +9,7 @@ export interface AnalyzeCustomersInput {
   readonly ideaText: string;
   readonly userId: string;
   readonly traceId: string;
+  readonly limited?: boolean;
 }
 
 export type AnalyzeCustomersError = CustomerAnalysisRepositoryError | SignalRepositoryError | LLMClientError;
@@ -34,6 +35,7 @@ export class AnalyzeCustomersUseCase {
       ideaText: input.ideaText,
       signals,
       traceId: input.traceId,
+      limited: input.limited,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 
