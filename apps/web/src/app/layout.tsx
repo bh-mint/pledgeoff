@@ -3,6 +3,7 @@ import { Bitter, Chivo_Mono } from "next/font/google";
 import "./globals.css";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { CookieBanner } from "@/components/CookieBanner";
+import { ToastProvider } from "@/components/ToastProvider";
 
 const bitter = Bitter({
   variable: "--font-bitter",
@@ -75,7 +76,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col">
-        {children}
+        <ToastProvider>
+          {children}
+        </ToastProvider>
         <CookieBanner />
         <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID ?? ""} />
       </body>
