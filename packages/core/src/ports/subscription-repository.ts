@@ -48,7 +48,7 @@ export interface ISubscriptionRepository {
   updateExtraSeats(input: SubscriptionSeatUpdateInput): Promise<Result<Subscription, SubscriptionRepositoryError>>;
   setPastDueSince(userId: string, since: string): Promise<Result<void, SubscriptionRepositoryError>>;
   downgradeToFree(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
-  deductOttoQuestion(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
+  deductOttoQuestion(userId: string, includedLimit: number): Promise<Result<void, SubscriptionRepositoryError>>;
   /** Atomically checks monthly quota and deducts 1 from verifications_purchased when included is exhausted. */
   deductVerification(userId: string): Promise<Result<void, SubscriptionRepositoryError | VerificationsExhaustedError>>;
   addOttoPurchasedQuestions(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>>;

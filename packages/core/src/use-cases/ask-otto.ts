@@ -1,6 +1,6 @@
 import { err, ok, Result } from 'neverthrow';
 import { appendMessage, createOttoConversation } from '../domain/otto-conversation';
-import { canAskOtto, effectivePlan, ottoAvailableQuestions } from '../domain/subscription';
+import { canAskOtto, effectivePlan, ottoAvailableQuestions, PLAN_LIMITS } from '../domain/subscription';
 import type { IOttoConversationRepository } from '../ports/otto-conversation-repository';
 import type { ISubscriptionRepository } from '../ports/subscription-repository';
 import type { ILLMClient } from '../ports/llm-client';
@@ -69,7 +69,8 @@ export class AskOttoUseCase {
 
     // Deduct before LLM — credit is consumed regardless of LLM outcome.
     // If LLM fails after this point, credit is intentionally lost (prevents credit farming via retries).
-    const deductResult = await this.subscriptionRepo.deductOttoQuestion(input.userId);
+    const includedLimit = PLAN_LIMITS[plan].ottoQuestionsPerMonth;
+    const deductResult = await this.subscriptionRepo.deductOttoQuestion(input.userId, includedLimit);
     if (deductResult.isErr()) return err(new OttoRepositoryError('Failed to deduct question'));
 
     const llmResult = await this.llmClient.chatWithOtto({

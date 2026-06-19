@@ -104,7 +104,7 @@ describe('AskOttoUseCase', () => {
 
     await useCase.execute(makeInput());
 
-    expect(subRepo.deductOttoQuestion).toHaveBeenCalledWith('user-1');
+    expect(subRepo.deductOttoQuestion).toHaveBeenCalledWith('user-1', 15); // founder = 15
   });
 
   it('rejects Free plan users with OttoInsufficientQuestionsError', async () => {
@@ -181,6 +181,6 @@ describe('AskOttoUseCase', () => {
     expect(result.isErr()).toBe(true);
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(OttoUnavailableError);
     // Credit is consumed before LLM — prevents gaming the system via retries
-    expect(subRepo.deductOttoQuestion).toHaveBeenCalledWith('user-1');
+    expect(subRepo.deductOttoQuestion).toHaveBeenCalledWith('user-1', 15); // founder = 15
   });
 });

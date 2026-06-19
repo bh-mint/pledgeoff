@@ -198,11 +198,13 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
     return ok(undefined);
   }
 
-  async deductOttoQuestion(userId: string): Promise<Result<void, SubscriptionRepositoryError>> {
+  async deductOttoQuestion(userId: string, includedLimit: number): Promise<Result<void, SubscriptionRepositoryError>> {
     // Uses the deduct_otto_question SQL function which holds a row-level lock
     // for the full transaction, eliminating the SELECT-then-UPDATE race condition.
+    // Cap Infinity (enterprise plan) to INT_MAX since SQL INT cannot hold Infinity.
+    const sqlLimit = isFinite(includedLimit) ? includedLimit : 2147483647;
     const { data, error } = await this.client
-      .rpc('deduct_otto_question', { p_user_id: userId });
+      .rpc('deduct_otto_question', { p_user_id: userId, p_included_limit: sqlLimit });
 
     if (error) return err(new SubscriptionRepositoryError(error.message));
 
