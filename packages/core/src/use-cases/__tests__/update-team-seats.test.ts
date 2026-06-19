@@ -30,6 +30,7 @@ function mockRepo(overrides?: Partial<ISubscriptionRepository>): ISubscriptionRe
     setPastDueSince: async () => ok(undefined),
     downgradeToFree: async () => ok(undefined),
     deductOttoQuestion: async () => ok(undefined),
+    deductVerification: async () => ok(undefined),
     addOttoPurchasedQuestions: async () => ok(undefined),
     addVerificationsPurchased: async () => ok(undefined),
     resetOttoIncludedUsed: async () => ok(undefined),

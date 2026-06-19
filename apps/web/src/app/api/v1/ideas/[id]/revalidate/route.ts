@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { checkAiRateLimit } from '@/lib/rate-limiter';
+import { VerificationsExhaustedError } from '@pledgeoff/core';
+import { logger } from '@pledgeoff/observability';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -37,6 +39,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json(
       { error: { code: 'RATE_LIMITED' } },
       { status: 429, headers: { 'X-Trace-Id': traceId, 'Retry-After': String(Math.ceil(aiLimit.retryAfterMs / 1000)) } },
+    );
+  }
+
+  // Verification gate (Q28): revalidation consumes 1 verification from included quota or pack.
+  const deductResult = await container.subscriptionRepo.deductVerification(userId);
+  if (deductResult.isErr()) {
+    if (deductResult.error instanceof VerificationsExhaustedError) {
+      return NextResponse.json(
+        { error: { code: 'PLAN_LIMIT_REACHED', message: 'Validation limit reached. Buy a Validation Pack to revalidate.' } },
+        { status: 403, headers: { 'X-Trace-Id': traceId } },
+      );
+    }
+    logger.error({ traceId, userId, ideaId: id, error: String(deductResult.error) }, 'revalidate: deductVerification failed');
+    return NextResponse.json(
+      { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
+      { status: 500, headers: { 'X-Trace-Id': traceId } },
     );
   }
 

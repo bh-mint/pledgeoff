@@ -37,6 +37,7 @@ function makeRepo(sub: Subscription | null = makeSub()): ISubscriptionRepository
     setPastDueSince: vi.fn(),
     downgradeToFree: vi.fn(),
     deductOttoQuestion: vi.fn(),
+    deductVerification: vi.fn(),
     addOttoPurchasedQuestions: vi.fn(),
     addVerificationsPurchased: vi.fn(),
     resetOttoIncludedUsed: vi.fn(),

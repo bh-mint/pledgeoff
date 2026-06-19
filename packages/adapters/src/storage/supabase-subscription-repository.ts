@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Subscription } from '@pledgeoff/core';
 import {
   SubscriptionRepositoryError,
+  VerificationsExhaustedError,
   subscriptionFromPersistence,
   type ISubscriptionRepository,
   type SubscriptionUpsertInput,
@@ -179,6 +180,19 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
       .eq('user_id', userId);
 
     if (error) return err(new SubscriptionRepositoryError(error.message));
+    return ok(undefined);
+  }
+
+  async deductVerification(userId: string): Promise<Result<void, SubscriptionRepositoryError | VerificationsExhaustedError>> {
+    // Uses deduct_verification SQL function — holds a row-level FOR UPDATE lock on subscriptions
+    // and atomically counts ideas this month to avoid SELECT-then-UPDATE race on the pack balance.
+    const { data, error } = await this.client
+      .rpc('deduct_verification', { p_user_id: userId });
+
+    if (error) return err(new SubscriptionRepositoryError(error.message));
+    if (data === 'not_found') return err(new SubscriptionRepositoryError('Subscription not found'));
+    if (data === 'no_balance') return err(new VerificationsExhaustedError());
+
     return ok(undefined);
   }
 

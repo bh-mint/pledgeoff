@@ -56,6 +56,7 @@ function makeRepos(subOverride?: Partial<Subscription>) {
     setPastDueSince: vi.fn(),
     downgradeToFree: vi.fn(),
     deductOttoQuestion: vi.fn().mockResolvedValue(ok(undefined)),
+    deductVerification: vi.fn().mockResolvedValue(ok(undefined)),
     addOttoPurchasedQuestions: vi.fn(),
     addVerificationsPurchased: vi.fn(),
     resetOttoIncludedUsed: vi.fn(),

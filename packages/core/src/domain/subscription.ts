@@ -62,13 +62,14 @@ export function requiredPlanForTool(tool: ToolKey): Plan {
   return 'founder';
 }
 
-export const VALIDATION_PACK_SIZES = [10, 25, 60] as const;
+export const VALIDATION_PACK_SIZES = [10, 25, 60, 100] as const;
 export type ValidationPackSize = typeof VALIDATION_PACK_SIZES[number];
 
 export const VALIDATION_PACK_PRICES_EUR: Record<ValidationPackSize, number> = {
   10: 19,
   25: 42,
   60: 85,
+  100: 120,
 };
 
 export const OTTO_PACK_SIZES = [10, 25, 60, 150] as const;

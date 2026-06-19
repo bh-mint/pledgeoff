@@ -1,27 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ok, err } from 'neverthrow';
-import { IdeaRepositoryError } from '@pledgeoff/core';
+import { IdeaRepositoryError, VerificationsExhaustedError, SubscriptionRepositoryError } from '@pledgeoff/core';
 
 const mockResolveUserId = vi.fn();
-const mockGetUserPlan = vi.fn();
 const mockCheckRateLimit = vi.fn();
 const mockCreateIdeaUseCase = { execute: vi.fn() };
 const mockIdeaRepo = {
   findByUserId: vi.fn(),
   findByUserIdPaginated: vi.fn(),
-  countThisMonth: vi.fn(),
 };
 const mockDecisionRepo = { findByIdeaId: vi.fn() };
 const mockIdempotencyStore = {
   hasBeenProcessed: vi.fn(),
   markAsProcessed: vi.fn(),
 };
-const mockSubscriptionRepo = { findByUserId: vi.fn() };
+const mockSubscriptionRepo = {
+  findByUserId: vi.fn(),
+  deductVerification: vi.fn(),
+};
 const mockAuditLog = { log: vi.fn() };
 const mockEventBus = { processOutbox: vi.fn() };
 
 vi.mock('@/lib/api-auth', () => ({ resolveUserId: mockResolveUserId, resolveUserIdFromRequest: mockResolveUserId }));
-vi.mock('@/server/billing/getUserPlan', () => ({ getUserPlan: mockGetUserPlan }));
 vi.mock('@/lib/rate-limiter', () => ({ checkRateLimit: mockCheckRateLimit }));
 vi.mock('next/server', async (importOriginal) => {
   const actual = await importOriginal<typeof import('next/server')>();
@@ -54,10 +54,8 @@ describe('POST /api/v1/ideas', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockResolveUserId.mockResolvedValue(TEST_USER_ID);
-    mockGetUserPlan.mockResolvedValue('free');
     mockCheckRateLimit.mockResolvedValue({ allowed: true });
-    mockIdeaRepo.countThisMonth.mockResolvedValue(ok(0));
-    mockSubscriptionRepo.findByUserId.mockResolvedValue(ok(null));
+    mockSubscriptionRepo.deductVerification.mockResolvedValue(ok(undefined));
     mockIdempotencyStore.hasBeenProcessed.mockResolvedValue(ok(false));
     mockIdempotencyStore.markAsProcessed.mockResolvedValue(ok(undefined));
     mockAuditLog.log.mockResolvedValue(undefined);
@@ -97,9 +95,8 @@ describe('POST /api/v1/ideas', () => {
     expect(body.error.code).toBe('VALIDATION_FAILED');
   });
 
-  it('returns 403 when monthly plan limit is reached', async () => {
-    mockGetUserPlan.mockResolvedValue('free');
-    mockIdeaRepo.countThisMonth.mockResolvedValue(ok(3));
+  it('returns 403 when verification limit is reached (included exhausted, no pack)', async () => {
+    mockSubscriptionRepo.deductVerification.mockResolvedValue(err(new VerificationsExhaustedError()));
 
     const { POST } = await import('../ideas/route');
     const res = await POST(makeRequest({ text: VALID_IDEA_TEXT }));
@@ -107,6 +104,17 @@ describe('POST /api/v1/ideas', () => {
     expect(res.status).toBe(403);
     const body = await res.json();
     expect(body.error.code).toBe('PLAN_LIMIT_REACHED');
+  });
+
+  it('returns 500 when deductVerification DB error (FIX-3b fail-closed)', async () => {
+    mockSubscriptionRepo.deductVerification.mockResolvedValue(err(new SubscriptionRepositoryError('DB timeout')));
+
+    const { POST } = await import('../ideas/route');
+    const res = await POST(makeRequest({ text: VALID_IDEA_TEXT }));
+
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error.code).toBe('INTERNAL');
   });
 
   it('returns 429 when rate limited', async () => {

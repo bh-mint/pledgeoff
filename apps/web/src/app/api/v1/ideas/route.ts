@@ -3,8 +3,7 @@ import { CreateIdeaRequestSchema } from '@pledgeoff/contracts';
 import { container } from '@/lib/container';
 import { checkRateLimit } from '@/lib/rate-limiter';
 import { logger } from '@pledgeoff/observability';
-import { getUserPlan } from '@/server/billing/getUserPlan';
-import { PLAN_LIMITS } from '@pledgeoff/core';
+import { VerificationsExhaustedError } from '@pledgeoff/core';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { classifyNiche } from '@/lib/niche-classifier';
 
@@ -58,31 +57,6 @@ export async function POST(req: Request) {
   const userId = await resolveUserIdFromRequest(req);
   if (!userId) return unauthorizedResponse(traceId);
 
-  // Plan gate
-  let plan: Awaited<ReturnType<typeof getUserPlan>>;
-  try {
-    plan = await getUserPlan(userId);
-  } catch {
-    logger.error({ traceId, userId, outcome: 'error' as const }, 'ideas POST: plan resolution failed');
-    return Response.json(
-      { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
-      { status: 500, headers: { 'X-Trace-Id': traceId } },
-    );
-  }
-  const limit = PLAN_LIMITS[plan].verificationsPerMonth;
-  // getUserPlan already resolved plan (SSOT). Second read here is for verificationsPurchased only.
-  const subResult = await container.subscriptionRepo.findByUserId(userId);
-  const verificationsPurchased = subResult.isOk() ? (subResult.value?.verificationsPurchased ?? 0) : 0;
-  const totalVerificationsAvailable = limit + verificationsPurchased;
-
-  const countResult = await container.ideaRepo.countThisMonth(userId);
-  if (countResult.isOk() && countResult.value >= totalVerificationsAvailable) {
-    return Response.json(
-      { error: { code: 'PLAN_LIMIT_REACHED', message: `Your ${plan} plan allows ${limit} verification${limit === 1 ? '' : 's'} per month. Upgrade to continue.`, plan } },
-      { status: 403, headers: { 'X-Trace-Id': traceId } },
-    );
-  }
-
   // Rate limiting
   const rateLimit = await checkRateLimit(userId);
   if (!rateLimit.allowed) {
@@ -130,6 +104,23 @@ export async function POST(req: Request) {
     return Response.json(
       { error: { code: 'VALIDATION_FAILED', details: parsed.error.flatten() } },
       { status: 400, headers: { 'X-Trace-Id': traceId } },
+    );
+  }
+
+  // Verification gate — atomic: checks included quota + deducts from pack if exhausted.
+  // Called after all other guards so pack credits are never deducted on blocked requests.
+  const deductResult = await container.subscriptionRepo.deductVerification(userId);
+  if (deductResult.isErr()) {
+    if (deductResult.error instanceof VerificationsExhaustedError) {
+      return Response.json(
+        { error: { code: 'PLAN_LIMIT_REACHED', message: 'Monthly validation limit reached. Upgrade your plan or buy a Validation Pack.' } },
+        { status: 403, headers: { 'X-Trace-Id': traceId } },
+      );
+    }
+    logger.error({ traceId, userId, outcome: 'error' as const, error: String(deductResult.error) }, 'ideas POST: deductVerification failed');
+    return Response.json(
+      { error: { code: 'INTERNAL', message: 'An unexpected error occurred' } },
+      { status: 500, headers: { 'X-Trace-Id': traceId } },
     );
   }
 

@@ -9,6 +9,13 @@ export class SubscriptionRepositoryError extends Error {
   }
 }
 
+export class VerificationsExhaustedError extends Error {
+  readonly code = 'VERIFICATIONS_EXHAUSTED' as const;
+  constructor() {
+    super('No verifications remaining');
+  }
+}
+
 export type SubscriptionUpsertInput = {
   userId: string;
   stripeCustomerId?: string | null;
@@ -42,6 +49,8 @@ export interface ISubscriptionRepository {
   setPastDueSince(userId: string, since: string): Promise<Result<void, SubscriptionRepositoryError>>;
   downgradeToFree(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
   deductOttoQuestion(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
+  /** Atomically checks monthly quota and deducts 1 from verifications_purchased when included is exhausted. */
+  deductVerification(userId: string): Promise<Result<void, SubscriptionRepositoryError | VerificationsExhaustedError>>;
   addOttoPurchasedQuestions(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>>;
   addVerificationsPurchased(userId: string, count: number): Promise<Result<void, SubscriptionRepositoryError>>;
   resetOttoIncludedUsed(userId: string): Promise<Result<void, SubscriptionRepositoryError>>;
