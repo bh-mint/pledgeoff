@@ -9,6 +9,14 @@ export type RateLimitResult =
 type Bucket = { count: number; resetAt: number };
 const ideaBuckets = new Map<string, Bucket>();
 const aiBuckets = new Map<string, Bucket>();
+const publicBuckets = new Map<string, Bucket>();
+const resendBuckets = new Map<string, Bucket>();
+
+export function getClientIp(req: Request): string {
+  const forwarded = req.headers.get('x-forwarded-for');
+  const first = forwarded?.split(',')[0]?.trim();
+  return first ?? 'unknown';
+}
 
 function inMemoryCheck(
   buckets: Map<string, Bucket>,
@@ -66,6 +74,35 @@ function getAiLimiter(): Ratelimit | null {
   return aiLimiter;
 }
 
+let publicLimiter: Ratelimit | null = null;
+let resendLimiter: Ratelimit | null = null;
+
+function getPublicLimiter(): Ratelimit | null {
+  if (publicLimiter) return publicLimiter;
+  const redis = getRedisClient();
+  if (!redis) return null;
+  publicLimiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, '1 h'),
+    prefix: 'rl:public',
+    analytics: false,
+  });
+  return publicLimiter;
+}
+
+function getResendLimiter(): Ratelimit | null {
+  if (resendLimiter) return resendLimiter;
+  const redis = getRedisClient();
+  if (!redis) return null;
+  resendLimiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(3, '10 m'),
+    prefix: 'rl:resend',
+    analytics: false,
+  });
+  return resendLimiter;
+}
+
 export async function checkRateLimit(userId: string): Promise<RateLimitResult> {
   const limiter = getIdeaLimiter();
   if (!limiter) {
@@ -84,6 +121,32 @@ export async function checkAiRateLimit(userId: string): Promise<RateLimitResult>
     return inMemoryCheck(aiBuckets, userId, 60 * 60 * 1000, 20);
   }
   const { success, reset } = await limiter.limit(userId);
+  if (!success) {
+    return { allowed: false, retryAfterMs: Math.max(0, reset - Date.now()) };
+  }
+  return { allowed: true };
+}
+
+// 5 requests per hour per IP — waitlist, contact, enterprise contact
+export async function checkPublicRateLimit(ip: string): Promise<RateLimitResult> {
+  const limiter = getPublicLimiter();
+  if (!limiter) {
+    return inMemoryCheck(publicBuckets, ip, 60 * 60 * 1000, 5);
+  }
+  const { success, reset } = await limiter.limit(ip);
+  if (!success) {
+    return { allowed: false, retryAfterMs: Math.max(0, reset - Date.now()) };
+  }
+  return { allowed: true };
+}
+
+// 3 requests per 10 minutes per IP — resend-verification (email bombing risk)
+export async function checkResendRateLimit(ip: string): Promise<RateLimitResult> {
+  const limiter = getResendLimiter();
+  if (!limiter) {
+    return inMemoryCheck(resendBuckets, ip, 10 * 60 * 1000, 3);
+  }
+  const { success, reset } = await limiter.limit(ip);
   if (!success) {
     return { allowed: false, retryAfterMs: Math.max(0, reset - Date.now()) };
   }

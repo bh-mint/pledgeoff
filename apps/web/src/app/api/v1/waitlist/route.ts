@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { logger } from "@pledgeoff/observability";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
+import { checkPublicRateLimit, getClientIp } from "@/lib/rate-limiter";
 
 const WaitlistSchema = z.object({
   email: z.string().email(),
@@ -10,6 +11,15 @@ const WaitlistSchema = z.object({
 
 export async function POST(req: NextRequest) {
   const traceId = req.headers.get("x-trace-id") ?? crypto.randomUUID();
+
+  const ip = getClientIp(req);
+  const rl = await checkPublicRateLimit(ip);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "TOO_MANY_REQUESTS" },
+      { status: 429, headers: { "X-Trace-Id": traceId, "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } },
+    );
+  }
 
   let body: unknown;
   try {

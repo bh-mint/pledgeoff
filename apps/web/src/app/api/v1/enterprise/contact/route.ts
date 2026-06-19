@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { logger } from "@pledgeoff/observability";
+import { checkPublicRateLimit, getClientIp } from "@/lib/rate-limiter";
 
 const BodySchema = z.object({
   name: z.string().min(1).max(200),
@@ -9,6 +10,15 @@ const BodySchema = z.object({
 
 export async function POST(req: Request): Promise<Response> {
   const traceId = req.headers.get("x-trace-id") ?? crypto.randomUUID();
+
+  const ip = getClientIp(req);
+  const rl = await checkPublicRateLimit(ip);
+  if (!rl.allowed) {
+    return Response.json(
+      { error: "TOO_MANY_REQUESTS" },
+      { status: 429, headers: { "X-Trace-Id": traceId, "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } },
+    );
+  }
 
   const body = await req.json() as unknown;
   const parsed = BodySchema.safeParse(body);
