@@ -77,9 +77,10 @@ export class RedisStreamsEventBus implements IEventBus {
   }
 
   // Unified entry point for cron — tries Redis Stream, falls back to outbox
-  async processEvents(): Promise<{ processed: number; failed: number }> {
+  async processEvents(): Promise<{ processed: number; failed: number; blocked: number }> {
     try {
-      return await this.processStream();
+      const result = await this.processStream();
+      return { ...result, blocked: 0 };
     } catch (streamErr) {
       log.warn(
         { traceId: 'system', target: 'upstash', operation: 'processStream', outcome: 'error', errorMsg: streamErr instanceof Error ? streamErr.message : 'unknown' },
@@ -124,7 +125,7 @@ export class RedisStreamsEventBus implements IEventBus {
   }
 
   // Fallback: direct outbox poll (same as PostgresEventBus)
-  async processOutbox(limit = 50): Promise<{ processed: number; failed: number }> {
+  async processOutbox(limit = 50): Promise<{ processed: number; failed: number; blocked: number }> {
     const { data, error } = await this.supabase
       .from('outbox')
       .select('event_id, event_type, payload, attempts')
@@ -132,7 +133,7 @@ export class RedisStreamsEventBus implements IEventBus {
       .order('created_at')
       .limit(limit);
 
-    if (error || !data) return { processed: 0, failed: 0 };
+    if (error || !data) return { processed: 0, failed: 0, blocked: 0 };
 
     let processed = 0;
     let failed = 0;
@@ -154,7 +155,7 @@ export class RedisStreamsEventBus implements IEventBus {
       }
     }
 
-    return { processed, failed };
+    return { processed, failed, blocked: 0 };
   }
 
   private async dispatchMessage(msg: StreamMessage): Promise<boolean> {

@@ -44,11 +44,11 @@ export class PostgresEventBus implements IEventBus {
   }
 
   // Unified entry point for cron
-  async processEvents(limit = 50): Promise<{ processed: number; failed: number }> {
+  async processEvents(limit = 50): Promise<{ processed: number; failed: number; blocked: number }> {
     return this.processOutbox(limit);
   }
 
-  async processOutbox(limit = 50): Promise<{ processed: number; failed: number }> {
+  async processOutbox(limit = 50): Promise<{ processed: number; failed: number; blocked: number }> {
     const { data, error } = await this.supabase
       .from('outbox')
       .select('event_id, event_type, payload, attempts')
@@ -57,7 +57,7 @@ export class PostgresEventBus implements IEventBus {
       .order('created_at')
       .limit(limit);
 
-    if (error || !data) return { processed: 0, failed: 0 };
+    if (error || !data) return { processed: 0, failed: 0, blocked: 0 };
 
     let processed = 0;
     let failed = 0;
@@ -88,7 +88,16 @@ export class PostgresEventBus implements IEventBus {
       }
     }
 
-    return { processed, failed };
+    // Count events permanently blocked (exhausted all 3 retry attempts)
+    const { count: blockedCount } = await this.supabase
+      .from('outbox')
+      .select('*', { count: 'exact', head: true })
+      .eq('processed', false)
+      .gt('attempts', 3);
+
+    const blocked = blockedCount ?? 0;
+
+    return { processed, failed, blocked };
   }
 
   private async dispatchOne(event: DomainEvent<unknown>): Promise<void> {

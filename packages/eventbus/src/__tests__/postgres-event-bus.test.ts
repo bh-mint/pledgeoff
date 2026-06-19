@@ -17,6 +17,7 @@ function makeSupabase(overrides: {
   insertError?: { message: string } | null;
   selectData?: unknown[];
   selectError?: { message: string } | null;
+  blockedCount?: number;
 } = {}) {
   // claim update: .update().eq().eq().select() → { data: [{ event_id }], error: null }
   const claimedSelectMock = vi.fn().mockResolvedValue({ data: [{ event_id: 'claimed' }], error: null });
@@ -24,18 +25,28 @@ function makeSupabase(overrides: {
   const claimEq1Mock = vi.fn().mockReturnValue({ eq: claimEq2Mock });
   const updateMock = vi.fn().mockReturnValue({ eq: claimEq1Mock });
 
-  // select: .select().eq().lte().order().limit()
-  const selectMock = vi.fn().mockReturnValue({
-    eq: vi.fn().mockReturnValue({
-      lte: vi.fn().mockReturnValue({
-        order: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue({
-            data: overrides.selectData ?? [],
-            error: overrides.selectError ?? null,
+  // blocked count query: .select('*', {count,head}).eq().gt() → { count, error: null }
+  const gtMock = vi.fn().mockResolvedValue({ count: overrides.blockedCount ?? 0, error: null });
+  const eqForCountMock = vi.fn().mockReturnValue({ gt: gtMock });
+
+  // main query: .select('cols').eq().lte().order().limit()
+  const selectMock = vi.fn().mockImplementation((_cols: string) => {
+    // blocked count query passes options object as second arg
+    if (_cols === '*') {
+      return { eq: eqForCountMock };
+    }
+    return {
+      eq: vi.fn().mockReturnValue({
+        lte: vi.fn().mockReturnValue({
+          order: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue({
+              data: overrides.selectData ?? [],
+              error: overrides.selectError ?? null,
+            }),
           }),
         }),
       }),
-    }),
+    };
   });
   const insertMock = vi.fn().mockResolvedValue({ error: overrides.insertError ?? null });
 
@@ -117,14 +128,17 @@ describe('PostgresEventBus', () => {
     const supabase = {
       from: vi.fn().mockReturnValue({
         insert: vi.fn().mockResolvedValue({ error: null }),
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            lte: vi.fn().mockReturnValue({
-              order: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue({ data: [row], error: null }),
+        select: vi.fn().mockImplementation((cols: string) => {
+          if (cols === '*') return { eq: vi.fn().mockReturnValue({ gt: vi.fn().mockResolvedValue({ count: 0, error: null }) }) };
+          return {
+            eq: vi.fn().mockReturnValue({
+              lte: vi.fn().mockReturnValue({
+                order: vi.fn().mockReturnValue({
+                  limit: vi.fn().mockResolvedValue({ data: [row], error: null }),
+                }),
               }),
             }),
-          }),
+          };
         }),
         update: updateMock,
       }),
@@ -137,6 +151,24 @@ describe('PostgresEventBus', () => {
 
     expect(stats.failed).toBe(1);
     expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ attempts: 1 }));
+  });
+
+  it('returns blocked count when events exceed max attempts', async () => {
+    const supabase = makeSupabase({ blockedCount: 3 });
+    const bus = new PostgresEventBus(supabase as never);
+
+    const stats = await bus.processOutbox();
+
+    expect(stats.blocked).toBe(3);
+  });
+
+  it('returns blocked: 0 when no events are exhausted', async () => {
+    const supabase = makeSupabase({ blockedCount: 0 });
+    const bus = new PostgresEventBus(supabase as never);
+
+    const stats = await bus.processOutbox();
+
+    expect(stats.blocked).toBe(0);
   });
 
   it('does not dispatch to unrelated subscribers', async () => {
