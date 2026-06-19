@@ -42,6 +42,7 @@ function makeDeps(opts: { decisions?: Decision[]; saved?: DecisionOutcome } = {}
     findByIdea: vi.fn(),
     findByUser: vi.fn(),
     findAll: vi.fn(),
+    findCalibrationExamples: vi.fn().mockResolvedValue(ok([])),
   };
 
   const decisionRepo: IDecisionRepository = {

@@ -219,7 +219,7 @@ export class GroqLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('groq.generate-decision', async (span) => {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
-        buildDecisionPrompt(request.ideaText, request.signals),
+        buildDecisionPrompt(request.ideaText, request.signals, request.calibrationExamples),
         `You are a startup decision intelligence engine using prompt version ${PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMResponseSchema,
         'generateDecision',

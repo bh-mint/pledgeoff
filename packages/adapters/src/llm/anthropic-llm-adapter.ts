@@ -237,7 +237,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('anthropic.generate-decision', async (span) => {
       span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callAnthropic(
-        buildDecisionPrompt(request.ideaText, request.signals),
+        buildDecisionPrompt(request.ideaText, request.signals, request.calibrationExamples),
         DECISION_SYSTEM_PROMPT,
         LLMResponseSchema,
         'generateDecision',

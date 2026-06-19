@@ -244,6 +244,7 @@ class AppContainer {
       this._eventBus,
       this.idempotencyStore,
       this._embeddingClient,
+      this.decisionOutcomeRepo,
     ));
   }
 

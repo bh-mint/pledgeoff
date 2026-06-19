@@ -22,6 +22,7 @@ function makeRepo(outcomes: DecisionOutcome[]): IDecisionOutcomeRepository {
     findByIdea: vi.fn(),
     findByUser: vi.fn(),
     findAll: vi.fn().mockResolvedValue(ok(outcomes)),
+    findCalibrationExamples: vi.fn().mockResolvedValue(ok([])),
   };
 }
 
@@ -88,6 +89,7 @@ describe('GetFlywheelStatsUseCase', () => {
       findByIdea: vi.fn(),
       findByUser: vi.fn(),
       findAll: vi.fn().mockResolvedValue(err(new DecisionOutcomeRepositoryError('db error'))),
+      findCalibrationExamples: vi.fn().mockResolvedValue(ok([])),
     };
     const uc = new GetFlywheelStatsUseCase(repo);
 

@@ -6,10 +6,18 @@ import type { CustomerSegment, PainPoint, SentimentBreakdown, CustomerQuote } fr
 import type { TechComponent, TechGap } from '../domain/build-analysis';
 import type { Competitor, CompetitorGap } from '../domain/competitor-analysis';
 
+export interface CalibrationExample {
+  readonly ideaText: string;
+  readonly verdict: 'GO' | 'KILL';
+  readonly outcome: 'built_worked' | 'not_built';
+  readonly reasoning: string;
+}
+
 export interface LLMDecisionRequest {
   readonly ideaText: string;
   readonly signals: Signal[];
   readonly traceId: string;
+  readonly calibrationExamples?: CalibrationExample[];
 }
 
 export interface LLMDecisionResponse {

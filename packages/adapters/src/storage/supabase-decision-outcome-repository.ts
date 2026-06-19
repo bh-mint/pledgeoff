@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { DecisionOutcome } from '@pledgeoff/core';
+import type { DecisionOutcome, CalibrationExample } from '@pledgeoff/core';
 import { DecisionOutcomeRepositoryError, type IDecisionOutcomeRepository } from '@pledgeoff/core';
 
 type DecisionOutcomeRow = {
@@ -82,5 +82,59 @@ export class SupabaseDecisionOutcomeRepository implements IDecisionOutcomeReposi
 
     if (error) return err(new DecisionOutcomeRepositoryError(error.message));
     return ok((data ?? []).map(rowToOutcome));
+  }
+
+  async findCalibrationExamples(limit: number): Promise<Result<CalibrationExample[], DecisionOutcomeRepositoryError>> {
+    const { data: outcomeRows, error: outcomeErr } = await this.client
+      .from('decision_outcomes')
+      .select('idea_id, outcome_type, verdict_at_time')
+      .in('outcome_type', ['built_worked', 'not_built'])
+      .in('verdict_at_time', ['GO', 'KILL'])
+      .order('reported_at', { ascending: false })
+      .limit(limit)
+      .returns<{ idea_id: string; outcome_type: string; verdict_at_time: string }[]>();
+
+    if (outcomeErr) return err(new DecisionOutcomeRepositoryError(outcomeErr.message));
+    if (!outcomeRows || outcomeRows.length === 0) return ok([]);
+
+    const ideaIds = outcomeRows.map((r) => r.idea_id);
+
+    const [ideasResult, decisionsResult] = await Promise.all([
+      this.client
+        .from('ideas')
+        .select('id, text')
+        .in('id', ideaIds)
+        .returns<{ id: string; text: string }[]>(),
+      this.client
+        .from('decisions')
+        .select('idea_id, reasoning')
+        .in('idea_id', ideaIds)
+        .order('created_at', { ascending: false })
+        .returns<{ idea_id: string; reasoning: string }[]>(),
+    ]);
+
+    if (ideasResult.error) return err(new DecisionOutcomeRepositoryError(ideasResult.error.message));
+    if (decisionsResult.error) return err(new DecisionOutcomeRepositoryError(decisionsResult.error.message));
+
+    const ideaMap = new Map((ideasResult.data ?? []).map((i) => [i.id, i.text]));
+    const decisionMap = new Map<string, string>();
+    for (const d of decisionsResult.data ?? []) {
+      if (!decisionMap.has(d.idea_id)) decisionMap.set(d.idea_id, d.reasoning);
+    }
+
+    const examples: CalibrationExample[] = [];
+    for (const row of outcomeRows) {
+      const ideaText = ideaMap.get(row.idea_id);
+      const reasoning = decisionMap.get(row.idea_id);
+      if (!ideaText || !reasoning) continue;
+      examples.push({
+        ideaText,
+        verdict: row.verdict_at_time as 'GO' | 'KILL',
+        outcome: row.outcome_type as 'built_worked' | 'not_built',
+        reasoning,
+      });
+    }
+
+    return ok(examples);
   }
 }

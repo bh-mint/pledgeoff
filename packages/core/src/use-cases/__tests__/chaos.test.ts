@@ -58,6 +58,7 @@ const mockOutcomeRepo = {
   findByIdea: async () => ok(null as DecisionOutcome | null),
   findByUser: async () => ok([] as DecisionOutcome[]),
   findAll: async () => ok([] as DecisionOutcome[]),
+  findCalibrationExamples: async () => ok([]),
 };
 
 const mockDecisionRepo: IDecisionRepository = {

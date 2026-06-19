@@ -6,9 +6,10 @@ import { SignalRepositoryError } from '../../ports/signal-repository';
 import { InvalidDecisionError } from '../../domain/decision';
 import type { ISignalRepository } from '../../ports/signal-repository';
 import type { IDecisionRepository } from '../../ports/decision-repository';
-import type { ILLMClient, LLMDecisionResponse } from '../../ports/llm-client';
+import type { ILLMClient, LLMDecisionResponse, CalibrationExample } from '../../ports/llm-client';
 import type { IEventBus } from '../../ports/event-bus';
 import type { IIdempotencyStore } from '../../ports/idempotency-store';
+import type { IDecisionOutcomeRepository } from '../../ports/decision-outcome-repository';
 import type { Signal } from '../../domain/signal';
 
 const ideaId = crypto.randomUUID();
@@ -69,6 +70,16 @@ function makeIdempotencyStore(processed = false): IIdempotencyStore {
   return {
     hasBeenProcessed: vi.fn().mockResolvedValue(ok(processed)),
     markAsProcessed: vi.fn().mockResolvedValue(ok(undefined)),
+  };
+}
+
+function makeOutcomeRepo(examples: CalibrationExample[] = []): IDecisionOutcomeRepository {
+  return {
+    upsert: vi.fn(),
+    findByIdea: vi.fn(),
+    findByUser: vi.fn(),
+    findAll: vi.fn(),
+    findCalibrationExamples: vi.fn().mockResolvedValue(ok(examples)),
   };
 }
 
@@ -206,5 +217,52 @@ describe('DecideUseCase', () => {
       eventType: 'decision.ready.v1',
       payload: expect.objectContaining({ ideaId, verdict: 'GO' }),
     }));
+  });
+
+  it('calls generateDecision without calibrationExamples when outcomeRepo returns 0 examples', async () => {
+    const llm = makeLLMClient();
+    const outcomeRepo = makeOutcomeRepo([]);  // empty — no calibration
+    const useCase = new DecideUseCase(
+      makeSignalRepo(),
+      makeDecisionRepo(),
+      llm,
+      makeEventBus(),
+      makeIdempotencyStore(false),
+      undefined,
+      outcomeRepo,
+    );
+
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isOk()).toBe(true);
+    expect(llm.generateDecision).toHaveBeenCalledWith(
+      expect.objectContaining({ calibrationExamples: undefined }),
+    );
+  });
+
+  it('injects calibrationExamples into generateDecision when outcomeRepo returns examples', async () => {
+    const examples: CalibrationExample[] = [
+      { ideaText: 'App for dog walkers', verdict: 'GO', outcome: 'built_worked', reasoning: 'Strong demand in niche.' },
+      { ideaText: 'Blockchain for dentists', verdict: 'KILL', outcome: 'not_built', reasoning: 'No real need found.' },
+    ];
+    const llm = makeLLMClient();
+    const outcomeRepo = makeOutcomeRepo(examples);
+    const useCase = new DecideUseCase(
+      makeSignalRepo(),
+      makeDecisionRepo(),
+      llm,
+      makeEventBus(),
+      makeIdempotencyStore(false),
+      undefined,
+      outcomeRepo,
+    );
+
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isOk()).toBe(true);
+    expect(outcomeRepo.findCalibrationExamples).toHaveBeenCalledWith(3);
+    expect(llm.generateDecision).toHaveBeenCalledWith(
+      expect.objectContaining({ calibrationExamples: examples }),
+    );
   });
 });

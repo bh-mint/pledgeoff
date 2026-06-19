@@ -22,6 +22,7 @@ const makeRepo = (outcomes: DecisionOutcome[]) => ({
   findByIdea: async () => ok(null),
   findByUser: async () => ok([]),
   upsert: async (o: DecisionOutcome) => ok(o),
+  findCalibrationExamples: async () => ok([]),
 });
 
 const makeErrRepo = () => ({
@@ -29,6 +30,7 @@ const makeErrRepo = () => ({
   findByIdea: async () => ok(null),
   findByUser: async () => ok([]),
   upsert: async (o: DecisionOutcome) => ok(o),
+  findCalibrationExamples: async () => ok([]),
 });
 
 describe('GetUsersAccuracyReportUseCase', () => {

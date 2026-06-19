@@ -3,10 +3,11 @@ import type { Decision } from '../domain/decision';
 import { computeScore, validateDimensions, InvalidDecisionError } from '../domain/decision';
 import type { IDecisionRepository, DecisionRepositoryError } from '../ports/decision-repository';
 import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository';
-import type { ILLMClient, LLMClientError } from '../ports/llm-client';
+import type { ILLMClient, LLMClientError, CalibrationExample } from '../ports/llm-client';
 import type { IEventBus, EventBusError } from '../ports/event-bus';
 import type { IIdempotencyStore, IdempotencyStoreError } from '../ports/idempotency-store';
 import type { IEmbeddingClient } from '../ports/embedding-client';
+import type { IDecisionOutcomeRepository } from '../ports/decision-outcome-repository';
 
 const TOP_SIGNALS_LIMIT = 15;
 
@@ -33,6 +34,7 @@ export class DecideUseCase {
     private readonly eventBus: IEventBus,
     private readonly idempotencyStore: IIdempotencyStore,
     private readonly embeddingClient?: IEmbeddingClient,
+    private readonly outcomeRepo?: IDecisionOutcomeRepository,
   ) {}
 
   async execute(input: DecideInput): Promise<Result<Decision, DecideError>> {
@@ -62,10 +64,19 @@ export class DecideUseCase {
     }
     if (signalsResult.isErr()) return err(signalsResult.error);
 
+    let calibrationExamples: CalibrationExample[] | undefined;
+    if (this.outcomeRepo) {
+      const calibResult = await this.outcomeRepo.findCalibrationExamples(3);
+      if (calibResult.isOk() && calibResult.value.length > 0) {
+        calibrationExamples = calibResult.value;
+      }
+    }
+
     const llmResult = await this.llmClient.generateDecision({
       ideaText: input.ideaText,
       signals: signalsResult.value,
       traceId: input.traceId,
+      calibrationExamples,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 
