@@ -112,7 +112,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
           {/* Browse by topic — filters in-page */}
           <div className="mt-10 max-w-xl">
-            <div className="mono text-[10px] uppercase tracking-[0.1em] mb-3" style={{ color: "var(--faint)" }}>Browse by topic</div>
+            <div className="mono text-[10px] uppercase tracking-widest mb-3" style={{ color: "var(--faint)" }}>Browse by topic</div>
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.filter((c) => c.value !== "all").map((c) => {
                 const isActive = activeTag === c.value;
@@ -153,7 +153,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
       {/* Start here — always visible */}
       <section className="border-b" style={{ borderColor: "var(--line)" }}>
           <div className="w-page" style={{ paddingTop: 32, paddingBottom: 32 }}>
-            <div className="mono text-[10px] uppercase tracking-[0.1em] mb-4" style={{ color: "var(--faint)" }}>
+            <div className="mono text-[10px] uppercase tracking-widest mb-4" style={{ color: "var(--faint)" }}>
               ▎ Start here — if it&apos;s your first time
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -164,7 +164,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                   <Link
                     key={a.slug}
                     href={`/blog/${a.slug}`}
-                    className="group border p-4 transition-colors hover:bg-white/[0.02]"
+                    className="group border p-4 transition-colors hover:bg-white/2"
                     style={{ borderColor: "var(--line)", background: "var(--surface)" }}
                   >
                     <div className="mono text-[10px] mb-2" style={{ color: "var(--faint)" }}>
@@ -197,7 +197,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                 <button
                   key={value}
                   onClick={() => handleTagChange(value)}
-                  className="rounded-full border h-8 px-3 inline-flex items-center transition-all flex-shrink-0"
+                  className="rounded-full border h-8 px-3 inline-flex items-center transition-all shrink-0"
                   style={
                     active
                       ? { borderColor: activeColor, background: `${activeColor}15`, color: "var(--ink)" }
@@ -211,7 +211,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
               );
             })}
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+          <div className="flex items-center gap-2 shrink-0 ml-3">
         <input
           type="search"
           value={query}
@@ -236,7 +236,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
             <section className="border-b" style={{ borderColor: "var(--line)" }}>
               <Link
                 href={`/blog/${featured.slug}`}
-                className="block w-page transition-colors hover:bg-white/[0.01]"
+                className="block w-page transition-colors hover:bg-white/1"
                 style={{ paddingTop: 32, paddingBottom: 40 }}
               >
                 <div className="flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-start gap-3">
@@ -244,7 +244,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                     <div className="mono text-[10px]" style={{ color: "var(--go)" }}>▎ FEATURED</div>
                     {featured.slug === TRENDING_SLUG && (
                       <span
-                        className="mono text-[9px] uppercase tracking-[0.1em] px-1.5 py-0.5 inline-flex items-center gap-1 sm:mt-1"
+                        className="mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 inline-flex items-center gap-1 sm:mt-1"
                         style={{
                           color: "var(--caution)",
                           background: "color-mix(in srgb, var(--caution) 12%, transparent)",
@@ -293,7 +293,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                   <Link
                     key={article.slug}
                     href={`/blog/${article.slug}`}
-                    className="flex flex-col sm:grid sm:grid-cols-12 sm:gap-6 sm:items-center py-5 sm:py-6 border-b transition-colors hover:bg-white/[0.015]"
+                    className="flex flex-col sm:grid sm:grid-cols-12 sm:gap-6 sm:items-center py-5 sm:py-6 border-b transition-colors hover:bg-white/1.5"
                     style={{ borderColor: "var(--line)" }}
                   >
                     <div className="flex items-center gap-3 mb-1 sm:contents">
@@ -317,7 +317,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
                       </div>
                       {article.slug === TRENDING_SLUG && (
                         <span
-                          className="mono text-[9px] uppercase tracking-[0.1em] px-1.5 py-0.5 inline-flex items-center gap-1 mt-1"
+                          className="mono text-[9px] uppercase tracking-widest px-1.5 py-0.5 inline-flex items-center gap-1 mt-1"
                           style={{
                             color: "var(--caution)",
                             background: "color-mix(in srgb, var(--caution) 12%, transparent)",

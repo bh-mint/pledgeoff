@@ -64,7 +64,7 @@ export default function IdeaValidationPage() {
         <div className="w-page-sm" style={{ paddingTop: 56, paddingBottom: 96 }}>
 
           {/* Breadcrumb */}
-          <div className="mono text-[10px] uppercase tracking-[0.1em] mb-6 flex items-center gap-2" style={{ color: "var(--faint)" }}>
+          <div className="mono text-[10px] uppercase tracking-widest mb-6 flex items-center gap-2" style={{ color: "var(--faint)" }}>
             <Link href="/blog" className="hover:text-(--t2) transition-colors">Blog</Link>
             <span>›</span>
             <span style={{ color: TAG_COLOR }}>Idea Validation</span>
@@ -95,7 +95,7 @@ export default function IdeaValidationPage() {
                     {formatDate(a.publishedAt).toUpperCase()} · {a.readingTime} MIN READ
                   </div>
                 </div>
-                <span className="mono text-[11px] flex-shrink-0 ml-4" style={{ color: "var(--faint)" }}>→</span>
+                <span className="mono text-[11px] shrink-0 ml-4" style={{ color: "var(--faint)" }}>→</span>
               </Link>
             ))}
           </div>
@@ -120,7 +120,7 @@ export default function IdeaValidationPage() {
 
           {/* Also explore */}
           <div className="mt-12">
-            <div className="mono text-[10px] mb-4 uppercase tracking-[0.1em]" style={{ color: "var(--faint)" }}>Also explore</div>
+            <div className="mono text-[10px] mb-4 uppercase tracking-widest" style={{ color: "var(--faint)" }}>Also explore</div>
             <div className="flex flex-col sm:flex-row gap-3">
               {others.map((o) => (
                 <Link
