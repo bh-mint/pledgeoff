@@ -430,7 +430,7 @@ export function NewIdeaClient({
                 </p>
               </div>
               {ideaId && (
-                <Link href={`/ideas/${ideaId}`} className={`an-done-cta${isDoneVisible ? " pulse" : ""}`}>
+                <Link href={`/ideas/${ideaId}`} className={`btn-p${isDoneVisible ? " pulse" : ""}`}>
                   View verdict →
                 </Link>
               )}
@@ -562,7 +562,7 @@ export function NewIdeaClient({
           </span>
           <button
             type="button"
-            className="ni-run"
+            className="btn-p"
             disabled={submitting || validationsLeft === 0}
             onClick={handleSubmit}
           >
