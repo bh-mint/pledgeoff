@@ -325,7 +325,7 @@ export function DashboardClient({
             ? `${teamFeedRows.length} items`
             : "ranked by signals"}
         </span>
-        <Link href="/ideas/new" className="db-btn-new">
+        <Link href="/ideas/new" className="btn-xs p">
           New survey →
         </Link>
       </div>
@@ -666,7 +666,7 @@ export function DashboardClient({
                       <button
                         type="submit"
                         disabled={quickText.trim().length < 10 || quickStatus === "loading"}
-                        className="db-btn-new"
+                        className="btn-xs p"
                         style={{ opacity: quickText.trim().length < 10 || quickStatus === "loading" ? .45 : 1 }}
                       >
                         {quickStatus === "loading" ? "Analyzing…" : "Validate →"}
@@ -696,7 +696,7 @@ export function DashboardClient({
           <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 20, lineHeight: 1.65 }}>
             Create a team and invite colleagues in Settings → Team.
           </p>
-          <Link href="/settings" className="db-btn-new">
+          <Link href="/settings" className="btn-xs p">
             Go to Settings →
           </Link>
         </div>
@@ -875,7 +875,7 @@ export function DashboardClient({
         <p style={{ fontSize: 13, color: "var(--dim)", marginBottom: 20, lineHeight: 1.65 }}>
           Automatically surfaces which stale ideas need a decision. Available on Founder and above.
         </p>
-        <Link href="/pricing" className="db-btn-new">
+        <Link href="/pricing" className="btn-xs p">
           Upgrade to Founder →
         </Link>
       </div>

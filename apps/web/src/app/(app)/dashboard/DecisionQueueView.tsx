@@ -102,7 +102,7 @@ export function DecisionQueueView({ variant = "main" }: Props) {
         </p>
         <Link
           href="/ideas/new"
-          className="db-btn-new"
+          className="btn-xs p"
         >
           + New survey →
         </Link>

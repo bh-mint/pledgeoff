@@ -61,7 +61,7 @@ export default function ProductDecisionsPage() {
       <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
         <PublicNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
-        <div className="max-w-2xl mx-auto px-6 pt-14 pb-24">
+        <div className="w-page-sm" style={{ paddingTop: 56, paddingBottom: 96 }}>
 
           {/* Breadcrumb */}
           <div className="mono text-[10px] uppercase tracking-[0.1em] mb-6 flex items-center gap-2" style={{ color: "var(--faint)" }}>

@@ -83,7 +83,7 @@ export function HomeClient() {
       </div>
 
       {/* ── HERO ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "52px 40px 60px" }}>
+      <div className="w-page" style={{ paddingTop: 52, paddingBottom: 60 }}>
         <div
           className="grid grid-cols-1 lg:grid-cols-2"
           style={{ gap: 52, alignItems: "start" }}
@@ -275,7 +275,7 @@ export function HomeClient() {
       </div>
 
       {/* ── HOW IT WORKS ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 60px" }}>
+      <div className="w-page" style={{ paddingBottom: 60 }}>
         <div style={{ marginBottom: 20 }}>
           <span style={monoEyebrow}>How it works</span>
           <h2
@@ -333,7 +333,7 @@ export function HomeClient() {
       </div>
 
       {/* ── FEATURE GRID ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 60px" }}>
+      <div className="w-page" style={{ paddingBottom: 60 }}>
         <span style={{ ...monoEyebrow, marginBottom: 20 }}>What you get</span>
         <div className="feat-grid" style={{ border: "1px solid var(--line)" }}>
           {FEATURES.map((f) => (
@@ -347,7 +347,7 @@ export function HomeClient() {
       </div>
 
       {/* ── THREE VERDICTS ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 60px" }}>
+      <div className="w-page" style={{ paddingBottom: 60 }}>
         <span style={{ ...monoEyebrow, marginBottom: 20 }}>Three verdicts</span>
         <div
           className="grid grid-cols-1 md:grid-cols-3"
@@ -409,7 +409,7 @@ export function HomeClient() {
       </div>
 
       {/* ── DECISION-CLARITY CALLOUT ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 60px" }}>
+      <div className="w-page" style={{ paddingBottom: 60 }}>
         <div
           style={{
             background: "var(--surface)",
@@ -457,7 +457,7 @@ export function HomeClient() {
       </div>
 
       {/* ── PRICING PREVIEW ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 40px 60px" }}>
+      <div className="w-page" style={{ paddingBottom: 60 }}>
         <span style={{ ...monoEyebrow, marginBottom: 8 }}>Pricing</span>
         <h2
           style={{
@@ -841,7 +841,7 @@ export function HomeClient() {
       <div
         className="cta-band"
       >
-        <div style={{ maxWidth: 820, margin: "0 auto" }}>
+        <div className="w-page-sm">
           <span
             style={{
               fontFamily: "var(--font-chivo-mono), monospace",

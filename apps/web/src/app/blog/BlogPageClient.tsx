@@ -75,7 +75,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
       {/* Hero */}
       <section className="border-b" style={{ borderColor: "var(--line)" }}>
-        <div className="max-w-360 mx-auto px-4 sm:px-10 py-16">
+        <div className="w-page" style={{ paddingTop: 64, paddingBottom: 64 }}>
           <div className="flex items-center gap-2 mb-6">
             <span className="w-1.5 h-1.5 pulse-dot" style={{ background: "var(--go)" }} />
             <span className="mono text-[10px] tracking-wider uppercase" style={{ color: "var(--faint)" }}>
@@ -152,7 +152,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
       {/* Start here — always visible */}
       <section className="border-b" style={{ borderColor: "var(--line)" }}>
-          <div className="max-w-360 mx-auto px-4 sm:px-10 py-8">
+          <div className="w-page" style={{ paddingTop: 32, paddingBottom: 32 }}>
             <div className="mono text-[10px] uppercase tracking-[0.1em] mb-4" style={{ color: "var(--faint)" }}>
               ▎ Start here — if it&apos;s your first time
             </div>
@@ -187,7 +187,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
         className="border-b sticky top-12 z-40 backdrop-blur"
         style={{ borderColor: "var(--line)", background: "rgba(10,10,11,0.85)" }}
       >
-        <div className="max-w-360 mx-auto px-4 sm:px-10 h-12 flex items-center justify-between">
+        <div className="w-page h-12 flex items-center justify-between">
           <div className="flex items-center gap-2 mono text-[11px] overflow-x-auto">
             {CATEGORIES.map(({ value, label, color }) => {
               const count = tagCount(value);
@@ -226,7 +226,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
       </section>
 
       {filtered.length === 0 ? (
-        <div className="max-w-360 mx-auto px-4 sm:px-10 py-24 text-center">
+        <div className="w-page" style={{ paddingTop: 96, paddingBottom: 96, textAlign: "center" }}>
           <p className="text-[14px]" style={{ color: "var(--faint)" }}>No articles in this category yet.</p>
         </div>
       ) : (
@@ -236,7 +236,8 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
             <section className="border-b" style={{ borderColor: "var(--line)" }}>
               <Link
                 href={`/blog/${featured.slug}`}
-                className="block max-w-360 mx-auto px-4 sm:px-10 py-8 sm:py-10 transition-colors hover:bg-white/[0.01]"
+                className="block w-page transition-colors hover:bg-white/[0.01]"
+                style={{ paddingTop: 32, paddingBottom: 40 }}
               >
                 <div className="flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-start gap-3">
                   <div className="sm:col-span-3 flex items-center gap-3 sm:block">
@@ -286,7 +287,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
           {/* Article list rows */}
           <section>
-            <div className="max-w-360 mx-auto px-4 sm:px-10">
+            <div className="w-page">
               <div className="divide-y" style={{ borderColor: "var(--line)" }}>
                 {rest.map((article) => (
                   <Link
