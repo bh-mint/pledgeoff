@@ -150,6 +150,7 @@ export default async function DashboardPage() {
         ? "killed"
         : "pivoting",
       tools: row.tools,
+      category: row.niche,
       outcomeType,
       needsOutcome:
         isOwn && isOlderThan30Days && !!row.decision && !outcomeType,

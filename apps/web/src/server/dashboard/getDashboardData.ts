@@ -13,6 +13,8 @@ export type DashboardIdeaRow = {
     landing: boolean;
     customers: boolean;
     build: boolean;
+    competitors: boolean;
+    launch_kit: boolean;
   };
 };
 
@@ -43,7 +45,9 @@ export async function getDashboardData(userIds: string[]): Promise<{
         simulations ( id ),
         landing_pages ( id ),
         customer_analyses ( id ),
-        build_analyses ( id )
+        build_analyses ( id ),
+        competitor_analyses ( id ),
+        launch_kits ( id )
       `)
       .in('user_id', userIds)
       .order('created_at', { ascending: false })
@@ -78,10 +82,12 @@ export async function getDashboardData(userIds: string[]): Promise<{
           } satisfies Decision)
         : null,
       tools: {
-        simulate:  (row.simulations?.length  ?? 0) > 0,
-        landing:   (row.landing_pages?.length ?? 0) > 0,
-        customers: (row.customer_analyses?.length ?? 0) > 0,
-        build:     (row.build_analyses?.length ?? 0) > 0,
+        simulate:    (row.simulations?.length         ?? 0) > 0,
+        landing:     (row.landing_pages?.length       ?? 0) > 0,
+        customers:   (row.customer_analyses?.length   ?? 0) > 0,
+        build:       (row.build_analyses?.length      ?? 0) > 0,
+        competitors: (row.competitor_analyses?.length ?? 0) > 0,
+        launch_kit:  (row.launch_kits?.length         ?? 0) > 0,
       },
     };
   });
@@ -116,4 +122,6 @@ type RawIdeaRow = {
   landing_pages: Array<{ id: string }> | null;
   customer_analyses: Array<{ id: string }> | null;
   build_analyses: Array<{ id: string }> | null;
+  competitor_analyses: Array<{ id: string }> | null;
+  launch_kits: Array<{ id: string }> | null;
 };

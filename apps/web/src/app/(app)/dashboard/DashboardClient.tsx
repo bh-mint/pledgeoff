@@ -15,6 +15,8 @@ export type ToolStatus = {
   landing: boolean;
   customers: boolean;
   build: boolean;
+  competitors: boolean;
+  launch_kit: boolean;
 };
 
 export type TableRow = {
@@ -25,6 +27,7 @@ export type TableRow = {
   verdict: string | null;
   status: "pending" | "validated" | "killed" | "pivoting";
   tools: ToolStatus;
+  category: string | null;
   outcomeType: string | null;
   needsOutcome: boolean;
   signalsStale: boolean;
@@ -517,7 +520,7 @@ export function DashboardClient({
           {/* Rows */}
           {filtered.map((row) => {
             const vc = verdictClass(row.verdict);
-            const toolKeys: (keyof ToolStatus)[] = ["simulate", "landing", "customers", "build"];
+            const toolKeys: (keyof ToolStatus)[] = ["customers", "competitors", "build", "simulate", "landing", "launch_kit"];
             return (
               <div
                 key={row.id}
@@ -560,20 +563,25 @@ export function DashboardClient({
                     )}
                     {row.text.slice(0, 120)}{row.text.length > 120 ? "…" : ""}
                   </div>
-                  {/* Category placeholder (not in row data, skip) */}
+                  {/* Category */}
                   <div className="db-ir-cat">
+                    {row.category && (
+                      <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--faint)" }}>
+                        {row.category}
+                      </span>
+                    )}
                     {row.needsOutcome && (
-                      <span style={{ color: "var(--pivot)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>
+                      <span style={{ color: "var(--pivot)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase", display: "block", marginTop: row.category ? 2 : 0 }}>
                         how did it go?
                       </span>
                     )}
                     {row.outcomeType && !row.needsOutcome && (
-                      <span style={{ color: row.outcomeType === "built_worked" ? "var(--go)" : "var(--kill)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>
+                      <span style={{ color: row.outcomeType === "built_worked" ? "var(--go)" : "var(--kill)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase", display: "block", marginTop: row.category ? 2 : 0 }}>
                         {row.outcomeType === "built_worked" ? "built ✓" : row.outcomeType === "built_failed" ? "built ✗" : "not built"}
                       </span>
                     )}
                     {row.signalsStale && !row.needsOutcome && !row.outcomeType && (
-                      <span style={{ color: "var(--faint)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase" }}>
+                      <span style={{ color: "var(--faint)", fontSize: 8, letterSpacing: ".1em", textTransform: "uppercase", display: "block", marginTop: row.category ? 2 : 0 }}>
                         outdated
                       </span>
                     )}
@@ -769,7 +777,7 @@ export function DashboardClient({
               <TeamActivityFeed events={teamActivityEvents} />
             </div>
 
-            {/* Team feed */}
+            {/* Team feed — grouped by member */}
             <div className="bc">
               <div className="bc-hd">
                 {teamName ?? "Team"} feed
@@ -801,7 +809,7 @@ export function DashboardClient({
                   </select>
                 )}
               </div>
-              {/* Feed rows */}
+              {/* Feed grouped by member */}
               {filteredFeed.length === 0 && (
                 <div style={{ padding: "28px", textAlign: "center" }}>
                   <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 12, color: "var(--faint)" }}>
@@ -809,53 +817,74 @@ export function DashboardClient({
                   </span>
                 </div>
               )}
-              {filteredFeed.map((row) => {
-                const vc = verdictClass(row.verdict);
-                const rxn = reactionState[row.id] ?? row.reactions;
-                return (
-                  <div key={row.id} style={{ padding: "12px 20px", borderBottom: "1px solid var(--line-soft)", display: "flex", gap: 12, alignItems: "flex-start" }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${row.isOwn ? "var(--go)" : "var(--line)"}`, background: row.isOwn ? "color-mix(in srgb, var(--go) 10%, transparent)" : "var(--bg)", color: row.isOwn ? "var(--go)" : "var(--dim)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, fontWeight: 600, flexShrink: 0, marginTop: 2 }}>
-                      {row.memberInitials}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <Link href={`/ideas/${row.id}`} style={{ textDecoration: "none" }}>
-                        <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 13.5, fontWeight: 600, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {row.text}
+              {members
+                .filter((m) => memberFilter === "all" || m.uid === memberFilter)
+                .map((member) => {
+                  const memberRows = filteredFeed.filter((r) => r.userId === member.uid);
+                  if (memberRows.length === 0) return null;
+                  const isYou = memberRows[0]?.isOwn ?? false;
+                  return (
+                    <div key={member.uid}>
+                      {/* Member header */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 20px", background: "color-mix(in srgb, var(--line) 30%, transparent)", borderBottom: "1px solid var(--line)" }}>
+                        <div style={{ width: 26, height: 26, borderRadius: "50%", border: `1px solid ${isYou ? "var(--go)" : "var(--line)"}`, background: isYou ? "color-mix(in srgb, var(--go) 10%, transparent)" : "var(--bg)", color: isYou ? "var(--go)" : "var(--dim)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-chivo-mono), monospace", fontSize: 8, fontWeight: 600, flexShrink: 0 }}>
+                          {member.initials}
                         </div>
-                      </Link>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
-                        <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, color: "var(--faint)" }}>
-                          {shortDate(row.createdAt)}{row.isOwn ? " · you" : ""}
+                        <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 10, fontWeight: 600, color: "var(--dim)", letterSpacing: ".06em" }}>
+                          {member.initials}{isYou ? " · you" : ""}
                         </span>
-                        {row.score !== null && (
-                          <span style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 14, fontWeight: 700, color: vc ? `var(--${vc})` : "var(--ink)" }}>
-                            {row.score}
-                          </span>
-                        )}
-                        {row.verdict && (
-                          <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, fontWeight: 600, color: vc ? `var(--${vc})` : "var(--faint)", letterSpacing: ".1em", textTransform: "uppercase" }}>
-                            {row.verdict}
-                          </span>
-                        )}
+                        <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, color: "var(--faint)", marginLeft: "auto" }}>
+                          {memberRows.length} {memberRows.length === 1 ? "idea" : "ideas"}
+                        </span>
                       </div>
+                      {/* Member ideas */}
+                      {memberRows.map((row) => {
+                        const vc = verdictClass(row.verdict);
+                        const rxn = reactionState[row.id] ?? row.reactions;
+                        return (
+                          <div key={row.id} style={{ padding: "12px 20px", borderBottom: "1px solid var(--line-soft)", display: "flex", gap: 12, alignItems: "flex-start" }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <Link href={`/ideas/${row.id}`} style={{ textDecoration: "none" }}>
+                                <div style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 13.5, fontWeight: 600, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                  {row.text}
+                                </div>
+                              </Link>
+                              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 4 }}>
+                                <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, color: "var(--faint)" }}>
+                                  {shortDate(row.createdAt)}
+                                </span>
+                                {row.score !== null && (
+                                  <span style={{ fontFamily: "var(--font-bitter), Georgia, serif", fontSize: 14, fontWeight: 700, color: vc ? `var(--${vc})` : "var(--ink)" }}>
+                                    {row.score}
+                                  </span>
+                                )}
+                                {row.verdict && (
+                                  <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, fontWeight: 600, color: vc ? `var(--${vc})` : "var(--faint)", letterSpacing: ".1em", textTransform: "uppercase" }}>
+                                    {row.verdict}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                              <button
+                                onClick={() => handleReact(row.id, "agree")}
+                                style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${rxn.myReaction === "agree" ? "rgba(26,106,60,.4)" : "var(--line)"}`, color: rxn.myReaction === "agree" ? "var(--go)" : "var(--faint)", background: rxn.myReaction === "agree" ? "var(--go-light)" : "transparent", cursor: "pointer", transition: "all .12s" }}
+                              >
+                                ↑ {rxn.agree > 0 ? rxn.agree : ""}
+                              </button>
+                              <button
+                                onClick={() => handleReact(row.id, "disagree")}
+                                style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${rxn.myReaction === "disagree" ? "rgba(158,42,26,.4)" : "var(--line)"}`, color: rxn.myReaction === "disagree" ? "var(--kill)" : "var(--faint)", background: rxn.myReaction === "disagree" ? "color-mix(in srgb, var(--kill) 8%, transparent)" : "transparent", cursor: "pointer", transition: "all .12s" }}
+                              >
+                                ↓ {rxn.disagree > 0 ? rxn.disagree : ""}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                      <button
-                        onClick={() => handleReact(row.id, "agree")}
-                        style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${rxn.myReaction === "agree" ? "rgba(26,106,60,.4)" : "var(--line)"}`, color: rxn.myReaction === "agree" ? "var(--go)" : "var(--faint)", background: rxn.myReaction === "agree" ? "var(--go-light)" : "transparent", cursor: "pointer", transition: "all .12s" }}
-                      >
-                        ↑ {rxn.agree > 0 ? rxn.agree : ""}
-                      </button>
-                      <button
-                        onClick={() => handleReact(row.id, "disagree")}
-                        style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase", padding: "3px 8px", border: `1px solid ${rxn.myReaction === "disagree" ? "rgba(158,42,26,.4)" : "var(--line)"}`, color: rxn.myReaction === "disagree" ? "var(--kill)" : "var(--faint)", background: rxn.myReaction === "disagree" ? "color-mix(in srgb, var(--kill) 8%, transparent)" : "transparent", cursor: "pointer", transition: "all .12s" }}
-                      >
-                        ↓ {rxn.disagree > 0 ? rxn.disagree : ""}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
             </div>
 
             <TeamAnalytics rows={teamFeedRows} plan={plan} />
