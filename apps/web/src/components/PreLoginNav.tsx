@@ -38,8 +38,8 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
               aria-label="PledgeOFF home"
             >
               <Logo size={22} />
-              <span className="display text-[15px] font-semibold tracking-tight">
-                Pledge<span style={{ color: "var(--accent)" }}>OFF</span>
+              <span className="display text-[15px] font-bold" style={{ letterSpacing: "-0.03em" }}>
+                Pledge<span style={{ color: "var(--go)" }}>OFF</span>
               </span>
             </Link>
 
