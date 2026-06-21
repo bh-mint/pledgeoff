@@ -41,7 +41,7 @@ export async function getDashboardData(userIds: string[]): Promise<{
         text,
         niche,
         created_at,
-        decisions ( id, idea_id, verdict, reasoning, confidence, dimensions, signal_ids, score, created_at, updated_at ),
+        decisions ( id, idea_id, verdict, reasoning, confidence, dimensions, signal_ids, score, created_at ),
         simulations ( id ),
         landing_pages ( id ),
         customer_analyses ( id ),
