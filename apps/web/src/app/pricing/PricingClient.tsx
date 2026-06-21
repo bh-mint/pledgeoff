@@ -250,7 +250,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
         <span style={{ color: "rgba(243,239,227,0.35)" }}>Straightforward plans · no long-term commitment</span>
       </div>
 
-      <div className="w-page" style={{ paddingTop: "52px", paddingBottom: "20px" }}>
+      <div className="w-bleed" style={{ paddingTop: "52px", paddingBottom: "20px" }}>
         <span className="eye">Pricing</span>
         <h1 className="mkt-h2" style={{ marginBottom: "8px" }}>Straightforward plans.</h1>
         <p className="mkt-lead" style={{ marginBottom: "28px" }}>
