@@ -163,7 +163,7 @@ export function HomeClient() {
           <h2
             style={{
               fontFamily: "var(--font-bitter), serif",
-              fontSize: "clamp(24px, 4vw, 42px)",
+              fontSize: "clamp(26px, 4.5vw, 56px)",
               fontWeight: 700,
               letterSpacing: "-0.025em",
               lineHeight: 1.1,
@@ -740,7 +740,7 @@ export function HomeClient() {
           <h2
             style={{
               fontFamily: "var(--font-bitter), serif",
-              fontSize: "clamp(28px, 4.5vw, 48px)",
+              fontSize: "clamp(30px, 5vw, 64px)",
               fontWeight: 700,
               lineHeight: 1.07,
               letterSpacing: "-0.025em",

@@ -58,7 +58,7 @@ export function HeroLeft() {
       <h1
         style={{
           fontFamily: "var(--font-bitter), serif",
-          fontSize: "clamp(34px, 5.5vw, 64px)",
+          fontSize: "clamp(36px, 5.5vw, 88px)",
           fontWeight: 700,
           letterSpacing: "-0.03em",
           lineHeight: 1.05,
