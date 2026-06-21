@@ -6,11 +6,8 @@ import { container } from "@/lib/container";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { getDashboardData } from "@/server/dashboard/getDashboardData";
 import { DashboardClient, type TableRow, type TeamFeedRow } from "./DashboardClient";
-import { SignalFeed } from "@/components/SignalFeed";
 import { getSignalFeedData } from "@/server/signal-feed/getSignalFeedData";
 import { getTeamActivity, type TeamActivityEvent } from "@/server/team/getTeamActivity";
-import { TeamActivityFeed } from "@/components/TeamActivityFeed";
-import { DecisionQueueView } from "./DecisionQueueView";
 import type { Decision } from "@pledgeoff/core";
 import { PLAN_LIMITS } from "@pledgeoff/core";
 
@@ -32,11 +29,6 @@ function computeScore(decision: Decision | null | undefined): number | null {
 export default async function DashboardPage() {
   const user = await requireUser();
   const supabase = createSupabaseServiceClient();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("first_name, last_name")
-    .eq("id", user.id)
-    .single();
 
   // Phase 1 — plan + team (parallel)
   const [plan, memberTeamResult, ownerTeamResult] = await Promise.all([
@@ -193,13 +185,6 @@ export default async function DashboardPage() {
     });
   }
 
-  // Stats
-  const withVerdict = ownIdeas.filter((r) => r.decision !== null);
-  const goCount = withVerdict.filter((r) => r.decision?.verdict === "GO").length;
-  const goRate =
-    withVerdict.length > 0
-      ? Math.round((goCount / withVerdict.length) * 100)
-      : 0;
   const now = new Date();
   const thisMonth = ownIdeas.filter((r) => {
     const d = new Date(r.createdAt);
@@ -210,19 +195,14 @@ export default async function DashboardPage() {
   const monthLimit = PLAN_LIMITS[plan].verificationsPerMonth;
   const monthLimitDisplay =
     monthLimit === Infinity ? null : (monthLimit as number);
-  const allScores = withVerdict
-    .map((r) => computeScore(r.decision))
-    .filter((s): s is number => s !== null);
-  const avgScore =
-    allScores.length > 0
-      ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length)
-      : null;
+
+  const builtCount = tableRows.filter(
+    (r) =>
+      r.isOwn &&
+      (r.outcomeType === "built_worked" || r.outcomeType === "built_failed")
+  ).length;
 
   const isEmpty = rawIdeas.length === 0;
-  const displayName =
-    [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
-    user.email?.split("@")[0] ||
-    "—";
 
   // ── Empty state ──
   if (isEmpty) {
@@ -297,112 +277,20 @@ export default async function DashboardPage() {
 
   // ── Main dashboard ──
   return (
-    <>
-      {/* Stats strip */}
-      <div className="stats-strip">
-        <div className="stats-i">
-          <div className="stat-cell">
-            <span className="stat-lbl">Ideas validated</span>
-            <div className="stat-val">{ownIdeas.length}</div>
-            <div className="stat-sub">Total all time</div>
-          </div>
-          <div className="stat-cell">
-            <span className="stat-lbl">GO rate</span>
-            <div className="stat-val go">
-              {goRate}
-              <em>%</em>
-            </div>
-            <div className="stat-sub">
-              {goCount} of {withVerdict.length} surveys
-            </div>
-          </div>
-          <div className="stat-cell">
-            <span className="stat-lbl">This month</span>
-            <div className="stat-val">
-              {thisMonth}
-              {monthLimitDisplay !== null && <em>/ {monthLimitDisplay}</em>}
-            </div>
-            {monthLimitDisplay !== null && (
-              <div className="stat-bar">
-                <div
-                  className="stat-fill"
-                  style={{
-                    width: `${Math.min(100, Math.round((thisMonth / monthLimitDisplay) * 100))}%`,
-                  }}
-                />
-              </div>
-            )}
-            {monthLimitDisplay === null && (
-              <div className="stat-sub">{plan} plan</div>
-            )}
-          </div>
-          <div className="stat-cell">
-            <span className="stat-lbl">Avg score</span>
-            <div className="stat-val">{avgScore ?? "—"}</div>
-            <div className="stat-sub">Across all verdicts</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile tabs */}
-      <div className="db-mtabs">
-        <div className="db-mt-i">
-          <button className="db-mtab on" id="db-mt-ideas">Ideas</button>
-          <button className="db-mtab" id="db-mt-queue">Queue</button>
-          {team && isWorkspacePlan && (
-            <button className="db-mtab" id="db-mt-activity">Activity</button>
-          )}
-        </div>
-      </div>
-
-      {/* 3-col layout */}
-      <div className="dash-wrap">
-        {/* Left: Signal Feed (≥1300px) */}
-        <aside className="dash-left">
-          <div className="sf-inner">
-            <div className="sf-head">
-              Signal Feed <span className="sf-r">Live</span>
-            </div>
-            <SignalFeed
-              niches={signalFeedData.data}
-              locked={signalFeedData.locked}
-            />
-          </div>
-        </aside>
-
-        {/* Main column */}
-        <main className="dash-main">
-          <DashboardClient
-            rows={tableRows}
-            totalCount={rawIdeas.length}
-            teamFeedRows={teamFeedRows}
-            teamActivityEvents={teamActivityEvents}
-            teamName={teamName}
-            teamLogoUrl={team?.logoUrl ?? null}
-            teamId={teamId}
-            plan={plan}
-            isWorkspace={isWorkspacePlan && !!team}
-            displayName={displayName}
-          />
-        </main>
-
-        {/* Right sidebar */}
-        <aside className="dash-right">
-          <div className="dr-inner">
-            <div className="sb-bh">
-              Decision Queue <span className="r">Top 5</span>
-            </div>
-            <DecisionQueueView variant="sidebar" />
-
-            {team && isWorkspacePlan && teamActivityEvents.length > 0 && (
-              <>
-                <div className="sb-bh sb-bh-sep">Team Activity</div>
-                <TeamActivityFeed events={teamActivityEvents.slice(0, 6)} />
-              </>
-            )}
-          </div>
-        </aside>
-      </div>
-    </>
+    <DashboardClient
+      rows={tableRows}
+      totalCount={rawIdeas.length}
+      ownCount={ownIdeas.length}
+      teamFeedRows={teamFeedRows}
+      teamActivityEvents={teamActivityEvents}
+      teamName={teamName}
+      teamId={teamId}
+      plan={plan}
+      isWorkspace={isWorkspacePlan && !!team}
+      usedThisMonth={thisMonth}
+      monthLimit={monthLimitDisplay}
+      builtCount={builtCount}
+      signalFeedData={signalFeedData}
+    />
   );
 }
