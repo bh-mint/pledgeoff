@@ -5,6 +5,7 @@ import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { CookieBanner } from "@/components/CookieBanner";
 import { ToastProvider } from "@/components/ToastProvider";
 import { UpgradeModalProvider } from "@/components/UpgradeModal";
+import { LayoutTransition } from "@/components/LayoutTransition";
 
 const bitter = Bitter({
   variable: "--font-bitter",
@@ -79,7 +80,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ToastProvider>
           <UpgradeModalProvider>
-            {children}
+            <LayoutTransition>{children}</LayoutTransition>
           </UpgradeModalProvider>
         </ToastProvider>
         <CookieBanner />
