@@ -41,7 +41,7 @@ export default function AboutPage() {
       <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
         <PublicNav />
 
-        <div className="w-page-sm" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
+        <div className="w-bleed" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
           <span className="eye">About</span>
           <h1 className="mkt-h2" style={{ marginBottom: "20px" }}>
             We got tired of building the wrong things.

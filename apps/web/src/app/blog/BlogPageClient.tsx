@@ -75,7 +75,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
       {/* Hero */}
       <section className="border-b" style={{ borderColor: "var(--line)" }}>
-        <div className="w-page" style={{ paddingTop: 64, paddingBottom: 64 }}>
+        <div className="w-bleed" style={{ paddingTop: 64, paddingBottom: 64 }}>
           <div className="flex items-center gap-2 mb-6">
             <span className="w-1.5 h-1.5 pulse-dot" style={{ background: "var(--go)" }} />
             <span className="mono text-[10px] tracking-wider uppercase" style={{ color: "var(--faint)" }}>
@@ -152,7 +152,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
       {/* Start here — always visible */}
       <section className="border-b" style={{ borderColor: "var(--line)" }}>
-          <div className="w-page" style={{ paddingTop: 32, paddingBottom: 32 }}>
+          <div className="w-bleed" style={{ paddingTop: 32, paddingBottom: 32 }}>
             <div className="mono text-[10px] uppercase tracking-widest mb-4" style={{ color: "var(--faint)" }}>
               ▎ Start here — if it&apos;s your first time
             </div>
@@ -226,7 +226,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
       </section>
 
       {filtered.length === 0 ? (
-        <div className="w-page" style={{ paddingTop: 96, paddingBottom: 96, textAlign: "center" }}>
+        <div className="w-bleed" style={{ paddingTop: 96, paddingBottom: 96, textAlign: "center" }}>
           <p className="text-[14px]" style={{ color: "var(--faint)" }}>No articles in this category yet.</p>
         </div>
       ) : (
@@ -287,7 +287,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
 
           {/* Article list rows */}
           <section>
-            <div className="w-page">
+            <div className="w-bleed">
               <div className="divide-y" style={{ borderColor: "var(--line)" }}>
                 {rest.map((article) => (
                   <Link

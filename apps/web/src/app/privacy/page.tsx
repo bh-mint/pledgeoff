@@ -39,7 +39,7 @@ export default function PrivacyPage() {
         className="border-b sticky top-12 z-40"
         style={{ borderColor: "var(--line)", background: "var(--bg)" }}
       >
-        <div className="w-page py-4">
+        <div className="w-bleed py-4">
           <div className="mono text-[10px] uppercase tracking-wider mb-1.5" style={{ color: "var(--faint)" }}>
             LEGAL · DOC_03
           </div>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
       </section>
 
       {/* 2-col layout */}
-      <div className="w-page py-12 flex gap-12">
+      <div className="w-bleed py-12 flex gap-12">
 
         {/* TOC sidebar */}
         <aside className="w-55 hidden md:block shrink-0">

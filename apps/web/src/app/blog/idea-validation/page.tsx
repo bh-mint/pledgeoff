@@ -61,7 +61,7 @@ export default function IdeaValidationPage() {
       <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
         <PublicNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
-        <div className="w-page-sm" style={{ paddingTop: 56, paddingBottom: 96 }}>
+        <div className="w-bleed" style={{ paddingTop: 56, paddingBottom: 96 }}>
 
           {/* Breadcrumb */}
           <div className="mono text-[10px] uppercase tracking-widest mb-6 flex items-center gap-2" style={{ color: "var(--faint)" }}>

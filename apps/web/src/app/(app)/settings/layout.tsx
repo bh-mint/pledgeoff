@@ -11,7 +11,7 @@ export default async function SettingsLayout({
   return (
     <>
       <SettingsTabBar />
-      <main className="max-w-[860px] mx-auto px-6 sm:px-10 pt-10 pb-20">
+      <main className="px-6 sm:px-10 pt-10 pb-20">
         {children}
       </main>
       <FooterMicro />
