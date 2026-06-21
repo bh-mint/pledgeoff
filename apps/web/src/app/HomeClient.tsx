@@ -3,14 +3,7 @@ import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { PHBanner } from "@/components/PHBanner";
 import { PRICING } from "@/lib/pricing.config";
-import { LastValidatedBadge } from "@/components/home/LastValidatedBadge";
-
-const HERO_DIMS = [
-  { label: "Market Demand", score: 88, weak: false },
-  { label: "Competition",   score: 69, weak: true  },
-  { label: "Feasibility",   score: 91, weak: false },
-  { label: "Timing",        score: 79, weak: false },
-];
+import { HeroLeft } from "@/components/home/HeroLeft";
 
 const FEATURES = [
   {
@@ -55,6 +48,7 @@ const monoEyebrow: React.CSSProperties = {
   marginBottom: 12,
 };
 
+// monoEyebrow used below in How it works, Features, Three Verdicts, Pricing, CTA sections
 export function HomeClient() {
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -90,119 +84,7 @@ export function HomeClient() {
         >
           {/* Left — live verdict demo */}
           <div>
-            <span style={monoEyebrow}>
-              Field Report · <span style={{ color: "var(--go)" }}>GO</span>
-            </span>
-            <h1
-              style={{
-                fontFamily: "var(--font-bitter), serif",
-                fontSize: "clamp(34px, 5.5vw, 64px)",
-                fontWeight: 700,
-                letterSpacing: "-0.03em",
-                lineHeight: 1.05,
-                color: "var(--ink)",
-                marginBottom: 18,
-              }}
-            >
-              Know if your idea
-              <br />
-              is worth building.
-              <br />
-              <em
-                style={{
-                  fontStyle: "italic",
-                  color: "var(--dim)",
-                  fontSize: "0.75em",
-                }}
-              >
-                Before you build it.
-              </em>
-            </h1>
-
-            {/* Dimension bars */}
-            <div style={{ marginBottom: 18 }}>
-              {HERO_DIMS.map((d) => (
-                <div
-                  key={d.label}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "160px 1fr 40px",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "9px 0",
-                    borderBottom: "1px solid var(--line-soft)",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "var(--font-chivo-mono), monospace",
-                      fontSize: 8.5,
-                      letterSpacing: "0.1em",
-                      textTransform: "uppercase",
-                      color: "var(--dim)",
-                    }}
-                  >
-                    {d.label}
-                  </span>
-                  <div
-                    style={{
-                      height: 5,
-                      background: "var(--surface-3)",
-                      border: "1px solid var(--line)",
-                      position: "relative",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: `${d.score}%`,
-                        background: d.weak ? "var(--pivot)" : "var(--go)",
-                      }}
-                    />
-                  </div>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-chivo-mono), monospace",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: "var(--ink)",
-                      textAlign: "right",
-                    }}
-                  >
-                    {d.score}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: 20,
-                fontFamily: "var(--font-chivo-mono), monospace",
-                fontSize: 9,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                marginBottom: 8,
-              }}
-            >
-              <span>
-                Score <strong style={{ color: "var(--go)" }}>82</strong>
-              </span>
-              <span>
-                Confidence <strong style={{ color: "var(--ink)" }}>91%</strong>
-              </span>
-              <span>
-                Signals <strong style={{ color: "var(--ink)" }}>34</strong>
-              </span>
-            </div>
-
-            <div style={{ marginTop: 8 }}>
-              <LastValidatedBadge />
-            </div>
+            <HeroLeft />
           </div>
 
           {/* Right — pitch card */}

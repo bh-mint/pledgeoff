@@ -125,6 +125,8 @@ function sentimentClass(s: Signal["sentiment"]): string {
 
 // ── Subcomponents ──────────────────────────────────────────────
 
+const FLAP_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
 function BoardCard({ verdict, score, confidence, signals, createdAt, category }: {
   verdict: string; score: number; confidence: number; signals: Signal[]; createdAt: string; category: string | null;
 }) {
@@ -134,11 +136,30 @@ function BoardCard({ verdict, score, confidence, signals, createdAt, category }:
   const target = flapChars(verdict, score);
 
   useEffect(() => {
-    const t1 = setTimeout(() => {
-      setCells(target);
-      setTimeout(() => setArmed(true), 100);
-    }, 300);
-    return () => clearTimeout(t1);
+    let interval: ReturnType<typeof setInterval>;
+    let frame = 0;
+    const totalFrames = 14;
+
+    const startDelay = setTimeout(() => {
+      interval = setInterval(() => {
+        frame++;
+        if (frame >= totalFrames) {
+          clearInterval(interval);
+          setCells(target);
+          setTimeout(() => setArmed(true), 80);
+        } else {
+          const r = () => FLAP_CHARS[Math.floor(Math.random() * FLAP_CHARS.length)];
+          setCells([
+            frame >= totalFrames - 3 ? target[0] : r(),
+            frame >= totalFrames - 2 ? target[1] : r(),
+            frame >= totalFrames - 4 ? target[2] : r(),
+            frame >= totalFrames - 3 ? target[3] : r(),
+          ]);
+        }
+      }, 55);
+    }, 280);
+
+    return () => { clearTimeout(startDelay); clearInterval(interval); };
   }, [verdict, score]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const date = new Date(createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
@@ -177,13 +198,30 @@ function ScoreCard({ verdict, score, confidence }: {
 }) {
   const vc = verdictClass(verdict);
   const [filled, setFilled] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setFilled(true), 600); return () => clearTimeout(t); }, []);
+  const [displayScore, setDisplayScore] = useState(0);
+
+  useEffect(() => {
+    const t = setTimeout(() => setFilled(true), 600);
+
+    let startTime: number | null = null;
+    const duration = 1000;
+    function step(ts: number) {
+      if (!startTime) startTime = ts;
+      const progress = Math.min((ts - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayScore(Math.round(eased * score));
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    const rafId = requestAnimationFrame(step);
+
+    return () => { clearTimeout(t); cancelAnimationFrame(rafId); };
+  }, [score]);
 
   return (
     <div className="vrd-score-card">
       <span className="vrd-sc-lbl">Overall score</span>
-      <div className={`vrd-sc-num ${vc === "go" ? "fc-go" : vc === "pivot" ? "fc-pivot" : "fc-kill"}`} style={{ color: `var(--${vc === "pivot" ? "pivot" : vc === "kill" ? "kill" : "go"})` }}>
-        {score} <span>/ 100</span>
+      <div className={`vrd-sc-num ${vc === "go" ? "fc-go" : vc === "pivot" ? "fc-pivot" : "fc-kill"}`} style={{ color: `var(--${vc === "pivot" ? "pivot" : vc === "kill" ? "kill" : "go"})`, fontVariantNumeric: "tabular-nums" }}>
+        {displayScore} <span>/ 100</span>
       </div>
       <div className="vrd-sc-conf">Confidence {Math.round(confidence * 100)}%</div>
       <div className="vrd-rt">
