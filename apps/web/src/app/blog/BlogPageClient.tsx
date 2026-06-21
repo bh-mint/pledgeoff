@@ -187,7 +187,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
         className="border-b sticky top-12 z-40 backdrop-blur"
         style={{ borderColor: "var(--line)", background: "rgba(10,10,11,0.85)" }}
       >
-        <div className="w-page h-12 flex items-center justify-between">
+        <div className="w-bleed h-12 flex items-center justify-between">
           <div className="flex items-center gap-2 mono text-[11px] overflow-x-auto">
             {CATEGORIES.map(({ value, label, color }) => {
               const count = tagCount(value);
@@ -236,7 +236,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
             <section className="border-b" style={{ borderColor: "var(--line)" }}>
               <Link
                 href={`/blog/${featured.slug}`}
-                className="block w-page transition-colors hover:bg-white/1"
+                className="block w-bleed transition-colors hover:bg-white/1"
                 style={{ paddingTop: 32, paddingBottom: 40 }}
               >
                 <div className="flex flex-col sm:grid sm:grid-cols-12 sm:gap-8 sm:items-start gap-3">

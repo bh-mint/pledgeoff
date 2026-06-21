@@ -716,6 +716,7 @@ textarea.finp { resize: vertical; min-height: 100px; }
 select.finp { cursor: pointer; }
 
 /* ── Article body ───────────────────────────────────── */
+.art-body { max-width: 65ch; }
 .art-body p { font-size: 15.5px; color: var(--dim); line-height: 1.88; margin-bottom: 18px; }
 .art-body strong { color: var(--ink); }
 .art-body h2 { font-family: var(--font-bitter), Georgia, serif; font-size: 22px; font-weight: 700; color: var(--ink); margin: 30px 0 10px; letter-spacing: -0.02em; }

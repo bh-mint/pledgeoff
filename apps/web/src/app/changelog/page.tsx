@@ -375,7 +375,7 @@ export default function ChangelogPage() {
         <span className="r">in reverse chronological order</span>
       </div>
 
-      <div className="w-page-sm" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
+      <div className="w-bleed" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
         <span className="eye">Changelog · Releases</span>
         <h1 className="mkt-h2" style={{ marginBottom: "6px" }}>What&apos;s shipped.</h1>
         <p style={{ fontSize: "13px", color: "var(--dim)", marginBottom: "40px" }}>

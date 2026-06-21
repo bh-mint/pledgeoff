@@ -127,7 +127,7 @@ export default async function ArticlePage({ params }: Props) {
         <PublicNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
         {/* Article */}
-        <article className="w-page-sm" style={{ paddingTop: 64, paddingBottom: 96 }}>
+        <article className="w-bleed" style={{ paddingTop: 64, paddingBottom: 96 }}>
 
           {/* Category */}
           <div className="mono text-[10px] uppercase tracking-wider" style={{ color: "var(--faint)" }}>

@@ -54,7 +54,7 @@ export default function AffiliatePage() {
       <div style={{ background: "var(--bg)", color: "var(--ink)" }}>
         <PublicNav />
 
-        <div className="w-page-sm" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
+        <div className="w-bleed" style={{ paddingTop: "52px", paddingBottom: "60px" }}>
           <span className="eye">Affiliate program</span>
           <h1 className="mkt-h2" style={{ marginBottom: "10px" }}>Earn 30% recurring commission.</h1>
           <p className="mkt-lead" style={{ marginBottom: "32px" }}>
