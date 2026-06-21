@@ -216,14 +216,19 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
   const [annual, setAnnual] = useState(false);
 
   const founderPrice = annual ? PRICING.founder.monthly.annual_equivalent : PRICING.founder.monthly.eur;
+  const founderSave  = PRICING.founder.monthly.eur * 12 - PRICING.founder.monthly.annual_total;
   const founderNote  = annual ? `billed €${PRICING.founder.monthly.annual_total}/yr` : "";
   const founderPriceId = annual ? FOUNDER_ANNUAL_PRICE_ID : FOUNDER_MONTHLY_PRICE_ID;
+  const founderCpv   = `€${(founderPrice / 20).toFixed(2)}/validation`;
 
   const teamPrice = annual ? PRICING.team.monthly.annual_equivalent : PRICING.team.monthly.eur;
+  const teamSave  = PRICING.team.monthly.eur * 12 - PRICING.team.monthly.annual_total;
   const teamNote  = annual ? `billed €${PRICING.team.monthly.annual_total}/yr` : "";
   const teamPriceId = annual ? TEAM_ANNUAL_PRICE_ID : TEAM_MONTHLY_PRICE_ID;
+  const teamCpv   = `€${(teamPrice / 60).toFixed(2)}/validation`;
 
   const studioPrice = annual ? PRICING.studio.monthly.annual_equivalent : PRICING.studio.monthly.eur;
+  const studioSave  = PRICING.studio.monthly.eur * 12 - PRICING.studio.monthly.annual_total;
   const studioNote  = annual ? `billed €${PRICING.studio.monthly.annual_total}/yr` : "";
   const studioPriceId = annual ? STUDIO_ANNUAL_PRICE_ID : STUDIO_MONTHLY_PRICE_ID;
 
@@ -315,7 +320,11 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                 <span className="plan-amt">€{founderPrice}</span>
                 <span className="plan-per">&nbsp;/&nbsp;mo</span>
               </div>
-              <div className="plan-annual-note">{founderNote || " "}</div>
+              <div className="plan-cpv">{founderCpv}</div>
+              <div className="plan-annual-note">
+                {founderNote || " "}
+                {annual && <span className="plan-save"> · save €{founderSave}</span>}
+              </div>
             </div>
             <div className="plan-features">
               <div className="pf yes">20 validations / month</div>
@@ -348,7 +357,11 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                 <span className="plan-amt">€{teamPrice}</span>
                 <span className="plan-per">&nbsp;/&nbsp;mo</span>
               </div>
-              <div className="plan-annual-note">{teamNote || " "}</div>
+              <div className="plan-cpv">{teamCpv}</div>
+              <div className="plan-annual-note">
+                {teamNote || " "}
+                {annual && <span className="plan-save"> · save €{teamSave}</span>}
+              </div>
             </div>
             <div className="plan-features">
               <div className="pf yes">60 validations / month</div>
@@ -379,7 +392,10 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
                 <span className="plan-amt">€{studioPrice}</span>
                 <span className="plan-per">&nbsp;/&nbsp;mo</span>
               </div>
-              <div className="plan-annual-note">{studioNote || " "}</div>
+              <div className="plan-annual-note">
+                {studioNote || " "}
+                {annual && <span className="plan-save"> · save €{studioSave}</span>}
+              </div>
             </div>
             <div className="plan-features" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
               <div className="pf yes">100 validations / month</div>

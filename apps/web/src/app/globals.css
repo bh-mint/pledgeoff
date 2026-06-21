@@ -641,20 +641,24 @@ body {
 
 /* Plan card */
 .plan-c { border: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; }
-.plan-c.feat { border-color: var(--ink); }
-[data-theme="dark"] .plan-c.feat { border-color: var(--go); }
+.plan-c.feat { border-color: var(--ink); border-top: 3px solid var(--ink); }
+[data-theme="dark"] .plan-c.feat { border-color: var(--go); border-top-color: var(--go); }
+.plan-c.feat .plan-hd { background: color-mix(in srgb, var(--go) 5%, var(--surface)); }
+[data-theme="dark"] .plan-c.feat .plan-hd { background: color-mix(in srgb, var(--go) 9%, transparent); }
 .plan-hd { padding: 18px 20px 14px; border-bottom: 1px solid var(--line); }
 .plan-nm { font-family: var(--font-bitter), Georgia, serif; font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
-.plan-desc { font-family: var(--font-chivo-mono), monospace; font-size: 8.5px; letter-spacing: 0.06em; color: var(--faint); }
-.plan-pr { display: flex; align-items: baseline; gap: 4px; margin-top: 14px; margin-bottom: 4px; }
+.plan-desc { font-family: var(--font-chivo-mono), monospace; font-size: 9.5px; letter-spacing: 0.04em; color: var(--dim); }
+.plan-pr { display: flex; align-items: baseline; gap: 4px; margin-top: 14px; margin-bottom: 2px; }
 .plan-amt { font-family: var(--font-chivo-mono), monospace; font-size: 30px; font-weight: 600; color: var(--ink); line-height: 1; }
 .plan-per { font-family: var(--font-chivo-mono), monospace; font-size: 9px; color: var(--faint); }
+.plan-cpv { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: 0.06em; color: var(--faint); margin-bottom: 2px; }
 .plan-annual-note { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: 0.06em; color: var(--faint); min-height: 14px; }
-.plan-features { padding: 14px 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.pf { font-family: var(--font-chivo-mono), monospace; font-size: 9px; letter-spacing: 0.05em; color: var(--dim); display: flex; align-items: flex-start; gap: 8px; }
+.plan-save { color: var(--go); }
+.plan-features { padding: 14px 20px; flex: 1; display: flex; flex-direction: column; gap: 9px; }
+.pf { font-family: var(--font-chivo-mono), monospace; font-size: 11px; letter-spacing: 0.03em; line-height: 1.4; color: var(--dim); display: flex; align-items: flex-start; gap: 8px; }
 .pf::before { content: "—"; color: var(--faint); flex-shrink: 0; }
 .pf.yes::before { content: "✓"; color: var(--go); }
-.pf.no { opacity: 0.45; }
+.pf.no { opacity: 0.4; }
 .pf.no::before { content: "×"; color: var(--kill); }
 .plan-foot { padding: 14px 20px 18px; border-top: 1px solid var(--line); }
 
