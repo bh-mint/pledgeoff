@@ -2975,6 +2975,17 @@ select.adm-search-inp { cursor: pointer; }
 .db-led-sub { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
 
 /* Brief grid */
+.db-intel { border: 1px solid var(--line); border-top: none; background: var(--bg); }
+.db-intel-hd { padding: 7px 18px; font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: .28em; text-transform: uppercase; color: var(--faint); border-bottom: 1px solid var(--line); background: var(--surface); }
+.db-intel-notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+.db-intel-note { padding: 14px 18px; border-right: 1px solid var(--line); }
+.db-intel-note:last-child { border-right: none; }
+.db-intel-lbl { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 7px; }
+.db-intel-val { font-family: var(--font-bitter), Georgia, serif; font-size: 22px; font-weight: 700; line-height: 1; color: var(--ink); margin-bottom: 5px; }
+.db-intel-val.go { color: var(--go); }
+.db-intel-val.pivot { color: var(--pivot); }
+.db-intel-sub { font-size: 12px; color: var(--dim); line-height: 1.45; }
+
 .db-brief-grid { display: grid; grid-template-columns: 1fr; gap: 0; padding-top: 26px; }
 @media (min-width: 1080px) { .db-brief-grid { grid-template-columns: 1fr 296px; gap: 26px; } }
 .db-brief-col { min-width: 0; }

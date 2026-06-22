@@ -155,6 +155,51 @@ export function DashboardClient({
     return scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
   }, [ownWithVerdict]);
 
+  const staleCount = useMemo(
+    () => rows.filter((r) => r.isOwn && r.signalsStale).length,
+    [rows]
+  );
+
+  // ── Intelligence notes (computed from existing data, no API) ──
+  type IntelNote = { lbl: string; val: string; valCls?: string; sub: string };
+  const intelNotes = useMemo((): IntelNote[] => {
+    if (ownRows.length === 0) return [];
+    const notes: IntelNote[] = [];
+
+    if (ownWithVerdict.length >= 2) {
+      const valCls = ownGoRate >= 60 ? "go" : ownGoRate <= 30 ? "pivot" : undefined;
+      notes.push({
+        lbl: "Conviction rate",
+        val: `${ownGoRate}%`,
+        valCls,
+        sub: ownGoRate >= 60
+          ? `${ownGoCount} of ${ownWithVerdict.length} ideas cleared the bar`
+          : `${ownGoCount} GO of ${ownWithVerdict.length} verdicts · refine to improve signal`,
+      });
+    } else if (ownWithVerdict.length === 1) {
+      notes.push({ lbl: "Conviction rate", val: "1 verdict in", sub: "More surveys sharpen pattern clarity" });
+    }
+
+    if (staleCount > 0) {
+      notes.push({
+        lbl: "Signal currency",
+        val: `${staleCount} stale`,
+        valCls: "pivot",
+        sub: "Market conditions shift — revalidation keeps verdicts accurate",
+      });
+    } else if (ownWithVerdict.length > 0) {
+      notes.push({ lbl: "Signal currency", val: "All current", valCls: "go", sub: "Verdicts reflect recent market conditions" });
+    }
+
+    if (builtCount > 0) {
+      notes.push({ lbl: "Outcome loop", val: `${builtCount} shipped`, sub: "Reported outcomes sharpen future verdict calibration" });
+    } else if (ownGoCount >= 2) {
+      notes.push({ lbl: "Outcome loop", val: `${ownGoCount} GO ideas`, sub: "Report what happened — close the loop for better calibration" });
+    }
+
+    return notes;
+  }, [ownRows, ownWithVerdict, ownGoCount, ownGoRate, staleCount, builtCount]);
+
   // ── Attention items ──
   const attnItems = useMemo((): AttnItem[] => {
     const items: AttnItem[] = [];
@@ -543,6 +588,22 @@ export function DashboardClient({
               <div className="db-led-sub">Outcome reported</div>
             </div>
           </div>
+
+          {/* Intelligence Notes */}
+          {intelNotes.length > 0 && (
+            <div className="db-intel">
+              <div className="db-intel-hd">Intelligence Notes</div>
+              <div className="db-intel-notes">
+                {intelNotes.map((n) => (
+                  <div key={n.lbl} className="db-intel-note">
+                    <span className="db-intel-lbl">{n.lbl}</span>
+                    <div className={`db-intel-val${n.valCls ? ` ${n.valCls}` : ""}`}>{n.val}</div>
+                    <div className="db-intel-sub">{n.sub}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Main grid */}
           <div className="db-brief-grid">
