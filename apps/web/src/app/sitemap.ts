@@ -14,13 +14,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const latestArticle = articles.map((a) => a.updatedAt).sort().at(-1) ?? "2026-01-01";
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: "2026-05-18" },
+    { url: SITE_URL, lastModified: "2026-06-24" },
     { url: `${SITE_URL}/blog`, lastModified: latestArticle },
     { url: `${SITE_URL}/blog/idea-validation`, lastModified: latestInCluster(articles, "idea-validation") },
     { url: `${SITE_URL}/blog/product-decisions`, lastModified: latestInCluster(articles, "product-decisions") },
     { url: `${SITE_URL}/blog/founder`, lastModified: latestInCluster(articles, "founder") },
-    { url: `${SITE_URL}/about`, lastModified: "2026-05-11" },
-    { url: `${SITE_URL}/pricing`, lastModified: "2026-05-20" },
+    { url: `${SITE_URL}/about`, lastModified: "2026-06-24" },
+    { url: `${SITE_URL}/pricing`, lastModified: "2026-06-24" },
     { url: `${SITE_URL}/enterprise`, lastModified: "2026-05-20" },
     { url: `${SITE_URL}/contact`, lastModified: "2026-05-30" },
     { url: `${SITE_URL}/security`, lastModified: "2026-05-30" },

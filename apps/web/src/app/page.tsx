@@ -4,11 +4,11 @@ import { HomeClient } from "./HomeClient";
 export const metadata: Metadata = {
   title: { absolute: "PledgeOFF — Kill bad ideas before they kill you" },
   description:
-    "GO / KILL / PIVOT — decided by live signals from Reddit and GitHub. Validate your startup idea in under 60 seconds. Not your gut.",
+    "GO / KILL / PIVOT — decided by live signals from Hacker News, Dev.to, GitHub, and the web. Validate your startup idea in under 60 seconds. Not your gut.",
   alternates: { canonical: "https://pledgeoff.com" },
   openGraph: {
     title: "PledgeOFF — Kill bad ideas before they kill you",
-    description: "Validate your startup idea in under 60 seconds using live Reddit and GitHub signals.",
+    description: "Validate your startup idea in under 60 seconds using live signals from HN, Dev.to, GitHub, and the web.",
     url: "https://pledgeoff.com",
     type: "website",
     images: [
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "PledgeOFF — Kill bad ideas before they kill you",
-    description: "Validate your startup idea in under 60 seconds using live Reddit and GitHub signals.",
+    description: "Validate your startup idea in under 60 seconds using live signals from HN, Dev.to, GitHub, and the web.",
     images: ["https://pledgeoff.com/api/og?type=home"],
   },
 };

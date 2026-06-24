@@ -12,6 +12,20 @@ export const metadata: Metadata = {
     description: `Free until you're sure. Then €${PRICING.founder.monthly.eur}/mo for Founder or €${PRICING.team.monthly.eur}/mo for Team.`,
     url: "https://pledgeoff.com/pricing",
     type: "website",
+    images: [
+      {
+        url: "https://pledgeoff.com/api/og?type=home",
+        width: 1200,
+        height: 630,
+        alt: "PledgeOFF Pricing — Free until you're sure",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pricing — PledgeOFF",
+    description: `Free until you're sure. Then €${PRICING.founder.monthly.eur}/mo for Founder or €${PRICING.team.monthly.eur}/mo for Team.`,
+    images: ["https://pledgeoff.com/api/og?type=home"],
   },
 };
 

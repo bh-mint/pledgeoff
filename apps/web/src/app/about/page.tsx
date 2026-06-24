@@ -14,6 +14,21 @@ export const metadata: Metadata = {
       "PledgeOFF exists because validation should take 15 seconds, not 15 weeks. Real signals, traceable sources, a verdict you can act on.",
     url: "https://pledgeoff.com/about",
     type: "website",
+    images: [
+      {
+        url: "https://pledgeoff.com/api/og?type=home",
+        width: 1200,
+        height: 630,
+        alt: "About PledgeOFF — Decision Intelligence for Founders",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About — PledgeOFF",
+    description:
+      "PledgeOFF exists because validation should take 15 seconds, not 15 weeks. Real signals, traceable sources, a verdict you can act on.",
+    images: ["https://pledgeoff.com/api/og?type=home"],
   },
 };
 
