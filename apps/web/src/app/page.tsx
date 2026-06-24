@@ -11,6 +11,20 @@ export const metadata: Metadata = {
     description: "Validate your startup idea in under 60 seconds using live Reddit and GitHub signals.",
     url: "https://pledgeoff.com",
     type: "website",
+    images: [
+      {
+        url: "https://pledgeoff.com/api/og?type=home",
+        width: 1200,
+        height: 630,
+        alt: "PledgeOFF — GO / KILL / PIVOT — Decision Intelligence for Founders",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PledgeOFF — Kill bad ideas before they kill you",
+    description: "Validate your startup idea in under 60 seconds using live Reddit and GitHub signals.",
+    images: ["https://pledgeoff.com/api/og?type=home"],
   },
 };
 

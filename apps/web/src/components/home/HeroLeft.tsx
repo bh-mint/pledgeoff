@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { LastValidatedBadge } from "@/components/home/LastValidatedBadge";
 
@@ -144,8 +145,20 @@ export function HeroLeft() {
         </span>
       </div>
 
-      <div style={{ marginTop: 8 }}>
+      <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
         <LastValidatedBadge />
+        <Link
+          href="/v/9f7ffdd3-af26-4744-be10-0b552035eb2a"
+          style={{
+            ...mono,
+            fontSize: 9,
+            color: "var(--go)",
+            textDecoration: "none",
+            letterSpacing: "0.06em",
+          }}
+        >
+          → See what a verdict looks like
+        </Link>
       </div>
     </div>
   );
