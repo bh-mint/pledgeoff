@@ -153,8 +153,8 @@ const LLMLaunchKitResponseSchemaG = z.object({
     tier: z.string().min(1).max(60),
     priceMonthly: z.number().positive(),
     currency: z.string().length(3),
-    rationale: z.string().min(1).max(400),
-    anchoring: z.string().min(1).max(200),
+    rationale: z.string().min(1).max(1500),
+    anchoring: z.string().min(1).max(800),
   }),
 });
 

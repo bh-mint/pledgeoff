@@ -61,7 +61,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if ('code' in e && e.code === 'IDEA_NOT_FOUND') {
       return Response.json({ error: { code: 'NOT_FOUND' } }, { status: 404, headers: { 'X-Trace-Id': traceId } });
     }
-    return Response.json({ error: { code: 'INTERNAL', debug: String(e), debugType: Object.prototype.toString.call(e) } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
+    return Response.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }
 
   return Response.json({ data: result.value }, { status: 200, headers: { 'X-Trace-Id': traceId } });
