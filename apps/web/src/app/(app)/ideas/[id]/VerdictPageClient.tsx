@@ -329,6 +329,188 @@ function SightingsSection({ signals, bySource }: { signals: Signal[]; bySource: 
   );
 }
 
+// ── Executive Summary ────────────────────────────────────────────
+
+function ExecSummary({
+  decision,
+  customers,
+  competitors,
+  simulation,
+  launchKit,
+  toolsRun,
+}: {
+  decision: Decision;
+  customers: CustomerAnalysis | null;
+  competitors: CompetitorAnalysis | null;
+  simulation: Simulation | null;
+  launchKit: LaunchKit | null;
+  toolsRun: number;
+}) {
+  const vc = verdictClass(decision.verdict);
+  const fmtNum = (n: number) =>
+    n >= 1_000_000_000 ? `$${(n / 1_000_000_000).toFixed(1)}B`
+    : n >= 1_000_000   ? `$${(n / 1_000_000).toFixed(0)}M`
+    : `$${n.toLocaleString()}`;
+
+  const bullets: string[] = [];
+
+  if (customers) {
+    const seg = customers.segments[0];
+    const pos = customers.sentiment.positive;
+    if (seg) bullets.push(`Primary segment: ${seg.name} — ${pos >= 60 ? "strong" : pos >= 40 ? "mixed" : "weak"} market reception (${pos}% positive)`);
+  }
+
+  if (competitors) {
+    const n = competitors.competitors.length;
+    const g = competitors.gaps.length;
+    bullets.push(`Competitive landscape: ${n} known competitor${n !== 1 ? "s" : ""}${g > 0 ? `, ${g} exploitable gap${g !== 1 ? "s" : ""}` : " — crowded space"}`);
+  }
+
+  if (simulation) {
+    const mod = simulation.scenarios.find((s) => s.name === "moderate");
+    bullets.push(`Market size ${fmtNum(simulation.tamLow)}–${fmtNum(simulation.tamHigh)} TAM${mod ? ` · projected MRR $${mod.mrr12.toLocaleString()} at 12 months` : ""}`);
+  }
+
+  if (launchKit) {
+    const pr = launchKit.pricingRecommendation;
+    bullets.push(`Recommended pricing: ${pr.tier} at ${pr.currency} ${pr.priceMonthly}/month`);
+  }
+
+  const dims = decision.dimensions ?? [];
+  const risks = dims.filter((d) => d.score < 50).map((d) => d.name);
+  if (risks.length > 0) bullets.push(`Key risks: ${risks.join(", ")}`);
+
+  return (
+    <div className="exec-wrap">
+      <div className="bc-hd">
+        <span>Executive Brief</span>
+        <span className="r">{toolsRun} / 6 tools run · {new Date(decision.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+      </div>
+      <div className="exec-body">
+        <div className="exec-verdict-row">
+          <span className={`exec-badge ${vc}`}>{decision.verdict}</span>
+          <span className="exec-score">{decision.score ?? "—"} / 100</span>
+          <span className="exec-conf">· {Math.round(decision.confidence * 100)}% confidence</span>
+        </div>
+        <p className="exec-reasoning">{decision.reasoning}</p>
+        {bullets.length > 0 && (
+          <ul className="exec-bullets">
+            {bullets.map((b, i) => <li key={i}>{b}</li>)}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── SWOT section ────────────────────────────────────────────────
+
+function SWOTSection({
+  decision,
+  customers,
+  competitors,
+}: {
+  decision: Decision;
+  customers: CustomerAnalysis | null;
+  competitors: CompetitorAnalysis | null;
+}) {
+  if (!customers && !competitors) {
+    return (
+      <div className="swot-wrap">
+        <div className="bc-hd"><span>SWOT Analysis</span><span className="r">needs data</span></div>
+        <div className="swot-empty">
+          Run <strong>ICP Analysis</strong> and <strong>Competitive Landscape</strong> to unlock the SWOT.
+        </div>
+      </div>
+    );
+  }
+
+  const dims = decision.dimensions ?? [];
+
+  const strengths: string[] = [];
+  const weaknesses: string[] = [];
+  const opportunities: string[] = [];
+  const threats: string[] = [];
+
+  // Strengths: strong dimensions + positive sentiment + gaps as advantages
+  dims.filter((d) => d.score >= 75).forEach((d) => strengths.push(`${d.name} — score ${d.score}/100`));
+  if (customers && customers.sentiment.positive >= 60) {
+    strengths.push(`Strong market reception — ${customers.sentiment.positive}% positive sentiment`);
+  }
+  if (competitors && competitors.gaps.length > 0) {
+    strengths.push(`${competitors.gaps.length} identified market gap${competitors.gaps.length > 1 ? "s" : ""} to exploit`);
+  }
+
+  // Weaknesses: low dimensions + high negative sentiment
+  dims.filter((d) => d.score < 50).forEach((d) => weaknesses.push(`${d.name} — score ${d.score}/100`));
+  if (customers && customers.sentiment.negative >= 40) {
+    weaknesses.push(`High negative sentiment in market (${customers.sentiment.negative}%)`);
+  }
+  if (competitors && competitors.competitors.length > 0 && competitors.gaps.length === 0) {
+    weaknesses.push("No clear differentiation gaps identified vs. competitors");
+  }
+  if (weaknesses.length === 0) weaknesses.push("No major structural weaknesses detected");
+
+  // Opportunities: gap opportunities + underserved segments + top pain points
+  if (competitors) {
+    competitors.gaps.slice(0, 3).forEach((g) => opportunities.push(g.opportunity));
+  }
+  if (customers) {
+    const large = customers.segments.filter((s) => s.size === "large");
+    large.slice(0, 1).forEach((s) => opportunities.push(`Large underserved segment: ${s.name}`));
+    if (customers.painPoints.length > 0) {
+      opportunities.push(`Top pain point unresolved: "${customers.painPoints[0]?.text ?? ""}"`);
+    }
+  }
+  if (opportunities.length === 0) opportunities.push("Run tools to identify opportunities");
+
+  // Threats: strong competitors + low score + market saturation
+  if (competitors) {
+    const topComp = competitors.competitors
+      .sort((a, b) => (b.signals?.length ?? 0) - (a.signals?.length ?? 0))
+      .slice(0, 2);
+    topComp.forEach((c) => threats.push(`${c.name} — ${c.positioning.slice(0, 80)}${c.positioning.length > 80 ? "…" : ""}`));
+    if (competitors.competitors.length >= 5) {
+      threats.push(`Saturated market — ${competitors.competitors.length} known competitors`);
+    }
+  }
+  if (decision.score != null && decision.score < 55) {
+    threats.push(`Low overall score (${decision.score}/100) — market may be resistant`);
+  }
+  if (threats.length === 0) threats.push("No critical threats detected in current signals");
+
+  const quadrants: Array<{ key: string; label: string; cls: string; items: string[] }> = [
+    { key: "S", label: "Strengths",    cls: "go",    items: strengths },
+    { key: "W", label: "Weaknesses",   cls: "kill",  items: weaknesses },
+    { key: "O", label: "Opportunities",cls: "watch", items: opportunities },
+    { key: "T", label: "Threats",      cls: "pivot", items: threats },
+  ];
+
+  return (
+    <div className="swot-wrap">
+      <div className="bc-hd">
+        <span>SWOT Analysis</span>
+        <span className="r">derived from signals · {new Date(decision.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+      </div>
+      <div className="swot-grid">
+        {quadrants.map((q) => (
+          <div key={q.key} className={`swot-q swot-q-${q.cls}`}>
+            <div className="swot-q-hd">
+              <span className={`swot-q-letter ${q.cls}`}>{q.key}</span>
+              <span className="swot-q-lbl">{q.label}</span>
+            </div>
+            <ul className="swot-q-list">
+              {q.items.map((item, i) => (
+                <li key={i} className="swot-q-item">{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Outcome section ─────────────────────────────────────────────
 
 const OUTCOME_OPTIONS: Array<{ type: OutcomeType; label: string; icon: string }> = [
@@ -817,6 +999,16 @@ export function VerdictPageClient({
             <FeedbackButtons ideaId={idea.id} decisionId={decision.id} />
           </div>
 
+          {/* Executive Brief */}
+          <ExecSummary
+            decision={decision}
+            customers={initialCustomers}
+            competitors={initialCompetitors}
+            simulation={initialSimulation}
+            launchKit={initialLaunchKit}
+            toolsRun={Object.values(isDone).filter(Boolean).length}
+          />
+
           {/* Tools accordion */}
           <div className="vrd-tools">
             <div className="bc-hd" style={{ marginBottom: 16 }}>
@@ -882,6 +1074,13 @@ export function VerdictPageClient({
               </div>
             )}
           </div>
+
+          {/* SWOT */}
+          <SWOTSection
+            decision={decision}
+            customers={initialCustomers}
+            competitors={initialCompetitors}
+          />
 
           {/* Evidence wall */}
           <SightingsSection signals={signals} bySource={bySource} />
