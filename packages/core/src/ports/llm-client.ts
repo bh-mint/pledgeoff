@@ -263,7 +263,7 @@ export interface LLMInterviewGuideRequest {
 export interface LLMInterviewQuestion {
   readonly question: string;
   readonly purpose: string;
-  readonly followUp?: string;
+  readonly followUp?: string | null;
 }
 
 export interface LLMInterviewGuideResponse {

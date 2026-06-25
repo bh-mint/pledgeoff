@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const InterviewQuestionSchema = z.object({
   question: z.string().min(1).max(800),
   purpose: z.string().min(1).max(600),
-  followUp: z.string().max(600).optional(),
+  followUp: z.string().max(600).nullish(),
 });
 export type InterviewQuestion = z.infer<typeof InterviewQuestionSchema>;
 

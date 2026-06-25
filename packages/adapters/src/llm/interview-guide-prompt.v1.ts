@@ -35,7 +35,7 @@ Return ONLY valid JSON. No markdown, no explanation.
     {
       "question": "string, the actual question to ask",
       "purpose": "string, why you ask this (what you learn from the answer)",
-      "followUp": "string, optional follow-up if they give a vague answer"
+      "followUp": "string — ONLY include for the 2-3 most critical questions; OMIT this key entirely for others (do NOT set to null)"
     }
   ],
   "hypotheses": [

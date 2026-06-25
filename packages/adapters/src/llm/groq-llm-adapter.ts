@@ -401,7 +401,7 @@ export class GroqLLMAdapter implements ILLMClient {
     const QuestionSchema = z.object({
       question: z.string().min(1).max(800),
       purpose: z.string().min(1).max(600),
-      followUp: z.string().max(600).optional(),
+      followUp: z.string().max(600).nullish(),
     });
     const Schema = z.object({
       targetSegment: z.string().min(1).max(500),
