@@ -8,6 +8,7 @@ import { getUserPlan } from "@/server/billing/getUserPlan";
 import { logger } from "@pledgeoff/observability";
 import { PrintTrigger } from "./PrintTrigger";
 import { ReportActions } from "./ReportActions";
+import { DimensionsBarChart, SentimentChart, RevenueBarChart } from "./ReportCharts";
 
 export const metadata: Metadata = {
   title: { absolute: "Field Report — PledgeOFF" },
@@ -103,6 +104,8 @@ export default async function ReportPage({ params, searchParams }: Props) {
     featuresResult,
     battlecardResult,
     marketLandscapeResult,
+    interviewGuideResult,
+    transcriptAnalysisResult,
     profileResult,
     plan,
   ] = await Promise.all([
@@ -117,6 +120,8 @@ export default async function ReportPage({ params, searchParams }: Props) {
     container.featureAnalysisRepo.findByIdeaId(id),
     container.battlecardRepo.findByIdeaId(id),
     container.marketLandscapeRepo.findByIdeaId(id),
+    container.interviewGuideRepo.findByIdeaId(id),
+    container.transcriptAnalysisRepo.findByIdeaId(id),
     supabase
       .from("profiles")
       .select("first_name, last_name, company_name")
@@ -136,6 +141,8 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const features = featuresResult.isOk() ? featuresResult.value : null;
   const battlecard = battlecardResult.isOk() ? battlecardResult.value : null;
   const marketLandscape = marketLandscapeResult.isOk() ? marketLandscapeResult.value : null;
+  const interviewGuide = interviewGuideResult.isOk() ? interviewGuideResult.value : null;
+  const transcriptAnalysis = transcriptAnalysisResult.isOk() ? transcriptAnalysisResult.value : null;
   const profileData = profileResult.data as {
     first_name?: string | null;
     last_name?: string | null;
@@ -457,6 +464,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
                       );
                     })}
                   </div>
+                  <DimensionsBarChart dimensions={decision.dimensions} />
                 </div>
               )}
 
@@ -495,6 +503,152 @@ export default async function ReportPage({ params, searchParams }: Props) {
                       </span>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* ICP Analysis snapshot */}
+              {customers && (
+                <div className="doc-icp">
+                  <span className="doc-sec-lbl">ICP Analysis · {customers.segments.length} segments identified</span>
+                  <div className="rpt-icp-grid">
+                    {customers.segments.slice(0, 3).map((seg, i) => (
+                      <div key={i} className="rpt-icp-seg">
+                        <div className="rpt-icp-seg-hd">
+                          <span className="rpt-icp-seg-name">{seg.name}</span>
+                          <span className="rpt-icp-seg-size">{seg.size}</span>
+                        </div>
+                        <p className="rpt-icp-seg-desc">{seg.description.slice(0, 120)}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {customers.painPoints.length > 0 && (
+                    <ul className="rpt-icp-pains">
+                      {customers.painPoints.slice(0, 4).map((p, j) => (
+                        <li key={j}>{p.text}</li>
+                      ))}
+                    </ul>
+                  )}
+                  <SentimentChart sentiment={customers.sentiment} />
+                </div>
+              )}
+
+              {/* Competitors snapshot */}
+              {competitors && competitors.competitors.length > 0 && (
+                <div className="doc-comp-snap">
+                  <span className="doc-sec-lbl">Competitive Landscape · {competitors.competitors.length} competitors · {competitors.gaps.length} gaps identified</span>
+                  <table className="rpt-comp-tbl">
+                    <thead>
+                      <tr>
+                        <th>Competitor</th>
+                        <th>Positioning</th>
+                        <th>Est. Price</th>
+                        <th>Signals</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {competitors.competitors.slice(0, 5).map((c, i) => (
+                        <tr key={i}>
+                          <td className="rpt-comp-name">{c.name}</td>
+                          <td className="rpt-comp-pos">{c.positioning}</td>
+                          <td className="rpt-comp-price">{c.estimatedPrice ?? "—"}</td>
+                          <td className="rpt-comp-gaps">{c.signals.length}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* Revenue Model snapshot */}
+              {simulation && (
+                <div className="doc-revenue">
+                  <span className="doc-sec-lbl">
+                    Revenue Model · TAM {formatCurrency(simulation.tamLow)}–{formatCurrency(simulation.tamHigh)} · {simulation.breakEvenMonths}mo break-even
+                  </span>
+                  <RevenueBarChart scenarios={simulation.scenarios} />
+                  <div className="rpt-rev-scenarios">
+                    {simulation.scenarios.map((s) => (
+                      <div key={s.name} className="rpt-rev-row">
+                        <span className="rpt-rev-name">{s.name}</span>
+                        <span className="rpt-rev-val">{formatCurrency(s.mrr12)}/mo at 12m</span>
+                        <span className="rpt-rev-price">${s.pricePerUser}/user</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Market Landscape snapshot */}
+              {marketLandscape && (
+                <div className="doc-market">
+                  <span className="doc-sec-lbl">Market Landscape · {marketLandscape.segments.length} segments · {marketLandscape.uncoveredOpportunities.length} opportunities</span>
+                  <div className="rpt-mkt-segs">
+                    {marketLandscape.segments.map((seg, i) => (
+                      <div key={i} className="rpt-mkt-seg">
+                        <span className={`rpt-mkt-badge ${seg.situation}`}>{seg.situation}</span>
+                        <span className="rpt-mkt-seg-name">{seg.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {marketLandscape.uncoveredOpportunities.length > 0 && (
+                    <div className="rpt-mkt-opps">
+                      <span className="rpt-mkt-opps-lbl">Uncovered opportunities</span>
+                      {marketLandscape.uncoveredOpportunities.slice(0, 3).map((o, i) => (
+                        <div key={i} className="rpt-mkt-opp">✦ {o}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Interview Guide snapshot */}
+              {interviewGuide && (
+                <div className="doc-interview">
+                  <span className="doc-sec-lbl">Interview Guide · Target: {interviewGuide.targetSegment.slice(0, 80)}</span>
+                  <div className="rpt-ig-cols">
+                    {interviewGuide.hypotheses.length > 0 && (
+                      <div className="rpt-ig-col">
+                        <span className="rpt-ig-col-lbl">Key hypotheses</span>
+                        {interviewGuide.hypotheses.slice(0, 3).map((h, i) => (
+                          <div key={i} className="rpt-ig-item hyp">{h}</div>
+                        ))}
+                      </div>
+                    )}
+                    {interviewGuide.redFlags.length > 0 && (
+                      <div className="rpt-ig-col">
+                        <span className="rpt-ig-col-lbl">Red flags</span>
+                        {interviewGuide.redFlags.slice(0, 3).map((f, i) => (
+                          <div key={i} className="rpt-ig-item flag">{f}</div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Transcript signal */}
+              {transcriptAnalysis && (
+                <div className="doc-transcript">
+                  <span className="doc-sec-lbl">Transcript Analysis · Signal strength: {transcriptAnalysis.signalStrength}</span>
+                  <div className="rpt-ta-strip">
+                    <div className={`rpt-ta-strength ${transcriptAnalysis.signalStrength}`}>
+                      {transcriptAnalysis.signalStrength.toUpperCase()}
+                    </div>
+                    <div className="rpt-ta-counts">
+                      <div className="rpt-ta-count go">
+                        <span className="rpt-ta-n">{transcriptAnalysis.confirmedHypotheses.length}</span>
+                        <span className="rpt-ta-lbl">confirmed</span>
+                      </div>
+                      <div className="rpt-ta-count kill">
+                        <span className="rpt-ta-n">{transcriptAnalysis.rejectedHypotheses.length}</span>
+                        <span className="rpt-ta-lbl">rejected</span>
+                      </div>
+                      <div className="rpt-ta-count dim">
+                        <span className="rpt-ta-n">{transcriptAnalysis.newInsights.length}</span>
+                        <span className="rpt-ta-lbl">new insights</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
