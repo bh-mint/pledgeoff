@@ -81,10 +81,10 @@ const TOOL_META: Record<ToolKey, { stage: string; label: string; desc: string }>
 
 const STAGES: { key: string; tools: ToolKey[] }[] = [
   { key: "Understand", tools: ["customers", "competitors"] },
-  { key: "Plan",       tools: ["simulate", "build"] },
-  { key: "Launch",     tools: ["landing", "launch-kit"] },
   { key: "Intel",      tools: ["features", "battlecard", "market-landscape"] },
   { key: "Validate",   tools: ["interview-guide", "transcript"] },
+  { key: "Plan",       tools: ["simulate", "build"] },
+  { key: "Launch",     tools: ["landing", "launch-kit"] },
 ];
 
 const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string } | null> = {
@@ -868,7 +868,7 @@ export function VerdictPageClient({
     if (lock && !hasPlanAccess(plan, lock.requiredPlan)) return false; // plan lock shown inline
     // Verdict lock: KILL locks plan+launch tools (except competitors), PIVOT locks plan+launch
     if (decision?.verdict === "KILL" && toolKey !== "customers" && toolKey !== "competitors") return true;
-    if (decision?.verdict === "PIVOT" && (toolKey === "simulate" || toolKey === "build" || toolKey === "landing" || toolKey === "launch-kit" || toolKey === "features" || toolKey === "battlecard" || toolKey === "market-landscape")) return true;
+    if (decision?.verdict === "PIVOT" && (toolKey === "simulate" || toolKey === "build" || toolKey === "landing" || toolKey === "launch-kit")) return true;
     return false;
   }
 
