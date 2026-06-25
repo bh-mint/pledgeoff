@@ -2,6 +2,7 @@ import { container } from '@/lib/container';
 import { getCachedIdea, setCachedIdea, invalidateCachedIdea } from '@/lib/idea-cache';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { isTeamMember } from '@/lib/team-access';
+import { withApiKeyLogging } from '@/lib/with-api-key-logging';
 
 function unauthorizedResponse(traceId: string) {
   return Response.json(
@@ -10,7 +11,7 @@ function unauthorizedResponse(traceId: string) {
   );
 }
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function getHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
   const { id } = await params;
 
@@ -94,3 +95,5 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   invalidateCachedIdea(userId, id);
   return new Response(null, { status: 204, headers: { 'X-Trace-Id': traceId } });
 }
+
+export const GET = withApiKeyLogging(getHandler);

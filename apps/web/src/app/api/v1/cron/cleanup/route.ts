@@ -11,7 +11,9 @@ export async function GET(req: Request): Promise<Response> {
   const traceId = crypto.randomUUID();
   const supabase = createSupabaseServiceClient();
 
-  const [outboxResult, eventsResult] = await Promise.all([
+  const cutoff90d = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+
+  const [outboxResult, eventsResult, apiLogsResult] = await Promise.all([
     supabase
       .from('outbox')
       .delete()
@@ -21,11 +23,16 @@ export async function GET(req: Request): Promise<Response> {
       .from('processed_events')
       .delete()
       .lt('processed_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+    supabase
+      .from('api_request_log')
+      .delete({ count: 'exact' })
+      .lt('created_at', cutoff90d),
   ]);
 
   const outboxDeleted = outboxResult.count ?? 0;
   const eventsDeleted = eventsResult.count ?? 0;
-  const hasError = !!outboxResult.error || !!eventsResult.error;
+  const apiLogsDeleted = apiLogsResult.count ?? 0;
+  const hasError = !!outboxResult.error || !!eventsResult.error || !!apiLogsResult.error;
 
   if (hasError) {
     logger.error(
@@ -33,6 +40,7 @@ export async function GET(req: Request): Promise<Response> {
         traceId,
         outboxError: outboxResult.error?.message ?? null,
         eventsError: eventsResult.error?.message ?? null,
+        apiLogsError: apiLogsResult.error?.message ?? null,
         outcome: 'error' as const,
       },
       'cron.cleanup.failed',
@@ -44,6 +52,7 @@ export async function GET(req: Request): Promise<Response> {
         errors: {
           outbox: outboxResult.error?.message ?? null,
           events: eventsResult.error?.message ?? null,
+          apiLogs: apiLogsResult.error?.message ?? null,
         },
       },
       { status: 500 },
@@ -51,9 +60,9 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   logger.info(
-    { traceId, outboxDeleted, eventsDeleted },
+    { traceId, outboxDeleted, eventsDeleted, apiLogsDeleted },
     'cron.cleanup.completed',
   );
 
-  return Response.json({ ok: true, traceId, outboxDeleted, eventsDeleted });
+  return Response.json({ ok: true, traceId, outboxDeleted, eventsDeleted, apiLogsDeleted });
 }

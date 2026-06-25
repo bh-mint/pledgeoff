@@ -5,8 +5,9 @@ import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { checkAiRateLimit } from '@/lib/rate-limiter';
 import { checkPlanToolGate } from '@/server/billing/checkPlanToolGate';
 import { isTeamMember } from '@/lib/team-access';
+import { withApiKeyLogging } from '@/lib/with-api-key-logging';
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function getHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
   const { id: ideaId } = await params;
 
@@ -33,7 +34,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   return Response.json({ data: result.value ?? null }, { status: 200, headers: { 'X-Trace-Id': traceId } });
 }
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function postHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
   const { id: ideaId } = await params;
 
@@ -89,3 +90,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   return Response.json({ data: result.value }, { status: 201, headers: { 'X-Trace-Id': traceId } });
 }
+
+export const GET = withApiKeyLogging(getHandler);
+export const POST = withApiKeyLogging(postHandler);

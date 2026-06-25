@@ -6,6 +6,7 @@ import { logger } from '@pledgeoff/observability';
 import { VerificationsExhaustedError } from '@pledgeoff/core';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { classifyNiche } from '@/lib/niche-classifier';
+import { withApiKeyLogging } from '@/lib/with-api-key-logging';
 
 export const maxDuration = 60;
 
@@ -16,7 +17,7 @@ function unauthorizedResponse(traceId: string) {
   );
 }
 
-export async function GET(req: Request) {
+async function getHandler(req: Request) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 
   const userId = await resolveUserIdFromRequest(req);
@@ -51,7 +52,7 @@ export async function GET(req: Request) {
   );
 }
 
-export async function POST(req: Request) {
+async function postHandler(req: Request) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
 
   const userId = await resolveUserIdFromRequest(req);
@@ -198,3 +199,6 @@ export async function POST(req: Request) {
     { status: 201, headers: { 'X-Trace-Id': traceId } },
   );
 }
+
+export const GET = withApiKeyLogging(getHandler);
+export const POST = withApiKeyLogging(postHandler);

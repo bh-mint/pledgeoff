@@ -1810,6 +1810,47 @@ select.finp { cursor: pointer; }
 .smeta { font-family: var(--font-chivo-mono), monospace; font-size: 8.5px; letter-spacing: 0.06em; color: var(--faint); }
 
 /* ── API key rows ────────────────────────────────────────── */
+/* ── API Usage (Developer settings) ───────────────────────── */
+.dev-usage-loading { color: var(--dim); font-size: 13px; padding: 12px 0; }
+.dev-usage-err { color: var(--kill); font-size: 13px; padding: 12px 0; }
+.dev-usage-empty { color: var(--faint); font-size: 13px; padding: 12px 0; }
+.dev-usage-period { margin-left: auto; display: flex; gap: 2px; }
+.dev-usage-tab { font-family: var(--font-chivo-mono), monospace; font-size: 9px; letter-spacing: 0.06em; padding: 3px 7px; border: 1px solid var(--line-soft); background: transparent; color: var(--dim); cursor: pointer; }
+.dev-usage-tab.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.dev-usage-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: var(--line-soft); margin: 16px 0; }
+.dev-usage-stat { background: var(--surface); padding: 14px 12px; display: flex; flex-direction: column; gap: 4px; }
+.dev-usage-val { font-family: var(--font-bitter), Georgia, serif; font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1; }
+.dev-usage-val.ok { color: var(--go); }
+.dev-usage-val.err { color: var(--kill); }
+.dev-usage-lbl { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: 0.08em; color: var(--faint); text-transform: uppercase; }
+.dev-usage-block { margin-top: 20px; }
+.dev-usage-sub { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: 0.12em; color: var(--faint); text-transform: uppercase; margin-bottom: 10px; }
+.dev-usage-rows { display: flex; flex-direction: column; gap: 6px; }
+.dev-usage-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.dev-usage-ep { font-family: var(--font-chivo-mono), monospace; font-size: 11px; color: var(--ink); min-width: 110px; }
+.dev-usage-prefix { font-family: var(--font-chivo-mono), monospace; font-size: 10px; color: var(--faint); }
+.dev-usage-bar-wrap { flex: 1; height: 4px; background: var(--line-soft); overflow: hidden; }
+.dev-usage-bar { height: 100%; background: var(--go); }
+.dev-usage-count { font-family: var(--font-chivo-mono), monospace; font-size: 11px; color: var(--dim); min-width: 50px; text-align: right; }
+.dev-usage-lat { font-family: var(--font-chivo-mono), monospace; font-size: 10px; color: var(--faint); min-width: 36px; text-align: right; }
+.dev-usage-errbadge { font-family: var(--font-chivo-mono), monospace; font-size: 9px; padding: 1px 5px; background: color-mix(in srgb, var(--kill) 12%, transparent); color: var(--kill); }
+.dev-usage-errs { display: flex; flex-direction: column; gap: 4px; }
+.dev-usage-errrow { display: grid; grid-template-columns: 42px 110px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line-soft); font-size: 12px; }
+.dev-usage-errrow:last-child { border-bottom: none; }
+.dev-usage-status { font-family: var(--font-chivo-mono), monospace; font-size: 11px; font-weight: 700; }
+.dev-usage-status.s500, .dev-usage-status.s503 { color: var(--kill); }
+.dev-usage-status.s400, .dev-usage-status.s401, .dev-usage-status.s403, .dev-usage-status.s404, .dev-usage-status.s429 { color: var(--pivot); }
+.dev-usage-time { font-family: var(--font-chivo-mono), monospace; font-size: 10px; color: var(--faint); }
+.dev-usage-trace { font-family: var(--font-chivo-mono), monospace; font-size: 10px; color: var(--dim); background: var(--surface); border: 1px solid var(--line-soft); padding: 2px 6px; cursor: pointer; }
+.dev-usage-trace:hover { color: var(--ink); border-color: var(--dim); }
+@media (max-width: 640px) {
+  .dev-usage-strip { grid-template-columns: repeat(3, 1fr); }
+  .dev-usage-strip .dev-usage-stat:nth-child(4), .dev-usage-strip .dev-usage-stat:nth-child(5) { display: none; }
+  .dev-usage-errrow { grid-template-columns: 42px 1fr auto; }
+  .dev-usage-errrow .dev-usage-ep { display: none; }
+}
+/* ──────────────────────────────────────────────────────────── */
+
 .krow { display: grid; grid-template-columns: 1fr 150px 110px auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line-soft); }
 .krow:last-child { border-bottom: none; }
 .knm { font-family: var(--font-bitter), Georgia, serif; font-size: 14px; font-weight: 600; color: var(--ink); }

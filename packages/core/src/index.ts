@@ -33,6 +33,7 @@ export * from './ports/idempotency-store';
 export * from './ports/llm-client';
 export * from './ports/source-adapter';
 export * from './ports/audit-log';
+export * from './ports/IApiRequestLogRepository';
 export * from './ports/cache';
 export * from './ports/embedding-client';
 

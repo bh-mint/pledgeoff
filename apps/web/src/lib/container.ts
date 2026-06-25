@@ -16,6 +16,7 @@ import {
   SupabaseIdeaReactionRepository,
   SupabaseOttoConversationRepository,
   SupabaseApiKeyRepository,
+  SupabaseApiRequestLogRepository,
   SupabaseUsageLogAdapter,
   SupabaseLaunchKitRepository,
   SupabaseDecisionQueueRepository,
@@ -183,6 +184,11 @@ class AppContainer {
   private _apiKeyRepo?: SupabaseApiKeyRepository;
   get apiKeyRepo(): SupabaseApiKeyRepository {
     return (this._apiKeyRepo ??= new SupabaseApiKeyRepository(this._supabase));
+  }
+
+  private _apiRequestLog?: SupabaseApiRequestLogRepository;
+  get apiRequestLog(): SupabaseApiRequestLogRepository {
+    return (this._apiRequestLog ??= new SupabaseApiRequestLogRepository(this._supabase));
   }
 
   private _launchKitRepo?: SupabaseLaunchKitRepository;
