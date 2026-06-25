@@ -15,6 +15,9 @@ export type DashboardIdeaRow = {
     build: boolean;
     competitors: boolean;
     launch_kit: boolean;
+    features: boolean;
+    battlecard: boolean;
+    market_landscape: boolean;
   };
 };
 
@@ -47,7 +50,10 @@ export async function getDashboardData(userIds: string[]): Promise<{
         customer_analyses ( id ),
         build_analyses ( id ),
         competitor_analyses ( id ),
-        launch_kits ( id )
+        launch_kits ( id ),
+        feature_analyses ( id ),
+        battlecards ( id ),
+        market_landscapes ( id )
       `)
       .in('user_id', userIds)
       .order('created_at', { ascending: false })
@@ -82,12 +88,15 @@ export async function getDashboardData(userIds: string[]): Promise<{
           } satisfies Decision)
         : null,
       tools: {
-        simulate:    (row.simulations?.length         ?? 0) > 0,
-        landing:     (row.landing_pages?.length       ?? 0) > 0,
-        customers:   (row.customer_analyses?.length   ?? 0) > 0,
-        build:       (row.build_analyses?.length      ?? 0) > 0,
-        competitors: (row.competitor_analyses?.length ?? 0) > 0,
-        launch_kit:  (row.launch_kits?.length         ?? 0) > 0,
+        simulate:         (row.simulations?.length          ?? 0) > 0,
+        landing:          (row.landing_pages?.length        ?? 0) > 0,
+        customers:        (row.customer_analyses?.length    ?? 0) > 0,
+        build:            (row.build_analyses?.length       ?? 0) > 0,
+        competitors:      (row.competitor_analyses?.length  ?? 0) > 0,
+        launch_kit:       (row.launch_kits?.length          ?? 0) > 0,
+        features:         (row.feature_analyses?.length     ?? 0) > 0,
+        battlecard:       (row.battlecards?.length          ?? 0) > 0,
+        market_landscape: (row.market_landscapes?.length    ?? 0) > 0,
       },
     };
   });
@@ -124,4 +133,7 @@ type RawIdeaRow = {
   build_analyses: Array<{ id: string }> | null;
   competitor_analyses: Array<{ id: string }> | null;
   launch_kits: Array<{ id: string }> | null;
+  feature_analyses: Array<{ id: string }> | null;
+  battlecards: Array<{ id: string }> | null;
+  market_landscapes: Array<{ id: string }> | null;
 };

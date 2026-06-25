@@ -18,6 +18,9 @@ export type ToolStatus = {
   build: boolean;
   competitors: boolean;
   launch_kit: boolean;
+  features: boolean;
+  battlecard: boolean;
+  market_landscape: boolean;
 };
 
 export type TableRow = {
@@ -370,7 +373,7 @@ export function DashboardClient({
   // ── Case row ──
   function caseRow(row: TableRow) {
     const vc = verdictClass(row.verdict);
-    const toolKeys: (keyof ToolStatus)[] = ["customers", "competitors", "build", "simulate", "landing", "launch_kit"];
+    const toolKeys: (keyof ToolStatus)[] = ["customers", "competitors", "build", "simulate", "landing", "launch_kit", "features", "battlecard", "market_landscape"];
     const runCount = toolKeys.filter((k) => row.tools[k]).length;
     return (
       <Link key={row.id} href={`/ideas/${row.id}`} className={`db-case ${vc}`}>

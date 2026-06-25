@@ -100,6 +100,9 @@ export default async function ReportPage({ params, searchParams }: Props) {
     competitorsResult,
     landingResult,
     launchKitResult,
+    featuresResult,
+    battlecardResult,
+    marketLandscapeResult,
     profileResult,
     plan,
   ] = await Promise.all([
@@ -111,6 +114,9 @@ export default async function ReportPage({ params, searchParams }: Props) {
     container.competitorAnalysisRepo.findByIdeaId(id),
     container.landingPageRepo.findByIdeaId(id),
     container.launchKitRepo.findByIdeaId(id),
+    container.featureAnalysisRepo.findByIdeaId(id),
+    container.battlecardRepo.findByIdeaId(id),
+    container.marketLandscapeRepo.findByIdeaId(id),
     supabase
       .from("profiles")
       .select("first_name, last_name, company_name")
@@ -127,6 +133,9 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const competitors = competitorsResult.isOk() ? competitorsResult.value : null;
   const landing = landingResult.isOk() ? landingResult.value : null;
   const launchKit = launchKitResult.isOk() ? launchKitResult.value : null;
+  const features = featuresResult.isOk() ? featuresResult.value : null;
+  const battlecard = battlecardResult.isOk() ? battlecardResult.value : null;
+  const marketLandscape = marketLandscapeResult.isOk() ? marketLandscapeResult.value : null;
   const profileData = profileResult.data as {
     first_name?: string | null;
     last_name?: string | null;
@@ -245,6 +254,45 @@ export default async function ReportPage({ params, searchParams }: Props) {
             : launchKit
               ? "GTM strategy generated — channels, messaging, launch sequence"
               : "Not yet run — GTM strategy, launch sequence",
+      };
+    })(),
+    (() => {
+      const s = toolStatus(!!features, founderPlus);
+      return {
+        name: "Feature Analysis",
+        ...s,
+        result:
+          !founderPlus
+            ? "Founder+ plan required to run this instrument"
+            : features
+              ? `${features.features.length} features mapped across competitors`
+              : "Not yet run — feature coverage matrix vs competitors",
+      };
+    })(),
+    (() => {
+      const s = toolStatus(!!battlecard, teamPlus);
+      return {
+        name: "Battlecard",
+        ...s,
+        result:
+          !teamPlus
+            ? "Team+ plan required to run this instrument"
+            : battlecard
+              ? `${battlecard.entries.length} competitor battlecards generated`
+              : "Not yet run — objection handling per competitor",
+      };
+    })(),
+    (() => {
+      const s = toolStatus(!!marketLandscape, founderPlus);
+      return {
+        name: "Market Landscape",
+        ...s,
+        result:
+          !founderPlus
+            ? "Founder+ plan required to run this instrument"
+            : marketLandscape
+              ? `${marketLandscape.segments.length} segments · ${marketLandscape.uncoveredOpportunities.length} uncovered opportunities`
+              : "Not yet run — segments, trends, uncovered opportunities",
       };
     })(),
   ];
