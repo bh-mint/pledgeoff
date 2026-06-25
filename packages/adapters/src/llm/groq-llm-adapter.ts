@@ -399,15 +399,15 @@ export class GroqLLMAdapter implements ILLMClient {
 
   async generateInterviewGuide(request: LLMInterviewGuideRequest): Promise<Result<LLMInterviewGuideResponse, LLMClientError>> {
     const QuestionSchema = z.object({
-      question: z.string().min(1).max(500),
-      purpose: z.string().min(1).max(300),
-      followUp: z.string().max(300).optional(),
+      question: z.string().min(1).max(800),
+      purpose: z.string().min(1).max(600),
+      followUp: z.string().max(600).optional(),
     });
     const Schema = z.object({
-      targetSegment: z.string().min(1).max(300),
+      targetSegment: z.string().min(1).max(500),
       questions: z.array(QuestionSchema).min(1).max(15),
-      hypotheses: z.array(z.string().min(1).max(400)).min(1).max(10),
-      redFlags: z.array(z.string().min(1).max(400)).min(1).max(8),
+      hypotheses: z.array(z.string().min(1).max(600)).min(1).max(10),
+      redFlags: z.array(z.string().min(1).max(600)).min(1).max(8),
     });
     const prompt = buildInterviewGuidePrompt(
       withFounderContext(request.ideaText, request.founderContext),
@@ -485,7 +485,7 @@ export class GroqLLMAdapter implements ILLMClient {
 
       const validated = schema.safeParse(parsed);
       if (!validated.success) {
-        log.error({ traceId, target: 'groq', operation, latencyMs: Date.now() - start, outcome: 'error', errorCode: 'SCHEMA_INVALID' }, 'Groq response failed schema validation');
+        log.error({ traceId, target: 'groq', operation, latencyMs: Date.now() - start, outcome: 'error', errorCode: 'SCHEMA_INVALID', schemaErrors: validated.error.flatten() }, 'Groq response failed schema validation');
         return err(new LLMClientError(`LLM response schema invalid: ${validated.error.message}`));
       }
 
