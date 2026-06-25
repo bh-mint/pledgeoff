@@ -438,9 +438,17 @@ export function VerdictPageClient({
   const [decision, setDecision] = useState<Decision | null>(initialDecision);
   const [signals, setSignals] = useState<Signal[]>(initialSignals);
   const [polls, setPolls] = useState(0);
-  const [openTool, setOpenTool] = useState<ToolKey | null>(null);
+  const [openTools, setOpenTools] = useState<Set<ToolKey>>(new Set());
   const [override, setOverride] = useState(false);
   const toolRefs = useRef<Partial<Record<ToolKey, HTMLDivElement | null>>>({});
+
+  function toggleTool(toolKey: ToolKey) {
+    setOpenTools((prev) => {
+      const next = new Set(prev);
+      if (next.has(toolKey)) next.delete(toolKey); else next.add(toolKey);
+      return next;
+    });
+  }
 
   const polling = !decision && polls < MAX_POLLS;
 
@@ -478,10 +486,96 @@ export function VerdictPageClient({
   }, {});
 
   function jumpTo(toolKey: ToolKey) {
-    setOpenTool(toolKey);
+    setOpenTools((prev) => { const next = new Set(prev); next.add(toolKey); return next; });
     setTimeout(() => {
       toolRefs.current[toolKey]?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
+  }
+
+  function renderToolStrip(toolKey: ToolKey): React.ReactNode {
+    const fmtNum = (n: number) =>
+      n >= 1_000_000_000 ? `$${(n / 1_000_000_000).toFixed(1)}B`
+      : n >= 1_000_000   ? `$${(n / 1_000_000).toFixed(0)}M`
+      : `$${n.toLocaleString()}`;
+
+    switch (toolKey) {
+      case "customers": {
+        if (!initialCustomers) return null;
+        const seg = initialCustomers.segments[0];
+        const pos = initialCustomers.sentiment.positive;
+        const sentCls = pos >= 60 ? "go" : pos <= 30 ? "kill" : "watch";
+        return (
+          <>
+            {seg && <span className="ts-pill">{seg.name}</span>}
+            <span className="ts-sep">·</span>
+            <span className={`ts-val ${sentCls}`}>{pos}% positive</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val">{initialCustomers.segments.length} segments · {initialCustomers.painPoints.length} pain points</span>
+          </>
+        );
+      }
+      case "competitors": {
+        if (!initialCompetitors) return null;
+        const gap = initialCompetitors.gaps[0];
+        return (
+          <>
+            <span className="ts-val">{initialCompetitors.competitors.length} competitors</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val">{initialCompetitors.gaps.length} gap{initialCompetitors.gaps.length !== 1 ? "s" : ""} identified</span>
+            {gap && <><span className="ts-sep">·</span><span className="ts-pill">{gap.title}</span></>}
+          </>
+        );
+      }
+      case "simulate": {
+        if (!initialSimulation) return null;
+        const mod = initialSimulation.scenarios.find((s) => s.name === "moderate");
+        return (
+          <>
+            <span className="ts-val">TAM {fmtNum(initialSimulation.tamLow)}–{fmtNum(initialSimulation.tamHigh)}</span>
+            {mod && <><span className="ts-sep">·</span><span className="ts-val go">MRR yr1 ${mod.mrr12.toLocaleString()}</span></>}
+            <span className="ts-sep">·</span>
+            <span className="ts-val">break-even {initialSimulation.breakEvenMonths}mo</span>
+          </>
+        );
+      }
+      case "build": {
+        if (!initialBuild) return null;
+        const bld = initialBuild.stack.filter((c) => c.decision === "build").length;
+        const oss = initialBuild.stack.filter((c) => c.decision === "oss").length;
+        const buy = initialBuild.stack.filter((c) => c.decision === "buy").length;
+        const tier = initialBuild.confidenceTier;
+        const tierCls = tier === "HIGH" ? "go" : tier === "LOW" ? "kill" : "watch";
+        return (
+          <>
+            <span className="ts-val">{initialBuild.stack.length} components</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-pill">Build {bld} · OSS {oss} · Buy {buy}</span>
+            {tier && <><span className="ts-sep">·</span><span className={`ts-val ${tierCls}`}>{tier} confidence</span></>}
+          </>
+        );
+      }
+      case "landing": {
+        if (!initialLanding) return null;
+        return (
+          <>
+            <span className="ts-headline">&ldquo;{initialLanding.headline}&rdquo;</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-pill">{initialLanding.ctaText}</span>
+          </>
+        );
+      }
+      case "launch-kit": {
+        if (!initialLaunchKit) return null;
+        const headA = initialLaunchKit.headlines.find((h) => h.variant === "A");
+        const pr = initialLaunchKit.pricingRecommendation;
+        return (
+          <>
+            {headA && <><span className="ts-headline">&ldquo;{headA.headline}&rdquo;</span><span className="ts-sep">·</span></>}
+            <span className="ts-val">{pr.tier} · {pr.currency} {pr.priceMonthly}/mo</span>
+          </>
+        );
+      }
+    }
   }
 
   function isToolLocked(toolKey: ToolKey): boolean {
@@ -734,10 +828,13 @@ export function VerdictPageClient({
               <div key={stage.key} className="vrd-stage">
                 <div className="vrd-stage-lbl">{stage.key}</div>
                 {stage.tools.map((toolKey) => {
-                  const isOpen = openTool === toolKey;
+                  const isOpen = openTools.has(toolKey);
                   const done = isDone[toolKey];
-                  const locked = isPlanLocked(toolKey) || isToolLocked(toolKey);
+                  const planLocked = isPlanLocked(toolKey);
+                  const verdLocked = isToolLocked(toolKey);
+                  const locked = planLocked || verdLocked;
                   const meta = TOOL_META[toolKey];
+                  const strip = done && !locked ? renderToolStrip(toolKey) : null;
                   return (
                     <div
                       key={toolKey}
@@ -746,20 +843,22 @@ export function VerdictPageClient({
                     >
                       <button
                         className="vrd-tbtn"
-                        onClick={() => setOpenTool(isOpen ? null : toolKey)}
+                        onClick={() => toggleTool(toolKey)}
                       >
                         <span className="vrd-tbtn-stg">{meta.stage}</span>
                         <span className="vrd-tbtn-sep" />
                         <span className="vrd-tbtn-name">{meta.label}</span>
-                        {isOpen
-                          ? <span className="vrd-tbtn-sum" />
-                          : <span className="vrd-tbtn-sum">{meta.desc}</span>
-                        }
+                        {!strip && <span className="vrd-tbtn-sum">{meta.desc}</span>}
                         <span className="vrd-tbtn-stat">
                           {done ? "✓ done" : locked ? "locked" : "idle"}
                         </span>
                         <span className={`vrd-tbtn-chev${!isOpen ? " closed" : ""}`}>▾</span>
                       </button>
+                      {strip && (
+                        <div className="vrd-tool-strip">
+                          {strip}
+                        </div>
+                      )}
                       {isOpen && (
                         <div className="vrd-tbody">
                           {renderToolBody(toolKey)}
