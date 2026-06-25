@@ -159,6 +159,12 @@ const LLMLaunchKitResponseSchema = z.object({
     rationale: z.string().min(1).max(1500),
     anchoring: z.string().min(1).max(800),
   }),
+  actionPlan: z.array(z.object({
+    phase: z.enum(['0-30', '31-60', '61-90']),
+    focus: z.string().min(1).max(120),
+    actions: z.array(z.string().min(1).max(200)).min(1).max(6),
+    metric: z.string().min(1).max(150),
+  })).length(3).optional(),
 });
 
 const TIMEOUT_MS = 60_000;

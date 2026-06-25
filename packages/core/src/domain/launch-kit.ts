@@ -21,6 +21,13 @@ export const PricingRecommendationSchema = z.object({
   anchoring: z.string().min(1).max(200),
 });
 
+export const ActionPlanPhaseSchema = z.object({
+  phase: z.enum(['0-30', '31-60', '61-90']),
+  focus: z.string().min(1).max(120),
+  actions: z.array(z.string().min(1).max(200)).min(1).max(6),
+  metric: z.string().min(1).max(150),
+});
+
 export const LaunchKitSchema = z.object({
   id: z.string().uuid(),
   ideaId: z.string().uuid(),
@@ -28,10 +35,12 @@ export const LaunchKitSchema = z.object({
   headlines: z.array(HeadlineVariantSchema).min(1).max(3),
   emailSequence: z.array(EmailMessageSchema).min(1).max(3),
   pricingRecommendation: PricingRecommendationSchema,
+  actionPlan: z.array(ActionPlanPhaseSchema).length(3).optional(),
   createdAt: z.string().datetime({ offset: true }),
 });
 
 export type HeadlineVariant = z.infer<typeof HeadlineVariantSchema>;
 export type EmailMessage = z.infer<typeof EmailMessageSchema>;
 export type PricingRecommendation = z.infer<typeof PricingRecommendationSchema>;
+export type ActionPlanPhase = z.infer<typeof ActionPlanPhaseSchema>;
 export type LaunchKit = z.infer<typeof LaunchKitSchema>;

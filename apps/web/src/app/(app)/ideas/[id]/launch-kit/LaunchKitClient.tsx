@@ -9,7 +9,7 @@ interface Props {
   initialKit: LaunchKit | null;
 }
 
-type Tab = "headlines" | "emails" | "pricing";
+type Tab = "headlines" | "emails" | "pricing" | "plan";
 
 function CopyButton({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
@@ -90,6 +90,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
     { key: "headlines", label: "A/B Headlines" },
     { key: "emails", label: "Email Sequence" },
     { key: "pricing", label: "Pricing" },
+    ...(kit.actionPlan && kit.actionPlan.length > 0 ? [{ key: "plan" as Tab, label: "90-Day Plan" }] : []),
   ];
 
   return (
@@ -243,6 +244,42 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
             <CopyButton
               text={`Tier: ${kit.pricingRecommendation.tier}\nPrice: $${kit.pricingRecommendation.priceMonthly}/${kit.pricingRecommendation.currency}/mo\n\nRationale:\n${kit.pricingRecommendation.rationale}\n\nAnchoring:\n${kit.pricingRecommendation.anchoring}`}
               label="Copy pricing notes"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 90-Day Plan tab */}
+      {tab === "plan" && kit.actionPlan && (
+        <div className="aplan-wrap">
+          <div className="aplan-grid">
+            {kit.actionPlan.map((phase) => (
+              <div key={phase.phase} className="aplan-phase">
+                <div className="aplan-phase-hd">
+                  <span className="aplan-badge">Days {phase.phase}</span>
+                </div>
+                <p className="aplan-focus">{phase.focus}</p>
+                <ul className="aplan-actions">
+                  {phase.actions.map((action, i) => (
+                    <li key={i} className="aplan-action">
+                      <span className="aplan-bullet">→</span>
+                      {action}
+                    </li>
+                  ))}
+                </ul>
+                <div className="aplan-metric">
+                  <span className="aplan-metric-lbl">Success metric</span>
+                  <span className="aplan-metric-val">{phase.metric}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end mt-4">
+            <CopyButton
+              text={kit.actionPlan.map((p) =>
+                `Days ${p.phase}: ${p.focus}\nActions:\n${p.actions.map((a) => `- ${a}`).join("\n")}\nMetric: ${p.metric}`
+              ).join("\n\n")}
+              label="Copy action plan"
             />
           </div>
         </div>

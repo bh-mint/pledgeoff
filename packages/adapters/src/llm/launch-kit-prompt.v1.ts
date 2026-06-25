@@ -46,7 +46,27 @@ Generate a complete launch kit. Respond ONLY with a valid JSON object:
     "currency": "USD",
     "rationale": "<max 200 words: why this price point — reference competitors, willingness to pay signals from the data, value metric>",
     "anchoring": "<max 100 words: how to frame this price to reduce sticker shock — comparison to alternatives, ROI framing, or annual discount>"
-  }
+  },
+  "actionPlan": [
+    {
+      "phase": "0-30",
+      "focus": "<1 sentence: the single most important focus for days 0–30>",
+      "actions": ["<specific action>", "<specific action>", "<specific action>"],
+      "metric": "<the one metric that proves this phase succeeded>"
+    },
+    {
+      "phase": "31-60",
+      "focus": "<1 sentence: focus for days 31–60, builds on phase 1>",
+      "actions": ["<specific action>", "<specific action>", "<specific action>"],
+      "metric": "<success metric for this phase>"
+    },
+    {
+      "phase": "61-90",
+      "focus": "<1 sentence: focus for days 61–90, scaling what works>",
+      "actions": ["<specific action>", "<specific action>", "<specific action>"],
+      "metric": "<success metric for this phase>"
+    }
+  ]
 }
 
 Rules:
@@ -54,6 +74,7 @@ Rules:
 - Email bodies must be plain text paragraphs — no markdown, no bullet lists, no HTML
 - All 3 emails must feel like they come from the same founder voice: honest, direct, not salesy
 - Pricing: if signals show enterprise buyers, price higher (>$99/mo); if indie hackers / solo founders, price lower ($9–$49/mo)
+- Action plan: each phase builds on the previous; actions must be concrete and specific to this idea (not generic)
 - Do NOT invent user counts, revenue numbers, or testimonials you don't have evidence for in the signals
 - Write in English regardless of the idea language
 - Do NOT include any text outside the JSON object`;

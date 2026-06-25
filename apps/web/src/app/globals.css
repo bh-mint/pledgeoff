@@ -3299,3 +3299,18 @@ select.adm-search-inp { cursor: pointer; }
 .bc-bullet { font-weight: 700; font-size: 14px; flex-shrink: 0; line-height: 1.3; }
 .bc-bullet.go { color: var(--go); }
 .bc-bullet.kill { color: var(--kill); }
+
+/* 90-Day Action Plan */
+.aplan-wrap { display: flex; flex-direction: column; gap: 16px; }
+.aplan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 700px) { .aplan-grid { grid-template-columns: 1fr; } }
+.aplan-phase { border: 1px solid var(--line); background: var(--surface); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.aplan-phase-hd { display: flex; align-items: center; }
+.aplan-badge { font-family: var(--font-chivo-mono), monospace; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; background: var(--ink); color: var(--bg); padding: 3px 8px; }
+.aplan-focus { font-family: var(--font-bitter), serif; font-size: 13px; font-weight: 600; color: var(--ink); margin: 0; line-height: 1.45; }
+.aplan-actions { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
+.aplan-action { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--dim); line-height: 1.45; }
+.aplan-bullet { color: var(--go); font-weight: 700; flex-shrink: 0; line-height: 1.4; }
+.aplan-metric { border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 3px; margin-top: auto; }
+.aplan-metric-lbl { font-family: var(--font-chivo-mono), monospace; font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+.aplan-metric-val { font-size: 12px; color: var(--ink); font-weight: 600; }

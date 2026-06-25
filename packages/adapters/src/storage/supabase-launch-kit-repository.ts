@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { LaunchKit } from '@pledgeoff/core';
+import type { LaunchKit, ActionPlanPhase } from '@pledgeoff/core';
 import { LaunchKitRepositoryError, type ILaunchKitRepository } from '@pledgeoff/core';
 
 type LaunchKitRow = {
@@ -10,6 +10,7 @@ type LaunchKitRow = {
   headlines: LaunchKit['headlines'];
   email_sequence: LaunchKit['emailSequence'];
   pricing_recommendation: LaunchKit['pricingRecommendation'];
+  action_plan: ActionPlanPhase[] | null;
   created_at: string;
 };
 
@@ -21,6 +22,7 @@ function rowToLaunchKit(row: LaunchKitRow): LaunchKit {
     headlines: row.headlines,
     emailSequence: row.email_sequence,
     pricingRecommendation: row.pricing_recommendation,
+    actionPlan: row.action_plan ?? undefined,
     createdAt: row.created_at,
   };
 }
@@ -38,6 +40,7 @@ export class SupabaseLaunchKitRepository implements ILaunchKitRepository {
         headlines: kit.headlines,
         email_sequence: kit.emailSequence,
         pricing_recommendation: kit.pricingRecommendation,
+        action_plan: kit.actionPlan ?? null,
         created_at: kit.createdAt,
       })
       .select()

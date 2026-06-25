@@ -141,10 +141,18 @@ export interface LLMLaunchKitPricing {
   readonly anchoring: string;
 }
 
+export interface LLMActionPlanPhase {
+  readonly phase: '0-30' | '31-60' | '61-90';
+  readonly focus: string;
+  readonly actions: string[];
+  readonly metric: string;
+}
+
 export interface LLMLaunchKitResponse {
   readonly headlines: LLMLaunchKitHeadline[];
   readonly emailSequence: LLMLaunchKitEmail[];
   readonly pricingRecommendation: LLMLaunchKitPricing;
+  readonly actionPlan?: LLMActionPlanPhase[];
 }
 
 export interface LLMOttoMessage {
