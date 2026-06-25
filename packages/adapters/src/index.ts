@@ -42,3 +42,4 @@ export { SupabaseWebhookConfigRepository } from './storage/supabase-webhook-conf
 export { SupabaseApiRequestLogRepository } from './storage/supabase-api-request-log-repository';
 export { SupabaseFeatureAnalysisRepository } from './storage/supabase-feature-analysis-repository';
 export { SupabaseBattlecardRepository } from './storage/supabase-battlecard-repository';
+export { SupabaseMarketLandscapeRepository } from './storage/supabase-market-landscape-repository';

@@ -11,6 +11,7 @@ import { CompetitorsClient } from "./competitors/CompetitorsClient";
 import { LaunchKitClient } from "./launch-kit/LaunchKitClient";
 import { FeaturesClient } from "./features/FeaturesClient";
 import { BattlecardClient } from "./battlecard/BattlecardClient";
+import { MarketLandscapeClient } from "./market-landscape/MarketLandscapeClient";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 import type {
@@ -25,13 +26,14 @@ import type {
   LaunchKit,
   FeatureAnalysis,
   Battlecard,
+  MarketLandscape,
   Dimension,
   DecisionOutcome,
   OutcomeType,
 } from "@pledgeoff/core";
 
 type Plan = "free" | "founder" | "team" | "studio" | "enterprise";
-type ToolKey = "customers" | "competitors" | "simulate" | "build" | "landing" | "launch-kit" | "features" | "battlecard";
+type ToolKey = "customers" | "competitors" | "simulate" | "build" | "landing" | "launch-kit" | "features" | "battlecard" | "market-landscape";
 
 interface Props {
   idea: Idea;
@@ -45,6 +47,7 @@ interface Props {
   initialLaunchKit: LaunchKit | null;
   initialFeatures: FeatureAnalysis | null;
   initialBattlecard: Battlecard | null;
+  initialMarketLandscape: MarketLandscape | null;
   plan: Plan;
   categoryAvg?: number | null;
   ideaTitle: string;
@@ -63,15 +66,16 @@ const TOOL_META: Record<ToolKey, { stage: string; label: string; desc: string }>
   build:        { stage: "Plan",       label: "Build Spec",            desc: "Tech stack · libraries · GitHub gaps" },
   landing:      { stage: "Launch",     label: "Page Brief",            desc: "Headline · features · CTA copy" },
   "launch-kit": { stage: "Launch",     label: "GTM Brief",             desc: "A/B headlines · email seq · pricing rec" },
-  features:     { stage: "Intel",      label: "Feature Analysis",      desc: "Feature-by-feature comparison vs. competitors" },
-  battlecard:   { stage: "Intel",      label: "Battlecard",             desc: "Objection handling · talking points per competitor" },
+  features:            { stage: "Intel", label: "Feature Analysis",   desc: "Feature-by-feature comparison vs. competitors" },
+  battlecard:          { stage: "Intel", label: "Battlecard",          desc: "Objection handling · talking points per competitor" },
+  "market-landscape":  { stage: "Intel", label: "Market Landscape",    desc: "Segments · trends · uncovered opportunities" },
 };
 
 const STAGES: { key: string; tools: ToolKey[] }[] = [
   { key: "Understand", tools: ["customers", "competitors"] },
   { key: "Plan",       tools: ["simulate", "build"] },
   { key: "Launch",     tools: ["landing", "launch-kit"] },
-  { key: "Intel",      tools: ["features", "battlecard"] },
+  { key: "Intel",      tools: ["features", "battlecard", "market-landscape"] },
 ];
 
 const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string } | null> = {
@@ -81,8 +85,9 @@ const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string }
   build:        { requiredPlan: "founder", requiredLabel: "Founder" },
   landing:      { requiredPlan: "founder", requiredLabel: "Founder" },
   "launch-kit": { requiredPlan: "team",    requiredLabel: "Team" },
-  features:     { requiredPlan: "founder", requiredLabel: "Founder" },
-  battlecard:   { requiredPlan: "team",    requiredLabel: "Team" },
+  features:             { requiredPlan: "founder", requiredLabel: "Founder" },
+  battlecard:           { requiredPlan: "team",    requiredLabel: "Team" },
+  "market-landscape":   { requiredPlan: "founder", requiredLabel: "Founder" },
 };
 
 const PLAN_ORDER = ["free", "founder", "team", "studio", "enterprise"];
@@ -395,7 +400,7 @@ function ExecSummary({
     <div className="exec-wrap">
       <div className="bc-hd">
         <span>Executive Brief</span>
-        <span className="r">{toolsRun} / 6 tools run · {new Date(decision.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
+        <span className="r">{toolsRun} / {STAGES.flatMap((s) => s.tools).length} tools run · {new Date(decision.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>
       </div>
       <div className="exec-body">
         <div className="exec-verdict-row">
@@ -622,6 +627,7 @@ export function VerdictPageClient({
   initialLaunchKit,
   initialFeatures,
   initialBattlecard,
+  initialMarketLandscape,
   plan,
   ideaTitle,
   ideaCategory,
@@ -667,14 +673,15 @@ export function VerdictPageClient({
   }, [polling, fetchLatest]);
 
   const isDone: Record<ToolKey, boolean> = {
-    simulate:     !!initialSimulation,
-    landing:      !!initialLanding,
-    customers:    !!initialCustomers,
-    build:        !!initialBuild,
-    competitors:  !!initialCompetitors,
-    "launch-kit": !!initialLaunchKit,
-    features:     !!initialFeatures,
-    battlecard:   !!initialBattlecard,
+    simulate:            !!initialSimulation,
+    landing:             !!initialLanding,
+    customers:           !!initialCustomers,
+    build:               !!initialBuild,
+    competitors:         !!initialCompetitors,
+    "launch-kit":        !!initialLaunchKit,
+    features:            !!initialFeatures,
+    battlecard:          !!initialBattlecard,
+    "market-landscape":  !!initialMarketLandscape,
   };
 
   const bySource = signals.reduce<Record<string, Signal[]>>((acc, s) => {
@@ -799,6 +806,19 @@ export function VerdictPageClient({
           </>
         );
       }
+      case "market-landscape": {
+        if (!initialMarketLandscape) return null;
+        const oppSeg = initialMarketLandscape.segments.filter((s) => s.situation === "opportunity").length;
+        return (
+          <>
+            <span className="ts-val">{initialMarketLandscape.segments.length} segments</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val">{oppSeg} opportunity{oppSeg !== 1 ? "s" : ""}</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val">{initialMarketLandscape.uncoveredOpportunities.length} gaps</span>
+          </>
+        );
+      }
     }
   }
 
@@ -808,7 +828,7 @@ export function VerdictPageClient({
     if (lock && !hasPlanAccess(plan, lock.requiredPlan)) return false; // plan lock shown inline
     // Verdict lock: KILL locks plan+launch tools (except competitors), PIVOT locks plan+launch
     if (decision?.verdict === "KILL" && toolKey !== "customers" && toolKey !== "competitors") return true;
-    if (decision?.verdict === "PIVOT" && (toolKey === "simulate" || toolKey === "build" || toolKey === "landing" || toolKey === "launch-kit" || toolKey === "features" || toolKey === "battlecard")) return true;
+    if (decision?.verdict === "PIVOT" && (toolKey === "simulate" || toolKey === "build" || toolKey === "landing" || toolKey === "launch-kit" || toolKey === "features" || toolKey === "battlecard" || toolKey === "market-landscape")) return true;
     return false;
   }
 
@@ -852,24 +872,26 @@ export function VerdictPageClient({
       const vc = verdict === "PIVOT" ? "pivot" : "kill";
       const reasons: Record<string, Record<ToolKey, string>> = {
         KILL: {
-          customers:    "",
-          competitors:  "",
-          simulate:     "No point projecting revenue for an idea you won't build.",
-          build:        "No point planning architecture for something that won't be built.",
-          landing:      "No point writing copy for an idea you won't launch.",
-          "launch-kit": "No point building a launch kit for an idea you won't launch.",
-          features:     "No point mapping features for an idea you won't build.",
-          battlecard:   "No point generating sales scripts for an idea you won't build.",
+          customers:           "",
+          competitors:         "",
+          simulate:            "No point projecting revenue for an idea you won't build.",
+          build:               "No point planning architecture for something that won't be built.",
+          landing:             "No point writing copy for an idea you won't launch.",
+          "launch-kit":        "No point building a launch kit for an idea you won't launch.",
+          features:            "No point mapping features for an idea you won't build.",
+          battlecard:          "No point generating sales scripts for an idea you won't build.",
+          "market-landscape":  "No point mapping the market for an idea you won't pursue.",
         },
         PIVOT: {
-          customers:    "",
-          competitors:  "",
-          simulate:     "Don't model revenue for a direction you're about to change.",
-          build:        "Your tech stack depends on what you're building. Lock the direction first.",
-          landing:      "You'd be writing copy for an idea that needs to change.",
-          "launch-kit": "Generate the launch kit after you lock the new direction and get a GO.",
-          features:     "Feature matrix depends on what you're building. Lock the direction first.",
-          battlecard:   "Battlecard depends on what you're building. Lock the direction first.",
+          customers:           "",
+          competitors:         "",
+          simulate:            "Don't model revenue for a direction you're about to change.",
+          build:               "Your tech stack depends on what you're building. Lock the direction first.",
+          landing:             "You'd be writing copy for an idea that needs to change.",
+          "launch-kit":        "Generate the launch kit after you lock the new direction and get a GO.",
+          features:            "Feature matrix depends on what you're building. Lock the direction first.",
+          battlecard:          "Battlecard depends on what you're building. Lock the direction first.",
+          "market-landscape":  "Landscape the market after you lock the new direction.",
         },
       };
       const reason = reasons[verdict]?.[toolKey] ?? "";
@@ -900,8 +922,9 @@ export function VerdictPageClient({
       case "build":       return <BuildClient       ideaId={idea.id} initialAnalysis={initialBuild} />;
       case "competitors": return <CompetitorsClient ideaId={idea.id} initialAnalysis={initialCompetitors} />;
       case "launch-kit":  return <LaunchKitClient   ideaId={idea.id} initialKit={initialLaunchKit} />;
-      case "features":    return <FeaturesClient    ideaId={idea.id} initialFeatures={initialFeatures} isLocked={false} />;
-      case "battlecard":  return <BattlecardClient  ideaId={idea.id} initialBattlecard={initialBattlecard} />;
+      case "features":           return <FeaturesClient          ideaId={idea.id} initialFeatures={initialFeatures} isLocked={false} />;
+      case "battlecard":         return <BattlecardClient         ideaId={idea.id} initialBattlecard={initialBattlecard} />;
+      case "market-landscape":   return <MarketLandscapeClient    ideaId={idea.id} initialLandscape={initialMarketLandscape} />;
     }
   }
 
@@ -1061,7 +1084,7 @@ export function VerdictPageClient({
           <div className="vrd-tools">
             <div className="bc-hd" style={{ marginBottom: 16 }}>
               <span>Intelligence Suite</span>
-              <span className="r">{STAGES.flatMap((s) => s.tools).filter((k) => isDone[k]).length} / 6 run</span>
+              <span className="r">{STAGES.flatMap((s) => s.tools).filter((k) => isDone[k]).length} / {STAGES.flatMap((s) => s.tools).length} run</span>
             </div>
 
             {STAGES.map((stage) => (

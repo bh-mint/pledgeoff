@@ -75,6 +75,7 @@ function makeLLM(response = llmResponse): ILLMClient {
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
     generateBattlecard: vi.fn(),
+    generateMarketLandscape: vi.fn(),
   };
 }
 
@@ -138,6 +139,7 @@ describe('AnalyzeCompetitorsUseCase', () => {
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
     generateBattlecard: vi.fn(),
+    generateMarketLandscape: vi.fn(),
     };
     const useCase = new AnalyzeCompetitorsUseCase(makeRepo(), makeSignalRepo(), llm);
 

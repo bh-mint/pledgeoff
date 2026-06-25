@@ -226,6 +226,24 @@ export interface LLMBattlecardResponse {
   readonly entries: LLMBattlecardEntry[];
 }
 
+export interface LLMMarketLandscapeRequest {
+  readonly ideaText: string;
+  readonly signals: Signal[];
+  readonly traceId: string;
+}
+
+export interface LLMMarketSegment {
+  readonly name: string;
+  readonly situation: 'competitive' | 'growing' | 'opportunity';
+  readonly description: string;
+}
+
+export interface LLMMarketLandscapeResponse {
+  readonly segments: LLMMarketSegment[];
+  readonly trends: string[];
+  readonly uncoveredOpportunities: string[];
+}
+
 export interface ILLMClient {
   generateSearchQueries(request: LLMSearchQueriesRequest): Promise<Result<LLMSearchQueriesResponse, LLMClientError>>;
   scoreSignalRelevance(request: LLMRelevanceRequest): Promise<Result<LLMRelevanceResponse, LLMClientError>>;
@@ -240,4 +258,5 @@ export interface ILLMClient {
   generatePriorityExplanation(request: LLMPriorityExplanationRequest): Promise<Result<LLMPriorityExplanationResponse, LLMClientError>>;
   analyzeFeatures(request: LLMFeatureAnalysisRequest): Promise<Result<LLMFeatureAnalysisResponse, LLMClientError>>;
   generateBattlecard(request: LLMBattlecardRequest): Promise<Result<LLMBattlecardResponse, LLMClientError>>;
+  generateMarketLandscape(request: LLMMarketLandscapeRequest): Promise<Result<LLMMarketLandscapeResponse, LLMClientError>>;
 }

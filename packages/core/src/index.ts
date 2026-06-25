@@ -16,6 +16,7 @@ export * from './domain/build-analysis';
 export * from './domain/competitor-analysis';
 export * from './domain/feature-analysis';
 export * from './domain/battlecard';
+export * from './domain/market-landscape';
 export * from './domain/idea-reaction';
 
 // Ports
@@ -38,6 +39,7 @@ export * from './ports/audit-log';
 export * from './ports/IApiRequestLogRepository';
 export * from './ports/IFeatureAnalysisRepository';
 export * from './ports/IBattlecardRepository';
+export * from './ports/IMarketLandscapeRepository';
 export * from './ports/cache';
 export * from './ports/embedding-client';
 
@@ -53,6 +55,7 @@ export * from './use-cases/analyze-build';
 export * from './use-cases/analyze-competitors';
 export * from './use-cases/analyze-features';
 export * from './use-cases/generate-battlecard';
+export * from './use-cases/generate-market-landscape';
 export * from './use-cases/get-or-create-subscription';
 export * from './use-cases/invite-team-member';
 export * from './use-cases/accept-team-invite';

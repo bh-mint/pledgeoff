@@ -21,6 +21,7 @@ import {
   SupabaseLaunchKitRepository,
   SupabaseFeatureAnalysisRepository,
   SupabaseBattlecardRepository,
+  SupabaseMarketLandscapeRepository,
   SupabaseDecisionQueueRepository,
   SupabaseEngineeringSnapshotRepository,
   SupabaseDecisionOutcomeRepository,
@@ -85,6 +86,7 @@ import {
   AutoJoinByDomainUseCase,
   AnalyzeFeaturesUseCase,
   GenerateBattlecardUseCase,
+  GenerateMarketLandscapeUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -238,6 +240,11 @@ class AppContainer {
     return (this._battlecardRepo ??= new SupabaseBattlecardRepository(this._supabase));
   }
 
+  private _marketLandscapeRepo?: SupabaseMarketLandscapeRepository;
+  get marketLandscapeRepo(): SupabaseMarketLandscapeRepository {
+    return (this._marketLandscapeRepo ??= new SupabaseMarketLandscapeRepository(this._supabase));
+  }
+
   // ── lazy use-cases ─────────────────────────────────────────────────────────
   private _createIdeaUseCase?: CreateIdeaUseCase;
   get createIdeaUseCase(): CreateIdeaUseCase {
@@ -331,6 +338,15 @@ class AppContainer {
     return (this._generateBattlecardUseCase ??= new GenerateBattlecardUseCase(
       this._llmClient,
       this.battlecardRepo,
+    ));
+  }
+
+  private _generateMarketLandscapeUseCase?: GenerateMarketLandscapeUseCase;
+  get generateMarketLandscapeUseCase(): GenerateMarketLandscapeUseCase {
+    return (this._generateMarketLandscapeUseCase ??= new GenerateMarketLandscapeUseCase(
+      this._llmClient,
+      this.marketLandscapeRepo,
+      this.signalRepo,
     ));
   }
 

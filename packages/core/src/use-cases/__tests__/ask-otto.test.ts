@@ -79,6 +79,7 @@ function makeRepos(subOverride?: Partial<Subscription>) {
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
     generateBattlecard: vi.fn(),
+    generateMarketLandscape: vi.fn(),
   };
 
   return { ottoRepo, subRepo, llm };

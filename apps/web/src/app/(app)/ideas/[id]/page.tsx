@@ -76,7 +76,7 @@ export default async function IdeaPage({ params }: Props) {
     if (!isSameTeam) notFound();
   }
 
-  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, featuresResult, battlecardResult] = await Promise.all([
+  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, featuresResult, battlecardResult, marketLandscapeResult] = await Promise.all([
     container.decisionRepo.findByIdeaId(id),
     container.signalRepo.findByIdeaId(id),
     container.simulationRepo.findByIdeaId(id),
@@ -88,6 +88,7 @@ export default async function IdeaPage({ params }: Props) {
     container.decisionOutcomeRepo.findByIdea(id),
     container.featureAnalysisRepo.findByIdeaId(id),
     container.battlecardRepo.findByIdeaId(id),
+    container.marketLandscapeRepo.findByIdeaId(id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -100,6 +101,7 @@ export default async function IdeaPage({ params }: Props) {
   const initialLaunchKit = launchKitResult.isOk() ? launchKitResult.value : null;
   const initialFeatures = featuresResult.isOk() ? featuresResult.value : null;
   const initialBattlecard = battlecardResult.isOk() ? battlecardResult.value : null;
+  const initialMarketLandscape = marketLandscapeResult.isOk() ? marketLandscapeResult.value : null;
   const existingOutcome = outcomeResult.isOk() ? outcomeResult.value : null;
 
   const now = new Date();
@@ -190,6 +192,7 @@ export default async function IdeaPage({ params }: Props) {
         initialLaunchKit={initialLaunchKit}
         initialFeatures={initialFeatures}
         initialBattlecard={initialBattlecard}
+        initialMarketLandscape={initialMarketLandscape}
         plan={plan}
         categoryAvg={categoryAvg}
         ideaTitle={title}

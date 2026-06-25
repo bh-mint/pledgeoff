@@ -58,6 +58,7 @@ function makeLLMClient(response = llmResponse): ILLMClient {
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
     generateBattlecard: vi.fn(),
+    generateMarketLandscape: vi.fn(),
   };
 }
 
@@ -110,6 +111,7 @@ describe('GenerateLandingUseCase', () => {
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
     generateBattlecard: vi.fn(),
+    generateMarketLandscape: vi.fn(),
     };
     const useCase = new GenerateLandingUseCase(makeLandingRepo(), llm);
 

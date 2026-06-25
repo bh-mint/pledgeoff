@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, LLMFeatureAnalysisRequest, LLMFeatureAnalysisResponse, LLMBattlecardRequest, LLMBattlecardResponse, IUsageLogger } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, LLMFeatureAnalysisRequest, LLMFeatureAnalysisResponse, LLMBattlecardRequest, LLMBattlecardResponse, LLMMarketLandscapeRequest, LLMMarketLandscapeResponse, IUsageLogger } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -16,6 +16,7 @@ import { buildOttoSystemPrompt } from './otto-prompt.v1';
 import { buildLaunchKitPrompt, LAUNCH_KIT_PROMPT_VERSION } from './launch-kit-prompt.v1';
 import { buildFeatureAnalysisPrompt } from './feature-analysis-prompt.v1';
 import { buildBattlecardPrompt } from './battlecard-prompt.v1';
+import { buildMarketLandscapePrompt } from './market-landscape-prompt.v1';
 
 const log = createLogger({ adapter: 'anthropic' });
 const tracer = getTracer('anthropic-llm-adapter');
@@ -530,6 +531,28 @@ export class AnthropicLLMAdapter implements ILLMClient {
       'generateBattlecard',
       request.traceId,
       2048,
+    );
+  }
+
+  async generateMarketLandscape(request: LLMMarketLandscapeRequest): Promise<Result<LLMMarketLandscapeResponse, LLMClientError>> {
+    const SegmentSchema = z.object({
+      name: z.string().min(1).max(100),
+      situation: z.enum(['competitive', 'growing', 'opportunity']),
+      description: z.string().min(1).max(300),
+    });
+    const LLMMarketLandscapeResponseSchema = z.object({
+      segments: z.array(SegmentSchema).min(1).max(8),
+      trends: z.array(z.string().min(1).max(200)).min(1).max(6),
+      uncoveredOpportunities: z.array(z.string().min(1).max(200)).min(1).max(5),
+    });
+    const prompt = buildMarketLandscapePrompt(request.ideaText, request.signals);
+    return this._callAnthropic(
+      prompt,
+      'You are a market intelligence analyst. Respond with valid JSON only.',
+      LLMMarketLandscapeResponseSchema,
+      'generateMarketLandscape',
+      request.traceId,
+      1024,
     );
   }
 

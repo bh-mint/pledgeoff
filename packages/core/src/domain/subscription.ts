@@ -43,15 +43,15 @@ export const PLAN_LIMITS = {
   enterprise: { verificationsPerMonth: 200,      seatsIncluded: Infinity, ottoQuestionsPerMonth: Infinity },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
 
-export const TOOL_KEYS = ['icp', 'icp_limited', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard'] as const;
+export const TOOL_KEYS = ['icp', 'icp_limited', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard', 'market-landscape'] as const;
 export type ToolKey = typeof TOOL_KEYS[number];
 
 export const PLAN_TOOL_GATES: Record<Plan, readonly ToolKey[]> = {
   free:       ['icp_limited'],
-  founder:    ['icp', 'comp', 'rev', 'build', 'page', 'features'],
-  team:       ['icp', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard'],
-  studio:     ['icp', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard'],
-  enterprise: ['icp', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard'],
+  founder:    ['icp', 'comp', 'rev', 'build', 'page', 'features', 'market-landscape'],
+  team:       ['icp', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard', 'market-landscape'],
+  studio:     ['icp', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard', 'market-landscape'],
+  enterprise: ['icp', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard', 'market-landscape'],
 } as const;
 
 export function hasPlanToolAccess(plan: Plan, tool: ToolKey): boolean {
