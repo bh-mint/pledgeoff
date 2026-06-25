@@ -3300,6 +3300,10 @@ select.adm-search-inp { cursor: pointer; }
 .bc-bullet.go { color: var(--go); }
 .bc-bullet.kill { color: var(--kill); }
 
+/* Competitor enhanced fields */
+.comp-sw-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; margin-bottom: 4px; padding: 10px 12px; border-radius: 4px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); }
+@media (max-width: 560px) { .comp-sw-grid { grid-template-columns: 1fr; } }
+
 /* 90-Day Action Plan */
 .aplan-wrap { display: flex; flex-direction: column; gap: 16px; }
 .aplan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }

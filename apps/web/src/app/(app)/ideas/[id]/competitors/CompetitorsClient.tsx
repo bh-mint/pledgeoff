@@ -112,6 +112,7 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
                 className="rounded border p-4"
                 style={{ borderColor: "var(--border)", background: "var(--surface)" }}
               >
+                {/* Header row */}
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex items-center flex-wrap gap-2">
                     <span className="text-[14px] font-semibold" style={{ color: "var(--t1)" }}>{c.name}</span>
@@ -126,6 +127,14 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
                         {c.url.replace(/^https?:\/\//, '')} ↗
                       </a>
                     )}
+                    {c.estimatedPrice && (
+                      <span
+                        className="mono text-[9px] px-1.5 py-0.5 rounded"
+                        style={{ background: "color-mix(in srgb, var(--accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 25%, transparent)", color: "var(--accent)" }}
+                      >
+                        {c.estimatedPrice}
+                      </span>
+                    )}
                     {c.source === "knowledge" && (
                       <InfoTooltip content="Found via AI general knowledge, not from your idea's live signals" align="left">
                         <span
@@ -138,8 +147,50 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
                     )}
                   </div>
                 </div>
-                <p className="text-[13px] mb-3 leading-relaxed" style={{ color: "var(--t2)" }}>{c.positioning}</p>
-                <div className="flex flex-wrap gap-1.5">
+
+                {/* Positioning */}
+                <p className="text-[13px] leading-relaxed" style={{ color: "var(--t2)" }}>{c.positioning}</p>
+
+                {/* Target segment */}
+                {c.targetSegment && (
+                  <p className="mono text-[10px] mt-1 mb-2" style={{ color: "var(--t3)" }}>
+                    → {c.targetSegment}
+                  </p>
+                )}
+                {!c.targetSegment && <div className="mb-3" />}
+
+                {/* Strengths + Weaknesses */}
+                {((c.strengths && c.strengths.length > 0) || (c.weaknesses && c.weaknesses.length > 0)) && (
+                  <div className="comp-sw-grid">
+                    {c.strengths && c.strengths.length > 0 && (
+                      <div>
+                        <p className="mono text-[9px] uppercase tracking-[0.08em] mb-1.5" style={{ color: "var(--validated)" }}>Strengths</p>
+                        <ul className="space-y-1">
+                          {c.strengths.map((s, j) => (
+                            <li key={j} className="text-[11px] leading-snug flex gap-1.5" style={{ color: "var(--t2)" }}>
+                              <span style={{ color: "var(--validated)", flexShrink: 0 }}>✓</span>{s}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {c.weaknesses && c.weaknesses.length > 0 && (
+                      <div>
+                        <p className="mono text-[9px] uppercase tracking-[0.08em] mb-1.5" style={{ color: "var(--caution)" }}>Weaknesses</p>
+                        <ul className="space-y-1">
+                          {c.weaknesses.map((w, j) => (
+                            <li key={j} className="text-[11px] leading-snug flex gap-1.5" style={{ color: "var(--t2)" }}>
+                              <span style={{ color: "var(--caution)", flexShrink: 0 }}>✗</span>{w}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Signals */}
+                <div className="flex flex-wrap gap-1.5 mt-3">
                   {c.signals.map((s, j) => (
                     <span
                       key={j}

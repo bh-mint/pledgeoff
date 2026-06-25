@@ -1,6 +1,6 @@
 import type { Signal } from '@pledgeoff/core';
 
-export const COMPETITOR_PROMPT_VERSION = 'competitor-v3';
+export const COMPETITOR_PROMPT_VERSION = 'competitor-v4';
 
 export function buildCompetitorPrompt(ideaText: string, signals: Signal[]): string {
   const signalBlock = signals.length === 0
@@ -18,6 +18,15 @@ ${ideaText}
 <signals>
 ${signalBlock}
 </signals>
+
+<enhanced_fields_instructions>
+For EVERY competitor you include (all phases), populate these additional fields when you have reasonable confidence:
+- "estimatedPrice": pricing model + representative price (e.g. "Free + $29/mo Pro", "$49/mo", "Enterprise only", "Freemium"). Omit if completely unknown.
+- "targetSegment": primary target customer description (e.g. "SMB product teams", "Enterprise marketing ops", "Indie hackers and solopreneurs"). Omit if unclear.
+- "strengths": 2–4 strings describing what this competitor does well (e.g. "Large integration ecosystem", "Established brand trust"). Only include factual strengths you're confident about.
+- "weaknesses": 2–4 strings describing where this competitor falls short (e.g. "No API access on free plan", "Steep learning curve", "No mobile app"). Only include weaknesses you're confident about.
+Do NOT fabricate. If unsure, omit the field entirely.
+</enhanced_fields_instructions>
 
 <phase0_instructions>
 FIRST: scan the <idea> text above for any competitor names mentioned explicitly (e.g. "Unlike X", "compared to Y", "similar to Z", product names cited by the founder).
@@ -58,6 +67,10 @@ Return ONLY valid JSON. No markdown, no explanation, no code fences.
       "name": "string",
       "url": "string or omit if unknown",
       "positioning": "string, 1-2 sentences",
+      "estimatedPrice": "string or omit",
+      "targetSegment": "string or omit",
+      "strengths": ["string", "string"],
+      "weaknesses": ["string", "string"],
       "signals": ["string", "string"],
       "source": "signal"
     },
@@ -65,6 +78,10 @@ Return ONLY valid JSON. No markdown, no explanation, no code fences.
       "name": "string",
       "url": "string",
       "positioning": "string, 1-2 sentences",
+      "estimatedPrice": "string or omit",
+      "targetSegment": "string or omit",
+      "strengths": ["string"],
+      "weaknesses": ["string"],
       "signals": ["factual string from training knowledge"],
       "source": "knowledge"
     }

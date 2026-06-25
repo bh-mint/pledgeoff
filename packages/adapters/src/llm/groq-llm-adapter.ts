@@ -126,6 +126,10 @@ const CompetitorItemSchema = z.object({
   positioning: z.string().min(1),
   signals: z.array(z.string().min(1)),
   source: z.enum(['signal', 'knowledge']).optional(),
+  estimatedPrice: z.string().max(80).optional(),
+  targetSegment: z.string().max(150).optional(),
+  strengths: z.array(z.string().min(1).max(150)).max(5).optional(),
+  weaknesses: z.array(z.string().min(1).max(150)).max(5).optional(),
 });
 
 const CompetitorGapItemSchema = z.object({

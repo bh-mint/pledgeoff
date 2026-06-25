@@ -7,6 +7,10 @@ export const CompetitorSchema = z.object({
   signals: z.array(z.string().min(1).max(200)).min(1).max(5),
   // 'signal' = found in fetched signals; 'knowledge' = LLM general knowledge supplement; undefined = legacy/signal
   source: z.enum(['signal', 'knowledge']).optional(),
+  estimatedPrice: z.string().max(80).optional(),
+  targetSegment: z.string().max(150).optional(),
+  strengths: z.array(z.string().min(1).max(150)).max(5).optional(),
+  weaknesses: z.array(z.string().min(1).max(150)).max(5).optional(),
 });
 export type Competitor = z.infer<typeof CompetitorSchema>;
 
