@@ -378,7 +378,7 @@ export class GroqLLMAdapter implements ILLMClient {
         LLMLaunchKitResponseSchemaG,
         'generateLaunchKit',
         request.traceId,
-        2048,
+        4096,
       );
       if (result.isErr()) {
         span.setStatus({ code: SpanStatusCode.ERROR, message: result.error.message });
@@ -506,14 +506,14 @@ export class GroqLLMAdapter implements ILLMClient {
 
   async generateMarketLandscape(request: LLMMarketLandscapeRequest): Promise<Result<LLMMarketLandscapeResponse, LLMClientError>> {
     const SegmentSchema = z.object({
-      name: z.string().min(1).max(100),
+      name: z.string().min(1).max(150),
       situation: z.enum(['competitive', 'growing', 'opportunity']),
-      description: z.string().min(1).max(300),
+      description: z.string().min(1).max(600),
     });
     const LLMMarketLandscapeResponseSchema = z.object({
       segments: z.array(SegmentSchema).min(1).max(8),
-      trends: z.array(z.string().min(1).max(200)).min(1).max(6),
-      uncoveredOpportunities: z.array(z.string().min(1).max(200)).min(1).max(5),
+      trends: z.array(z.string().min(1).max(400)).min(1).max(6),
+      uncoveredOpportunities: z.array(z.string().min(1).max(400)).min(1).max(5),
     });
     const prompt = buildMarketLandscapePrompt(request.ideaText, request.signals);
     return this._callGroq(
@@ -522,7 +522,7 @@ export class GroqLLMAdapter implements ILLMClient {
       LLMMarketLandscapeResponseSchema,
       'generateMarketLandscape',
       request.traceId,
-      1024,
+      2048,
     );
   }
 
