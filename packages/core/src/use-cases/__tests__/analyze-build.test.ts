@@ -80,6 +80,7 @@ function makeLLMClient(response = llmBuildResponse): ILLMClient {
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
+    generateBattlecard: vi.fn(),
   };
 }
 

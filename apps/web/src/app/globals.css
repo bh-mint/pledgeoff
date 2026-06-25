@@ -3271,3 +3271,31 @@ select.adm-search-inp { cursor: pointer; }
 [data-theme="dark"] .feat-no { background: rgba(220,88,88,.1); }
 .feat-legend { display: flex; align-items: center; gap: 16px; }
 .feat-leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--dim); }
+
+/* Battlecard */
+.bc-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px 0; }
+.bc-empty-txt { font-size: 13px; color: var(--dim); max-width: 460px; line-height: 1.5; }
+.bc-err { font-size: 11px; color: var(--kill); font-family: var(--font-chivo-mono), monospace; }
+.bc-wrap { display: flex; flex-direction: column; gap: 6px; }
+.bc-entry { border: 1px solid var(--line); background: var(--surface); }
+.bc-entry-hd { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: none; border: none; cursor: pointer; text-align: left; gap: 12px; }
+.bc-entry-hd:hover { background: rgba(0,0,0,.03); }
+[data-theme="dark"] .bc-entry-hd:hover { background: rgba(255,255,255,.03); }
+.bc-entry-name { font-family: var(--font-bitter), serif; font-size: 14px; font-weight: 700; color: var(--ink); }
+.bc-entry-chevron { font-size: 9px; color: var(--faint); flex-shrink: 0; }
+.bc-entry-bd { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+.bc-block { display: flex; flex-direction: column; gap: 6px; }
+.bc-block-lbl { font-family: var(--font-chivo-mono), monospace; font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.bc-block-txt { font-size: 13px; color: var(--ink); line-height: 1.55; margin: 0; }
+.bc-objection .bc-block-txt { font-style: italic; color: var(--dim); }
+.bc-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .bc-cols { grid-template-columns: 1fr; } }
+.bc-col { display: flex; flex-direction: column; gap: 8px; }
+.bc-col-lbl { font-family: var(--font-chivo-mono), monospace; font-size: 8.5px; letter-spacing: .12em; text-transform: uppercase; }
+.bc-col-lbl.go { color: var(--go); }
+.bc-col-lbl.kill { color: var(--kill); }
+.bc-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.bc-list-item { display: flex; align-items: flex-start; gap: 7px; font-size: 12.5px; color: var(--ink); line-height: 1.45; }
+.bc-bullet { font-weight: 700; font-size: 14px; flex-shrink: 0; line-height: 1.3; }
+.bc-bullet.go { color: var(--go); }
+.bc-bullet.kill { color: var(--kill); }

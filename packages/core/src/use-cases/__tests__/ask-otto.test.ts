@@ -78,6 +78,7 @@ function makeRepos(subOverride?: Partial<Subscription>) {
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
+    generateBattlecard: vi.fn(),
   };
 
   return { ottoRepo, subRepo, llm };

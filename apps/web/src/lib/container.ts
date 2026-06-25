@@ -20,6 +20,7 @@ import {
   SupabaseUsageLogAdapter,
   SupabaseLaunchKitRepository,
   SupabaseFeatureAnalysisRepository,
+  SupabaseBattlecardRepository,
   SupabaseDecisionQueueRepository,
   SupabaseEngineeringSnapshotRepository,
   SupabaseDecisionOutcomeRepository,
@@ -83,6 +84,7 @@ import {
   RemoveDomainAllowlistUseCase,
   AutoJoinByDomainUseCase,
   AnalyzeFeaturesUseCase,
+  GenerateBattlecardUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -231,6 +233,11 @@ class AppContainer {
     return (this._featureAnalysisRepo ??= new SupabaseFeatureAnalysisRepository(this._supabase));
   }
 
+  private _battlecardRepo?: SupabaseBattlecardRepository;
+  get battlecardRepo(): SupabaseBattlecardRepository {
+    return (this._battlecardRepo ??= new SupabaseBattlecardRepository(this._supabase));
+  }
+
   // ── lazy use-cases ─────────────────────────────────────────────────────────
   private _createIdeaUseCase?: CreateIdeaUseCase;
   get createIdeaUseCase(): CreateIdeaUseCase {
@@ -316,6 +323,14 @@ class AppContainer {
     return (this._analyzeFeaturesUseCase ??= new AnalyzeFeaturesUseCase(
       this._llmClient,
       this.featureAnalysisRepo,
+    ));
+  }
+
+  private _generateBattlecardUseCase?: GenerateBattlecardUseCase;
+  get generateBattlecardUseCase(): GenerateBattlecardUseCase {
+    return (this._generateBattlecardUseCase ??= new GenerateBattlecardUseCase(
+      this._llmClient,
+      this.battlecardRepo,
     ));
   }
 

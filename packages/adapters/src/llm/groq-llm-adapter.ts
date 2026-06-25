@@ -1,7 +1,7 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, LLMFeatureAnalysisRequest, LLMFeatureAnalysisResponse, IUsageLogger } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, LLMFeatureAnalysisRequest, LLMFeatureAnalysisResponse, LLMBattlecardRequest, LLMBattlecardResponse, IUsageLogger } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -14,6 +14,7 @@ import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-p
 import { buildRelevancePrompt, RELEVANCE_PROMPT_VERSION } from './relevance-prompt.v1';
 import { buildLaunchKitPrompt, LAUNCH_KIT_PROMPT_VERSION } from './launch-kit-prompt.v1';
 import { buildFeatureAnalysisPrompt } from './feature-analysis-prompt.v1';
+import { buildBattlecardPrompt } from './battlecard-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
 const tracer = getTracer('groq-llm-adapter');
@@ -465,6 +466,28 @@ export class GroqLLMAdapter implements ILLMClient {
       'You are a competitive analyst. Respond with valid JSON only.',
       LLMFeatureAnalysisResponseSchema,
       'analyzeFeatures',
+      request.traceId,
+      2048,
+    );
+  }
+
+  async generateBattlecard(request: LLMBattlecardRequest): Promise<Result<LLMBattlecardResponse, LLMClientError>> {
+    const EntrySchema = z.object({
+      competitorName: z.string().min(1).max(100),
+      objection: z.string().min(1).max(300),
+      response: z.string().min(1).max(600),
+      ourAdvantages: z.array(z.string().min(1).max(200)).min(1).max(6),
+      theirWeaknesses: z.array(z.string().min(1).max(200)).min(1).max(6),
+    });
+    const LLMBattlecardResponseSchema = z.object({
+      entries: z.array(EntrySchema).min(1).max(8),
+    });
+    const prompt = buildBattlecardPrompt(request.ideaText, request.competitorNames);
+    return this._callGroq(
+      prompt,
+      'You are a competitive intelligence analyst. Respond with valid JSON only.',
+      LLMBattlecardResponseSchema,
+      'generateBattlecard',
       request.traceId,
       2048,
     );

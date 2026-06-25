@@ -10,6 +10,7 @@ import { BuildClient } from "./build/BuildClient";
 import { CompetitorsClient } from "./competitors/CompetitorsClient";
 import { LaunchKitClient } from "./launch-kit/LaunchKitClient";
 import { FeaturesClient } from "./features/FeaturesClient";
+import { BattlecardClient } from "./battlecard/BattlecardClient";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 import type {
@@ -23,13 +24,14 @@ import type {
   CompetitorAnalysis,
   LaunchKit,
   FeatureAnalysis,
+  Battlecard,
   Dimension,
   DecisionOutcome,
   OutcomeType,
 } from "@pledgeoff/core";
 
 type Plan = "free" | "founder" | "team" | "studio" | "enterprise";
-type ToolKey = "customers" | "competitors" | "simulate" | "build" | "landing" | "launch-kit" | "features";
+type ToolKey = "customers" | "competitors" | "simulate" | "build" | "landing" | "launch-kit" | "features" | "battlecard";
 
 interface Props {
   idea: Idea;
@@ -42,6 +44,7 @@ interface Props {
   initialCompetitors: CompetitorAnalysis | null;
   initialLaunchKit: LaunchKit | null;
   initialFeatures: FeatureAnalysis | null;
+  initialBattlecard: Battlecard | null;
   plan: Plan;
   categoryAvg?: number | null;
   ideaTitle: string;
@@ -61,13 +64,14 @@ const TOOL_META: Record<ToolKey, { stage: string; label: string; desc: string }>
   landing:      { stage: "Launch",     label: "Page Brief",            desc: "Headline · features · CTA copy" },
   "launch-kit": { stage: "Launch",     label: "GTM Brief",             desc: "A/B headlines · email seq · pricing rec" },
   features:     { stage: "Intel",      label: "Feature Analysis",      desc: "Feature-by-feature comparison vs. competitors" },
+  battlecard:   { stage: "Intel",      label: "Battlecard",             desc: "Objection handling · talking points per competitor" },
 };
 
 const STAGES: { key: string; tools: ToolKey[] }[] = [
   { key: "Understand", tools: ["customers", "competitors"] },
   { key: "Plan",       tools: ["simulate", "build"] },
   { key: "Launch",     tools: ["landing", "launch-kit"] },
-  { key: "Intel",      tools: ["features"] },
+  { key: "Intel",      tools: ["features", "battlecard"] },
 ];
 
 const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string } | null> = {
@@ -78,6 +82,7 @@ const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string }
   landing:      { requiredPlan: "founder", requiredLabel: "Founder" },
   "launch-kit": { requiredPlan: "team",    requiredLabel: "Team" },
   features:     { requiredPlan: "founder", requiredLabel: "Founder" },
+  battlecard:   { requiredPlan: "team",    requiredLabel: "Team" },
 };
 
 const PLAN_ORDER = ["free", "founder", "team", "studio", "enterprise"];
@@ -616,6 +621,7 @@ export function VerdictPageClient({
   initialCompetitors,
   initialLaunchKit,
   initialFeatures,
+  initialBattlecard,
   plan,
   ideaTitle,
   ideaCategory,
@@ -668,6 +674,7 @@ export function VerdictPageClient({
     competitors:  !!initialCompetitors,
     "launch-kit": !!initialLaunchKit,
     features:     !!initialFeatures,
+    battlecard:   !!initialBattlecard,
   };
 
   const bySource = signals.reduce<Record<string, Signal[]>>((acc, s) => {
@@ -780,6 +787,18 @@ export function VerdictPageClient({
           </>
         );
       }
+      case "battlecard": {
+        if (!initialBattlecard) return null;
+        return (
+          <>
+            <span className="ts-val">{initialBattlecard.entries.length} competitor{initialBattlecard.entries.length !== 1 ? "s" : ""}</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-pill">{initialBattlecard.entries[0]?.competitorName}</span>
+            <span className="ts-sep">+</span>
+            <span className="ts-val">{initialBattlecard.entries.reduce((s, e) => s + e.ourAdvantages.length, 0)} advantages mapped</span>
+          </>
+        );
+      }
     }
   }
 
@@ -789,7 +808,7 @@ export function VerdictPageClient({
     if (lock && !hasPlanAccess(plan, lock.requiredPlan)) return false; // plan lock shown inline
     // Verdict lock: KILL locks plan+launch tools (except competitors), PIVOT locks plan+launch
     if (decision?.verdict === "KILL" && toolKey !== "customers" && toolKey !== "competitors") return true;
-    if (decision?.verdict === "PIVOT" && (toolKey === "simulate" || toolKey === "build" || toolKey === "landing" || toolKey === "launch-kit" || toolKey === "features")) return true;
+    if (decision?.verdict === "PIVOT" && (toolKey === "simulate" || toolKey === "build" || toolKey === "landing" || toolKey === "launch-kit" || toolKey === "features" || toolKey === "battlecard")) return true;
     return false;
   }
 
@@ -840,6 +859,7 @@ export function VerdictPageClient({
           landing:      "No point writing copy for an idea you won't launch.",
           "launch-kit": "No point building a launch kit for an idea you won't launch.",
           features:     "No point mapping features for an idea you won't build.",
+          battlecard:   "No point generating sales scripts for an idea you won't build.",
         },
         PIVOT: {
           customers:    "",
@@ -849,6 +869,7 @@ export function VerdictPageClient({
           landing:      "You'd be writing copy for an idea that needs to change.",
           "launch-kit": "Generate the launch kit after you lock the new direction and get a GO.",
           features:     "Feature matrix depends on what you're building. Lock the direction first.",
+          battlecard:   "Battlecard depends on what you're building. Lock the direction first.",
         },
       };
       const reason = reasons[verdict]?.[toolKey] ?? "";
@@ -880,6 +901,7 @@ export function VerdictPageClient({
       case "competitors": return <CompetitorsClient ideaId={idea.id} initialAnalysis={initialCompetitors} />;
       case "launch-kit":  return <LaunchKitClient   ideaId={idea.id} initialKit={initialLaunchKit} />;
       case "features":    return <FeaturesClient    ideaId={idea.id} initialFeatures={initialFeatures} isLocked={false} />;
+      case "battlecard":  return <BattlecardClient  ideaId={idea.id} initialBattlecard={initialBattlecard} />;
     }
   }
 

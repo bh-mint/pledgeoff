@@ -63,6 +63,7 @@ function makeLLMClient(queries = { devto: ['code review pull request automation'
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
+    generateBattlecard: vi.fn(),
   };
 }
 

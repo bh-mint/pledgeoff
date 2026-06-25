@@ -200,6 +200,24 @@ export interface LLMFeatureAnalysisResponse {
   readonly features: LLMFeatureRow[];
 }
 
+export interface LLMBattlecardRequest {
+  readonly ideaText: string;
+  readonly competitorNames: string[];
+  readonly traceId: string;
+}
+
+export interface LLMBattlecardEntry {
+  readonly competitorName: string;
+  readonly objection: string;
+  readonly response: string;
+  readonly ourAdvantages: string[];
+  readonly theirWeaknesses: string[];
+}
+
+export interface LLMBattlecardResponse {
+  readonly entries: LLMBattlecardEntry[];
+}
+
 export interface ILLMClient {
   generateSearchQueries(request: LLMSearchQueriesRequest): Promise<Result<LLMSearchQueriesResponse, LLMClientError>>;
   scoreSignalRelevance(request: LLMRelevanceRequest): Promise<Result<LLMRelevanceResponse, LLMClientError>>;
@@ -213,4 +231,5 @@ export interface ILLMClient {
   generateLaunchKit(request: LLMLaunchKitRequest): Promise<Result<LLMLaunchKitResponse, LLMClientError>>;
   generatePriorityExplanation(request: LLMPriorityExplanationRequest): Promise<Result<LLMPriorityExplanationResponse, LLMClientError>>;
   analyzeFeatures(request: LLMFeatureAnalysisRequest): Promise<Result<LLMFeatureAnalysisResponse, LLMClientError>>;
+  generateBattlecard(request: LLMBattlecardRequest): Promise<Result<LLMBattlecardResponse, LLMClientError>>;
 }

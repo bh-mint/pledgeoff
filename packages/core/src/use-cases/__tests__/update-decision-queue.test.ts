@@ -93,6 +93,7 @@ function makeDeps(opts: {
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn().mockResolvedValue(ok({ explanation: 'Competitor failed → opportunity rose' })),
     analyzeFeatures: vi.fn(),
+    generateBattlecard: vi.fn(),
   };
 
   return { ideaRepo, decisionRepo, queueRepo, llmClient };

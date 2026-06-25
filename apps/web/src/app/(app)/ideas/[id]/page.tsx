@@ -76,7 +76,7 @@ export default async function IdeaPage({ params }: Props) {
     if (!isSameTeam) notFound();
   }
 
-  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, featuresResult] = await Promise.all([
+  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, featuresResult, battlecardResult] = await Promise.all([
     container.decisionRepo.findByIdeaId(id),
     container.signalRepo.findByIdeaId(id),
     container.simulationRepo.findByIdeaId(id),
@@ -87,6 +87,7 @@ export default async function IdeaPage({ params }: Props) {
     container.launchKitRepo.findByIdeaId(id),
     container.decisionOutcomeRepo.findByIdea(id),
     container.featureAnalysisRepo.findByIdeaId(id),
+    container.battlecardRepo.findByIdeaId(id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -98,6 +99,7 @@ export default async function IdeaPage({ params }: Props) {
   const initialCompetitors = competitorsResult.isOk() ? competitorsResult.value : null;
   const initialLaunchKit = launchKitResult.isOk() ? launchKitResult.value : null;
   const initialFeatures = featuresResult.isOk() ? featuresResult.value : null;
+  const initialBattlecard = battlecardResult.isOk() ? battlecardResult.value : null;
   const existingOutcome = outcomeResult.isOk() ? outcomeResult.value : null;
 
   const now = new Date();
@@ -187,6 +189,7 @@ export default async function IdeaPage({ params }: Props) {
         initialCompetitors={initialCompetitors}
         initialLaunchKit={initialLaunchKit}
         initialFeatures={initialFeatures}
+        initialBattlecard={initialBattlecard}
         plan={plan}
         categoryAvg={categoryAvg}
         ideaTitle={title}

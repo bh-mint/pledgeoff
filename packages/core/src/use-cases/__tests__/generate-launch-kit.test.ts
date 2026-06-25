@@ -83,6 +83,7 @@ function makeLlmClient(response: LLMLaunchKitResponse = mockLlmResponse): ILLMCl
     generateLaunchKit: vi.fn().mockResolvedValue(ok(response)),
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
+    generateBattlecard: vi.fn(),
   };
 }
 
