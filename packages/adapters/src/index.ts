@@ -43,3 +43,5 @@ export { SupabaseApiRequestLogRepository } from './storage/supabase-api-request-
 export { SupabaseFeatureAnalysisRepository } from './storage/supabase-feature-analysis-repository';
 export { SupabaseBattlecardRepository } from './storage/supabase-battlecard-repository';
 export { SupabaseMarketLandscapeRepository } from './storage/supabase-market-landscape-repository';
+export { SupabaseInterviewGuideRepository } from './storage/supabase-interview-guide-repository';
+export { SupabaseTranscriptAnalysisRepository } from './storage/supabase-transcript-analysis-repository';

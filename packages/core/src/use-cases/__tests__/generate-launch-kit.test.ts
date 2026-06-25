@@ -84,7 +84,7 @@ function makeLlmClient(response: LLMLaunchKitResponse = mockLlmResponse): ILLMCl
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
     generateBattlecard: vi.fn(),
-    generateMarketLandscape: vi.fn(),
+    generateMarketLandscape: vi.fn(), generateInterviewGuide: vi.fn(), analyzeTranscript: vi.fn(),
   };
 }
 

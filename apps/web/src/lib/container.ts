@@ -22,6 +22,8 @@ import {
   SupabaseFeatureAnalysisRepository,
   SupabaseBattlecardRepository,
   SupabaseMarketLandscapeRepository,
+  SupabaseInterviewGuideRepository,
+  SupabaseTranscriptAnalysisRepository,
   SupabaseDecisionQueueRepository,
   SupabaseEngineeringSnapshotRepository,
   SupabaseDecisionOutcomeRepository,
@@ -87,6 +89,8 @@ import {
   AnalyzeFeaturesUseCase,
   GenerateBattlecardUseCase,
   GenerateMarketLandscapeUseCase,
+  GenerateInterviewGuideUseCase,
+  AnalyzeTranscriptUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -347,6 +351,34 @@ class AppContainer {
       this._llmClient,
       this.marketLandscapeRepo,
       this.signalRepo,
+    ));
+  }
+
+  private _interviewGuideRepo?: SupabaseInterviewGuideRepository;
+  get interviewGuideRepo(): SupabaseInterviewGuideRepository {
+    return (this._interviewGuideRepo ??= new SupabaseInterviewGuideRepository(this._supabase));
+  }
+
+  private _transcriptAnalysisRepo?: SupabaseTranscriptAnalysisRepository;
+  get transcriptAnalysisRepo(): SupabaseTranscriptAnalysisRepository {
+    return (this._transcriptAnalysisRepo ??= new SupabaseTranscriptAnalysisRepository(this._supabase));
+  }
+
+  private _generateInterviewGuideUseCase?: GenerateInterviewGuideUseCase;
+  get generateInterviewGuideUseCase(): GenerateInterviewGuideUseCase {
+    return (this._generateInterviewGuideUseCase ??= new GenerateInterviewGuideUseCase(
+      this._llmClient,
+      this.interviewGuideRepo,
+      this.customerAnalysisRepo,
+    ));
+  }
+
+  private _analyzeTranscriptUseCase?: AnalyzeTranscriptUseCase;
+  get analyzeTranscriptUseCase(): AnalyzeTranscriptUseCase {
+    return (this._analyzeTranscriptUseCase ??= new AnalyzeTranscriptUseCase(
+      this._llmClient,
+      this.transcriptAnalysisRepo,
+      this.interviewGuideRepo,
     ));
   }
 

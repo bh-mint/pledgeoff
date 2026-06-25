@@ -76,7 +76,7 @@ export default async function IdeaPage({ params }: Props) {
     if (!isSameTeam) notFound();
   }
 
-  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, featuresResult, battlecardResult, marketLandscapeResult] = await Promise.all([
+  const [decisionResult, signalsResult, simulateResult, landingResult, customersResult, buildResult, competitorsResult, launchKitResult, outcomeResult, featuresResult, battlecardResult, marketLandscapeResult, interviewGuideResult, transcriptResult] = await Promise.all([
     container.decisionRepo.findByIdeaId(id),
     container.signalRepo.findByIdeaId(id),
     container.simulationRepo.findByIdeaId(id),
@@ -89,6 +89,8 @@ export default async function IdeaPage({ params }: Props) {
     container.featureAnalysisRepo.findByIdeaId(id),
     container.battlecardRepo.findByIdeaId(id),
     container.marketLandscapeRepo.findByIdeaId(id),
+    container.interviewGuideRepo.findByIdeaId(id),
+    container.transcriptAnalysisRepo.findByIdeaId(id),
   ]);
 
   const decision = decisionResult.isOk() ? decisionResult.value : null;
@@ -102,6 +104,8 @@ export default async function IdeaPage({ params }: Props) {
   const initialFeatures = featuresResult.isOk() ? featuresResult.value : null;
   const initialBattlecard = battlecardResult.isOk() ? battlecardResult.value : null;
   const initialMarketLandscape = marketLandscapeResult.isOk() ? marketLandscapeResult.value : null;
+  const initialInterviewGuide = interviewGuideResult.isOk() ? interviewGuideResult.value : null;
+  const initialTranscript = transcriptResult.isOk() ? transcriptResult.value : null;
   const existingOutcome = outcomeResult.isOk() ? outcomeResult.value : null;
 
   const now = new Date();
@@ -193,6 +197,8 @@ export default async function IdeaPage({ params }: Props) {
         initialFeatures={initialFeatures}
         initialBattlecard={initialBattlecard}
         initialMarketLandscape={initialMarketLandscape}
+        initialInterviewGuide={initialInterviewGuide}
+        initialTranscript={initialTranscript}
         plan={plan}
         categoryAvg={categoryAvg}
         ideaTitle={title}

@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, LLMFeatureAnalysisRequest, LLMFeatureAnalysisResponse, LLMBattlecardRequest, LLMBattlecardResponse, LLMMarketLandscapeRequest, LLMMarketLandscapeResponse, IUsageLogger } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMOttoRequest, LLMOttoResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, LLMFeatureAnalysisRequest, LLMFeatureAnalysisResponse, LLMBattlecardRequest, LLMBattlecardResponse, LLMMarketLandscapeRequest, LLMMarketLandscapeResponse, LLMInterviewGuideRequest, LLMInterviewGuideResponse, LLMTranscriptRequest, LLMTranscriptResponse, IUsageLogger } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -17,6 +17,8 @@ import { buildLaunchKitPrompt, LAUNCH_KIT_PROMPT_VERSION } from './launch-kit-pr
 import { buildFeatureAnalysisPrompt } from './feature-analysis-prompt.v1';
 import { buildBattlecardPrompt } from './battlecard-prompt.v1';
 import { buildMarketLandscapePrompt } from './market-landscape-prompt.v1';
+import { buildInterviewGuidePrompt } from './interview-guide-prompt.v1';
+import { buildTranscriptPrompt } from './transcript-prompt.v1';
 
 const log = createLogger({ adapter: 'anthropic' });
 const tracer = getTracer('anthropic-llm-adapter');
@@ -556,6 +558,56 @@ export class AnthropicLLMAdapter implements ILLMClient {
       'You are a market intelligence analyst. Respond with valid JSON only.',
       LLMMarketLandscapeResponseSchema,
       'generateMarketLandscape',
+      request.traceId,
+      2048,
+    );
+  }
+
+  async generateInterviewGuide(request: LLMInterviewGuideRequest): Promise<Result<LLMInterviewGuideResponse, LLMClientError>> {
+    const QuestionSchema = z.object({
+      question: z.string().min(1).max(500),
+      purpose: z.string().min(1).max(300),
+      followUp: z.string().max(300).optional(),
+    });
+    const Schema = z.object({
+      targetSegment: z.string().min(1).max(300),
+      questions: z.array(QuestionSchema).min(1).max(15),
+      hypotheses: z.array(z.string().min(1).max(400)).min(1).max(10),
+      redFlags: z.array(z.string().min(1).max(400)).min(1).max(8),
+    });
+    const prompt = buildInterviewGuidePrompt(
+      withFounderContext(request.ideaText, request.founderContext),
+      request.icpSegments ?? [],
+    );
+    return this._callAnthropic(
+      prompt,
+      'You are an expert in customer development interviews. Respond with valid JSON only.',
+      Schema,
+      'generateInterviewGuide',
+      request.traceId,
+      2048,
+    );
+  }
+
+  async analyzeTranscript(request: LLMTranscriptRequest): Promise<Result<LLMTranscriptResponse, LLMClientError>> {
+    const QuoteSchema = z.object({
+      text: z.string().min(1).max(600),
+      sentiment: z.enum(['positive', 'negative', 'neutral']),
+      theme: z.string().min(1).max(150),
+    });
+    const Schema = z.object({
+      confirmedHypotheses: z.array(z.string().min(1).max(400)).max(10),
+      rejectedHypotheses: z.array(z.string().min(1).max(400)).max(10),
+      newInsights: z.array(z.string().min(1).max(400)).max(10),
+      quotes: z.array(QuoteSchema).max(15),
+      signalStrength: z.enum(['strong', 'moderate', 'weak']),
+    });
+    const prompt = buildTranscriptPrompt(request.ideaText, request.transcript, request.hypotheses);
+    return this._callAnthropic(
+      prompt,
+      'You are an expert qualitative researcher. Respond with valid JSON only.',
+      Schema,
+      'analyzeTranscript',
       request.traceId,
       2048,
     );

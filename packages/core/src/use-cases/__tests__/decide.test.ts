@@ -61,7 +61,7 @@ function makeLLMClient(response = llmResponse): ILLMClient {
     generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(),
     generateBattlecard: vi.fn(),
-    generateMarketLandscape: vi.fn(),
+    generateMarketLandscape: vi.fn(), generateInterviewGuide: vi.fn(), analyzeTranscript: vi.fn(),
   };
 }
 
@@ -118,7 +118,7 @@ describe('DecideUseCase', () => {
     const useCase = new DecideUseCase(
       makeSignalRepo(),
       makeDecisionRepo(),
-      { generateSearchQueries: vi.fn(), scoreSignalRelevance: vi.fn(), generateDecision: vi.fn().mockResolvedValue(err(llmError)), generateSimulation: vi.fn(), generateLanding: vi.fn(), analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(), chatWithOtto: vi.fn(), generateLaunchKit: vi.fn(), generatePriorityExplanation: vi.fn(), analyzeFeatures: vi.fn(), generateBattlecard: vi.fn(), generateMarketLandscape: vi.fn() },
+      { generateSearchQueries: vi.fn(), scoreSignalRelevance: vi.fn(), generateDecision: vi.fn().mockResolvedValue(err(llmError)), generateSimulation: vi.fn(), generateLanding: vi.fn(), analyzeCustomers: vi.fn(), analyzeBuild: vi.fn(), analyzeCompetitors: vi.fn(), chatWithOtto: vi.fn(), generateLaunchKit: vi.fn(), generatePriorityExplanation: vi.fn(), analyzeFeatures: vi.fn(), generateBattlecard: vi.fn(), generateMarketLandscape: vi.fn(), generateInterviewGuide: vi.fn(), analyzeTranscript: vi.fn() },
       makeEventBus(),
       makeIdempotencyStore(false),
     );

@@ -253,6 +253,47 @@ export interface LLMMarketLandscapeResponse {
   readonly uncoveredOpportunities: string[];
 }
 
+export interface LLMInterviewGuideRequest {
+  readonly ideaText: string;
+  readonly icpSegments?: string[];
+  readonly traceId: string;
+  readonly founderContext?: string;
+}
+
+export interface LLMInterviewQuestion {
+  readonly question: string;
+  readonly purpose: string;
+  readonly followUp?: string;
+}
+
+export interface LLMInterviewGuideResponse {
+  readonly targetSegment: string;
+  readonly questions: LLMInterviewQuestion[];
+  readonly hypotheses: string[];
+  readonly redFlags: string[];
+}
+
+export interface LLMTranscriptRequest {
+  readonly ideaText: string;
+  readonly transcript: string;
+  readonly hypotheses: string[];
+  readonly traceId: string;
+}
+
+export interface LLMTranscriptQuote {
+  readonly text: string;
+  readonly sentiment: 'positive' | 'negative' | 'neutral';
+  readonly theme: string;
+}
+
+export interface LLMTranscriptResponse {
+  readonly confirmedHypotheses: string[];
+  readonly rejectedHypotheses: string[];
+  readonly newInsights: string[];
+  readonly quotes: LLMTranscriptQuote[];
+  readonly signalStrength: 'strong' | 'moderate' | 'weak';
+}
+
 export interface ILLMClient {
   generateSearchQueries(request: LLMSearchQueriesRequest): Promise<Result<LLMSearchQueriesResponse, LLMClientError>>;
   scoreSignalRelevance(request: LLMRelevanceRequest): Promise<Result<LLMRelevanceResponse, LLMClientError>>;
@@ -268,4 +309,6 @@ export interface ILLMClient {
   analyzeFeatures(request: LLMFeatureAnalysisRequest): Promise<Result<LLMFeatureAnalysisResponse, LLMClientError>>;
   generateBattlecard(request: LLMBattlecardRequest): Promise<Result<LLMBattlecardResponse, LLMClientError>>;
   generateMarketLandscape(request: LLMMarketLandscapeRequest): Promise<Result<LLMMarketLandscapeResponse, LLMClientError>>;
+  generateInterviewGuide(request: LLMInterviewGuideRequest): Promise<Result<LLMInterviewGuideResponse, LLMClientError>>;
+  analyzeTranscript(request: LLMTranscriptRequest): Promise<Result<LLMTranscriptResponse, LLMClientError>>;
 }

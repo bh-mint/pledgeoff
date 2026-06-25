@@ -58,6 +58,8 @@ function makeLLM(response = llmResponse): ILLMClient {
     generateLaunchKit: vi.fn(), generatePriorityExplanation: vi.fn(),
     analyzeFeatures: vi.fn(), generateBattlecard: vi.fn(),
     generateMarketLandscape: vi.fn().mockResolvedValue(ok(response)),
+    generateInterviewGuide: vi.fn(),
+    analyzeTranscript: vi.fn(),
   };
 }
 
@@ -107,6 +109,8 @@ describe('GenerateMarketLandscapeUseCase', () => {
       generateLaunchKit: vi.fn(), generatePriorityExplanation: vi.fn(),
       analyzeFeatures: vi.fn(), generateBattlecard: vi.fn(),
       generateMarketLandscape: vi.fn().mockResolvedValue(err(llmError)),
+      generateInterviewGuide: vi.fn(),
+      analyzeTranscript: vi.fn(),
     };
     const useCase = new GenerateMarketLandscapeUseCase(llm, makeRepo(), makeSignalRepo());
 

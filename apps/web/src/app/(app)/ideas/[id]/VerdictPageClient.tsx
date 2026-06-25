@@ -12,6 +12,8 @@ import { LaunchKitClient } from "./launch-kit/LaunchKitClient";
 import { FeaturesClient } from "./features/FeaturesClient";
 import { BattlecardClient } from "./battlecard/BattlecardClient";
 import { MarketLandscapeClient } from "./market-landscape/MarketLandscapeClient";
+import { InterviewGuideClient } from "./interview-guide/InterviewGuideClient";
+import { TranscriptClient } from "./transcript/TranscriptClient";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 import type {
@@ -27,13 +29,15 @@ import type {
   FeatureAnalysis,
   Battlecard,
   MarketLandscape,
+  InterviewGuide,
+  TranscriptAnalysis,
   Dimension,
   DecisionOutcome,
   OutcomeType,
 } from "@pledgeoff/core";
 
 type Plan = "free" | "founder" | "team" | "studio" | "enterprise";
-type ToolKey = "customers" | "competitors" | "simulate" | "build" | "landing" | "launch-kit" | "features" | "battlecard" | "market-landscape";
+type ToolKey = "customers" | "competitors" | "simulate" | "build" | "landing" | "launch-kit" | "features" | "battlecard" | "market-landscape" | "interview-guide" | "transcript";
 
 interface Props {
   idea: Idea;
@@ -48,6 +52,8 @@ interface Props {
   initialFeatures: FeatureAnalysis | null;
   initialBattlecard: Battlecard | null;
   initialMarketLandscape: MarketLandscape | null;
+  initialInterviewGuide: InterviewGuide | null;
+  initialTranscript: TranscriptAnalysis | null;
   plan: Plan;
   categoryAvg?: number | null;
   ideaTitle: string;
@@ -68,7 +74,9 @@ const TOOL_META: Record<ToolKey, { stage: string; label: string; desc: string }>
   "launch-kit": { stage: "Launch",     label: "GTM Brief",             desc: "A/B headlines · email seq · pricing rec" },
   features:            { stage: "Intel", label: "Feature Analysis",   desc: "Feature-by-feature comparison vs. competitors" },
   battlecard:          { stage: "Intel", label: "Battlecard",          desc: "Objection handling · talking points per competitor" },
-  "market-landscape":  { stage: "Intel", label: "Market Landscape",    desc: "Segments · trends · uncovered opportunities" },
+  "market-landscape":  { stage: "Intel",     label: "Market Landscape",    desc: "Segments · trends · uncovered opportunities" },
+  "interview-guide":   { stage: "Validate",  label: "Interview Guide",     desc: "Structured customer questions · hypotheses · red flags" },
+  transcript:          { stage: "Validate",  label: "Transcript Analyzer", desc: "Validate hypotheses · key quotes · signal strength" },
 };
 
 const STAGES: { key: string; tools: ToolKey[] }[] = [
@@ -76,6 +84,7 @@ const STAGES: { key: string; tools: ToolKey[] }[] = [
   { key: "Plan",       tools: ["simulate", "build"] },
   { key: "Launch",     tools: ["landing", "launch-kit"] },
   { key: "Intel",      tools: ["features", "battlecard", "market-landscape"] },
+  { key: "Validate",   tools: ["interview-guide", "transcript"] },
 ];
 
 const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string } | null> = {
@@ -88,6 +97,8 @@ const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string }
   features:             { requiredPlan: "founder", requiredLabel: "Founder" },
   battlecard:           { requiredPlan: "team",    requiredLabel: "Team" },
   "market-landscape":   { requiredPlan: "founder", requiredLabel: "Founder" },
+  "interview-guide":    { requiredPlan: "founder", requiredLabel: "Founder" },
+  transcript:           { requiredPlan: "team",    requiredLabel: "Team" },
 };
 
 const PLAN_ORDER = ["free", "founder", "team", "studio", "enterprise"];
@@ -628,6 +639,8 @@ export function VerdictPageClient({
   initialFeatures,
   initialBattlecard,
   initialMarketLandscape,
+  initialInterviewGuide,
+  initialTranscript,
   plan,
   ideaTitle,
   ideaCategory,
@@ -682,6 +695,8 @@ export function VerdictPageClient({
     features:            !!initialFeatures,
     battlecard:          !!initialBattlecard,
     "market-landscape":  !!initialMarketLandscape,
+    "interview-guide":   !!initialInterviewGuide,
+    transcript:          !!initialTranscript,
   };
 
   const bySource = signals.reduce<Record<string, Signal[]>>((acc, s) => {
@@ -819,6 +834,31 @@ export function VerdictPageClient({
           </>
         );
       }
+      case "interview-guide": {
+        if (!initialInterviewGuide) return null;
+        return (
+          <>
+            <span className="ts-pill">{initialInterviewGuide.targetSegment}</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val">{initialInterviewGuide.questions.length} questions</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val">{initialInterviewGuide.hypotheses.length} hypotheses</span>
+          </>
+        );
+      }
+      case "transcript": {
+        if (!initialTranscript) return null;
+        const strengthCls = initialTranscript.signalStrength === "strong" ? "go" : initialTranscript.signalStrength === "moderate" ? "watch" : "kill";
+        return (
+          <>
+            <span className={`ts-val ${strengthCls}`}>{initialTranscript.signalStrength} signal</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val go">{initialTranscript.confirmedHypotheses.length} confirmed</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val kill">{initialTranscript.rejectedHypotheses.length} rejected</span>
+          </>
+        );
+      }
     }
   }
 
@@ -881,6 +921,8 @@ export function VerdictPageClient({
           features:            "No point mapping features for an idea you won't build.",
           battlecard:          "No point generating sales scripts for an idea you won't build.",
           "market-landscape":  "No point mapping the market for an idea you won't pursue.",
+          "interview-guide":   "No point preparing customer interviews for an idea you've killed.",
+          transcript:          "No point analyzing transcripts for an idea you won't build.",
         },
         PIVOT: {
           customers:           "",
@@ -892,6 +934,8 @@ export function VerdictPageClient({
           features:            "Feature matrix depends on what you're building. Lock the direction first.",
           battlecard:          "Battlecard depends on what you're building. Lock the direction first.",
           "market-landscape":  "Landscape the market after you lock the new direction.",
+          "interview-guide":   "",
+          transcript:          "",
         },
       };
       const reason = reasons[verdict]?.[toolKey] ?? "";
@@ -925,6 +969,8 @@ export function VerdictPageClient({
       case "features":           return <FeaturesClient          ideaId={idea.id} initialFeatures={initialFeatures} isLocked={false} />;
       case "battlecard":         return <BattlecardClient         ideaId={idea.id} initialBattlecard={initialBattlecard} />;
       case "market-landscape":   return <MarketLandscapeClient    ideaId={idea.id} initialLandscape={initialMarketLandscape} />;
+      case "interview-guide":    return <InterviewGuideClient     ideaId={idea.id} initialGuide={initialInterviewGuide} />;
+      case "transcript":         return <TranscriptClient          ideaId={idea.id} initialAnalysis={initialTranscript} />;
     }
   }
 
