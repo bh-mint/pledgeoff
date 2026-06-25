@@ -77,6 +77,7 @@ function makeRepos(subOverride?: Partial<Subscription>) {
     chatWithOtto: vi.fn().mockResolvedValue(ok({ reply: 'Build the auth module first.' })),
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn(),
+    analyzeFeatures: vi.fn(),
   };
 
   return { ottoRepo, subRepo, llm };

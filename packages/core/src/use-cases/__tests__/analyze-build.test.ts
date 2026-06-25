@@ -79,6 +79,7 @@ function makeLLMClient(response = llmBuildResponse): ILLMClient {
     chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn(),
+    analyzeFeatures: vi.fn(),
   };
 }
 

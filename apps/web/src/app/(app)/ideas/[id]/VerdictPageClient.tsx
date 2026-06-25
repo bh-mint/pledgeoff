@@ -9,6 +9,7 @@ import { CustomersClient } from "./customers/CustomersClient";
 import { BuildClient } from "./build/BuildClient";
 import { CompetitorsClient } from "./competitors/CompetitorsClient";
 import { LaunchKitClient } from "./launch-kit/LaunchKitClient";
+import { FeaturesClient } from "./features/FeaturesClient";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 import type {
@@ -21,13 +22,14 @@ import type {
   BuildAnalysis,
   CompetitorAnalysis,
   LaunchKit,
+  FeatureAnalysis,
   Dimension,
   DecisionOutcome,
   OutcomeType,
 } from "@pledgeoff/core";
 
 type Plan = "free" | "founder" | "team" | "studio" | "enterprise";
-type ToolKey = "customers" | "competitors" | "simulate" | "build" | "landing" | "launch-kit";
+type ToolKey = "customers" | "competitors" | "simulate" | "build" | "landing" | "launch-kit" | "features";
 
 interface Props {
   idea: Idea;
@@ -39,6 +41,7 @@ interface Props {
   initialBuild: BuildAnalysis | null;
   initialCompetitors: CompetitorAnalysis | null;
   initialLaunchKit: LaunchKit | null;
+  initialFeatures: FeatureAnalysis | null;
   plan: Plan;
   categoryAvg?: number | null;
   ideaTitle: string;
@@ -57,12 +60,14 @@ const TOOL_META: Record<ToolKey, { stage: string; label: string; desc: string }>
   build:        { stage: "Plan",       label: "Build Spec",            desc: "Tech stack · libraries · GitHub gaps" },
   landing:      { stage: "Launch",     label: "Page Brief",            desc: "Headline · features · CTA copy" },
   "launch-kit": { stage: "Launch",     label: "GTM Brief",             desc: "A/B headlines · email seq · pricing rec" },
+  features:     { stage: "Intel",      label: "Feature Analysis",      desc: "Feature-by-feature comparison vs. competitors" },
 };
 
 const STAGES: { key: string; tools: ToolKey[] }[] = [
   { key: "Understand", tools: ["customers", "competitors"] },
   { key: "Plan",       tools: ["simulate", "build"] },
   { key: "Launch",     tools: ["landing", "launch-kit"] },
+  { key: "Intel",      tools: ["features"] },
 ];
 
 const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string } | null> = {
@@ -72,6 +77,7 @@ const PLAN_LOCK: Record<ToolKey, { requiredPlan: string; requiredLabel: string }
   build:        { requiredPlan: "founder", requiredLabel: "Founder" },
   landing:      { requiredPlan: "founder", requiredLabel: "Founder" },
   "launch-kit": { requiredPlan: "team",    requiredLabel: "Team" },
+  features:     { requiredPlan: "founder", requiredLabel: "Founder" },
 };
 
 const PLAN_ORDER = ["free", "founder", "team", "studio", "enterprise"];
@@ -609,6 +615,7 @@ export function VerdictPageClient({
   initialBuild,
   initialCompetitors,
   initialLaunchKit,
+  initialFeatures,
   plan,
   ideaTitle,
   ideaCategory,
@@ -660,6 +667,7 @@ export function VerdictPageClient({
     build:        !!initialBuild,
     competitors:  !!initialCompetitors,
     "launch-kit": !!initialLaunchKit,
+    features:     !!initialFeatures,
   };
 
   const bySource = signals.reduce<Record<string, Signal[]>>((acc, s) => {
@@ -757,6 +765,21 @@ export function VerdictPageClient({
           </>
         );
       }
+      case "features": {
+        if (!initialFeatures) return null;
+        const yesCount = initialFeatures.features.filter((r) => r.idea === "yes").length;
+        const partialCount = initialFeatures.features.filter((r) => r.idea === "partial").length;
+        return (
+          <>
+            <span className="ts-val">{initialFeatures.features.length} features</span>
+            <span className="ts-sep">·</span>
+            <span className="ts-val go">{yesCount} covered</span>
+            {partialCount > 0 && <><span className="ts-sep">·</span><span className="ts-val watch">{partialCount} partial</span></>}
+            <span className="ts-sep">·</span>
+            <span className="ts-val">{initialFeatures.competitorNames.length} competitors</span>
+          </>
+        );
+      }
     }
   }
 
@@ -766,7 +789,7 @@ export function VerdictPageClient({
     if (lock && !hasPlanAccess(plan, lock.requiredPlan)) return false; // plan lock shown inline
     // Verdict lock: KILL locks plan+launch tools (except competitors), PIVOT locks plan+launch
     if (decision?.verdict === "KILL" && toolKey !== "customers" && toolKey !== "competitors") return true;
-    if (decision?.verdict === "PIVOT" && (toolKey === "simulate" || toolKey === "build" || toolKey === "landing" || toolKey === "launch-kit")) return true;
+    if (decision?.verdict === "PIVOT" && (toolKey === "simulate" || toolKey === "build" || toolKey === "landing" || toolKey === "launch-kit" || toolKey === "features")) return true;
     return false;
   }
 
@@ -816,6 +839,7 @@ export function VerdictPageClient({
           build:        "No point planning architecture for something that won't be built.",
           landing:      "No point writing copy for an idea you won't launch.",
           "launch-kit": "No point building a launch kit for an idea you won't launch.",
+          features:     "No point mapping features for an idea you won't build.",
         },
         PIVOT: {
           customers:    "",
@@ -824,6 +848,7 @@ export function VerdictPageClient({
           build:        "Your tech stack depends on what you're building. Lock the direction first.",
           landing:      "You'd be writing copy for an idea that needs to change.",
           "launch-kit": "Generate the launch kit after you lock the new direction and get a GO.",
+          features:     "Feature matrix depends on what you're building. Lock the direction first.",
         },
       };
       const reason = reasons[verdict]?.[toolKey] ?? "";
@@ -854,6 +879,7 @@ export function VerdictPageClient({
       case "build":       return <BuildClient       ideaId={idea.id} initialAnalysis={initialBuild} />;
       case "competitors": return <CompetitorsClient ideaId={idea.id} initialAnalysis={initialCompetitors} />;
       case "launch-kit":  return <LaunchKitClient   ideaId={idea.id} initialKit={initialLaunchKit} />;
+      case "features":    return <FeaturesClient    ideaId={idea.id} initialFeatures={initialFeatures} isLocked={false} />;
     }
   }
 

@@ -92,6 +92,7 @@ function makeDeps(opts: {
     chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn().mockResolvedValue(ok({ explanation: 'Competitor failed → opportunity rose' })),
+    analyzeFeatures: vi.fn(),
   };
 
   return { ideaRepo, decisionRepo, queueRepo, llmClient };

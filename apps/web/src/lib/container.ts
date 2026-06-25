@@ -19,6 +19,7 @@ import {
   SupabaseApiRequestLogRepository,
   SupabaseUsageLogAdapter,
   SupabaseLaunchKitRepository,
+  SupabaseFeatureAnalysisRepository,
   SupabaseDecisionQueueRepository,
   SupabaseEngineeringSnapshotRepository,
   SupabaseDecisionOutcomeRepository,
@@ -81,6 +82,7 @@ import {
   AddDomainAllowlistUseCase,
   RemoveDomainAllowlistUseCase,
   AutoJoinByDomainUseCase,
+  AnalyzeFeaturesUseCase,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -224,6 +226,11 @@ class AppContainer {
     return (this._webhookConfigRepo ??= new SupabaseWebhookConfigRepository(this._supabase));
   }
 
+  private _featureAnalysisRepo?: SupabaseFeatureAnalysisRepository;
+  get featureAnalysisRepo(): SupabaseFeatureAnalysisRepository {
+    return (this._featureAnalysisRepo ??= new SupabaseFeatureAnalysisRepository(this._supabase));
+  }
+
   // ── lazy use-cases ─────────────────────────────────────────────────────────
   private _createIdeaUseCase?: CreateIdeaUseCase;
   get createIdeaUseCase(): CreateIdeaUseCase {
@@ -301,6 +308,14 @@ class AppContainer {
       this.competitorAnalysisRepo,
       this.signalRepo,
       this._llmClient,
+    ));
+  }
+
+  private _analyzeFeaturesUseCase?: AnalyzeFeaturesUseCase;
+  get analyzeFeaturesUseCase(): AnalyzeFeaturesUseCase {
+    return (this._analyzeFeaturesUseCase ??= new AnalyzeFeaturesUseCase(
+      this._llmClient,
+      this.featureAnalysisRepo,
     ));
   }
 

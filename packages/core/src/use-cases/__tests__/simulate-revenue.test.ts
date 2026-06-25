@@ -60,6 +60,7 @@ function makeLLMClient(response = llmResponse): ILLMClient {
     chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn(),
+    analyzeFeatures: vi.fn(),
   };
 }
 
@@ -117,6 +118,7 @@ describe('SimulateRevenueUseCase', () => {
     chatWithOtto: vi.fn(),
     generateLaunchKit: vi.fn(),
     generatePriorityExplanation: vi.fn(),
+    analyzeFeatures: vi.fn(),
     };
     const useCase = new SimulateRevenueUseCase(makeSimulationRepo(), makeSignalRepo(), llm);
 

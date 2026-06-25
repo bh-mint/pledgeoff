@@ -183,6 +183,23 @@ export class LLMClientError extends Error {
   readonly code = 'LLM_CLIENT_ERROR' as const;
 }
 
+export interface LLMFeatureAnalysisRequest {
+  readonly ideaText: string;
+  readonly competitorNames: string[];
+  readonly traceId: string;
+}
+
+export interface LLMFeatureRow {
+  readonly feature: string;
+  readonly category?: string;
+  readonly competitors: Record<string, 'yes' | 'partial' | 'no'>;
+  readonly idea: 'yes' | 'partial' | 'no';
+}
+
+export interface LLMFeatureAnalysisResponse {
+  readonly features: LLMFeatureRow[];
+}
+
 export interface ILLMClient {
   generateSearchQueries(request: LLMSearchQueriesRequest): Promise<Result<LLMSearchQueriesResponse, LLMClientError>>;
   scoreSignalRelevance(request: LLMRelevanceRequest): Promise<Result<LLMRelevanceResponse, LLMClientError>>;
@@ -195,4 +212,5 @@ export interface ILLMClient {
   chatWithOtto(request: LLMOttoRequest): Promise<Result<LLMOttoResponse, LLMClientError>>;
   generateLaunchKit(request: LLMLaunchKitRequest): Promise<Result<LLMLaunchKitResponse, LLMClientError>>;
   generatePriorityExplanation(request: LLMPriorityExplanationRequest): Promise<Result<LLMPriorityExplanationResponse, LLMClientError>>;
+  analyzeFeatures(request: LLMFeatureAnalysisRequest): Promise<Result<LLMFeatureAnalysisResponse, LLMClientError>>;
 }

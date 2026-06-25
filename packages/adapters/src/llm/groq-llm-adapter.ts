@@ -1,7 +1,7 @@
 import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
-import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, IUsageLogger } from '@pledgeoff/core';
+import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, LLMFeatureAnalysisRequest, LLMFeatureAnalysisResponse, IUsageLogger } from '@pledgeoff/core';
 import { LLMClientError } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
@@ -13,6 +13,7 @@ import { buildSearchQueriesPrompt, SEARCH_QUERIES_PROMPT_VERSION } from './searc
 import { buildCompetitorPrompt, COMPETITOR_PROMPT_VERSION } from './competitor-prompt.v1';
 import { buildRelevancePrompt, RELEVANCE_PROMPT_VERSION } from './relevance-prompt.v1';
 import { buildLaunchKitPrompt, LAUNCH_KIT_PROMPT_VERSION } from './launch-kit-prompt.v1';
+import { buildFeatureAnalysisPrompt } from './feature-analysis-prompt.v1';
 
 const log = createLogger({ adapter: 'groq' });
 const tracer = getTracer('groq-llm-adapter');
@@ -446,6 +447,27 @@ export class GroqLLMAdapter implements ILLMClient {
   // Otto uses Anthropic Haiku — Groq adapter does not support chat
   async chatWithOtto(): Promise<Result<never, LLMClientError>> {
     return err(new LLMClientError('chatWithOtto is not supported by GroqLLMAdapter — use AnthropicLLMAdapter'));
+  }
+
+  async analyzeFeatures(request: LLMFeatureAnalysisRequest): Promise<Result<LLMFeatureAnalysisResponse, LLMClientError>> {
+    const FeatureCoverageSchema = z.enum(['yes', 'partial', 'no']);
+    const LLMFeatureAnalysisResponseSchema = z.object({
+      features: z.array(z.object({
+        feature: z.string().min(1).max(100),
+        category: z.string().min(1).max(60).optional(),
+        competitors: z.record(z.string(), FeatureCoverageSchema),
+        idea: FeatureCoverageSchema,
+      })).min(1).max(20),
+    });
+    const prompt = buildFeatureAnalysisPrompt(request.ideaText, request.competitorNames);
+    return this._callGroq(
+      prompt,
+      'You are a competitive analyst. Respond with valid JSON only.',
+      LLMFeatureAnalysisResponseSchema,
+      'analyzeFeatures',
+      request.traceId,
+      2048,
+    );
   }
 
   async generatePriorityExplanation(request: LLMPriorityExplanationRequest): Promise<Result<LLMPriorityExplanationResponse, LLMClientError>> {

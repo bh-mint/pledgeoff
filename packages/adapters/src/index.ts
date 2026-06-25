@@ -40,3 +40,4 @@ export { SupabaseDecisionOutcomeRepository } from './storage/supabase-decision-o
 export { SupabaseNotificationRepository } from './storage/supabase-notification-repository';
 export { SupabaseWebhookConfigRepository } from './storage/supabase-webhook-config-repository';
 export { SupabaseApiRequestLogRepository } from './storage/supabase-api-request-log-repository';
+export { SupabaseFeatureAnalysisRepository } from './storage/supabase-feature-analysis-repository';
