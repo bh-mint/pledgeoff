@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ApiKeySection } from "../ApiKeySection";
 import { WebhookConfigSection } from "@/components/WebhookConfigSection";
+import { getAuthToken } from "@/lib/auth-client";
 import type { ApiRequestSummary } from "@pledgeoff/core";
 
 const PERIODS = [
@@ -25,8 +26,11 @@ function UsageSection() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/v1/api-keys/usage?days=${days}`);
-        if (res.status === 403) { setUsageState({ status: "forbidden", data: null, error: null }); return; }
+        const token = (await getAuthToken()) ?? "";
+        const res = await fetch(`/api/v1/api-keys/usage?days=${days}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.status === 403 || res.status === 401) { setUsageState({ status: "forbidden", data: null, error: null }); return; }
         if (!res.ok) throw new Error("Failed to load usage");
         const json = await res.json() as { data: ApiRequestSummary };
         setUsageState({ status: "ok", data: json.data, error: null });
