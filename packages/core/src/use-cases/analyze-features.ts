@@ -9,6 +9,7 @@ export type AnalyzeFeaturesInput = {
   readonly ideaText: string;
   readonly competitorNames: string[];
   readonly traceId: string;
+  readonly founderContext?: string;
 };
 
 export type AnalyzeFeaturesError = LLMClientError | FeatureAnalysisRepositoryError;
@@ -24,6 +25,7 @@ export class AnalyzeFeaturesUseCase {
       ideaText: input.ideaText,
       competitorNames: input.competitorNames,
       traceId: input.traceId,
+      founderContext: input.founderContext,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 

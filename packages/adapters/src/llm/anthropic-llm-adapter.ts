@@ -21,6 +21,11 @@ import { buildMarketLandscapePrompt } from './market-landscape-prompt.v1';
 const log = createLogger({ adapter: 'anthropic' });
 const tracer = getTracer('anthropic-llm-adapter');
 
+function withFounderContext(ideaText: string, founderContext?: string): string {
+  if (!founderContext) return ideaText;
+  return `${ideaText}\n\n<founder_context>\n${founderContext}\n</founder_context>`;
+}
+
 const DimensionResponseSchema = z.object({
   name: z.string(),
   weight: z.number().min(0).max(1),
@@ -271,7 +276,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('anthropic.generate-simulation', async (span) => {
       span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callAnthropic(
-        buildSimulationPrompt(request.ideaText, request.verdict, request.signals),
+        buildSimulationPrompt(withFounderContext(request.ideaText, request.founderContext), request.verdict, request.signals),
         SIMULATION_SYSTEM_PROMPT,
         LLMSimulationResponseSchema,
         'generateSimulation',
@@ -292,7 +297,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('anthropic.generate-landing', async (span) => {
       span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callAnthropic(
-        buildLandingPrompt(request.ideaText, request.reasoning, request.signals),
+        buildLandingPrompt(withFounderContext(request.ideaText, request.founderContext), request.reasoning, request.signals),
         LANDING_SYSTEM_PROMPT,
         LLMLandingResponseSchema,
         'generateLanding',
@@ -315,7 +320,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
       if (request.limited) {
         const limitedSystemPrompt = `You are a customer intelligence analyst using prompt version ${CUSTOMER_LIMITED_PROMPT_VERSION}. Always respond with valid JSON only. No explanation, no markdown, no code fences — raw JSON object only.`;
         const limitedResult = await this._callAnthropic(
-          buildLimitedCustomerPrompt(request.ideaText),
+          buildLimitedCustomerPrompt(withFounderContext(request.ideaText, request.founderContext)),
           limitedSystemPrompt,
           LLMCustomerLimitedResponseSchema,
           'analyzeCustomers',
@@ -329,7 +334,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
       }
 
       const result = await this._callAnthropic(
-        buildCustomerPrompt(request.ideaText, request.signals),
+        buildCustomerPrompt(withFounderContext(request.ideaText, request.founderContext), request.signals),
         CUSTOMER_SYSTEM_PROMPT,
         LLMCustomerResponseSchema,
         'analyzeCustomers',
@@ -350,7 +355,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('anthropic.analyze-build', async (span) => {
       span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callAnthropic(
-        buildBuildPrompt(request.ideaText, request.signals),
+        buildBuildPrompt(withFounderContext(request.ideaText, request.founderContext), request.signals),
         BUILD_SYSTEM_PROMPT,
         LLMBuildResponseSchemaA,
         'analyzeBuild',
@@ -433,7 +438,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('anthropic.analyze-competitors', async (span) => {
       span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callAnthropic(
-        buildCompetitorPrompt(request.ideaText, request.signals),
+        buildCompetitorPrompt(withFounderContext(request.ideaText, request.founderContext), request.signals),
         COMPETITOR_SYSTEM_PROMPT,
         LLMCompetitorResponseSchemaA,
         'analyzeCompetitors',
@@ -454,7 +459,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('anthropic.generate-launch-kit', async (span) => {
       span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callAnthropic(
-        buildLaunchKitPrompt(request.ideaText, request.signals),
+        buildLaunchKitPrompt(withFounderContext(request.ideaText, request.founderContext), request.signals),
         LAUNCH_KIT_SYSTEM_PROMPT,
         LLMLaunchKitResponseSchema,
         'generateLaunchKit',
@@ -501,7 +506,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
         idea: FeatureCoverageSchema,
       })).min(1).max(20),
     });
-    const prompt = buildFeatureAnalysisPrompt(request.ideaText, request.competitorNames);
+    const prompt = buildFeatureAnalysisPrompt(withFounderContext(request.ideaText, request.founderContext), request.competitorNames);
     return this._callAnthropic(
       prompt,
       'You are a competitive analyst. Respond with valid JSON only.',
@@ -523,7 +528,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
     const LLMBattlecardResponseSchema = z.object({
       entries: z.array(EntrySchema).min(1).max(8),
     });
-    const prompt = buildBattlecardPrompt(request.ideaText, request.competitorNames);
+    const prompt = buildBattlecardPrompt(withFounderContext(request.ideaText, request.founderContext), request.competitorNames);
     return this._callAnthropic(
       prompt,
       'You are a competitive intelligence analyst. Respond with valid JSON only.',
@@ -545,7 +550,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
       trends: z.array(z.string().min(1).max(400)).min(1).max(6),
       uncoveredOpportunities: z.array(z.string().min(1).max(400)).min(1).max(5),
     });
-    const prompt = buildMarketLandscapePrompt(request.ideaText, request.signals);
+    const prompt = buildMarketLandscapePrompt(withFounderContext(request.ideaText, request.founderContext), request.signals);
     return this._callAnthropic(
       prompt,
       'You are a market intelligence analyst. Respond with valid JSON only.',

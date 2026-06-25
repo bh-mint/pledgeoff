@@ -12,6 +12,7 @@ export interface GenerateLandingInput {
   readonly reasoning: string;
   readonly userId: string;
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export type GenerateLandingError = LandingPageRepositoryError | LLMClientError;
@@ -39,6 +40,7 @@ export class GenerateLandingUseCase {
       reasoning: input.reasoning,
       signals,
       traceId: input.traceId,
+      founderContext: input.founderContext,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 

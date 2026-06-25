@@ -9,6 +9,7 @@ export interface AnalyzeCompetitorsInput {
   readonly ideaText: string;
   readonly userId: string;
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export type AnalyzeCompetitorsError = CompetitorAnalysisRepositoryError | SignalRepositoryError | LLMClientError;
@@ -34,6 +35,7 @@ export class AnalyzeCompetitorsUseCase {
       ideaText: input.ideaText,
       signals,
       traceId: input.traceId,
+      founderContext: input.founderContext,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 

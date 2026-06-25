@@ -16,6 +16,7 @@ export const IdeaSchema = z.object({
   teamId: z.string().uuid().nullable().optional(),
   text: z.string().min(10).max(2000),
   niche: z.enum(NICHES).default('other'),
+  context: z.string().max(3000).nullable().optional(),
   createdAt: z.string().datetime({ offset: true }),
 });
 
@@ -44,6 +45,7 @@ export function createIdea(input: {
   text: string;
   teamId?: string | null;
   niche?: Niche;
+  context?: string | null;
 }): Result<Idea, CreateIdeaError> {
   const trimmed = input.text.trim();
   if (trimmed.length < 10) return err(new IdeaTooShortError());
@@ -55,6 +57,7 @@ export function createIdea(input: {
     teamId: input.teamId ?? null,
     text: trimmed,
     niche: input.niche ?? 'other',
+    context: input.context?.trim() || null,
     createdAt: new Date().toISOString(),
   });
 }

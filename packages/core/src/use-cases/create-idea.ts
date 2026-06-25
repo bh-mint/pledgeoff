@@ -8,6 +8,7 @@ export interface CreateIdeaInput {
   readonly traceId: string;
   readonly teamId?: string | null;
   readonly niche?: Niche;
+  readonly context?: string | null;
 }
 
 export type CreateIdeaUseCaseError = CreateIdeaError | IdeaRepositoryError;
@@ -16,7 +17,7 @@ export class CreateIdeaUseCase {
   constructor(private readonly ideaRepo: IIdeaRepository) {}
 
   async execute(input: CreateIdeaInput): Promise<Result<Idea, CreateIdeaUseCaseError>> {
-    const ideaResult = createIdea({ userId: input.userId, text: input.text, teamId: input.teamId, niche: input.niche });
+    const ideaResult = createIdea({ userId: input.userId, text: input.text, teamId: input.teamId, niche: input.niche, context: input.context });
     if (ideaResult.isErr()) return err(ideaResult.error);
 
     const idea = ideaResult.value;

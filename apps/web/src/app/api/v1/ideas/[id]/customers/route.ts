@@ -70,6 +70,7 @@ async function postHandler(req: Request, { params }: { params: Promise<{ id: str
     userId,
     traceId,
     limited,
+    founderContext: ideaResult.value.context ?? undefined,
   });
 
   if (result.isErr()) {

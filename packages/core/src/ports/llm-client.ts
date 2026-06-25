@@ -32,6 +32,7 @@ export interface LLMSimulationRequest {
   readonly signals: Signal[];
   readonly verdict: Verdict;
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export interface LLMSimulationResponse {
@@ -47,6 +48,7 @@ export interface LLMLandingRequest {
   readonly reasoning: string;
   readonly signals?: Signal[];
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export interface LLMLandingResponse {
@@ -62,6 +64,7 @@ export interface LLMCustomerRequest {
   readonly signals: Signal[];
   readonly traceId: string;
   readonly limited?: boolean;
+  readonly founderContext?: string;
 }
 
 export interface LLMCustomerResponse {
@@ -75,6 +78,7 @@ export interface LLMBuildRequest {
   readonly ideaText: string;
   readonly signals: Signal[];
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export interface LLMBuildResponse {
@@ -86,6 +90,7 @@ export interface LLMCompetitorRequest {
   readonly ideaText: string;
   readonly signals: Signal[];
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export interface LLMCompetitorResponse {
@@ -118,6 +123,7 @@ export interface LLMLaunchKitRequest {
   readonly reasoning: string;
   readonly signals: Signal[];
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export interface LLMLaunchKitHeadline {
@@ -195,6 +201,7 @@ export interface LLMFeatureAnalysisRequest {
   readonly ideaText: string;
   readonly competitorNames: string[];
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export interface LLMFeatureRow {
@@ -212,6 +219,7 @@ export interface LLMBattlecardRequest {
   readonly ideaText: string;
   readonly competitorNames: string[];
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export interface LLMBattlecardEntry {
@@ -230,6 +238,7 @@ export interface LLMMarketLandscapeRequest {
   readonly ideaText: string;
   readonly signals: Signal[];
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export interface LLMMarketSegment {

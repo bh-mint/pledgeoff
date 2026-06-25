@@ -9,6 +9,7 @@ type IdeaRow = {
   team_id: string | null;
   text: string;
   niche: string;
+  context: string | null;
   created_at: string;
 };
 
@@ -19,6 +20,7 @@ function rowToIdea(row: IdeaRow): Idea {
     teamId: row.team_id ?? null,
     text: row.text,
     niche: row.niche ?? 'other',
+    context: row.context ?? null,
     createdAt: row.created_at,
   });
 }
@@ -35,6 +37,7 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
         team_id: idea.teamId ?? null,
         text: idea.text,
         niche: idea.niche ?? 'other',
+        context: idea.context ?? null,
         created_at: idea.createdAt,
       })
       .select()
@@ -58,6 +61,7 @@ export class SupabaseIdeaRepository implements IIdeaRepository {
       p_event_id:      event.eventId,
       p_event_type:    event.eventType,
       p_event_payload: event.payload,
+      p_context:       idea.context ?? null,
     });
     if (error) return err(new IdeaRepositoryError(error.message));
     return ok(idea);

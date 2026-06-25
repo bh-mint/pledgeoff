@@ -20,6 +20,11 @@ import { buildMarketLandscapePrompt } from './market-landscape-prompt.v1';
 const log = createLogger({ adapter: 'groq' });
 const tracer = getTracer('groq-llm-adapter');
 
+function withFounderContext(ideaText: string, founderContext?: string): string {
+  if (!founderContext) return ideaText;
+  return `${ideaText}\n\n<founder_context>\n${founderContext}\n</founder_context>`;
+}
+
 const DimensionResponseSchema = z.object({
   name: z.string(),
   weight: z.number().min(0).max(1),
@@ -253,7 +258,7 @@ export class GroqLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('groq.generate-simulation', async (span) => {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
-        buildSimulationPrompt(request.ideaText, request.verdict, request.signals),
+        buildSimulationPrompt(withFounderContext(request.ideaText, request.founderContext), request.verdict, request.signals),
         `You are a startup revenue simulation engine using prompt version ${SIMULATION_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMSimulationResponseSchema,
         'generateSimulation',
@@ -274,7 +279,7 @@ export class GroqLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('groq.generate-landing', async (span) => {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
-        buildLandingPrompt(request.ideaText, request.reasoning, request.signals),
+        buildLandingPrompt(withFounderContext(request.ideaText, request.founderContext), request.reasoning, request.signals),
         `You are a conversion copywriter using prompt version ${LANDING_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMLandingResponseSchema,
         'generateLanding',
@@ -296,7 +301,7 @@ export class GroqLLMAdapter implements ILLMClient {
 
       if (request.limited) {
         const limitedResult = await this._callGroq(
-          buildLimitedCustomerPrompt(request.ideaText),
+          buildLimitedCustomerPrompt(withFounderContext(request.ideaText, request.founderContext)),
           `You are a customer intelligence analyst using prompt version ${CUSTOMER_LIMITED_PROMPT_VERSION}. Always respond with valid JSON only.`,
           LLMCustomerLimitedResponseSchema,
           'analyzeCustomers',
@@ -310,7 +315,7 @@ export class GroqLLMAdapter implements ILLMClient {
       }
 
       const result = await this._callGroq(
-        buildCustomerPrompt(request.ideaText, request.signals),
+        buildCustomerPrompt(withFounderContext(request.ideaText, request.founderContext), request.signals),
         `You are a customer intelligence analyst using prompt version ${CUSTOMER_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMCustomerResponseSchema,
         'analyzeCustomers',
@@ -331,7 +336,7 @@ export class GroqLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('groq.analyze-build', async (span) => {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
-        buildBuildPrompt(request.ideaText, request.signals),
+        buildBuildPrompt(withFounderContext(request.ideaText, request.founderContext), request.signals),
         `You are a senior software architect using prompt version ${BUILD_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMBuildResponseSchema,
         'analyzeBuild',
@@ -352,7 +357,7 @@ export class GroqLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('groq.analyze-competitors', async (span) => {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
-        buildCompetitorPrompt(request.ideaText, request.signals),
+        buildCompetitorPrompt(withFounderContext(request.ideaText, request.founderContext), request.signals),
         `You are a competitive intelligence analyst using prompt version ${COMPETITOR_PROMPT_VERSION}. Always respond with valid JSON only. No markdown, no explanation, no code fences — raw JSON object only.`,
         LLMCompetitorResponseSchema,
         'analyzeCompetitors',
@@ -373,7 +378,7 @@ export class GroqLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('groq.generate-launch-kit', async (span) => {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
-        buildLaunchKitPrompt(request.ideaText, request.signals),
+        buildLaunchKitPrompt(withFounderContext(request.ideaText, request.founderContext), request.signals),
         `You are a B2B SaaS go-to-market strategist using prompt version ${LAUNCH_KIT_PROMPT_VERSION}. Always respond with valid JSON only. No markdown, no explanation, no code fences — raw JSON object only.`,
         LLMLaunchKitResponseSchemaG,
         'generateLaunchKit',
@@ -471,7 +476,7 @@ export class GroqLLMAdapter implements ILLMClient {
         idea: FeatureCoverageSchema,
       })).min(1).max(20),
     });
-    const prompt = buildFeatureAnalysisPrompt(request.ideaText, request.competitorNames);
+    const prompt = buildFeatureAnalysisPrompt(withFounderContext(request.ideaText, request.founderContext), request.competitorNames);
     return this._callGroq(
       prompt,
       'You are a competitive analyst. Respond with valid JSON only.',
@@ -493,7 +498,7 @@ export class GroqLLMAdapter implements ILLMClient {
     const LLMBattlecardResponseSchema = z.object({
       entries: z.array(EntrySchema).min(1).max(8),
     });
-    const prompt = buildBattlecardPrompt(request.ideaText, request.competitorNames);
+    const prompt = buildBattlecardPrompt(withFounderContext(request.ideaText, request.founderContext), request.competitorNames);
     return this._callGroq(
       prompt,
       'You are a competitive intelligence analyst. Respond with valid JSON only.',
@@ -515,7 +520,7 @@ export class GroqLLMAdapter implements ILLMClient {
       trends: z.array(z.string().min(1).max(400)).min(1).max(6),
       uncoveredOpportunities: z.array(z.string().min(1).max(400)).min(1).max(5),
     });
-    const prompt = buildMarketLandscapePrompt(request.ideaText, request.signals);
+    const prompt = buildMarketLandscapePrompt(withFounderContext(request.ideaText, request.founderContext), request.signals);
     return this._callGroq(
       prompt,
       'You are a market intelligence analyst. Respond with valid JSON only.',

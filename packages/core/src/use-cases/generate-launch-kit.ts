@@ -46,6 +46,7 @@ export class GenerateLaunchKitUseCase {
       reasoning: '',
       signals: signalsResult.value,
       traceId: input.traceId,
+      founderContext: ideaResult.value.context ?? undefined,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 

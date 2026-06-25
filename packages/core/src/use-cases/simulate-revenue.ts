@@ -11,6 +11,7 @@ export interface SimulateRevenueInput {
   readonly verdict: Verdict;
   readonly userId: string;
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export type SimulateRevenueError =
@@ -39,6 +40,7 @@ export class SimulateRevenueUseCase {
       signals: signalsResult.value,
       verdict: input.verdict,
       traceId: input.traceId,
+      founderContext: input.founderContext,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 

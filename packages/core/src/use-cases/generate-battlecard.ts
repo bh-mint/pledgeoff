@@ -9,6 +9,7 @@ export type GenerateBattlecardInput = {
   readonly ideaText: string;
   readonly competitorNames: string[];
   readonly traceId: string;
+  readonly founderContext?: string;
 };
 
 export type GenerateBattlecardError = LLMClientError | BattlecardRepositoryError;
@@ -24,6 +25,7 @@ export class GenerateBattlecardUseCase {
       ideaText: input.ideaText,
       competitorNames: input.competitorNames,
       traceId: input.traceId,
+      founderContext: input.founderContext,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 

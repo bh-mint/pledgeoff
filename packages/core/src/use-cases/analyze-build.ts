@@ -13,6 +13,7 @@ export interface AnalyzeBuildInput {
   readonly ideaText: string;
   readonly userId: string;
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export type AnalyzeBuildError = BuildAnalysisRepositoryError | SignalRepositoryError | LLMClientError;
@@ -40,6 +41,7 @@ export class AnalyzeBuildUseCase {
       ideaText: input.ideaText,
       signals,
       traceId: input.traceId,
+      founderContext: input.founderContext,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 

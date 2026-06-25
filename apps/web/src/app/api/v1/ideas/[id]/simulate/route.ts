@@ -85,6 +85,7 @@ async function postHandler(req: Request, { params }: { params: Promise<{ id: str
     verdict: decision.verdict,
     userId,
     traceId,
+    founderContext: ideaResult.value.context ?? undefined,
   });
 
   if (result.isErr()) {

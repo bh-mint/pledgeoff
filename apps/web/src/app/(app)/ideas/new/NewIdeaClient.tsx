@@ -100,6 +100,8 @@ export function NewIdeaClient({
   const [text, setText] = useState("");
   const [cat, setCat] = useState<CatKey | null>(null);
   const [context, setContext] = useState<"personal" | "team">("personal");
+  const [founderContext, setFounderContext] = useState("");
+  const [showContext, setShowContext] = useState(false);
   const [showTextErr, setShowTextErr] = useState(false);
   const [showCatErr, setShowCatErr] = useState(false);
   const [submitErr, setSubmitErr] = useState("");
@@ -175,10 +177,12 @@ export function NewIdeaClient({
     if (!token) { router.push("/login"); return; }
 
     const catLabel = CATEGORIES.find((c) => c.key === cat)?.label ?? "";
-    const body: { text: string; teamId?: string } = {
+    const body: { text: string; teamId?: string; context?: string } = {
       text: `${text.trim()}\n\nCategory: ${catLabel}`,
     };
     if (context === "team" && teamId) body.teamId = teamId;
+    const trimmedCtx = founderContext.trim();
+    if (trimmedCtx) body.context = trimmedCtx;
 
     const res = await fetch("/api/v1/ideas", {
       method: "POST",
@@ -215,7 +219,7 @@ export function NewIdeaClient({
     setIsDoneVisible(false);
     setScreen("analysis");
     setSubmitting(false);
-  }, [text, cat, context, teamId, submitting, validationsLeft, router]);
+  }, [text, cat, context, founderContext, teamId, submitting, validationsLeft, router]);
 
   // Analysis animation
   useEffect(() => {
@@ -552,6 +556,53 @@ export function NewIdeaClient({
           </div>
           {showCatErr && (
             <div className="ni-err">Select a category to continue</div>
+          )}
+        </div>
+
+        {/* Founder context — collapsible */}
+        <div className="ni-field">
+          <button
+            type="button"
+            onClick={() => setShowContext((v) => !v)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              fontFamily: "var(--font-chivo-mono), monospace",
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: founderContext.trim() ? "var(--ink)" : "var(--dim)",
+            }}
+          >
+            <span style={{ fontSize: 11, lineHeight: 1 }}>{showContext ? "▾" : "▸"}</span>
+            Add context (optional)
+            {!showContext && founderContext.trim() && (
+              <span style={{ color: "var(--go)", fontWeight: 700 }}>· Added</span>
+            )}
+          </button>
+          {showContext && (
+            <div style={{ marginTop: "12px" }}>
+              <div className="bc" style={{ background: "var(--surface)" }}>
+                <div className="bc-hd">
+                  Founder context · Injected into all AI tools
+                  <span className="r">{founderContext.length} / 3000</span>
+                </div>
+                <textarea
+                  className="ni-ta"
+                  rows={5}
+                  maxLength={3000}
+                  placeholder="Share what you know: customer conversations, lost deals, competitive feedback, pricing signals, failed experiments… The AI will use this alongside public signals."
+                  value={founderContext}
+                  onChange={(e) => setFounderContext(e.target.value)}
+                />
+              </div>
+            </div>
           )}
         </div>
 

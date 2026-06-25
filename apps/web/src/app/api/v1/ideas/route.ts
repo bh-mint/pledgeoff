@@ -126,6 +126,7 @@ async function postHandler(req: Request) {
   }
 
   const niche = classifyNiche(parsed.data.text);
+  const context = parsed.data.context?.trim() || null;
 
   // Auto-resolve teamId: if client didn't send one, inherit from the user's team
   let teamId = parsed.data.teamId ?? null;
@@ -144,6 +145,7 @@ async function postHandler(req: Request) {
     text: parsed.data.text,
     teamId,
     niche,
+    context,
     traceId,
   });
 

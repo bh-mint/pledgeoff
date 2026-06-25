@@ -11,6 +11,7 @@ interface Input {
   readonly userId: string;
   readonly ideaText: string;
   readonly traceId: string;
+  readonly founderContext?: string;
 }
 
 export class GenerateMarketLandscapeUseCase {
@@ -33,6 +34,7 @@ export class GenerateMarketLandscapeUseCase {
       ideaText: input.ideaText,
       signals,
       traceId: input.traceId,
+      founderContext: input.founderContext,
     });
     if (llmResult.isErr()) return err(llmResult.error);
 
