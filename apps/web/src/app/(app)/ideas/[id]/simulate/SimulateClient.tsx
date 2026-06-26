@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Simulation } from "@pledgeoff/core";
 import { getAuthToken } from "@/lib/auth-client";
 import { InfoTooltip } from "@/components/InfoTooltip";
+import { RevenueAreaChart } from "../VerdictCharts";
 
 interface Props {
   ideaId: string;
@@ -122,6 +123,17 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
         <p className="mono text-[11px] mt-2" style={{ color: "var(--t3)" }}>
           Estimated serviceable market for this category
         </p>
+      </div>
+
+      {/* Revenue projection chart */}
+      <div
+        className="rounded-md border p-5 no-print"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        <div className="mono text-[10px] mb-3 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+          Revenue Projection · 3 scenarios · 24 months
+        </div>
+        <RevenueAreaChart simulation={simulation} />
       </div>
 
       {/* Scenarios */}
