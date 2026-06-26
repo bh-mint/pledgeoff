@@ -1298,6 +1298,11 @@ select.finp { cursor: pointer; }
 .vrd-dc-flag.go { color: var(--go); } .vrd-dc-flag.watch { color: var(--pivot); } .vrd-dc-flag.kill { color: var(--kill); }
 .vrd-dc-note { font-size: 11px; color: var(--dim); line-height: 1.55; font-style: italic; }
 
+/* Verdict charts */
+.vrd-chart-wrap { margin-top: 20px; border: 1px solid var(--line); }
+.vrd-chart-body { padding: 4px 0 8px; background: var(--surface); }
+@media print { .no-print { display: none !important; } }
+
 /* Tools section */
 .vrd-tools { margin-top: 36px; }
 .vrd-stage { margin-bottom: 18px; }

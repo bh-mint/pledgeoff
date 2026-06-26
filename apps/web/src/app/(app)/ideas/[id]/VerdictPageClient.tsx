@@ -14,6 +14,7 @@ import { BattlecardClient } from "./battlecard/BattlecardClient";
 import { MarketLandscapeClient } from "./market-landscape/MarketLandscapeClient";
 import { InterviewGuideClient } from "./interview-guide/InterviewGuideClient";
 import { TranscriptClient } from "./transcript/TranscriptClient";
+import { DimensionRadarChart } from "./VerdictCharts";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 import type {
@@ -1171,6 +1172,9 @@ export function VerdictPageClient({
 
           {/* Dimensions */}
           {hasFullDims && <DimsGrid dimensions={dims} />}
+          {hasFullDims && (
+            <DimensionRadarChart dimensions={dims} verdict={decision.verdict} />
+          )}
 
           {/* Feedback */}
           <div style={{ marginTop: 28 }}>
