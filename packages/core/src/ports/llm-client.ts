@@ -8,9 +8,10 @@ import type { Competitor, CompetitorGap } from '../domain/competitor-analysis';
 
 export interface CalibrationExample {
   readonly ideaText: string;
-  readonly verdict: 'GO' | 'KILL';
-  readonly outcome: 'built_worked' | 'not_built';
+  readonly verdict: 'GO' | 'KILL' | 'PIVOT';
+  readonly outcome: 'built_worked' | 'not_built' | 'built_failed';
   readonly reasoning: string;
+  readonly lostToCompetitor?: string;
 }
 
 export interface LLMDecisionRequest {

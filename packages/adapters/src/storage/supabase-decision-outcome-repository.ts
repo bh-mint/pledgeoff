@@ -88,19 +88,29 @@ export class SupabaseDecisionOutcomeRepository implements IDecisionOutcomeReposi
   }
 
   async findCalibrationExamples(limit: number): Promise<Result<CalibrationExample[], DecisionOutcomeRepositoryError>> {
-    const { data: outcomeRows, error: outcomeErr } = await this.client
+    // Fetch more than limit to allow JS filtering: standard outcomes + built_failed with competitor
+    const { data: allRows, error: outcomeErr } = await this.client
       .from('decision_outcomes')
-      .select('idea_id, outcome_type, verdict_at_time')
-      .in('outcome_type', ['built_worked', 'not_built'])
-      .in('verdict_at_time', ['GO', 'KILL'])
+      .select('idea_id, outcome_type, verdict_at_time, lost_to_competitor')
+      .in('outcome_type', ['built_worked', 'not_built', 'built_failed'])
       .order('reported_at', { ascending: false })
-      .limit(limit)
-      .returns<{ idea_id: string; outcome_type: string; verdict_at_time: string }[]>();
+      .limit(limit * 4)
+      .returns<{ idea_id: string; outcome_type: string; verdict_at_time: string; lost_to_competitor: string | null }[]>();
 
     if (outcomeErr) return err(new DecisionOutcomeRepositoryError(outcomeErr.message));
-    if (!outcomeRows || outcomeRows.length === 0) return ok([]);
+    if (!allRows || allRows.length === 0) return ok([]);
 
-    const ideaIds = outcomeRows.map((r) => r.idea_id);
+    // Keep: standard calibration rows (correct verdict) OR built_failed with named competitor
+    const validRows = allRows.filter(
+      (r) =>
+        ((r.outcome_type === 'built_worked' || r.outcome_type === 'not_built') &&
+          (r.verdict_at_time === 'GO' || r.verdict_at_time === 'KILL')) ||
+        (r.outcome_type === 'built_failed' && r.lost_to_competitor !== null),
+    ).slice(0, limit);
+
+    if (validRows.length === 0) return ok([]);
+
+    const ideaIds = validRows.map((r) => r.idea_id);
 
     const [ideasResult, decisionsResult] = await Promise.all([
       this.client
@@ -126,15 +136,16 @@ export class SupabaseDecisionOutcomeRepository implements IDecisionOutcomeReposi
     }
 
     const examples: CalibrationExample[] = [];
-    for (const row of outcomeRows) {
+    for (const row of validRows) {
       const ideaText = ideaMap.get(row.idea_id);
       const reasoning = decisionMap.get(row.idea_id);
       if (!ideaText || !reasoning) continue;
       examples.push({
         ideaText,
-        verdict: row.verdict_at_time as 'GO' | 'KILL',
-        outcome: row.outcome_type as 'built_worked' | 'not_built',
+        verdict: row.verdict_at_time as 'GO' | 'KILL' | 'PIVOT',
+        outcome: row.outcome_type as 'built_worked' | 'not_built' | 'built_failed',
         reasoning,
+        ...(row.lost_to_competitor ? { lostToCompetitor: row.lost_to_competitor } : {}),
       });
     }
 

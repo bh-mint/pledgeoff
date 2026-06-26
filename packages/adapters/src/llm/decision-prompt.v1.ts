@@ -2,13 +2,21 @@ import type { Signal, CalibrationExample } from '@pledgeoff/core';
 
 export const PROMPT_VERSION = 'decisionPrompt.v1' as const;
 
+function outcomeLabel(ex: CalibrationExample): string {
+  if (ex.outcome === 'built_worked') return 'Built — succeeded';
+  if (ex.outcome === 'built_failed') return `Built — failed${ex.lostToCompetitor ? ` (lost to ${ex.lostToCompetitor})` : ''}`;
+  return 'Not built';
+}
+
 function buildCalibrationSection(examples: CalibrationExample[]): string {
   if (examples.length === 0) return '';
   const formatted = examples
-    .map(
-      (ex, i) =>
-        `Example ${i + 1}:\nIdea: ${ex.ideaText.slice(0, 300)}\nVerdict: ${ex.verdict}\nOutcome: ${ex.outcome === 'built_worked' ? 'Built — succeeded' : 'Not built'}\nReasoning: ${ex.reasoning.slice(0, 400)}`,
-    )
+    .map((ex, i) => {
+      const lossLine = ex.lostToCompetitor
+        ? `\nLoss pattern: When ${ex.lostToCompetitor} is present in the space, ideas with this approach tend to fail.`
+        : '';
+      return `Example ${i + 1}:\nIdea: ${ex.ideaText.slice(0, 300)}\nVerdict: ${ex.verdict}\nOutcome: ${outcomeLabel(ex)}${lossLine}\nReasoning: ${ex.reasoning.slice(0, 400)}`;
+    })
     .join('\n\n');
   return `\nCALIBRATION EXAMPLES (real past decisions and their outcomes — use to calibrate your verdict):\n${formatted}\n`;
 }

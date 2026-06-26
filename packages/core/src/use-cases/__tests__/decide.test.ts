@@ -268,4 +268,38 @@ describe('DecideUseCase', () => {
       expect.objectContaining({ calibrationExamples: examples }),
     );
   });
+
+  it('injects loss pattern example with lostToCompetitor when outcomeRepo returns built_failed outcome', async () => {
+    const examples: CalibrationExample[] = [
+      {
+        ideaText: 'AI coding tool for startups',
+        verdict: 'GO',
+        outcome: 'built_failed',
+        reasoning: 'Signals were positive but market too competitive.',
+        lostToCompetitor: 'GitHub Copilot',
+      },
+    ];
+    const llm = makeLLMClient();
+    const outcomeRepo = makeOutcomeRepo(examples);
+    const useCase = new DecideUseCase(
+      makeSignalRepo(),
+      makeDecisionRepo(),
+      llm,
+      makeEventBus(),
+      makeIdempotencyStore(false),
+      undefined,
+      outcomeRepo,
+    );
+
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isOk()).toBe(true);
+    expect(llm.generateDecision).toHaveBeenCalledWith(
+      expect.objectContaining({
+        calibrationExamples: expect.arrayContaining([
+          expect.objectContaining({ lostToCompetitor: 'GitHub Copilot', outcome: 'built_failed' }),
+        ]),
+      }),
+    );
+  });
 });
