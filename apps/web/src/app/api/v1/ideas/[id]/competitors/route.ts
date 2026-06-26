@@ -6,6 +6,9 @@ import { checkAiRateLimit } from '@/lib/rate-limiter';
 import { checkPlanToolGate } from '@/server/billing/checkPlanToolGate';
 import { isTeamMember } from '@/lib/team-access';
 import { withApiKeyLogging } from '@/lib/with-api-key-logging';
+import { createSupabaseServiceClient } from '@/lib/supabase-server';
+import { getTeamSlackWebhook } from '@/server/slack/getTeamSlackWebhook';
+import { notifySlack } from '@pledgeoff/adapters';
 
 async function getHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -88,6 +91,11 @@ async function postHandler(req: Request, { params }: { params: Promise<{ id: str
     resourceId: ideaId,
     metadata: { tool: 'competitors' },
     traceId,
+  });
+
+  const ideaText = ideaResult.value.text;
+  void getTeamSlackWebhook(userId, createSupabaseServiceClient()).then((webhookUrl) => {
+    if (webhookUrl) void notifySlack({ webhookUrl, ideaId, ideaText, tool: 'competitors', traceId });
   });
 
   return Response.json({ data: result.value }, { status: 201, headers: { 'X-Trace-Id': traceId } });

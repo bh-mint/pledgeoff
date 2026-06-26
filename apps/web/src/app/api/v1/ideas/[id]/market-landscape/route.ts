@@ -5,6 +5,9 @@ import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { checkAiRateLimit } from '@/lib/rate-limiter';
 import { checkPlanToolGate } from '@/server/billing/checkPlanToolGate';
 import { withApiKeyLogging } from '@/lib/with-api-key-logging';
+import { createSupabaseServiceClient } from '@/lib/supabase-server';
+import { getTeamSlackWebhook } from '@/server/slack/getTeamSlackWebhook';
+import { notifySlack } from '@pledgeoff/adapters';
 
 async function getHandler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -68,6 +71,11 @@ async function postHandler(req: Request, { params }: { params: Promise<{ id: str
   if (result.isErr()) {
     return Response.json({ error: { code: 'INTERNAL' } }, { status: 500, headers: { 'X-Trace-Id': traceId } });
   }
+
+  const ideaText = ideaResult.value.text;
+  void getTeamSlackWebhook(userId, createSupabaseServiceClient()).then((webhookUrl) => {
+    if (webhookUrl) void notifySlack({ webhookUrl, ideaId, ideaText, tool: 'market-landscape', traceId });
+  });
 
   return Response.json({ data: result.value }, { status: 200, headers: { 'X-Trace-Id': traceId } });
 }

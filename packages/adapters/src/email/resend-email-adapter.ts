@@ -527,3 +527,101 @@ export async function sendQueueAlertEmail(
     log.error({ traceId, target: 'resend', operation: 'sendQueueAlertEmail', latencyMs: Date.now() - start, outcome: 'error' }, `Resend fetch failed: ${message}`);
   }
 }
+
+export type WeeklyDigestIdea = {
+  id: string;
+  text: string;
+  verdict?: 'GO' | 'KILL' | 'PIVOT';
+  score?: number;
+  toolsRun: string[];
+};
+
+export type WeeklyDigestEmailParams = {
+  to: string;
+  name?: string;
+  ideas: WeeklyDigestIdea[];
+  weekStart: string;
+  traceId: string;
+};
+
+const VERDICT_COLOR: Record<string, string> = {
+  GO: '#7dd66b',
+  KILL: '#e55b3c',
+  PIVOT: '#e8b341',
+};
+
+export async function sendWeeklyDigestEmail(
+  apiKey: string,
+  params: WeeklyDigestEmailParams,
+): Promise<void> {
+  const { to, name, ideas, weekStart, traceId } = params;
+  const displayName = name?.split(' ')[0] ?? 'there';
+  const weekLabel = new Date(weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  const ideasHtml = ideas.map((idea) => {
+    const title = idea.text.split('\n\n')[0]?.slice(0, 80) ?? idea.text.slice(0, 80);
+    const verdictChip = idea.verdict
+      ? `<span style="font-family:monospace;font-size:10px;font-weight:700;color:${VERDICT_COLOR[idea.verdict] ?? '#aaa'};margin-left:8px;">${idea.verdict}${idea.score !== undefined ? ` · ${idea.score}` : ''}</span>`
+      : '';
+    const tools = idea.toolsRun.length > 0
+      ? `<p style="margin:4px 0 0;font-family:monospace;font-size:10px;color:#555;">${idea.toolsRun.join(' · ')}</p>`
+      : '';
+    const url = `https://pledgeoff.com/ideas/${idea.id}`;
+    return `
+      <tr>
+        <td style="padding:12px 0;border-bottom:1px solid #1e1e1e;">
+          <a href="${url}" style="text-decoration:none;">
+            <span style="font-size:13px;color:#f0f0f0;font-weight:500;">${title}</span>${verdictChip}
+          </a>
+          ${tools}
+        </td>
+      </tr>`;
+  }).join('');
+
+  const html = EMAIL_SHELL(`
+    <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">WEEKLY DIGEST · ${weekLabel}</p>
+    <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+      Hey ${displayName}, here's your week in PledgeOFF.
+    </h1>
+    ${ideas.length === 0
+      ? '<p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">No ideas validated this week. New week, new opportunity.</p>'
+      : `<p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+          You worked on <strong style="color:#f5f5f5;">${ideas.length} idea${ideas.length === 1 ? '' : 's'}</strong> this week.
+        </p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+          ${ideasHtml}
+        </table>`
+    }
+    <a href="https://pledgeoff.com/dashboard" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+      Open dashboard →
+    </a>
+    <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+    <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">
+      — PledgeOFF Team &nbsp;·&nbsp;
+      <a href="https://pledgeoff.com/settings/notifications" style="color:#444;">Unsubscribe</a>
+    </p>
+  `);
+
+  const start = Date.now();
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'PledgeOFF <hello@pledgeoff.com>',
+        to: [to],
+        subject: `Your PledgeOFF week: ${ideas.length} idea${ideas.length === 1 ? '' : 's'}`,
+        html,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      log.warn({ traceId, target: 'resend', operation: 'sendWeeklyDigestEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${res.status}` }, `Resend error: ${body}`);
+      return;
+    }
+    log.info({ traceId, target: 'resend', operation: 'sendWeeklyDigestEmail', latencyMs: Date.now() - start, outcome: 'success' }, 'Weekly digest email sent');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown';
+    log.error({ traceId, target: 'resend', operation: 'sendWeeklyDigestEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'FETCH_ERROR' }, `Resend fetch failed: ${message}`);
+  }
+}

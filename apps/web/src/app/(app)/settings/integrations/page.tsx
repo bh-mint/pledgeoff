@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-server";
+import { getUserPlan } from "@/server/billing/getUserPlan";
 import { IntegrationsClient } from "./IntegrationsClient";
 
 export const dynamic = "force-dynamic";
@@ -17,10 +18,12 @@ export default async function IntegrationsPage({
   const user = await requireUser();
   const params = await searchParams;
   const loginProvider = (user.app_metadata?.provider as string | undefined) ?? "email";
+  const plan = await getUserPlan(user.id);
   return (
     <IntegrationsClient
       githubParam={params.github ?? null}
       loginProvider={loginProvider}
+      plan={plan}
     />
   );
 }
