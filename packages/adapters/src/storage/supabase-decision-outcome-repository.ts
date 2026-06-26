@@ -10,6 +10,7 @@ type DecisionOutcomeRow = {
   verdict_at_time: string;
   outcome_type: string;
   notes: string | null;
+  lost_to_competitor: string | null;
   reported_at: string;
 };
 
@@ -21,6 +22,7 @@ function rowToOutcome(row: DecisionOutcomeRow): DecisionOutcome {
     verdictAtTime: row.verdict_at_time,
     outcomeType: row.outcome_type as DecisionOutcome['outcomeType'],
     notes: row.notes,
+    lostToCompetitor: row.lost_to_competitor,
     reportedAt: row.reported_at,
   };
 }
@@ -39,6 +41,7 @@ export class SupabaseDecisionOutcomeRepository implements IDecisionOutcomeReposi
           verdict_at_time: outcome.verdictAtTime,
           outcome_type: outcome.outcomeType,
           notes: outcome.notes,
+          lost_to_competitor: outcome.lostToCompetitor ?? null,
           reported_at: outcome.reportedAt,
         },
         { onConflict: 'idea_id,user_id' },

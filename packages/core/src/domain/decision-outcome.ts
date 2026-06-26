@@ -11,6 +11,7 @@ export const DecisionOutcomeSchema = z.object({
   verdictAtTime: z.string(),
   outcomeType: OutcomeTypeSchema,
   notes: z.string().max(1000).nullable(),
+  lostToCompetitor: z.string().max(100).nullable().optional(),
   reportedAt: z.string().datetime({ offset: true }),
 });
 
@@ -36,6 +37,7 @@ export function createDecisionOutcome(input: {
   verdictAtTime: string;
   outcomeType: OutcomeType;
   notes?: string | null;
+  lostToCompetitor?: string | null;
 }): Result<DecisionOutcome, never> {
   return ok({
     id: crypto.randomUUID(),
@@ -44,6 +46,7 @@ export function createDecisionOutcome(input: {
     verdictAtTime: input.verdictAtTime,
     outcomeType: input.outcomeType,
     notes: input.notes ?? null,
+    lostToCompetitor: input.lostToCompetitor ?? null,
     reportedAt: new Date().toISOString(),
   });
 }

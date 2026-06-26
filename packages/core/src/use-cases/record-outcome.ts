@@ -14,6 +14,7 @@ export interface RecordOutcomeInput {
   readonly userId: string;
   readonly outcomeType: OutcomeType;
   readonly notes?: string | null;
+  readonly lostToCompetitor?: string | null;
   readonly traceId: string;
 }
 
@@ -50,6 +51,7 @@ export class RecordOutcomeUseCase {
       verdictAtTime: latestDecision.verdict,
       outcomeType: input.outcomeType,
       notes: input.notes,
+      lostToCompetitor: input.outcomeType === 'built_failed' ? (input.lostToCompetitor ?? null) : null,
     });
 
     if (outcomeResult.isErr()) return err(outcomeResult.error);

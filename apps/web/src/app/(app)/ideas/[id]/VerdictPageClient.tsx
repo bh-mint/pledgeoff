@@ -555,40 +555,64 @@ const OUTCOME_OPTIONS: Array<{ type: OutcomeType; label: string; icon: string }>
   { type: "not_built",    label: "Decided not to build",     icon: "⏸" },
 ];
 
-function OutcomeSection({ ideaId, initialOutcome }: { ideaId: string; initialOutcome: OutcomeType | null }) {
-  const [current, setCurrent]   = useState<OutcomeType | null>(initialOutcome);
-  const [saving,  setSaving]    = useState(false);
-  const [error,   setError]     = useState(false);
-  const [editing, setEditing]   = useState(false);
+function OutcomeSection({
+  ideaId,
+  initialOutcome,
+  initialLostTo,
+  competitorNames,
+}: {
+  ideaId: string;
+  initialOutcome: OutcomeType | null;
+  initialLostTo: string | null;
+  competitorNames: string[];
+}) {
+  const [current, setCurrent]         = useState<OutcomeType | null>(initialOutcome);
+  const [lostTo, setLostTo]           = useState<string>(initialLostTo ?? "");
+  const [pendingFailure, setPending]  = useState(false);
+  const [saving, setSaving]           = useState(false);
+  const [error, setError]             = useState(false);
+  const [editing, setEditing]         = useState(false);
 
   const showOptions = !current || editing;
   const active = OUTCOME_OPTIONS.find((o) => o.type === current);
 
-  async function report(type: OutcomeType) {
+  async function submit(type: OutcomeType, competitor: string) {
     const prev = current;
-    setCurrent(type);   // optimistic update
+    setCurrent(type);
     setSaving(true);
     setError(false);
     setEditing(false);
+    setPending(false);
     try {
       const token = await getAuthToken();
+      const body: Record<string, unknown> = { outcomeType: type };
+      if (type === "built_failed" && competitor) body.lostToCompetitor = competitor;
       const res = await fetch(`/api/v1/ideas/${ideaId}/outcome`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ outcomeType: type }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
-        setCurrent(prev);   // revert on error
+        setCurrent(prev);
         setError(true);
       }
     } catch {
-      setCurrent(prev);     // revert on network failure
+      setCurrent(prev);
       setError(true);
     } finally {
       setSaving(false);
+    }
+  }
+
+  function handleOptionClick(type: OutcomeType) {
+    if (type === "built_failed" && competitorNames.length > 0) {
+      setPending(true);
+      setCurrent(type);
+    } else {
+      void submit(type, "");
     }
   }
 
@@ -596,8 +620,8 @@ function OutcomeSection({ ideaId, initialOutcome }: { ideaId: string; initialOut
     <div className="out-section">
       <div className="out-hd">
         <span className="out-eye">OUTCOME · CLOSE THE LOOP</span>
-        {current && !editing && (
-          <button className="out-edit" onClick={() => setEditing(true)}>Edit →</button>
+        {current && !editing && !pendingFailure && (
+          <button className="out-edit" onClick={() => { setEditing(true); setPending(false); }}>Edit →</button>
         )}
       </div>
 
@@ -609,7 +633,7 @@ function OutcomeSection({ ideaId, initialOutcome }: { ideaId: string; initialOut
               <button
                 key={opt.type}
                 className={`out-opt${current === opt.type ? " selected" : ""}`}
-                onClick={() => report(opt.type)}
+                onClick={() => handleOptionClick(opt.type)}
                 disabled={saving}
               >
                 <span className="out-opt-icon">{opt.icon}</span>
@@ -617,14 +641,42 @@ function OutcomeSection({ ideaId, initialOutcome }: { ideaId: string; initialOut
               </button>
             ))}
           </div>
+          {pendingFailure && (
+            <div className="out-loser">
+              <label className="out-loser-lbl" htmlFor="out-loser-sel">Which competitor did you lose to?</label>
+              <div className="out-loser-row">
+                <select
+                  id="out-loser-sel"
+                  className="finp out-loser-sel"
+                  value={lostTo}
+                  onChange={(e) => setLostTo(e.target.value)}
+                >
+                  <option value="">— Not sure / Unknown</option>
+                  {competitorNames.map((name) => (
+                    <option key={name} value={name}>{name}</option>
+                  ))}
+                </select>
+                <button
+                  className="btn-p out-loser-save"
+                  onClick={() => void submit("built_failed", lostTo)}
+                  disabled={saving}
+                >
+                  {saving ? "Saving…" : "Save"}
+                </button>
+              </div>
+            </div>
+          )}
           {error && <p className="out-err">Failed to save. Try again.</p>}
-          {saving && <span className="out-saving">Saving…</span>}
+          {saving && !pendingFailure && <span className="out-saving">Saving…</span>}
         </>
       ) : (
         <div className="out-done">
           <span className="out-done-icon">{active?.icon}</span>
           <div>
             <div className="out-done-lbl">{active?.label}</div>
+            {current === "built_failed" && lostTo && (
+              <div className="out-done-loser">Lost to: <strong>{lostTo}</strong></div>
+            )}
             <div className="out-done-sub">Reported · helps calibrate future verdicts</div>
           </div>
         </div>
@@ -1216,6 +1268,8 @@ export function VerdictPageClient({
             <OutcomeSection
               ideaId={idea.id}
               initialOutcome={existingOutcome?.outcomeType ?? null}
+              initialLostTo={existingOutcome?.lostToCompetitor ?? null}
+              competitorNames={initialCompetitors?.competitors.map((c) => c.name) ?? []}
             />
           )}
 

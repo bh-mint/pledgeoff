@@ -6,6 +6,7 @@ import { InvalidVerdictError } from '@pledgeoff/core';
 const RecordOutcomeBodySchema = z.object({
   outcomeType: z.enum(['built_worked', 'built_failed', 'not_built']),
   notes: z.string().max(1000).nullable().optional(),
+  lostToCompetitor: z.string().max(100).nullable().optional(),
 });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -31,6 +32,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     userId,
     outcomeType: parsed.data.outcomeType,
     notes: parsed.data.notes ?? null,
+    lostToCompetitor: parsed.data.lostToCompetitor ?? null,
     traceId,
   });
 

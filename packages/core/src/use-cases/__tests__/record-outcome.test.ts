@@ -29,6 +29,7 @@ const makeOutcome = (overrides: Partial<DecisionOutcome> = {}): DecisionOutcome 
   verdictAtTime: 'GO',
   outcomeType: 'built_worked',
   notes: null,
+  lostToCompetitor: null,
   reportedAt: new Date().toISOString(),
   ...overrides,
 });
@@ -126,5 +127,29 @@ describe('RecordOutcomeUseCase', () => {
 
     const upsertCall = vi.mocked(outcomeRepo.upsert).mock.calls[0]![0];
     expect(upsertCall.notes).toBe('Got 100 signups');
+  });
+
+  it('saves lostToCompetitor when outcomeType is built_failed', async () => {
+    const { outcomeRepo, decisionRepo } = makeDeps({
+      decisions: [makeDecision({ verdict: 'GO' })],
+      saved: makeOutcome({ outcomeType: 'built_failed', lostToCompetitor: 'Acme Corp' }),
+    });
+    const uc = new RecordOutcomeUseCase(outcomeRepo, decisionRepo);
+
+    await uc.execute({ ...BASE_INPUT, outcomeType: 'built_failed', lostToCompetitor: 'Acme Corp' });
+
+    const upsertCall = vi.mocked(outcomeRepo.upsert).mock.calls[0]![0];
+    expect(upsertCall.outcomeType).toBe('built_failed');
+    expect(upsertCall.lostToCompetitor).toBe('Acme Corp');
+  });
+
+  it('clears lostToCompetitor when outcomeType is not built_failed', async () => {
+    const { outcomeRepo, decisionRepo } = makeDeps();
+    const uc = new RecordOutcomeUseCase(outcomeRepo, decisionRepo);
+
+    await uc.execute({ ...BASE_INPUT, outcomeType: 'built_worked', lostToCompetitor: 'Acme Corp' });
+
+    const upsertCall = vi.mocked(outcomeRepo.upsert).mock.calls[0]![0];
+    expect(upsertCall.lostToCompetitor).toBeNull();
   });
 });

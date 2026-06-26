@@ -3154,6 +3154,12 @@ select.adm-search-inp { cursor: pointer; }
 .out-done-sub { font-family: var(--font-chivo-mono), monospace; font-size: 9.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
 .out-err { font-size: 12px; color: var(--kill); margin-top: 10px; }
 .out-saving { font-family: var(--font-chivo-mono), monospace; font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); display: block; margin-top: 10px; }
+.out-loser { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.out-loser-lbl { display: block; font-size: 12px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+.out-loser-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.out-loser-sel { flex: 1; min-width: 180px; }
+.out-loser-save { white-space: nowrap; }
+.out-done-loser { font-size: 12px; color: var(--faint); margin-top: 3px; }
 @media (max-width: 640px) {
   .out-opts { flex-direction: column; }
   .out-opt { width: 100%; }
