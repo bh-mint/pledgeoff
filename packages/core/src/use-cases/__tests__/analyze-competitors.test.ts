@@ -164,4 +164,36 @@ describe('AnalyzeCompetitorsUseCase', () => {
     if (!result.isErr()) return;
     expect(result.error).toBeInstanceOf(CompetitorAnalysisRepositoryError);
   });
+
+  it('re-runs LLM when forceRerun=true even if analysis exists', async () => {
+    const existing: CompetitorAnalysis = {
+      id: crypto.randomUUID(), ideaId, userId,
+      competitors: llmResponse.competitors, gaps: llmResponse.gaps, signalCount: 1,
+      createdAt: new Date().toISOString(),
+    };
+    const repo = makeRepo(existing);
+    const llm = makeLLM();
+    const useCase = new AnalyzeCompetitorsUseCase(repo, makeSignalRepo(), llm);
+
+    const result = await useCase.execute({ ideaId, ideaText: 'idea', userId, traceId: 'trace-6', forceRerun: true });
+
+    expect(result.isOk()).toBe(true);
+    expect(llm.analyzeCompetitors).toHaveBeenCalledOnce();
+    expect(repo.save).toHaveBeenCalledOnce();
+  });
+
+  it('saves snapshot before re-running when snapshotRepo is provided', async () => {
+    const existing: CompetitorAnalysis = {
+      id: crypto.randomUUID(), ideaId, userId,
+      competitors: llmResponse.competitors, gaps: llmResponse.gaps, signalCount: 1,
+      createdAt: new Date().toISOString(),
+    };
+    const repo = makeRepo(existing);
+    const snapshotRepo = { save: vi.fn().mockResolvedValue(ok(undefined)), findLatestByIdeaId: vi.fn().mockResolvedValue(ok(null)) };
+    const useCase = new AnalyzeCompetitorsUseCase(repo, makeSignalRepo(), makeLLM(), snapshotRepo);
+
+    await useCase.execute({ ideaId, ideaText: 'idea', userId, traceId: 'trace-7', forceRerun: true });
+
+    expect(snapshotRepo.save).toHaveBeenCalledWith(ideaId, existing);
+  });
 });

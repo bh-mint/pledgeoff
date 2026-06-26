@@ -45,3 +45,5 @@ export { SupabaseBattlecardRepository } from './storage/supabase-battlecard-repo
 export { SupabaseMarketLandscapeRepository } from './storage/supabase-market-landscape-repository';
 export { SupabaseInterviewGuideRepository } from './storage/supabase-interview-guide-repository';
 export { SupabaseTranscriptAnalysisRepository } from './storage/supabase-transcript-analysis-repository';
+export { SupabaseCompetitorSnapshotRepository } from './storage/supabase-competitor-snapshot-repository';
+export { SupabaseLandscapeSnapshotRepository } from './storage/supabase-landscape-snapshot-repository';

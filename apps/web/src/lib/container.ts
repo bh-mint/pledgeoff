@@ -24,6 +24,8 @@ import {
   SupabaseMarketLandscapeRepository,
   SupabaseInterviewGuideRepository,
   SupabaseTranscriptAnalysisRepository,
+  SupabaseCompetitorSnapshotRepository,
+  SupabaseLandscapeSnapshotRepository,
   SupabaseDecisionQueueRepository,
   SupabaseEngineeringSnapshotRepository,
   SupabaseDecisionOutcomeRepository,
@@ -320,12 +322,24 @@ class AppContainer {
     ));
   }
 
+  private _competitorSnapshotRepo?: SupabaseCompetitorSnapshotRepository;
+  get competitorSnapshotRepo(): SupabaseCompetitorSnapshotRepository {
+    return (this._competitorSnapshotRepo ??= new SupabaseCompetitorSnapshotRepository(this._supabase));
+  }
+
+  private _landscapeSnapshotRepo?: SupabaseLandscapeSnapshotRepository;
+  get landscapeSnapshotRepo(): SupabaseLandscapeSnapshotRepository {
+    return (this._landscapeSnapshotRepo ??= new SupabaseLandscapeSnapshotRepository(this._supabase));
+  }
+
   private _analyzeCompetitorsUseCase?: AnalyzeCompetitorsUseCase;
   get analyzeCompetitorsUseCase(): AnalyzeCompetitorsUseCase {
     return (this._analyzeCompetitorsUseCase ??= new AnalyzeCompetitorsUseCase(
       this.competitorAnalysisRepo,
       this.signalRepo,
       this._llmClient,
+      this.competitorSnapshotRepo,
+      this._eventBus,
     ));
   }
 
@@ -351,6 +365,8 @@ class AppContainer {
       this._llmClient,
       this.marketLandscapeRepo,
       this.signalRepo,
+      this.landscapeSnapshotRepo,
+      this._eventBus,
     ));
   }
 

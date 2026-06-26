@@ -110,3 +110,5 @@ export * from './use-cases/register-webhook';
 export * from './use-cases/add-domain-allowlist';
 export * from './use-cases/remove-domain-allowlist';
 export * from './use-cases/auto-join-by-domain';
+export * from './domain/snapshot-diff';
+export * from './ports/snapshot-repository';

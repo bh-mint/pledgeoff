@@ -86,6 +86,21 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
 
   return (
     <div className="space-y-10" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
+      {/* Re-check bar */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 4 }}>
+        <span className="mono text-[10px]" style={{ color: "var(--dim)" }}>
+          Last checked {new Date(analysis.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+        </span>
+        <button
+          className="btn-g"
+          style={{ fontSize: 11, padding: "3px 10px", opacity: loading ? 0.5 : 1 }}
+          onClick={() => run(true)}
+          disabled={loading}
+        >
+          {loading ? "Refreshing…" : "Re-check market →"}
+        </button>
+      </div>
+
       {/* Competitors list */}
       <section>
         <p className="mono text-[10px] uppercase tracking-[0.12em] mb-2" style={{ color: "var(--t3)" }}>

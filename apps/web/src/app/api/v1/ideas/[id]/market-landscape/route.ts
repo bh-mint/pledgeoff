@@ -62,6 +62,7 @@ async function postHandler(req: Request, { params }: { params: Promise<{ id: str
     ideaText: ideaResult.value.text,
     traceId,
     founderContext: ideaResult.value.context ?? undefined,
+    forceRerun: true,
   });
 
   if (result.isErr()) {
