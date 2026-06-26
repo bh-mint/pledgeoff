@@ -5,6 +5,7 @@ import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { getDashboardData } from "@/server/dashboard/getDashboardData";
+import { getWinLossData, type WinLossRow } from "@/server/analytics/getWinLossData";
 import { DashboardClient, type TableRow, type TeamFeedRow } from "./DashboardClient";
 import { getSignalFeedData } from "@/server/signal-feed/getSignalFeedData";
 import { getTeamActivity, type TeamActivityEvent } from "@/server/team/getTeamActivity";
@@ -82,11 +83,13 @@ export default async function DashboardPage() {
     );
   }
 
-  // Phase 3 — ideas + signal feed (parallel)
-  const [{ ideas: rawIdeas, outcomes: rawOutcomes }, signalFeedData] =
+  // Phase 3 — ideas + signal feed + win-loss (parallel)
+  const isFounderPlus = plan !== 'free';
+  const [{ ideas: rawIdeas, outcomes: rawOutcomes }, signalFeedData, winLossRows] =
     await Promise.all([
       getDashboardData(allMemberIds),
       getSignalFeedData(plan),
+      isFounderPlus ? getWinLossData(user.id) : Promise.resolve([] as WinLossRow[]),
     ]);
 
   // Phase 4 — team activity
@@ -202,6 +205,14 @@ export default async function DashboardPage() {
       (r.outcomeType === "built_worked" || r.outcomeType === "built_failed")
   ).length;
 
+  // Win rate: built_worked / all own outcomes (min 3 to show)
+  const ownIdeaIds = new Set(ownIdeas.map((r) => r.id));
+  const ownOutcomes = rawOutcomes.filter((o) => ownIdeaIds.has(o.ideaId));
+  const winRate =
+    ownOutcomes.length >= 3
+      ? Math.round((ownOutcomes.filter((o) => o.outcomeType === "built_worked").length / ownOutcomes.length) * 100)
+      : null;
+
   const isEmpty = rawIdeas.length === 0;
 
   // ── Empty state ──
@@ -290,6 +301,8 @@ export default async function DashboardPage() {
       usedThisMonth={thisMonth}
       monthLimit={monthLimitDisplay}
       builtCount={builtCount}
+      winRate={winRate}
+      winLossRows={winLossRows}
       signalFeedData={signalFeedData}
     />
   );

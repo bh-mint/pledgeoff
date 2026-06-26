@@ -10,6 +10,7 @@ import { SignalFeed } from "@/components/SignalFeed";
 import type { Plan } from "@pledgeoff/core";
 import type { TeamActivityEvent } from "@/server/team/getTeamActivity";
 import type { SignalFeedNiche } from "@/app/api/v1/signal-feed/route";
+import type { WinLossRow } from "@/server/analytics/getWinLossData";
 
 export type ToolStatus = {
   simulate: boolean;
@@ -104,6 +105,8 @@ interface DashboardClientProps {
   usedThisMonth: number;
   monthLimit: number | null;
   builtCount: number;
+  winRate: number | null;
+  winLossRows: WinLossRow[];
   signalFeedData: { data: SignalFeedNiche[]; locked: boolean };
 }
 
@@ -120,6 +123,8 @@ export function DashboardClient({
   usedThisMonth,
   monthLimit,
   builtCount,
+  winRate,
+  winLossRows,
   signalFeedData,
 }: DashboardClientProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -569,7 +574,7 @@ export function DashboardClient({
           </div>
 
           {/* Ledger strip */}
-          <div className="db-ledger">
+          <div className="db-ledger db-ledger-5">
             <div className="db-led-cell">
               <span className="db-led-k">Ideas validated</span>
               <div className="db-led-v">{ownCount}</div>
@@ -590,7 +595,41 @@ export function DashboardClient({
               <div className="db-led-v">{builtCount}</div>
               <div className="db-led-sub">Outcome reported</div>
             </div>
+            <div className="db-led-cell">
+              <span className="db-led-k">Win rate</span>
+              <div className={`db-led-v${winRate !== null && winRate >= 50 ? " go" : ""}`}>
+                {winRate !== null ? <>{winRate}<em>%</em></> : "—"}
+              </div>
+              <div className="db-led-sub">{winRate !== null ? "Built & worked" : "Min 3 outcomes"}</div>
+            </div>
           </div>
+
+          {/* Win/Loss by competitor */}
+          {winLossRows.length > 0 && (
+            <div className="db-wl">
+              <div className="db-wl-hd">Win / Loss by competitor</div>
+              <table className="db-wl-tbl">
+                <thead>
+                  <tr>
+                    <th className="db-wl-th">Competitor</th>
+                    <th className="db-wl-th db-wl-num">Won against</th>
+                    <th className="db-wl-th db-wl-num">Lost to</th>
+                    <th className="db-wl-th db-wl-num">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {winLossRows.map((row) => (
+                    <tr key={row.competitor} className="db-wl-row">
+                      <td className="db-wl-td db-wl-name">{row.competitor}</td>
+                      <td className="db-wl-td db-wl-num db-wl-win">{row.wins > 0 ? `+${row.wins}` : "—"}</td>
+                      <td className="db-wl-td db-wl-num db-wl-loss">{row.losses > 0 ? `-${row.losses}` : "—"}</td>
+                      <td className="db-wl-td db-wl-num">{row.wins + row.losses}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Intelligence Notes */}
           {intelNotes.length > 0 && (
