@@ -14,7 +14,7 @@ import { BattlecardClient } from "./battlecard/BattlecardClient";
 import { MarketLandscapeClient } from "./market-landscape/MarketLandscapeClient";
 import { InterviewGuideClient } from "./interview-guide/InterviewGuideClient";
 import { TranscriptClient } from "./transcript/TranscriptClient";
-import { DimensionRadarChart } from "./VerdictCharts";
+import { DimensionRadarChart, ScoreWaterfallChart } from "./VerdictCharts";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 import type {
@@ -1169,6 +1169,11 @@ export function VerdictPageClient({
               confidence={decision.confidence}
             />
           </div>
+
+          {/* Score Waterfall — always visible when dimensions exist */}
+          {dims.length > 0 && (
+            <ScoreWaterfallChart dimensions={dims} score={decision.score ?? 0} />
+          )}
 
           {/* Dimensions */}
           {hasFullDims && <DimsGrid dimensions={dims} />}

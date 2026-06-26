@@ -8,6 +8,8 @@ import {
   Radar,
   AreaChart,
   Area,
+  BarChart,
+  Bar,
   ScatterChart,
   Scatter,
   ZAxis,
@@ -298,6 +300,161 @@ type CompetitorPoint = {
   priceStr: string;
   positioning: string;
 };
+
+// ── Score Waterfall Chart ─────────────────────────────────────────────────────
+
+type WfEntry = {
+  name: string;
+  base: number;
+  value: number;
+  weight: number;
+  contrib: number;
+  isTotal: boolean;
+};
+
+function wfBarColor(contrib: number, weight: number, isTotal: boolean, score: number): string {
+  if (isTotal) {
+    if (score >= 75) return "var(--go)";
+    if (score >= 50) return "var(--pivot)";
+    return "var(--kill)";
+  }
+  if (contrib >= weight * 75) return "var(--go)";
+  if (contrib >= weight * 50) return "var(--pivot)";
+  return "var(--kill)";
+}
+
+export function ScoreWaterfallChart({
+  dimensions,
+  score,
+}: {
+  dimensions: Dimension[];
+  score: number;
+}): ReactNode {
+  if (dimensions.length === 0) return null;
+
+  const contributions = dimensions.map((d) => Math.round(d.weight * d.score));
+  const dimEntries: WfEntry[] = dimensions.map((d, i) => ({
+    name: d.name,
+    base: contributions.slice(0, i).reduce((s, c) => s + c, 0),
+    value: contributions[i] ?? 0,
+    weight: d.weight,
+    contrib: contributions[i] ?? 0,
+    isTotal: false,
+  }));
+  const data: WfEntry[] = [
+    ...dimEntries,
+    { name: "Total", base: 0, value: score, weight: 1, contrib: score, isTotal: true },
+  ];
+
+  const tooltipStyle = {
+    fontFamily: "var(--font-chivo-mono)",
+    fontSize: 10,
+    border: "1px solid var(--line)",
+    background: "var(--surface)",
+    borderRadius: 0,
+    boxShadow: "none",
+    padding: "8px 12px",
+  };
+
+  return (
+    <div className="vrd-chart-wrap no-print">
+      <div className="bc-hd">
+        <span>Score Breakdown</span>
+        <span className="r">weighted contribution · pts</span>
+      </div>
+      <div className="vrd-chart-body">
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={data} margin={{ top: 28, right: 16, bottom: 0, left: -12 }}>
+            <CartesianGrid stroke="var(--line)" strokeWidth={0.75} vertical={false} />
+            <XAxis
+              dataKey="name"
+              tick={{ fontSize: 9, fontFamily: "var(--font-chivo-mono)", fill: "var(--dim)", fontWeight: 600 }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              domain={[0, 100]}
+              ticks={[0, 25, 50, 75, 100]}
+              tick={{ fontSize: 8, fontFamily: "var(--font-chivo-mono)", fill: "var(--faint)" }}
+              tickLine={false}
+              axisLine={false}
+              width={24}
+            />
+            <Tooltip
+              cursor={{ fill: "var(--line)", fillOpacity: 0.3 }}
+              contentStyle={tooltipStyle}
+              content={(props) => {
+                if (!props.active || !props.payload?.length) return null;
+                const d = (props.payload[0] as { payload: WfEntry }).payload;
+                if (d.isTotal) {
+                  return (
+                    <div style={tooltipStyle}>
+                      <div style={{ fontWeight: 700, color: "var(--ink)" }}>Total Score</div>
+                      <div style={{ color: "var(--dim)", marginTop: 2 }}>{score} / 100</div>
+                    </div>
+                  );
+                }
+                return (
+                  <div style={tooltipStyle}>
+                    <div style={{ fontWeight: 700, color: "var(--ink)" }}>{d.name}</div>
+                    <div style={{ color: "var(--dim)", marginTop: 2 }}>+{d.contrib} pts · weight {Math.round(d.weight * 100)}%</div>
+                    <div style={{ color: "var(--faint)", marginTop: 2 }}>dim score {Math.round(d.contrib / d.weight)} / 100</div>
+                  </div>
+                );
+              }}
+            />
+            {/* Transparent base bar — pushes visible bar up for waterfall effect */}
+            <Bar dataKey="base" stackId="wf" fill="transparent" isAnimationActive={false} legendType="none" />
+            {/* Visible contribution bar */}
+            <Bar
+              dataKey="value"
+              stackId="wf"
+              isAnimationActive={true}
+              animationDuration={800}
+              animationEasing="ease-out"
+              radius={[2, 2, 0, 0]}
+            >
+              {data.map((d, i) => (
+                <Cell
+                  key={i}
+                  fill={wfBarColor(d.contrib, d.weight, d.isTotal, score)}
+                  fillOpacity={d.isTotal ? 1 : 0.82}
+                />
+              ))}
+              <LabelList
+                content={(props) => {
+                  const { x, y, width, index } = props as {
+                    x?: number; y?: number; width?: number; index?: number;
+                  };
+                  if (index === undefined) return null;
+                  const d = data[index];
+                  if (!d) return null;
+                  const label = d.isTotal ? `Total: ${score}` : `+${d.contrib} pts`;
+                  const color = wfBarColor(d.contrib, d.weight, d.isTotal, score);
+                  return (
+                    <text
+                      x={(x ?? 0) + (width ?? 0) / 2}
+                      y={(y ?? 28) - 5}
+                      textAnchor="middle"
+                      fontSize={8.5}
+                      fontFamily="var(--font-chivo-mono)"
+                      fill={color}
+                      fontWeight={d.isTotal ? 700 : 500}
+                    >
+                      {label}
+                    </text>
+                  );
+                }}
+              />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+// ── Competitor Positioning Map ────────────────────────────────────────────────
 
 export function CompetitorPositioningMap({ competitors }: { competitors: Competitor[] }): ReactNode {
   if (competitors.length === 0) return null;
