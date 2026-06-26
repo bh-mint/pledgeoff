@@ -37,8 +37,26 @@ export class FetchSignalsUseCase {
     });
     // HN, DevTo, GitHub, Brave all use devto queries (short keyword phrases); Google uses its own
     const queries: Record<string, string[]> = queriesResult.isOk()
-      ? { devto: queriesResult.value.devto, google: queriesResult.value.google, hn: queriesResult.value.devto, github: queriesResult.value.devto, brave: queriesResult.value.devto }
-      : { devto: [fallbackQuery], google: [fallbackQuery], hn: [fallbackQuery], github: [fallbackQuery], brave: [fallbackQuery] };
+      ? {
+          devto: queriesResult.value.devto,
+          google: queriesResult.value.google,
+          hn: queriesResult.value.devto,
+          github: queriesResult.value.devto,
+          brave: queriesResult.value.devto,
+          reviews: queriesResult.value.devto,
+          news: queriesResult.value.devto,
+          jobs: queriesResult.value.devto,
+        }
+      : {
+          devto: [fallbackQuery],
+          google: [fallbackQuery],
+          hn: [fallbackQuery],
+          github: [fallbackQuery],
+          brave: [fallbackQuery],
+          reviews: [fallbackQuery],
+          news: [fallbackQuery],
+          jobs: [fallbackQuery],
+        };
 
     // Fetch from each adapter for each query in parallel
     const fetchPromises = this.sourceAdapters.flatMap((adapter) => {

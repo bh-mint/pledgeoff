@@ -137,6 +137,13 @@ function flapChars(verdict: string, score: number): [string, string, string, str
 const SOURCE_NAME: Record<string, string> = {
   hn: "Hacker News", github: "GitHub", reddit: "Reddit",
   producthunt: "Product Hunt", google: "Google", devto: "Dev.to", brave: "Reddit (Brave)",
+  reviews: "Reviews (G2 · Capterra)", news: "News & Announcements", jobs: "Job Postings",
+};
+
+const SOURCE_BADGE: Record<string, string> = {
+  reviews: "var(--accent-orange, #e07b39)",
+  news: "var(--accent-blue, #3b7ed6)",
+  jobs: "var(--accent-purple, #7c5cbf)",
 };
 
 function sentimentFlag(s: Signal["sentiment"]): string {
@@ -330,7 +337,9 @@ function SightingsSection({ signals, bySource }: { signals: Signal[]; bySource: 
                 style={{ width: "100%", textAlign: "left", border: "none", cursor: "pointer", background: "none" }}
                 onClick={() => toggle(source)}
               >
-                <h4>{SOURCE_NAME[source] ?? source}</h4>
+                <h4 style={SOURCE_BADGE[source] ? { color: SOURCE_BADGE[source] } : undefined}>
+                  {SOURCE_NAME[source] ?? source}
+                </h4>
                 <span className="vrd-si-srcm">{items.length} signal{items.length !== 1 ? "s" : ""}</span>
                 <span className="vrd-si-caret" style={{ transform: open ? "rotate(90deg)" : undefined }}>▶</span>
               </button>

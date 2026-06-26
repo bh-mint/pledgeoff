@@ -23,14 +23,18 @@ const RESULTS_COUNT = 4;
 const TOP_N = 2;
 
 export class BraveSearchSourceAdapter implements ISourceAdapter {
-  readonly sourceName = 'brave';
+  readonly sourceName: string;
 
   constructor(
     private readonly apiKey: string,
+    sourceName: string = 'brave',
+    private readonly buildQuery: (q: string) => string = (q) => `site:reddit.com ${q}`,
     private readonly timeoutMs = 10_000,
     private readonly maxRetries = 2,
     private readonly cache?: ICache,
-  ) {}
+  ) {
+    this.sourceName = sourceName;
+  }
 
   async fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
     return tracer.startActiveSpan('brave.fetch', async (span) => {
@@ -48,11 +52,10 @@ export class BraveSearchSourceAdapter implements ISourceAdapter {
   }
 
   private async _fetch(query: string, ideaId: string, traceId: string): Promise<Result<Signal[], SourceAdapterError>> {
-    // Search Reddit discussions via Brave Search (site:reddit.com restriction)
-    const siteQuery = `site:reddit.com ${query}`;
+    const siteQuery = this.buildQuery(query);
 
     if (this.cache) {
-      const cacheKey = `pledgeoff:brave:v1:${query}`;
+      const cacheKey = `pledgeoff:${this.sourceName}:v1:${query}`;
       const cached = await this.cache.get<Signal[]>(cacheKey);
       if (cached) {
         log.info({ traceId, target: 'brave', operation: 'search', outcome: 'success', cacheHit: true, signalCount: cached.length }, 'Brave cache hit');
@@ -90,7 +93,7 @@ export class BraveSearchSourceAdapter implements ISourceAdapter {
         const signals: Signal[] = results.map((r) => ({
           id: crypto.randomUUID(),
           ideaId,
-          source: 'brave' as const,
+          source: this.sourceName as Signal['source'],
           url: r.url,
           title: r.title.slice(0, 500),
           summary: r.description.slice(0, 2000),
@@ -101,7 +104,7 @@ export class BraveSearchSourceAdapter implements ISourceAdapter {
         log.info({ traceId, target: 'brave', operation: 'search', latencyMs: Date.now() - start, outcome: 'success', signalCount: signals.length }, 'Brave signals fetched');
 
         if (this.cache && signals.length > 0) {
-          await this.cache.set(`pledgeoff:brave:v1:${query}`, signals, CACHE_TTL_SECONDS);
+          await this.cache.set(`pledgeoff:${this.sourceName}:v1:${query}`, signals, CACHE_TTL_SECONDS);
         }
 
         return ok(signals);

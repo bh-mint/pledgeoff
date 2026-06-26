@@ -711,7 +711,12 @@ class AppContainer {
       new DevToSourceAdapter(8_000, 2, this._cache),
       new GitHubSourceAdapter(process.env.GITHUB_PAT ?? '', 8_000, 2, this._cache),
       ...(process.env.BRAVE_SEARCH_API_KEY
-        ? [new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 8_000, 2, this._cache)]
+        ? [
+            new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 'brave', (q) => `site:reddit.com ${q}`, 8_000, 2, this._cache),
+            new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 'reviews', (q) => `(site:g2.com OR site:capterra.com) ${q}`, 8_000, 2, this._cache),
+            new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 'news', (q) => `${q} announcement OR launch OR funding -site:reddit.com`, 8_000, 2, this._cache),
+            new BraveSearchSourceAdapter(process.env.BRAVE_SEARCH_API_KEY, 'jobs', (q) => `site:linkedin.com/jobs ${q}`, 8_000, 2, this._cache),
+          ]
         : []),
       ...(process.env.GOOGLE_SEARCH_API_KEY && process.env.GOOGLE_SEARCH_ENGINE_ID
         ? [

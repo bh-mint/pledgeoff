@@ -35,7 +35,7 @@ describe('BraveSearchSourceAdapter', () => {
     expect(signals.every((s) => s.sentiment === 'neutral')).toBe(true);
   });
 
-  it('adds site:reddit.com restriction to query', async () => {
+  it('adds site:reddit.com restriction to query by default', async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce(makeBraveResponse([]));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -44,7 +44,6 @@ describe('BraveSearchSourceAdapter', () => {
 
     const calledUrl = (fetchMock.mock.calls[0] as [string, RequestInit])[0];
     expect(calledUrl).toContain('site%3Areddit.com');
-    // URLSearchParams encodes spaces as +, so check individual keywords
     expect(calledUrl).toContain('meeting');
     expect(calledUrl).toContain('summarizer');
   });
@@ -73,7 +72,7 @@ describe('BraveSearchSourceAdapter', () => {
   it('returns error after all retries exhausted on HTTP failure', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 429 }));
 
-    const adapter = new BraveSearchSourceAdapter(API_KEY, 5_000, 1);
+    const adapter = new BraveSearchSourceAdapter(API_KEY, 'brave', undefined, 5_000, 1);
     const result = await adapter.fetch(query, ideaId, traceId);
 
     expect(result.isErr()).toBe(true);
@@ -83,10 +82,46 @@ describe('BraveSearchSourceAdapter', () => {
   it('returns error on network failure', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network error')));
 
-    const adapter = new BraveSearchSourceAdapter(API_KEY, 5_000, 1);
+    const adapter = new BraveSearchSourceAdapter(API_KEY, 'brave', undefined, 5_000, 1);
     const result = await adapter.fetch(query, ideaId, traceId);
 
     expect(result.isErr()).toBe(true);
     expect(result._unsafeUnwrapErr().message).toBe('network error');
+  });
+
+  it('uses custom sourceName and buildQuery for reviews source', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      makeBraveResponse([
+        { title: 'G2: AI summarizer review', url: 'https://g2.com/products/ai-summarizer/reviews', description: 'Users love this tool' },
+      ]),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const adapter = new BraveSearchSourceAdapter(API_KEY, 'reviews', (q) => `(site:g2.com OR site:capterra.com) ${q}`);
+    const result = await adapter.fetch(query, ideaId, traceId);
+
+    expect(result.isOk()).toBe(true);
+    const signals = result._unsafeUnwrap();
+    expect(signals.every((s) => s.source === 'reviews')).toBe(true);
+    const calledUrl = (fetchMock.mock.calls[0] as [string, RequestInit])[0];
+    expect(calledUrl).toContain('site%3Ag2.com');
+  });
+
+  it('uses custom sourceName and buildQuery for jobs source', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(
+      makeBraveResponse([
+        { title: 'ML Engineer at Competitor X', url: 'https://linkedin.com/jobs/view/123', description: 'Hiring ML engineers' },
+      ]),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+
+    const adapter = new BraveSearchSourceAdapter(API_KEY, 'jobs', (q) => `site:linkedin.com/jobs ${q}`);
+    const result = await adapter.fetch(query, ideaId, traceId);
+
+    expect(result.isOk()).toBe(true);
+    const signals = result._unsafeUnwrap();
+    expect(signals.every((s) => s.source === 'jobs')).toBe(true);
+    const calledUrl = (fetchMock.mock.calls[0] as [string, RequestInit])[0];
+    expect(calledUrl).toContain('linkedin.com%2Fjobs');
   });
 });
