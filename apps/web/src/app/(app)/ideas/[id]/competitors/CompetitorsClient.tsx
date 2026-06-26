@@ -4,6 +4,7 @@ import { useState } from "react";
 import { getAuthToken } from "@/lib/auth-client";
 import type { CompetitorAnalysis } from "@pledgeoff/core";
 import { InfoTooltip } from "@/components/InfoTooltip";
+import { CompetitorPositioningMap } from "../VerdictCharts";
 
 interface CompetitorsClientProps {
   ideaId: string;
@@ -100,6 +101,9 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
           {loading ? "Refreshing…" : "Re-check market →"}
         </button>
       </div>
+
+      {/* Positioning map */}
+      <CompetitorPositioningMap competitors={analysis.competitors} />
 
       {/* Competitors list */}
       <section>

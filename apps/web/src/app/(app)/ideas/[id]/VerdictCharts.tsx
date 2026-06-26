@@ -8,6 +8,11 @@ import {
   Radar,
   AreaChart,
   Area,
+  ScatterChart,
+  Scatter,
+  ZAxis,
+  Cell,
+  LabelList,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -18,7 +23,7 @@ import {
   type DotItemDotProps,
 } from "recharts";
 import type { ReactNode } from "react";
-import type { Dimension, Simulation } from "@pledgeoff/core";
+import type { Competitor, Dimension, Simulation } from "@pledgeoff/core";
 
 function dotColor(score: number): string {
   if (score >= 75) return "var(--go)";
@@ -254,5 +259,138 @@ export function RevenueAreaChart({ simulation }: { simulation: Simulation }): Re
         />
       </AreaChart>
     </ResponsiveContainer>
+  );
+}
+
+// ── Competitor Positioning Map ────────────────────────────────────────────────
+
+const COMPETITOR_PALETTE = [
+  "#3b7ed6", "#7c5cbf", "#e07b39", "#1a9e5a",
+  "#d94040", "#c4a028", "#2a9cb5", "#8b4513",
+];
+
+function parsePrice(raw: string): number | null {
+  const s = raw.toLowerCase().trim();
+  if (["free", "freemium", "open source", "open-source"].includes(s)) return 0;
+  if (["custom", "enterprise", "contact", "on request", "negotiated"].some((k) => s.includes(k))) return null;
+  const range = s.match(/(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)/);
+  if (range) return (parseFloat(range[1]) + parseFloat(range[2])) / 2;
+  const single = s.match(/(\d+(?:\.\d+)?)/);
+  return single ? parseFloat(single[1]) : null;
+}
+
+function segmentToY(targetSegment: string | undefined): 0 | 1 | 2 {
+  if (!targetSegment) return 1;
+  const s = targetSegment.toLowerCase();
+  const b2bTerms = ["enterprise", "team", "business", "b2b", "smb", "compan", "startup", "agency", "professional", "developer"];
+  const b2cTerms = ["consumer", "b2c", "personal", "individual", "freelance", "creator", "end user"];
+  const isB2B = b2bTerms.some((t) => s.includes(t));
+  const isB2C = b2cTerms.some((t) => s.includes(t));
+  if (isB2B && !isB2C) return 2;
+  if (isB2C && !isB2B) return 0;
+  return 1;
+}
+
+type CompetitorPoint = {
+  x: number;
+  y: 0 | 1 | 2;
+  name: string;
+  priceStr: string;
+  positioning: string;
+};
+
+export function CompetitorPositioningMap({ competitors }: { competitors: Competitor[] }): ReactNode {
+  if (competitors.length === 0) return null;
+
+  const points: CompetitorPoint[] = [];
+  for (const c of competitors) {
+    if (!c.estimatedPrice) continue;
+    const price = parsePrice(c.estimatedPrice);
+    if (price === null) continue;
+    points.push({
+      x: price,
+      y: segmentToY(c.targetSegment),
+      name: c.name,
+      priceStr: c.estimatedPrice,
+      positioning: c.positioning,
+    });
+  }
+
+  if (points.length === 0 || points.length < Math.ceil(competitors.length / 2)) {
+    return (
+      <div className="no-print" style={{ padding: "10px 14px", border: "1px solid var(--line)", background: "var(--surface)", fontFamily: "var(--font-chivo-mono)", fontSize: 10, color: "var(--faint)", fontStyle: "italic" }}>
+        Add pricing data to competitors for positioning map
+      </div>
+    );
+  }
+
+  const maxX = Math.max(...points.map((p) => p.x), 10);
+  const xDomain: [number, number] = [0, Math.ceil(maxX * 1.3)];
+  const segLabels = ["B2C", "Mixed", "B2B"] as const;
+
+  return (
+    <div className="vrd-chart-wrap no-print">
+      <div className="bc-hd">
+        <span>Positioning Map</span>
+        <span className="r">price vs. segment · {points.length} competitor{points.length !== 1 ? "s" : ""}</span>
+      </div>
+      <div className="vrd-chart-body">
+        <ResponsiveContainer width="100%" height={220}>
+          <ScatterChart margin={{ top: 16, right: 40, bottom: 16, left: 8 }}>
+            <CartesianGrid stroke="var(--line)" strokeWidth={0.75} />
+            <XAxis
+              dataKey="x"
+              type="number"
+              name="Price"
+              domain={xDomain}
+              tickFormatter={(v: number) => v === 0 ? "Free" : `$${v}`}
+              tick={{ fontSize: 9, fontFamily: "var(--font-chivo-mono)", fill: "var(--faint)" }}
+              tickLine={false}
+              axisLine={false}
+              label={{ value: "$/month", position: "insideBottomRight", offset: 0, fontSize: 8, fontFamily: "var(--font-chivo-mono)", fill: "var(--faint)" }}
+            />
+            <YAxis
+              dataKey="y"
+              type="number"
+              domain={[-0.5, 2.5]}
+              ticks={[0, 1, 2]}
+              tickFormatter={(v) => segLabels[v as 0 | 1 | 2] ?? ""}
+              tick={{ fontSize: 9, fontFamily: "var(--font-chivo-mono)", fill: "var(--faint)" }}
+              tickLine={false}
+              axisLine={false}
+              width={44}
+            />
+            <ZAxis range={[72, 72]} />
+            <Tooltip
+              cursor={{ strokeDasharray: "3 3", stroke: "var(--faint)" }}
+              content={(props) => {
+                if (!props.active || !props.payload?.length) return null;
+                const pt = (props.payload[0] as { payload: CompetitorPoint }).payload;
+                const seg = segLabels[pt.y] ?? "Mixed";
+                return (
+                  <div style={{ fontFamily: "var(--font-chivo-mono)", fontSize: 10, border: "1px solid var(--line)", background: "var(--surface)", padding: "8px 12px", maxWidth: 220 }}>
+                    <div style={{ fontWeight: 700, marginBottom: 4, color: "var(--ink)" }}>{pt.name}</div>
+                    <div style={{ color: "var(--dim)", marginBottom: 4 }}>{pt.priceStr} · {seg}</div>
+                    <div style={{ color: "var(--faint)", lineHeight: 1.45 }}>
+                      {pt.positioning.length > 90 ? pt.positioning.slice(0, 90) + "…" : pt.positioning}
+                    </div>
+                  </div>
+                );
+              }}
+            />
+            <Scatter data={points} shape="circle">
+              {points.map((_, i) => (
+                <Cell key={i} fill={COMPETITOR_PALETTE[i % COMPETITOR_PALETTE.length]} />
+              ))}
+              <LabelList
+                dataKey="name"
+                position="top"
+                style={{ fontSize: 8, fontFamily: "var(--font-chivo-mono)", fill: "var(--dim)" }}
+              />
+            </Scatter>
+          </ScatterChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
   );
 }
