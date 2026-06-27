@@ -683,6 +683,16 @@ class AppContainer {
         'STRIPE_FOUNDER_ANNUAL_PRICE_ID',
         'STRIPE_TEAM_MONTHLY_PRICE_ID',
         'STRIPE_TEAM_ANNUAL_PRICE_ID',
+        'STRIPE_STUDIO_MONTHLY_PRICE_ID',
+        'STRIPE_STUDIO_ANNUAL_PRICE_ID',
+        'STRIPE_VALIDATION_PACK_10_PRICE_ID',
+        'STRIPE_VALIDATION_PACK_25_PRICE_ID',
+        'STRIPE_VALIDATION_PACK_60_PRICE_ID',
+        'STRIPE_VALIDATION_PACK_100_PRICE_ID',
+        'STRIPE_OTTO_10Q_PRICE_ID',
+        'STRIPE_OTTO_25Q_PRICE_ID',
+        'STRIPE_OTTO_60Q_PRICE_ID',
+        'STRIPE_OTTO_150Q_PRICE_ID',
       ] as const;
       for (const name of requiredStripeEnvs) {
         if (!process.env[name]) {
