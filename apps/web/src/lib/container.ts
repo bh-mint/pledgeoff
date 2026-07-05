@@ -93,6 +93,7 @@ import {
   GenerateMarketLandscapeUseCase,
   GenerateInterviewGuideUseCase,
   AnalyzeTranscriptUseCase,
+  allowedSourcesForPlan,
 } from '@pledgeoff/core';
 import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
 import type { DomainEvent } from '@pledgeoff/core';
@@ -791,11 +792,17 @@ class AppContainer {
       'idea.created.v1',
       async (event: DomainEvent<IdeaCreatedV1['payload']>) => {
         try {
+          // Plan gating (SOURCES_BY_PLAN). Dynamic import: getUserPlan imports container.
+          // A throw here lands in the catch below → Sentry + outbox retry (fail-closed).
+          const { getUserPlan } = await import('@/server/billing/getUserPlan');
+          const plan = await getUserPlan(event.payload.userId);
+
           const result = await this.fetchSignalsUseCase.execute({
             ideaId: event.payload.ideaId,
             ideaText: event.payload.text,
             traceId: event.traceId,
             eventId: event.eventId,
+            allowedSources: allowedSourcesForPlan(plan),
           });
           if (result.isErr()) {
             throw new Error(`FetchSignalsUseCase failed: ${result.error.message}`);

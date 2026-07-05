@@ -1,5 +1,5 @@
 import { Result, err, ok } from 'neverthrow';
-import type { Signal } from '../domain/signal';
+import type { Signal, SignalSource } from '../domain/signal';
 import type { ISignalRepository, SignalRepositoryError } from '../ports/signal-repository';
 import type { IEventBus, EventBusError } from '../ports/event-bus';
 import type { IIdempotencyStore, IdempotencyStoreError } from '../ports/idempotency-store';
@@ -11,6 +11,8 @@ export interface FetchSignalsInput {
   readonly ideaText: string;
   readonly traceId: string;
   readonly eventId: string;
+  /** Plan-gated source list (SOURCES_BY_PLAN). Undefined = all configured sources. */
+  readonly allowedSources?: readonly SignalSource[];
 }
 
 export type FetchSignalsError = SignalRepositoryError | EventBusError | IdempotencyStoreError | SourceAdapterError;
@@ -58,8 +60,14 @@ export class FetchSignalsUseCase {
           jobs: [fallbackQuery],
         };
 
+    // Plan gating: only run adapters whose source is allowed for the user's plan
+    const allowedSet = input.allowedSources ? new Set<string>(input.allowedSources) : null;
+    const activeAdapters = allowedSet
+      ? this.sourceAdapters.filter((adapter) => allowedSet.has(adapter.sourceName))
+      : this.sourceAdapters;
+
     // Fetch from each adapter for each query in parallel
-    const fetchPromises = this.sourceAdapters.flatMap((adapter) => {
+    const fetchPromises = activeAdapters.flatMap((adapter) => {
       const adapterQueries = queries[adapter.sourceName] ?? [fallbackQuery];
       return adapterQueries.map((query) => adapter.fetch(query, input.ideaId, input.traceId));
     });

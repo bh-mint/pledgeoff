@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server';
 import { container } from '@/lib/container';
 import { resolveUserIdFromRequest } from '@/lib/api-auth';
 import { checkAiRateLimit } from '@/lib/rate-limiter';
-import { VerificationsExhaustedError } from '@pledgeoff/core';
+import { VerificationsExhaustedError, allowedSourcesForPlan } from '@pledgeoff/core';
 import { logger } from '@pledgeoff/observability';
+import { getUserPlan } from '@/server/billing/getUserPlan';
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const traceId = req.headers.get('x-trace-id') ?? crypto.randomUUID();
@@ -64,12 +65,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const oldScore = prevDecision?.score ?? null;
   const oldVerdict = prevDecision?.verdict ?? null;
 
-  // Fetch fresh signals (new eventId bypasses idempotency)
+  // Fetch fresh signals (new eventId bypasses idempotency), gated by plan sources
+  const plan = await getUserPlan(userId);
   const signalsResult = await container.fetchSignalsUseCase.execute({
     ideaId: id,
     ideaText: idea.text,
     traceId,
     eventId: crypto.randomUUID(),
+    allowedSources: allowedSourcesForPlan(plan),
   });
 
   if (signalsResult.isErr()) {

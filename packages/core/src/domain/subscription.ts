@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { InvalidDomainDataError } from './errors';
+import type { SignalSource } from './signal';
 
 export const PlanSchema = z.enum(['free', 'founder', 'team', 'studio', 'enterprise']);
 export type Plan = z.infer<typeof PlanSchema>;
@@ -42,6 +43,22 @@ export const PLAN_LIMITS = {
   studio:     { verificationsPerMonth: 100,      seatsIncluded: 8,        ottoQuestionsPerMonth: 120      },
   enterprise: { verificationsPerMonth: 200,      seatsIncluded: Infinity, ottoQuestionsPerMonth: Infinity },
 } satisfies Record<Plan, { verificationsPerMonth: number; seatsIncluded: number; ottoQuestionsPerMonth: number }>;
+
+// Signal sources per plan. 'all' = every configured source adapter runs.
+// 'brave' is the Reddit source at runtime (BraveSearchSourceAdapter with site:reddit.com).
+export const SOURCES_BY_PLAN: Record<Plan, readonly SignalSource[] | 'all'> = {
+  free:       ['brave', 'github'],
+  founder:    'all',
+  team:       'all',
+  studio:     'all',
+  enterprise: 'all',
+};
+
+/** Returns the allowed source list for a plan, or undefined when the plan gets every source. */
+export function allowedSourcesForPlan(plan: Plan): readonly SignalSource[] | undefined {
+  const sources = SOURCES_BY_PLAN[plan];
+  return sources === 'all' ? undefined : sources;
+}
 
 export const TOOL_KEYS = ['icp', 'icp_limited', 'comp', 'rev', 'build', 'page', 'gtm', 'features', 'battlecard', 'market-landscape', 'interview-guide', 'transcript'] as const;
 export type ToolKey = typeof TOOL_KEYS[number];

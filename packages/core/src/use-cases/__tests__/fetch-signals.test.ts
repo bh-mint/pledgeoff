@@ -211,4 +211,44 @@ describe('FetchSignalsUseCase', () => {
     expect(result.isErr()).toBe(true);
     if (result.isErr()) expect(result.error).toBeInstanceOf(IdempotencyStoreError);
   });
+
+  it('only fetches from allowed sources when allowedSources is set (plan gating)', async () => {
+    const braveAdapter = makeAdapter(signals, 'brave');
+    const githubAdapter = makeAdapter(signals, 'github');
+    const hnAdapter = makeAdapter(signals, 'hn');
+    const devtoAdapter = makeAdapter(signals, 'devto');
+    const useCase = new FetchSignalsUseCase(
+      makeRepo(signals),
+      makeEventBus(),
+      makeIdempotencyStore(),
+      [braveAdapter, githubAdapter, hnAdapter, devtoAdapter],
+      makeLLMClient(),
+    );
+
+    const result = await useCase.execute({ ...baseInput, allowedSources: ['brave', 'github'] });
+
+    expect(result.isOk()).toBe(true);
+    expect(braveAdapter.fetch).toHaveBeenCalled();
+    expect(githubAdapter.fetch).toHaveBeenCalled();
+    expect(hnAdapter.fetch).not.toHaveBeenCalled();
+    expect(devtoAdapter.fetch).not.toHaveBeenCalled();
+  });
+
+  it('fetches from every adapter when allowedSources is undefined', async () => {
+    const braveAdapter = makeAdapter(signals, 'brave');
+    const hnAdapter = makeAdapter(signals, 'hn');
+    const useCase = new FetchSignalsUseCase(
+      makeRepo(signals),
+      makeEventBus(),
+      makeIdempotencyStore(),
+      [braveAdapter, hnAdapter],
+      makeLLMClient(),
+    );
+
+    const result = await useCase.execute(baseInput);
+
+    expect(result.isOk()).toBe(true);
+    expect(braveAdapter.fetch).toHaveBeenCalled();
+    expect(hnAdapter.fetch).toHaveBeenCalled();
+  });
 });
