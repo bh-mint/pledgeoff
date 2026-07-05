@@ -24,7 +24,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
     group: "Validation",
     rows: [
       { k: "Validations / month",       f: "1",               fo: "20",             t: "60",               s: "100" },
-      { k: "Signal sources",            f: "Reddit · GitHub", fo: "HN · Dev.to · GitHub · Reddit · Brave",  t: "HN · Dev.to · GitHub · Reddit · Brave",    s: "All 5 + custom" },
+      { k: "Signal sources",            f: "Reddit · GitHub", fo: "All 8 sources",  t: "All 8 sources",    s: "All 8 sources" },
       { k: "PDF / JSON export",         f: "—",               fo: "✓",              t: "✓",                s: "✓ · white-label" },
     ],
   },
@@ -36,7 +36,12 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
       { k: "Revenue Model",             f: "—",               fo: "✓",              t: "✓",                s: "✓" },
       { k: "Build Spec",                f: "—",               fo: "✓",              t: "✓",                s: "✓" },
       { k: "Page Brief",                f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "Feature Analysis",          f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "Market Landscape",          f: "—",               fo: "✓",              t: "✓",                s: "✓" },
+      { k: "Interview Guide",           f: "—",               fo: "✓",              t: "✓",                s: "✓" },
       { k: "GTM Brief",                 f: "—",               fo: "—",              t: "✓",                s: "✓" },
+      { k: "Battlecard",                f: "—",               fo: "—",              t: "✓",                s: "✓" },
+      { k: "Transcript Analyzer",       f: "—",               fo: "—",              t: "✓",                s: "✓" },
     ],
   },
   {
@@ -93,7 +98,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: "What are the intelligence tools?",
-    a: "Six tools you can run after a verdict: ICP Analysis, Competitive Landscape, Revenue Model, Build Spec, Page Brief, and GTM Brief. Founder plan includes five; Team and above gets all six.",
+    a: "Eleven tools you can run after a verdict — from ICP Analysis, Competitive Landscape, and Revenue Model to Battlecards, Interview Guides, and Transcript Analysis. Founder plan includes eight; Team and above gets all eleven.",
   },
   {
     q: "Can I upgrade or downgrade at any time?",
@@ -328,7 +333,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             </div>
             <div className="plan-features">
               <div className="pf yes">20 validations / month</div>
-              <div className="pf yes">All 5 signal sources</div>
+              <div className="pf yes">All 8 signal sources</div>
               <div className="pf yes">5 of 6 intelligence tools</div>
               <div className="pf yes">15 Otto questions / mo</div>
               <div className="pf yes">1-year history · PDF + JSON export</div>
@@ -401,7 +406,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               <div className="pf yes">100 validations / month</div>
               <div className="pf yes">All tools · 120 Otto questions</div>
               <div className="pf yes">8 team seats</div>
-              <div className="pf yes">All 5 sources + custom</div>
+              <div className="pf yes">All 8 signal sources</div>
               <div className="pf yes">Audit log · NET30 invoicing</div>
               <div className="pf yes">4h dedicated SLA</div>
             </div>

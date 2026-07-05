@@ -58,7 +58,7 @@ const PLAN_DATA: Record<PlanKey, {
     monthly: 99, annual: 79, annualTotal: 948, saveEur: 240,
     tag: '60 validations / cycle · up to 5 seats',
     features: [
-      { txt: 'All 6 tools including GTM Brief', note: 'full launch playbook' },
+      { txt: 'All 11 tools including GTM Brief', note: 'full launch playbook' },
       { txt: '60 validations per cycle', note: 'built for active teams' },
       { txt: 'Otto Q&A', note: '45 questions per month' },
       { txt: 'Up to 5 seats with shared team feed' },
@@ -68,7 +68,7 @@ const PLAN_DATA: Record<PlanKey, {
     monthly: 349, annual: 279, annualTotal: 3348, saveEur: 840,
     tag: '100 validations / cycle · up to 10 seats',
     features: [
-      { txt: 'All 6 tools + white-label PDF reports' },
+      { txt: 'All 11 tools + white-label PDF reports' },
       { txt: '100 validations per cycle' },
       { txt: 'Otto Q&A', note: '120 questions per month' },
       { txt: 'Up to 10 seats + API access' },

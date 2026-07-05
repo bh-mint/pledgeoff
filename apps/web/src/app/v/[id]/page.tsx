@@ -167,6 +167,11 @@ export default async function PublicVerdictPage({ params }: Props) {
   const TOOLS = [
     { name: "ICP Analysis",          stage: "Understand", lock: "Founder+", desc: "Customer segments, pain points ranked by signal frequency, and direct quotes from evidence." },
     { name: "Competitive Landscape", stage: "Understand", lock: "Founder+", desc: "Named competitors, positioning gaps, and market openings drawn from signal data." },
+    { name: "Feature Analysis",      stage: "Intel",      lock: "Founder+", desc: "Feature-by-feature comparison matrix against every named competitor." },
+    { name: "Battlecard",            stage: "Intel",      lock: "Team+",    desc: "Objection handling and talking points per competitor — advantages and weaknesses mapped." },
+    { name: "Market Landscape",      stage: "Intel",      lock: "Founder+", desc: "Market segments, trends, and uncovered opportunities across the space." },
+    { name: "Interview Guide",       stage: "Validate",   lock: "Founder+", desc: "Structured customer interview questions with hypotheses to test and red flags to watch." },
+    { name: "Transcript Analyzer",   stage: "Validate",   lock: "Team+",    desc: "Paste an interview transcript — confirmed and rejected hypotheses, key quotes, signal strength." },
     { name: "Revenue Model",         stage: "Plan",       lock: "Founder+", desc: "TAM estimate with 3 revenue scenarios — conservative, moderate, optimistic — and break-even timeline." },
     { name: "Build Spec",            stage: "Plan",       lock: "Founder+", desc: "Stack recommendations with build / buy / OSS decisions, library options, and confidence tiers." },
     { name: "Page Brief",            stage: "Launch",     lock: "Founder+", desc: "Landing page headline, features list, and waitlist CTA copy — ready to paste into your builder." },

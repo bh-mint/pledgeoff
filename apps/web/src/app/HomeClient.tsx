@@ -9,7 +9,7 @@ const FEATURES = [
   {
     n: "01",
     title: "Cited sources",
-    desc: "Every signal links to its origin. Hacker News threads, GitHub issues, Dev.to articles, web results. Nothing invented.",
+    desc: "Every signal links to its origin. Reddit threads, Hacker News, GitHub issues, G2 reviews, news, job postings. Nothing invented.",
   },
   {
     n: "02",
@@ -23,18 +23,33 @@ const FEATURES = [
   },
   {
     n: "04",
-    title: "Six intelligence tools",
-    desc: "From ICP analysis to GTM brief. Each tool reads the verdict and goes deeper on one specific angle of the decision.",
+    title: "Eleven intelligence tools",
+    desc: "From ICP analysis and battlecards to interview guides and transcript analysis. Each tool reads the verdict and goes deeper on one angle.",
   },
   {
     n: "05",
-    title: "Team collaboration",
-    desc: "Share verdicts with teammates. Comment, react, run tools together. Build a library of validated and rejected ideas.",
+    title: "Movement tracking",
+    desc: "Competitors change pricing, positioning, and features. PledgeOFF re-checks the market on schedule and flags what moved.",
   },
   {
     n: "06",
+    title: "Win/Loss intelligence",
+    desc: "Report what happened after the verdict — built, failed, lost to whom. Every outcome calibrates your future verdicts.",
+  },
+  {
+    n: "07",
+    title: "Team collaboration",
+    desc: "Share verdicts with teammates. React, run tools together, get Slack alerts and a weekly digest of what changed.",
+  },
+  {
+    n: "08",
     title: "Public profiles",
     desc: "Make ideas public. Share verdicts via link. Build a credible validation track record others can see.",
+  },
+  {
+    n: "09",
+    title: "API & reports",
+    desc: "REST API with keys and usage stats. Export any verdict as a PDF intelligence report — white-label on Studio.",
   },
 ];
 
@@ -119,10 +134,10 @@ export function HomeClient() {
                   color: "var(--dim)",
                 }}
               >
-                You describe an idea. We scan Hacker News, Dev.to, GitHub, and
-                the web for real signals. You get a verdict — GO, PIVOT, or KILL
-                — with a score, four dimensions, and every source cited. In about
-                15 seconds.
+                You describe an idea. We scan Reddit, Hacker News, Dev.to,
+                GitHub, and the web for real signals. You get a verdict — GO,
+                PIVOT, or KILL — with a score, four dimensions, and every source
+                cited. In about 15 seconds.
               </p>
             </div>
             <div style={{ height: 1, background: "var(--line)" }} />
@@ -204,9 +219,9 @@ export function HomeClient() {
               <div className="how-body">
                 <div className="how-title">Run intelligence tools</div>
                 <div className="how-desc">
-                  Go deeper with six tools: ICP analysis, competitive landscape,
-                  revenue model, build spec, page brief, GTM brief. Run what you
-                  need.
+                  Go deeper with eleven tools across five stages — from ICP
+                  analysis and competitive landscape to battlecards, interview
+                  guides, and transcript analysis. Run what you need.
                 </div>
               </div>
             </div>

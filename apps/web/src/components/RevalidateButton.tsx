@@ -179,7 +179,7 @@ export function RevalidateButton({
               <li>
                 <span className="reval-ch-mark" aria-hidden="true">→</span>
                 <span className="reval-ch-txt">
-                  Resets all 6 tools to idle{' '}
+                  Resets all tools to idle{' '}
                   <span>— prior tool outputs are cleared</span>
                 </span>
               </li>
