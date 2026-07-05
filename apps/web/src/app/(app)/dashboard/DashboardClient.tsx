@@ -11,6 +11,7 @@ import type { Plan } from "@pledgeoff/core";
 import type { TeamActivityEvent } from "@/server/team/getTeamActivity";
 import type { SignalFeedNiche } from "@/app/api/v1/signal-feed/route";
 import type { WinLossRow } from "@/server/analytics/getWinLossData";
+import type { MarketMovement } from "@/server/dashboard/getMarketMovements";
 
 export type ToolStatus = {
   simulate: boolean;
@@ -108,6 +109,8 @@ interface DashboardClientProps {
   winRate: number | null;
   winLossRows: WinLossRow[];
   signalFeedData: { data: SignalFeedNiche[]; locked: boolean };
+  marketMovements?: MarketMovement[];
+  otto?: { includedUsed: number; includedLimit: number | null; purchased: number } | null;
 }
 
 export function DashboardClient({
@@ -126,6 +129,8 @@ export function DashboardClient({
   winRate,
   winLossRows,
   signalFeedData,
+  marketMovements = [],
+  otto = null,
 }: DashboardClientProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [tab, setTab] = useState<"brief" | "team">("brief");
@@ -565,6 +570,19 @@ export function DashboardClient({
                       <b>{Math.max(0, monthLimit - usedThisMonth)}</b> left · resets {getNextMonthReset()}
                     </span>
                   </div>
+                  {otto && (
+                    <div className="db-quota-otto">
+                      <span className="db-quota-otto-k">Otto</span>
+                      <span className="db-quota-otto-v">
+                        {otto.includedLimit === null ? (
+                          <>Unlimited</>
+                        ) : (
+                          <><b>{otto.includedUsed}</b> / {otto.includedLimit} used</>
+                        )}
+                        {otto.purchased > 0 && <em> · +{otto.purchased} pack</em>}
+                      </span>
+                    </div>
+                  )}
                   {plan === "free" && (
                     <Link className="db-quota-up" href="/pricing">Upgrade plan →</Link>
                   )}
@@ -628,6 +646,44 @@ export function DashboardClient({
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Market movements — competitor changes from snapshot diffs */}
+          {marketMovements.length > 0 && (
+            <div className="db-mv">
+              <div className="db-mv-hd">
+                <span>Market movements</span>
+                <span className="db-mv-sub">Since previous check</span>
+              </div>
+              {marketMovements.map((m) => (
+                <div key={m.ideaId} className="db-mv-row">
+                  <div className="db-mv-top">
+                    <Link href={`/ideas/${m.ideaId}/competitors`} className="db-mv-title">
+                      {m.ideaTitle}
+                    </Link>
+                    <span className="db-mv-date">
+                      {new Date(m.checkedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                    </span>
+                  </div>
+                  <ul className="db-mv-changes">
+                    {m.changes.slice(0, 4).map((c, i) => (
+                      <li key={i} className="db-mv-change">
+                        <span className={`db-mv-sig ${c.significance}`}>
+                          {c.significance === "major" ? "▲" : "△"}
+                        </span>
+                        <span className="db-mv-field">{c.field}</span>
+                        <span className="db-mv-delta">
+                          {c.before} → {c.after}
+                        </span>
+                      </li>
+                    ))}
+                    {m.changes.length > 4 && (
+                      <li className="db-mv-more">+{m.changes.length - 4} more changes</li>
+                    )}
+                  </ul>
+                </div>
+              ))}
             </div>
           )}
 

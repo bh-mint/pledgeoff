@@ -5,6 +5,7 @@ import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { container } from "@/lib/container";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { getDashboardData } from "@/server/dashboard/getDashboardData";
+import { getMarketMovements } from "@/server/dashboard/getMarketMovements";
 import { getWinLossData, type WinLossRow } from "@/server/analytics/getWinLossData";
 import { DashboardClient, type TableRow, type TeamFeedRow } from "./DashboardClient";
 import { getSignalFeedData } from "@/server/signal-feed/getSignalFeedData";
@@ -31,12 +32,28 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const supabase = createSupabaseServiceClient();
 
-  // Phase 1 — plan + team (parallel)
-  const [plan, memberTeamResult, ownerTeamResult] = await Promise.all([
+  // Phase 1 — plan + team + otto balance (parallel)
+  const [plan, memberTeamResult, ownerTeamResult, ottoBalanceResult] = await Promise.all([
     getUserPlan(user.id),
     container.teamRepo.findByMemberId(user.id),
     container.teamRepo.findByOwnerId(user.id),
+    container.getOttoBalanceUseCase.execute(user.id),
   ]);
+
+  const ottoBalance = ottoBalanceResult.isOk() ? ottoBalanceResult.value : null;
+  // includedLimit can be Infinity (enterprise) — not JSON-serializable; null = unlimited
+  const otto =
+    ottoBalance && (ottoBalance.includedLimit > 0 || ottoBalance.purchased > 0)
+      ? {
+          includedUsed:
+            ottoBalance.includedLimit === Infinity
+              ? 0
+              : Math.max(0, ottoBalance.includedLimit - ottoBalance.included),
+          includedLimit:
+            ottoBalance.includedLimit === Infinity ? null : ottoBalance.includedLimit,
+          purchased: ottoBalance.purchased,
+        }
+      : null;
 
   const isWorkspacePlan = plan === "team" || plan === "studio" || plan === "enterprise";
   const isPaidPlan = plan !== "free";
@@ -92,15 +109,13 @@ export default async function DashboardPage() {
       isFounderPlus ? getWinLossData(user.id) : Promise.resolve([] as WinLossRow[]),
     ]);
 
-  // Phase 4 — team activity
-  let teamActivityEvents: TeamActivityEvent[] = [];
-  if (team && isWorkspacePlan) {
-    teamActivityEvents = await getTeamActivity(
-      team.id,
-      allMemberIds,
-      user.id
-    );
-  }
+  // Phase 4 — team activity + market movements (parallel)
+  const [teamActivityEvents, marketMovements] = await Promise.all([
+    team && isWorkspacePlan
+      ? getTeamActivity(team.id, allMemberIds, user.id)
+      : Promise.resolve([] as TeamActivityEvent[]),
+    getMarketMovements(rawIdeas.map((r) => ({ id: r.id, text: r.text }))),
+  ]);
 
   const outcomeMap = new Map<string, string>();
   for (const o of rawOutcomes) {
@@ -304,6 +319,8 @@ export default async function DashboardPage() {
       winRate={winRate}
       winLossRows={winLossRows}
       signalFeedData={signalFeedData}
+      marketMovements={marketMovements}
+      otto={otto}
     />
   );
 }
