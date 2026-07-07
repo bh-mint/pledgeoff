@@ -68,12 +68,18 @@ export async function GET(req: Request): Promise<Response> {
     for (const profile of pending) {
       const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || undefined;
 
-      await sendSequenceEmail(resendKey, {
+      const sent = await sendSequenceEmail(resendKey, {
         to: profile.email,
         name,
         day,
         traceId,
       });
+
+      // No row on failure — the email was not delivered, so the DB must not claim it was
+      if (!sent) {
+        errors.push(`day${day} user ${profile.id}: resend send failed`);
+        continue;
+      }
 
       // Mark as sent — UNIQUE constraint prevents duplicates on race conditions
       const { error: insertError } = await supabase

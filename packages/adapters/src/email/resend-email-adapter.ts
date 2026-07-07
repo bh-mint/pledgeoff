@@ -186,10 +186,12 @@ export async function sendPaymentFailedEmail(
   }
 }
 
+// Returns true only when Resend accepted the email — callers must not mark the
+// sequence row as sent on false, otherwise the email is silently lost.
 export async function sendSequenceEmail(
   apiKey: string,
   params: SequenceEmailParams,
-): Promise<void> {
+): Promise<boolean> {
   const { to, name, day, traceId } = params;
   const displayName = name?.split(' ')[0] ?? 'there';
   const { subject, html } = SEQUENCE_CONTENT[day](displayName);
@@ -209,12 +211,14 @@ export async function sendSequenceEmail(
     if (!res.ok) {
       const body = await res.text().catch(() => '');
       log.warn({ traceId, target: 'resend', operation: `sendSequenceEmail.day${day}`, latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${res.status}` }, `Resend error: ${body}`);
-      return;
+      return false;
     }
     log.info({ traceId, target: 'resend', operation: `sendSequenceEmail.day${day}`, latencyMs: Date.now() - start, outcome: 'success' }, `Sequence email day ${day} sent`);
+    return true;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'unknown';
     log.error({ traceId, target: 'resend', operation: `sendSequenceEmail.day${day}`, latencyMs: Date.now() - start, outcome: 'error', errorCode: 'FETCH_ERROR' }, `Resend fetch failed: ${message}`);
+    return false;
   }
 }
 
