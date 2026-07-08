@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { PLAN_LIMITS, PLAN_TOOL_GATES } from '@pledgeoff/core';
 import { CheckoutModal } from '@/components/CheckoutModal';
 import { getAuthToken } from '@/lib/auth-client';
 import { PRICING } from '@/lib/pricing.config';
@@ -38,40 +39,48 @@ const PRICE_IDS: Record<PlanKey, { monthly: string; annual: string }> = {
   },
 };
 
-// ── Static plan data ──────────────────────────────────────────────────────────
+// ── Plan data derived from PRICING config + core PLAN_LIMITS/PLAN_TOOL_GATES ──
+// Numbers must never be written inline here — they drift from the checkout.
+const EXTRA_SEAT = PRICING.seats.extraEurPerMonth;
+
+function planPrices(key: PlanKey): { monthly: number; annual: number; annualTotal: number; saveEur: number } {
+  const p = PRICING[key].monthly;
+  return { monthly: p.eur, annual: p.annual_equivalent, annualTotal: p.annual_total, saveEur: p.eur * 12 - p.annual_total };
+}
+
 const PLAN_DATA: Record<PlanKey, {
   monthly: number; annual: number; annualTotal: number; saveEur: number;
   tag: string;
   features: { txt: string; note?: string }[];
 }> = {
   founder: {
-    monthly: 49, annual: 39, annualTotal: 468, saveEur: 120,
-    tag: '20 validations / cycle · cancel anytime',
+    ...planPrices('founder'),
+    tag: `${PLAN_LIMITS.founder.verificationsPerMonth} validations / cycle · cancel anytime`,
     features: [
-      { txt: '5 intelligence tools', note: 'ICP, Competitive, Revenue, Build Spec, Page Brief' },
-      { txt: '20 validations per cycle', note: 'survey freely, not just once' },
-      { txt: 'Otto Q&A', note: '15 questions per month' },
+      { txt: `${PLAN_TOOL_GATES.founder.length} intelligence tools`, note: 'ICP, Competitive, Revenue, Build Spec, Interview Guide + more' },
+      { txt: `${PLAN_LIMITS.founder.verificationsPerMonth} validations per cycle`, note: 'survey freely, not just once' },
+      { txt: 'Otto Q&A', note: `${PLAN_LIMITS.founder.ottoQuestionsPerMonth} questions per month` },
       { txt: 'Export verdict boards to PDF' },
     ],
   },
   team: {
-    monthly: 99, annual: 79, annualTotal: 948, saveEur: 240,
-    tag: '60 validations / cycle · up to 5 seats',
+    ...planPrices('team'),
+    tag: `${PLAN_LIMITS.team.verificationsPerMonth} validations / cycle · ${PLAN_LIMITS.team.seatsIncluded} seats included`,
     features: [
-      { txt: 'All 11 tools including GTM Brief', note: 'full launch playbook' },
-      { txt: '60 validations per cycle', note: 'built for active teams' },
-      { txt: 'Otto Q&A', note: '45 questions per month' },
-      { txt: 'Up to 5 seats with shared team feed' },
+      { txt: `All ${PLAN_TOOL_GATES.team.length} tools including GTM Brief`, note: 'full launch playbook' },
+      { txt: `${PLAN_LIMITS.team.verificationsPerMonth} validations per cycle`, note: 'built for active teams' },
+      { txt: 'Otto Q&A', note: `${PLAN_LIMITS.team.ottoQuestionsPerMonth} questions per month` },
+      { txt: `${PLAN_LIMITS.team.seatsIncluded} seats included with shared team feed`, note: `extra seats €${EXTRA_SEAT}/mo` },
     ],
   },
   studio: {
-    monthly: 349, annual: 279, annualTotal: 3348, saveEur: 840,
-    tag: '100 validations / cycle · up to 10 seats',
+    ...planPrices('studio'),
+    tag: `${PLAN_LIMITS.studio.verificationsPerMonth} validations / cycle · ${PLAN_LIMITS.studio.seatsIncluded} seats included`,
     features: [
-      { txt: 'All 11 tools + white-label PDF reports' },
-      { txt: '100 validations per cycle' },
-      { txt: 'Otto Q&A', note: '120 questions per month' },
-      { txt: 'Up to 10 seats + API access' },
+      { txt: `All ${PLAN_TOOL_GATES.studio.length} tools + white-label PDF reports` },
+      { txt: `${PLAN_LIMITS.studio.verificationsPerMonth} validations per cycle` },
+      { txt: 'Otto Q&A', note: `${PLAN_LIMITS.studio.ottoQuestionsPerMonth} questions per month` },
+      { txt: `${PLAN_LIMITS.studio.seatsIncluded} seats included + API access`, note: `extra seats €${EXTRA_SEAT}/mo` },
     ],
   },
 };
