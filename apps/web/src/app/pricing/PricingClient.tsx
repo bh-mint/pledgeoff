@@ -156,6 +156,83 @@ function renderCell(val: string, emphasize = false, soon = false) {
   );
 }
 
+function MarketDataPackSection() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "saving" | "done" | "error">("idle");
+
+  async function join(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (status === "saving" || status === "done") return;
+    setStatus("saving");
+    const res = await fetch("/api/v1/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, source: "market_data_pack" }),
+    }).catch(() => null);
+    setStatus(res?.ok ? "done" : "error");
+  }
+
+  return (
+    <div style={{ marginTop: "48px", border: "1px solid var(--line)", background: "var(--surface)", padding: "24px" }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: "10px", flexWrap: "wrap", marginBottom: "6px" }}>
+        <span className="eye" style={{ marginBottom: 0 }}>Add-on</span>
+        <SoonBadge />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "24px", alignItems: "start" }}>
+        <div>
+          <h3 style={{ fontFamily: "var(--font-bitter), serif", fontSize: "22px", fontWeight: 700, color: "var(--ink)", margin: "6px 0 4px" }}>
+            Market Data Pack
+          </h3>
+          <p className="mono" style={{ fontSize: "12px", color: "var(--dim)", marginBottom: "12px" }}>
+            €49 / report · or €199 / mo
+          </p>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, fontSize: "13px", color: "var(--dim)", lineHeight: 2 }}>
+            <li>✦ Real market size data (Statista)<SoonBadge /></li>
+            <li>✦ Funding &amp; growth data (Crunchbase)<SoonBadge /></li>
+            <li>✦ Verified TAM / SAM / SOM in every Revenue Model</li>
+          </ul>
+        </div>
+        <div>
+          <p style={{ fontSize: "13px", color: "var(--dim)", margin: "6px 0 12px", lineHeight: 1.7 }}>
+            Today PledgeOFF estimates market size from live signals. The Market Data Pack replaces
+            estimates with verified research data. Join the waitlist and we&apos;ll email you when it ships.
+          </p>
+          {status === "done" ? (
+            <p className="mono" style={{ fontSize: "12px", color: "var(--go)" }}>
+              You&apos;re on the list. We&apos;ll be in touch.
+            </p>
+          ) : (
+            <form onSubmit={join} style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@company.com"
+                aria-label="Email for Market Data Pack waitlist"
+                style={{ flex: "1 1 200px", padding: "9px 12px", fontSize: "13px", background: "var(--bg)", border: "1px solid var(--line)", color: "var(--ink)", borderRadius: 3 }}
+              />
+              <button
+                type="submit"
+                disabled={status === "saving"}
+                className="mono"
+                style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", padding: "9px 18px", background: "var(--ink)", color: "var(--bg)", border: "none", cursor: "pointer", opacity: status === "saving" ? 0.6 : 1, borderRadius: 3 }}
+              >
+                {status === "saving" ? "Joining…" : "Join waitlist"}
+              </button>
+              {status === "error" && (
+                <p className="mono" style={{ fontSize: "11px", color: "var(--kill)", width: "100%" }}>
+                  Something went wrong — try again.
+                </p>
+              )}
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   const id = `faq-${q.slice(0, 20).replace(/\s+/g, "-").toLowerCase()}`;
@@ -570,6 +647,9 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             </div>
           </div>
         </div>
+
+        {/* Market Data Pack — coming soon + waitlist (16.1) */}
+        <MarketDataPackSection />
 
         {/* ROI Calculator */}
         <ROICalculator />
