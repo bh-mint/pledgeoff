@@ -27,8 +27,8 @@ export { GitHubSourceAdapter } from './sources/github-source-adapter';
 export { BraveSearchSourceAdapter } from './sources/brave-search-source-adapter';
 export { GroqLLMAdapter } from './llm/groq-llm-adapter';
 export { AnthropicLLMAdapter } from './llm/anthropic-llm-adapter';
-export { sendVerdictEmail, sendTeamInviteEmail, sendSequenceEmail, sendPaymentFailedEmail, sendQueueAlertEmail, sendAccuracyReportEmail, sendWeeklyDigestEmail, sendOutcomeReminderEmail } from './email/resend-email-adapter';
-export type { VerdictEmailParams, TeamInviteEmailParams, SequenceEmailParams, SequenceDay, PaymentFailedEmailParams, QueueAlertEmailParams, AccuracyReportEmailParams, WeeklyDigestEmailParams, WeeklyDigestIdea, OutcomeReminderEmailParams } from './email/resend-email-adapter';
+export { sendVerdictEmail, sendTeamInviteEmail, sendSequenceEmail, sendPaymentFailedEmail, sendQueueAlertEmail, sendAccuracyReportEmail, sendWeeklyDigestEmail, sendOutcomeReminderEmail, sendMovementAlertEmail } from './email/resend-email-adapter';
+export type { VerdictEmailParams, TeamInviteEmailParams, SequenceEmailParams, SequenceDay, PaymentFailedEmailParams, QueueAlertEmailParams, AccuracyReportEmailParams, WeeklyDigestEmailParams, WeeklyDigestIdea, OutcomeReminderEmailParams, MovementAlertEmailParams } from './email/resend-email-adapter';
 export { VoyageEmbeddingAdapter } from './embeddings/voyage-embedding-adapter';
 export { SupabaseApiKeyRepository } from './storage/supabase-api-key-repository';
 export { SupabaseUsageLogAdapter } from './storage/supabase-usage-log-adapter';
@@ -47,5 +47,5 @@ export { SupabaseInterviewGuideRepository } from './storage/supabase-interview-g
 export { SupabaseTranscriptAnalysisRepository } from './storage/supabase-transcript-analysis-repository';
 export { SupabaseCompetitorSnapshotRepository } from './storage/supabase-competitor-snapshot-repository';
 export { SupabaseLandscapeSnapshotRepository } from './storage/supabase-landscape-snapshot-repository';
-export { notifySlack, sendSlackTestNotification } from './slack/slack-notifier';
-export type { SlackNotifyParams } from './slack/slack-notifier';
+export { notifySlack, notifySlackMovement, sendSlackTestNotification } from './slack/slack-notifier';
+export type { SlackNotifyParams, SlackMovementParams } from './slack/slack-notifier';

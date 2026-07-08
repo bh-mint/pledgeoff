@@ -222,6 +222,83 @@ export async function sendSequenceEmail(
   }
 }
 
+export interface MovementAlertEmailParams {
+  to: string;
+  name?: string;
+  ideaId: string;
+  ideaExcerpt: string;
+  diffs: readonly { field: string; before: string; after: string }[];
+  traceId: string;
+}
+
+// Major market movement alert — sent from the competitor.changed.v1 consumer.
+// Returns true only when Resend accepted the email.
+export async function sendMovementAlertEmail(
+  apiKey: string,
+  params: MovementAlertEmailParams,
+): Promise<boolean> {
+  const { to, name, ideaId, ideaExcerpt, diffs, traceId } = params;
+  const displayName = name?.split(' ')[0] ?? 'there';
+  const shown = diffs.slice(0, 5);
+
+  const diffRows = shown
+    .map((d) => `
+      <tr>
+        <td style="padding:8px 12px;border-bottom:1px solid #2a2a2a;font-size:12px;color:#f5f5f5;font-family:monospace;">${d.field}</td>
+        <td style="padding:8px 12px;border-bottom:1px solid #2a2a2a;font-size:12px;color:#888;">${d.before} <span style="color:#b6f04c;">→</span> ${d.after}</td>
+      </tr>`)
+    .join('');
+  const moreRow = diffs.length > shown.length
+    ? `<tr><td colspan="2" style="padding:8px 12px;font-size:11px;color:#555;font-family:monospace;">+${diffs.length - shown.length} more changes</td></tr>`
+    : '';
+
+  const html = EMAIL_SHELL(`
+    <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">MARKET MOVEMENT · PLEDGEOFF</p>
+    <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+      ${displayName}, a competitor just moved.
+    </h1>
+    <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+      Major changes detected in the market around:
+    </p>
+    <p style="margin:0 0 20px;font-size:14px;color:#f5f5f5;line-height:1.6;font-style:italic;border-left:2px solid #2a2a2a;padding-left:12px;">
+      "${ideaExcerpt}"
+    </p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border:1px solid #2a2a2a;border-radius:6px;">
+      ${diffRows}${moreRow}
+    </table>
+    <a href="https://pledgeoff.com/ideas/${ideaId}/competitors" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+      See the full picture →
+    </a>
+    <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+    <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team · You can turn these off in Settings → Notifications</p>
+  `);
+
+  const start = Date.now();
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'PledgeOFF <hello@pledgeoff.com>',
+        to: [to],
+        subject: 'Market movement: a competitor just changed',
+        html,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      log.warn({ traceId, target: 'resend', operation: 'sendMovementAlertEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${res.status}` }, `Resend error: ${body}`);
+      return false;
+    }
+    log.info({ traceId, target: 'resend', operation: 'sendMovementAlertEmail', latencyMs: Date.now() - start, outcome: 'success' }, 'Movement alert email sent');
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown';
+    log.error({ traceId, target: 'resend', operation: 'sendMovementAlertEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'FETCH_ERROR' }, `Resend fetch failed: ${message}`);
+    return false;
+  }
+}
+
 export interface OutcomeReminderEmailParams {
   to: string;
   name?: string;

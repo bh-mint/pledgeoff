@@ -15,6 +15,11 @@ const NOTIFICATION_ITEMS = [
     desc: "When a stale idea rises to the top of your decision queue.",
   },
   {
+    key: "movement_alerts",
+    label: "Market movement alerts",
+    desc: "When a competitor makes a major move — price change, repositioning, new segment.",
+  },
+  {
     key: "weekly_digest",
     label: "Weekly progress summary",
     desc: "Mondays — what you validated, what you killed, what's launch-ready.",

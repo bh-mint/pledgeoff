@@ -8,6 +8,7 @@ const NotificationPrefsSchema = z.object({
   weekly_digest: z.boolean().optional(),
   signal_feed: z.boolean().optional(),
   score: z.boolean().optional(),
+  movement_alerts: z.boolean().optional(),
 });
 
 export async function GET() {

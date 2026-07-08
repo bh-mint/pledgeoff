@@ -44,6 +44,8 @@ import {
   UpstashRedisCacheAdapter,
   VoyageEmbeddingAdapter,
   sendVerdictEmail,
+  sendMovementAlertEmail,
+  notifySlackMovement,
 } from '@pledgeoff/adapters';
 import type { ICache, ISourceAdapter, ILLMClient, IEmbeddingClient } from '@pledgeoff/core';
 import { PostgresEventBus, RedisStreamsEventBus } from '@pledgeoff/eventbus';
@@ -95,7 +97,10 @@ import {
   AnalyzeTranscriptUseCase,
   allowedSourcesForPlan,
 } from '@pledgeoff/core';
-import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1 } from '@pledgeoff/contracts';
+import type { IdeaCreatedV1, SignalsFetchedV1, DecisionReadyV1, CompetitorChangedV1 } from '@pledgeoff/contracts';
+import { createNotification } from '@pledgeoff/core';
+import { logger } from '@pledgeoff/observability';
+import { getTeamSlackWebhook } from '@/server/slack/getTeamSlackWebhook';
 import type { DomainEvent } from '@pledgeoff/core';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { createSupabaseServiceClient } from './supabase-server';
@@ -942,6 +947,74 @@ class AppContainer {
         } catch (error) {
           Sentry.captureException(error, {
             extra: { eventType: 'decision.ready.v1.webhook', traceId: event.traceId, ideaId: event.payload.ideaId },
+          });
+        }
+      },
+    );
+
+    // Wire: competitor.changed.v1 → in-app notification + Slack + email alert (15.6)
+    this._eventBus.subscribe<CompetitorChangedV1['payload']>(
+      'competitor.changed.v1',
+      async (event: DomainEvent<CompetitorChangedV1['payload']>) => {
+        try {
+          const { ideaId, source, diffs, majorChanges } = event.payload;
+
+          const ideaResult = await this.ideaRepo.findById(ideaId);
+          if (ideaResult.isErr() || !ideaResult.value) return;
+          const idea = ideaResult.value;
+
+          // In-app notification — always, regardless of email preference
+          const notif = createNotification({
+            userId: idea.userId,
+            type: 'movement_alert',
+            title: source === 'competitors' ? 'Competitor movement detected' : 'Market landscape shifted',
+            body: `${diffs.length} change${diffs.length > 1 ? 's' : ''}${majorChanges > 0 ? ` (${majorChanges} major)` : ''} — check the analysis.`,
+          });
+          const saved = await this.notificationRepo.save(notif);
+          if (saved.isErr()) {
+            logger.error({ traceId: event.traceId, ideaId, error: saved.error.message }, 'movement_alert.notification_save_failed');
+          }
+
+          // Slack — if the user's team has a webhook configured
+          const webhookUrl = await getTeamSlackWebhook(idea.userId, this._supabase);
+          if (webhookUrl) {
+            await notifySlackMovement({
+              webhookUrl,
+              ideaId,
+              ideaText: idea.text,
+              diffs,
+              majorChanges,
+              traceId: event.traceId,
+            });
+          }
+
+          // Email — only for major changes, opt-in via movement_alerts pref
+          // (matches the product-wide opt-in convention in Settings → Notifications)
+          const resendKey = process.env.RESEND_API_KEY;
+          if (majorChanges > 0 && resendKey && process.env.DISABLE_EMAIL !== 'true') {
+            const { data: profile } = await this._supabase
+              .from('profiles')
+              .select('email, first_name, last_name, notification_preferences')
+              .eq('id', idea.userId)
+              .single();
+
+            const prefs = (profile?.notification_preferences ?? {}) as Record<string, unknown>;
+            if (profile?.email && prefs['movement_alerts'] === true) {
+              const name = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || undefined;
+              const excerpt = idea.text.length > 140 ? `${idea.text.slice(0, 140)}…` : idea.text;
+              await sendMovementAlertEmail(resendKey, {
+                to: profile.email,
+                name,
+                ideaId,
+                ideaExcerpt: excerpt,
+                diffs: diffs.filter((d) => d.significance === 'major'),
+                traceId: event.traceId,
+              });
+            }
+          }
+        } catch (error) {
+          Sentry.captureException(error, {
+            extra: { eventType: 'competitor.changed.v1.notify', traceId: event.traceId, ideaId: event.payload.ideaId },
           });
         }
       },

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { getAuthToken } from "@/lib/auth-client";
-import type { CompetitorAnalysis } from "@pledgeoff/core";
+import { diffCompetitors } from "@pledgeoff/core";
+import type { CompetitorAnalysis, SnapshotDiff } from "@pledgeoff/core";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { CompetitorPositioningMap } from "../VerdictCharts";
 
@@ -15,6 +16,8 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
   const [analysis, setAnalysis] = useState<CompetitorAnalysis | null>(initialAnalysis);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [changes, setChanges] = useState<SnapshotDiff[] | null>(null);
+  const [changesOpen, setChangesOpen] = useState(false);
 
   async function run(force = false) {
     if (loading) return;
@@ -39,7 +42,13 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
     }
 
     const json = await res.json();
-    setAnalysis(json.data);
+    const next = json.data as CompetitorAnalysis;
+    // Same pure diff the server uses for competitor.changed.v1 — no extra API call
+    if (force && analysis) {
+      setChanges(diffCompetitors(analysis, next));
+      setChangesOpen(false);
+    }
+    setAnalysis(next);
     setLoading(false);
   }
 
@@ -88,19 +97,79 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
   return (
     <div className="space-y-10" style={{ opacity: loading ? 0.5 : 1, transition: "opacity 0.2s" }}>
       {/* Re-check bar */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 4 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "8px 12px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 4 }}>
         <span className="mono text-[10px]" style={{ color: "var(--dim)" }}>
           Last checked {new Date(analysis.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
         </span>
-        <button
-          className="btn-g"
-          style={{ fontSize: 11, padding: "3px 10px", opacity: loading ? 0.5 : 1 }}
-          onClick={() => run(true)}
-          disabled={loading}
-        >
-          {loading ? "Refreshing…" : "Re-check market →"}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {changes !== null && !loading && (
+            changes.length > 0 ? (
+              <button
+                className="mono text-[10px]"
+                style={{ padding: "3px 10px", background: "color-mix(in srgb, var(--caution) 12%, transparent)", color: "var(--caution)", border: "1px solid color-mix(in srgb, var(--caution) 35%, transparent)", borderRadius: 3, cursor: "pointer" }}
+                onClick={() => setChangesOpen(true)}
+              >
+                {changes.length} change{changes.length > 1 ? "s" : ""}
+                {changes.some((c) => c.significance === "major") ? " ▲" : ""}
+              </button>
+            ) : (
+              <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>No changes</span>
+            )
+          )}
+          <button
+            className="btn-g"
+            style={{ fontSize: 11, padding: "3px 10px", opacity: loading ? 0.5 : 1 }}
+            onClick={() => run(true)}
+            disabled={loading}
+          >
+            {loading ? "Refreshing…" : "Re-check market →"}
+          </button>
+        </div>
       </div>
+
+      {/* Changes modal */}
+      {changesOpen && changes && changes.length > 0 && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Market changes since last check"
+          style={{ position: "fixed", inset: 0, zIndex: 60, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.55)", padding: 16 }}
+          onClick={() => setChangesOpen(false)}
+        >
+          <div
+            style={{ maxWidth: 520, width: "100%", maxHeight: "70vh", overflowY: "auto", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: 6, padding: 20 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <span className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+                Changes since last check
+              </span>
+              <button
+                aria-label="Close"
+                className="mono text-[14px]"
+                style={{ background: "none", border: "none", color: "var(--dim)", cursor: "pointer", lineHeight: 1 }}
+                onClick={() => setChangesOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+              {changes.map((c, i) => (
+                <li key={i} style={{ padding: "10px 0", borderTop: i > 0 ? "1px solid var(--line)" : "none" }}>
+                  <div className="mono text-[11px] mb-1" style={{ color: c.significance === "major" ? "var(--caution)" : "var(--t2)" }}>
+                    {c.significance === "major" ? "▲" : "△"} {c.field}
+                  </div>
+                  <div className="text-[12px]" style={{ color: "var(--t2)" }}>
+                    <span style={{ color: "var(--t3)" }}>{c.before}</span>
+                    <span className="mono" style={{ color: "var(--validated)", margin: "0 6px" }}>→</span>
+                    {c.after}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Positioning map */}
       <CompetitorPositioningMap competitors={analysis.competitors} />

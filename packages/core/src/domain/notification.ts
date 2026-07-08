@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-export const NotificationTypeSchema = z.enum(['queue_alert', 'accuracy_report']);
+// Kept in sync with the notifications_type_check DB constraint
+export const NotificationTypeSchema = z.enum(['queue_alert', 'accuracy_report', 'movement_alert']);
 export type NotificationType = z.infer<typeof NotificationTypeSchema>;
 
 export const NotificationSchema = z.object({

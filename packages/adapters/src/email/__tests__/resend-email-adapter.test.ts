@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { sendSequenceEmail, sendOutcomeReminderEmail } from '../resend-email-adapter';
+import { sendSequenceEmail, sendOutcomeReminderEmail, sendMovementAlertEmail } from '../resend-email-adapter';
 
 const traceId = crypto.randomUUID();
 const params = { to: 'founder@example.com', name: 'Ada Lovelace', day: 3 as const, traceId };
@@ -68,5 +68,33 @@ describe('sendOutcomeReminderEmail', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('ECONNRESET')));
 
     await expect(sendOutcomeReminderEmail('re_test_key', reminderParams)).resolves.toBe(false);
+  });
+});
+
+describe('sendMovementAlertEmail', () => {
+  const alertParams = {
+    to: 'founder@example.com',
+    name: 'Ada Lovelace',
+    ideaId: crypto.randomUUID(),
+    ideaExcerpt: 'App to track daily habits',
+    diffs: [{ field: 'Notion · price', before: '$8/mo', after: '$12/mo' }],
+    traceId,
+  };
+
+  it('returns true and includes the diff rows when Resend accepts', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 'email_789' }) });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(sendMovementAlertEmail('re_test_key', alertParams)).resolves.toBe(true);
+
+    const body = JSON.parse(String((fetchMock.mock.calls[0]?.[1] as RequestInit).body));
+    expect(body.html).toContain('Notion · price');
+    expect(body.html).toContain(`/ideas/${alertParams.ideaId}/competitors`);
+  });
+
+  it('returns false when Resend responds with an HTTP error', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500, text: async () => 'boom' }));
+
+    await expect(sendMovementAlertEmail('re_test_key', alertParams)).resolves.toBe(false);
   });
 });

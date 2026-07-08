@@ -5,7 +5,7 @@ import { getAuthToken } from "@/lib/auth-client";
 
 type Notification = {
   id: string;
-  type: "queue_alert" | "accuracy_report";
+  type: "queue_alert" | "accuracy_report" | "movement_alert";
   title: string;
   body: string;
   readAt: string | null;
@@ -27,6 +27,7 @@ function relativeTime(iso: string): string {
 function typeIcon(type: Notification["type"]): string {
   if (type === "queue_alert") return "↑";
   if (type === "accuracy_report") return "◎";
+  if (type === "movement_alert") return "▲";
   return "·";
 }
 
