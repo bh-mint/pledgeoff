@@ -1,12 +1,14 @@
 import type { Signal } from '@pledgeoff/core';
 
-export const CUSTOMER_PROMPT_VERSION = 'customerPrompt.v1' as const;
+export const CUSTOMER_PROMPT_VERSION = 'customerPrompt.v2' as const;
 export const CUSTOMER_LIMITED_PROMPT_VERSION = 'customerLimitedPrompt.v1' as const;
 
 export function buildCustomerPrompt(ideaText: string, signals: Signal[]): string {
   const signalLines = signals
     .map((s, i) => `[${i + 1}] source:${s.source} sentiment:${s.sentiment} url:${s.url}\ntitle: ${s.title}\nsummary: ${s.summary}`)
     .join('\n\n');
+
+  const hasReviews = signals.some((s) => s.source === 'reviews');
 
   return `You are a customer intelligence analyst. Analyze market signals for a startup idea and identify customer segments, pain points, sentiment, and representative quotes.
 
@@ -15,6 +17,10 @@ ${ideaText}
 
 MARKET SIGNALS (${signals.length} total — use ONLY these as source for quotes):
 ${signalLines || 'No signals available.'}
+${hasReviews ? `
+REVIEW SIGNALS PRIORITY:
+Signals with source:reviews come from G2 and Capterra — real customers reviewing existing products in this space. Treat them as the strongest evidence for pain points: complaints in reviews are validated pain, praised features are table stakes. Rank pain points backed by review signals above ones inferred from discussions.
+` : ''}
 
 Respond ONLY with a valid JSON object matching this exact schema:
 {
@@ -39,7 +45,7 @@ Respond ONLY with a valid JSON object matching this exact schema:
   "quotes": [
     {
       "text": "<verbatim text from the signal summary above — do NOT invent quotes>",
-      "source": "<'reddit'|'github'>",
+      "source": "<the exact source value of the quoted signal, e.g. 'brave'|'github'|'hn'|'reviews'>",
       "url": "<exact url from the signal above>"
     }
   ]

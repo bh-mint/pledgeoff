@@ -1,6 +1,6 @@
 import type { Signal } from '@pledgeoff/core';
 
-export const COMPETITOR_PROMPT_VERSION = 'competitor-v4';
+export const COMPETITOR_PROMPT_VERSION = 'competitor-v5';
 
 export function buildCompetitorPrompt(ideaText: string, signals: Signal[]): string {
   const signalBlock = signals.length === 0
@@ -8,6 +8,8 @@ export function buildCompetitorPrompt(ideaText: string, signals: Signal[]): stri
     : signals.map((s, i) =>
         `[${i + 1}] ${s.source.toUpperCase()} | ${s.title}\n${s.summary ?? ''}`
       ).join('\n\n');
+
+  const hasDirectionSignals = signals.some((s) => s.source === 'jobs' || s.source === 'news');
 
   return `You are a competitive intelligence analyst. Your task has three phases.
 
@@ -27,7 +29,16 @@ For EVERY competitor you include (all phases), populate these additional fields 
 - "weaknesses": 2–4 strings describing where this competitor falls short (e.g. "No API access on free plan", "Steep learning curve", "No mobile app"). Only include weaknesses you're confident about.
 Do NOT fabricate. If unsure, omit the field entirely.
 </enhanced_fields_instructions>
-
+${hasDirectionSignals ? `
+<direction_signals_instructions>
+Signals marked JOBS (competitor job postings) and NEWS (announcements, launches, funding) reveal where a competitor is heading, not just where they are today.
+When a JOBS or NEWS signal clearly refers to a competitor you include:
+- Infer their direction from it (e.g. hiring ML engineers → investing in AI features; hiring enterprise AEs → moving upmarket; a funding round → about to accelerate).
+- Reflect the inference in that competitor's "positioning" or "strengths", phrased as direction (e.g. "Expanding into enterprise — actively hiring enterprise sales").
+- Add the underlying fact as an evidence string in that competitor's "signals" array.
+Only use direction signals that name or unambiguously refer to the competitor. Do NOT stretch a generic job posting into a claim about a specific company.
+</direction_signals_instructions>
+` : ''}
 <phase0_instructions>
 FIRST: scan the <idea> text above for any competitor names mentioned explicitly (e.g. "Unlike X", "compared to Y", "similar to Z", product names cited by the founder).
 For each explicitly named competitor found in the idea text:

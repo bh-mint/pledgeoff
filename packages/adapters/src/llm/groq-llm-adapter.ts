@@ -2,7 +2,7 @@ import Groq from 'groq-sdk';
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
 import type { ILLMClient, LLMDecisionRequest, LLMDecisionResponse, LLMSimulationRequest, LLMSimulationResponse, LLMLandingRequest, LLMLandingResponse, LLMCustomerRequest, LLMCustomerResponse, LLMBuildRequest, LLMBuildResponse, LLMSearchQueriesRequest, LLMSearchQueriesResponse, LLMCompetitorRequest, LLMCompetitorResponse, LLMRelevanceRequest, LLMRelevanceResponse, LLMLaunchKitRequest, LLMLaunchKitResponse, LLMPriorityExplanationRequest, LLMPriorityExplanationResponse, LLMFeatureAnalysisRequest, LLMFeatureAnalysisResponse, LLMBattlecardRequest, LLMBattlecardResponse, LLMMarketLandscapeRequest, LLMMarketLandscapeResponse, LLMInterviewGuideRequest, LLMInterviewGuideResponse, LLMTranscriptRequest, LLMTranscriptResponse, IUsageLogger } from '@pledgeoff/core';
-import { LLMClientError } from '@pledgeoff/core';
+import { LLMClientError, SignalSourceSchema } from '@pledgeoff/core';
 import { createLogger, getTracer, SpanStatusCode } from '@pledgeoff/observability';
 import { buildDecisionPrompt, PROMPT_VERSION } from './decision-prompt.v1';
 import { buildSimulationPrompt, SIMULATION_PROMPT_VERSION } from './simulation-prompt.v1';
@@ -80,7 +80,7 @@ const LLMCustomerResponseSchema = z.object({
   }),
   quotes: z.array(z.object({
     text: z.string().min(1).max(400),
-    source: z.enum(['reddit', 'hn', 'github']),
+    source: SignalSourceSchema,
     url: z.string().min(1),
   })).max(10),
 });

@@ -30,7 +30,15 @@ const SIZE_TOOLTIP: Record<CustomerSegment["size"], string> = {
 
 const SOURCE_LABEL: Record<string, string> = {
   reddit: "Reddit",
+  brave: "Reddit", // Brave Search adapter fetches site:reddit.com
   github: "GitHub",
+  hn: "Hacker News",
+  devto: "Dev.to",
+  producthunt: "Product Hunt",
+  google: "Web",
+  reviews: "G2 · Capterra",
+  news: "News",
+  jobs: "Job posting",
 };
 
 export function CustomersClient({ ideaId, initialAnalysis }: Props) {

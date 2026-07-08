@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SignalSourceSchema } from './signal';
 
 export const CustomerSegmentSchema = z.object({
   name: z.string().min(1).max(80),
@@ -22,7 +23,8 @@ export type SentimentBreakdown = z.infer<typeof SentimentBreakdownSchema>;
 
 export const CustomerQuoteSchema = z.object({
   text: z.string().min(1).max(400),
-  source: z.enum(['reddit', 'hn', 'github']),
+  // Any signal source can be quoted ('brave' = Reddit via Brave Search at runtime)
+  source: SignalSourceSchema,
   url: z.string().url(),
 });
 export type CustomerQuote = z.infer<typeof CustomerQuoteSchema>;
