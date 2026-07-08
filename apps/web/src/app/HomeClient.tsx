@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { PHBanner } from "@/components/PHBanner";
 import { PRICING } from "@/lib/pricing.config";
 import { HeroLeft } from "@/components/home/HeroLeft";
+import { HomeFAQ } from "@/components/home/HomeFAQ";
 
 const FEATURES = [
   {
@@ -733,6 +734,9 @@ export function HomeClient() {
           </Link>
         </div>
       </div>
+
+      {/* ── FAQ ── */}
+      <HomeFAQ />
 
       {/* ── CTA BAND ── */}
       <div

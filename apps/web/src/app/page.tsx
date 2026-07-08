@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HomeClient } from "./HomeClient";
+import { HOME_FAQ } from "./home-faq";
 
 export const metadata: Metadata = {
   title: { absolute: "PledgeOFF — Kill bad ideas before they kill you" },
@@ -52,11 +53,22 @@ const websiteJsonLd = {
   url: "https://pledgeoff.com",
 };
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: HOME_FAQ.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
 export default function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <HomeClient />
     </>
   );
