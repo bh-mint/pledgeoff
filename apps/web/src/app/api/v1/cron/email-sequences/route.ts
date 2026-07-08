@@ -29,10 +29,14 @@ export async function GET(req: Request): Promise<Response> {
   const errors: string[] = [];
 
   for (const day of SEQUENCE_DAYS) {
-    const windowStart = new Date(Date.now() - (day * 24 + 12) * 60 * 60 * 1000).toISOString();
+    // Window opens 12h before the sequence day and stays open 36h after it, so a
+    // profile whose send failed is retried on the next daily run instead of being
+    // lost. The already-sent check below (plus the UNIQUE constraint) prevents
+    // duplicates. Windows must not overlap: closest day pair is 3/7 → 48h apart.
+    const windowStart = new Date(Date.now() - (day * 24 + 36) * 60 * 60 * 1000).toISOString();
     const windowEnd   = new Date(Date.now() - (day * 24 - 12) * 60 * 60 * 1000).toISOString();
 
-    // Fetch profiles created within the 24h window for this sequence day
+    // Fetch profiles created within the 48h window for this sequence day
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('id, email, first_name, last_name')
