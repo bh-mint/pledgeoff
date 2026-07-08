@@ -12,6 +12,7 @@ on:
     - cron: '0 6 * * *' # past-due-billing + movement-check
     - cron: '0 8 * * 1' # weekly-digest (Mondays)
     - cron: '0 9 * * *' # email-sequences
+    - cron: '0 10 * * *' # outcome-reminders
     - cron: '1 0 1 * *' # reset-otto-balance (1st of month)
     - cron: '0 9 2 * *' # accuracy-report (2nd of month)
   workflow_dispatch:
@@ -29,6 +30,7 @@ on:
           - movement-check
           - weekly-digest
           - email-sequences
+          - outcome-reminders
           - reset-otto-balance
           - accuracy-report
 
@@ -63,6 +65,7 @@ jobs:
             '0 6 * * *') call past-due-billing && call movement-check ;;
             '0 8 * * 1') call weekly-digest ;;
             '0 9 * * *') call email-sequences ;;
+            '0 10 * * *') call outcome-reminders ;;
             '1 0 1 * *') call reset-otto-balance ;;
             '0 9 2 * *') call accuracy-report ;;
             *) call "$TARGET" ;;

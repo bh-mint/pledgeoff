@@ -222,6 +222,72 @@ export async function sendSequenceEmail(
   }
 }
 
+export interface OutcomeReminderEmailParams {
+  to: string;
+  name?: string;
+  ideaId: string;
+  ideaExcerpt: string;
+  verdict: 'GO' | 'KILL' | 'PIVOT';
+  traceId: string;
+}
+
+// Returns true only when Resend accepted the email — callers must not mark the
+// reminder as sent on false, otherwise the reminder is silently lost.
+export async function sendOutcomeReminderEmail(
+  apiKey: string,
+  params: OutcomeReminderEmailParams,
+): Promise<boolean> {
+  const { to, name, ideaId, ideaExcerpt, verdict, traceId } = params;
+  const displayName = name?.split(' ')[0] ?? 'there';
+  const verdictColor = verdict === 'GO' ? '#b6f04c' : verdict === 'KILL' ? '#ff5c5c' : '#f0b64c';
+
+  const html = EMAIL_SHELL(`
+    <p style="margin:0 0 4px;font-size:11px;color:#555;font-family:monospace;text-transform:uppercase;letter-spacing:0.08em;">30 DAYS LATER · PLEDGEOFF</p>
+    <h1 style="margin:8px 0 20px;font-size:22px;font-weight:700;color:#f5f5f5;letter-spacing:-0.03em;line-height:1.1;">
+      ${displayName}, what happened with this idea?
+    </h1>
+    <p style="margin:0 0 16px;font-size:14px;color:#aaa;line-height:1.6;">
+      A month ago you got a <strong style="color:${verdictColor};">${verdict}</strong> on:
+    </p>
+    <p style="margin:0 0 16px;font-size:14px;color:#f5f5f5;line-height:1.6;font-style:italic;border-left:2px solid #2a2a2a;padding-left:12px;">
+      "${ideaExcerpt}"
+    </p>
+    <p style="margin:0 0 24px;font-size:14px;color:#aaa;line-height:1.6;">
+      Did you build it? Did it work? Your answer takes 10 seconds and makes every future verdict sharper — yours and everyone else's.
+    </p>
+    <a href="https://pledgeoff.com/ideas/${ideaId}" style="display:inline-block;background:#b6f04c;color:#000;font-size:13px;font-weight:600;padding:10px 20px;border-radius:6px;text-decoration:none;">
+      Report the outcome →
+    </a>
+    <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0;">
+    <p style="margin:0;font-size:11px;color:#444;font-family:monospace;">— PledgeOFF Team</p>
+  `);
+
+  const start = Date.now();
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'PledgeOFF <hello@pledgeoff.com>',
+        to: [to],
+        subject: 'What happened with your idea?',
+        html,
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      log.warn({ traceId, target: 'resend', operation: 'sendOutcomeReminderEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: `HTTP_${res.status}` }, `Resend error: ${body}`);
+      return false;
+    }
+    log.info({ traceId, target: 'resend', operation: 'sendOutcomeReminderEmail', latencyMs: Date.now() - start, outcome: 'success' }, 'Outcome reminder email sent');
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown';
+    log.error({ traceId, target: 'resend', operation: 'sendOutcomeReminderEmail', latencyMs: Date.now() - start, outcome: 'error', errorCode: 'FETCH_ERROR' }, `Resend fetch failed: ${message}`);
+    return false;
+  }
+}
+
 export interface VerdictEmailParams {
   to: string;
   ideaId: string;
