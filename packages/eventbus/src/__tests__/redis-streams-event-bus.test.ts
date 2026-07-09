@@ -166,6 +166,59 @@ describe('RedisStreamsEventBus', () => {
     });
   });
 
+  describe('processStream — raw Upstash REST shapes', () => {
+    // @upstash/redis has no deserializer for XAUTOCLAIM/XREADGROUP: entries
+    // arrive as [id, [field, value]] tuples and parseRecursive may have
+    // already turned the eventJson string into an object.
+    it('dispatches xautoclaim tuples with eventJson as a pre-parsed object', async () => {
+      const event = makeEvent('competitor.changed.v1');
+      const supabase = makeSupabase();
+      const bus = new RedisStreamsEventBus(supabase as never, 'https://x.upstash.io', 'token');
+      const handler = vi.fn().mockResolvedValue(undefined);
+      bus.subscribe('competitor.changed.v1', handler);
+
+      const { xautoclaim } = await getRedisMocks();
+      xautoclaim.mockResolvedValue(['0-0', [['17-0', ['eventJson', event]]]]);
+
+      const stats = await bus.processStream();
+
+      expect(stats.processed).toBe(1);
+      expect(handler).toHaveBeenCalledWith(event);
+      const { xack } = await getRedisMocks();
+      expect(xack).toHaveBeenCalledWith('pledgeoff:events', 'pledgeoff-workers', '17-0');
+    });
+
+    it('dispatches xreadgroup raw stream tuples with eventJson as a string', async () => {
+      const event = makeEvent('idea.created.v1');
+      const supabase = makeSupabase();
+      const bus = new RedisStreamsEventBus(supabase as never, 'https://x.upstash.io', 'token');
+      const handler = vi.fn().mockResolvedValue(undefined);
+      bus.subscribe('idea.created.v1', handler);
+
+      const { xreadgroup } = await getRedisMocks();
+      xreadgroup.mockResolvedValue([['pledgeoff:events', [['18-0', ['eventJson', JSON.stringify(event)]]]]]);
+
+      const stats = await bus.processStream();
+
+      expect(stats.processed).toBe(1);
+      expect(handler).toHaveBeenCalledWith(event);
+    });
+
+    it('ACKs poisoned messages so they stop looping, counting them failed', async () => {
+      const supabase = makeSupabase();
+      const bus = new RedisStreamsEventBus(supabase as never, 'https://x.upstash.io', 'token');
+
+      const { xautoclaim } = await getRedisMocks();
+      xautoclaim.mockResolvedValue(['0-0', [['19-0', ['someOtherField', 'junk']]]]);
+
+      const stats = await bus.processStream();
+
+      expect(stats.failed).toBe(1);
+      const { xack } = await getRedisMocks();
+      expect(xack).toHaveBeenCalledWith('pledgeoff:events', 'pledgeoff-workers', '19-0');
+    });
+  });
+
   describe('processEvents (unified entry point)', () => {
     it('falls back to outbox when Redis stream is unavailable', async () => {
       const event = makeEvent();
@@ -175,13 +228,30 @@ describe('RedisStreamsEventBus', () => {
       const bus = new RedisStreamsEventBus(supabase as never, 'https://x.upstash.io', 'token');
       bus.subscribe(event.eventType, vi.fn().mockResolvedValue(undefined));
 
-      // xautoclaim throws → processStream throws → processEvents falls back to outbox
+      // xautoclaim throws → processStream throws → outbox sweep delivers
       const { xautoclaim } = await getRedisMocks();
       xautoclaim.mockRejectedValueOnce(new Error('Redis unavailable'));
 
       const stats = await bus.processEvents();
 
       expect(stats.processed).toBe(1);
+    });
+
+    it('sweeps unprocessed outbox rows even when the stream succeeds', async () => {
+      const event = makeEvent();
+      const supabase = makeSupabase({
+        selectData: [{ event_id: event.eventId, event_type: event.eventType, payload: event, attempts: 0 }],
+      });
+      const bus = new RedisStreamsEventBus(supabase as never, 'https://x.upstash.io', 'token');
+      const handler = vi.fn().mockResolvedValue(undefined);
+      bus.subscribe(event.eventType, handler);
+
+      // Stream is empty (default mocks) but the outbox still holds one row —
+      // e.g. its stream copy was poisoned and ACKed on a previous run
+      const stats = await bus.processEvents();
+
+      expect(stats.processed).toBe(1);
+      expect(handler).toHaveBeenCalledWith(event);
     });
   });
 });

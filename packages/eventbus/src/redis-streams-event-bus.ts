@@ -14,16 +14,75 @@ const MIN_IDLE_MS = 60_000; // reclaim messages unACKed for >60s
 
 type Handler<TPayload> = (event: DomainEvent<TPayload>) => Promise<void>;
 
-interface StreamMessage {
-  id: string;
-  message: { eventJson: string };
-}
-
 interface OutboxRow {
   event_id: string;
   event_type: string;
   payload: DomainEvent<unknown>;
   attempts: number;
+}
+
+// A stream entry normalized from whichever shape Upstash returns. event is
+// null when the payload cannot be recovered (poisoned message).
+interface StreamEntry {
+  id: string;
+  event: DomainEvent<unknown> | null;
+}
+
+function coerceEvent(value: unknown): DomainEvent<unknown> | null {
+  try {
+    const parsed = typeof value === 'string' ? (JSON.parse(value) as unknown) : value;
+    if (parsed && typeof parsed === 'object' && 'eventType' in parsed && 'eventId' in parsed) {
+      return parsed as DomainEvent<unknown>;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// XAUTOCLAIM/XREADGROUP have no deserializer in @upstash/redis, so entries
+// arrive as raw RESP tuples `[id, [field, value, ...]]` — and parseRecursive
+// JSON-parses string leaves, so the eventJson value may already be an object.
+// The `{ id, message }` object shape is kept for forward compatibility.
+function normalizeEntries(raw: unknown): StreamEntry[] {
+  if (!Array.isArray(raw)) return [];
+  const entries: StreamEntry[] = [];
+  for (const item of raw) {
+    if (Array.isArray(item) && item.length >= 2 && typeof item[0] === 'string') {
+      const fields: unknown = item[1];
+      let eventJson: unknown;
+      if (Array.isArray(fields)) {
+        for (let i = 0; i + 1 < fields.length; i += 2) {
+          if (fields[i] === 'eventJson') {
+            eventJson = fields[i + 1];
+            break;
+          }
+        }
+      } else if (fields && typeof fields === 'object') {
+        eventJson = (fields as Record<string, unknown>).eventJson;
+      }
+      entries.push({ id: item[0], event: coerceEvent(eventJson) });
+    } else if (item && typeof item === 'object' && 'id' in item) {
+      const msg = item as { id: unknown; message?: Record<string, unknown> };
+      entries.push({ id: String(msg.id), event: coerceEvent(msg.message?.eventJson) });
+    }
+  }
+  return entries;
+}
+
+// XREADGROUP wraps entries per stream: `[[streamKey, entries], ...]` raw, or
+// `[{ name, messages }]` object-shaped.
+function normalizeStreams(raw: unknown): StreamEntry[] {
+  if (!Array.isArray(raw)) return [];
+  const entries: StreamEntry[] = [];
+  for (const stream of raw) {
+    if (Array.isArray(stream) && stream.length >= 2) {
+      entries.push(...normalizeEntries(stream[1]));
+    } else if (stream && typeof stream === 'object' && 'messages' in stream) {
+      entries.push(...normalizeEntries((stream as { messages: unknown }).messages));
+    }
+  }
+  return entries;
 }
 
 export class RedisStreamsEventBus implements IEventBus {
@@ -76,18 +135,27 @@ export class RedisStreamsEventBus implements IEventBus {
     this.handlers.set(eventType, [...existing, handler as Handler<unknown>]);
   }
 
-  // Unified entry point for cron — tries Redis Stream, falls back to outbox
+  // Unified entry point for cron: Redis Stream for fast-path delivery, then an
+  // outbox sweep that delivers anything the stream lost, poisoned, or never
+  // received. Consumers are idempotent (processed_events), so the occasional
+  // double delivery is safe.
   async processEvents(): Promise<{ processed: number; failed: number; blocked: number }> {
+    let stream = { processed: 0, failed: 0 };
     try {
-      const result = await this.processStream();
-      return { ...result, blocked: 0 };
+      stream = await this.processStream();
     } catch (streamErr) {
       log.warn(
         { traceId: 'system', target: 'upstash', operation: 'processStream', outcome: 'error', errorMsg: streamErr instanceof Error ? streamErr.message : 'unknown' },
-        'Redis Stream processing failed — falling back to outbox',
+        'Redis Stream processing failed — outbox sweep will deliver',
       );
-      return this.processOutbox();
     }
+
+    const outbox = await this.processOutbox();
+    return {
+      processed: stream.processed + outbox.processed,
+      failed: stream.failed + outbox.failed,
+      blocked: outbox.blocked,
+    };
   }
 
   async processStream(batchSize = 50): Promise<{ processed: number; failed: number }> {
@@ -97,28 +165,20 @@ export class RedisStreamsEventBus implements IEventBus {
     let failed = 0;
 
     // 1. Re-deliver timed-out PEL messages (claimed but not ACKed for >60s)
-    // xautoclaim returns [nextId, StreamMessage[]] from Upstash REST
-    const claimed = await this.redis.xautoclaim(
+    const claimed = (await this.redis.xautoclaim(
       STREAM_KEY, GROUP, CONSUMER, MIN_IDLE_MS, '0-0', { count: batchSize },
-    ) as unknown as [string, StreamMessage[]];
-
-    const claimedMsgs: StreamMessage[] = Array.isArray(claimed) && Array.isArray(claimed[1]) ? claimed[1] : [];
-    for (const msg of claimedMsgs) {
-      if (await this.dispatchMessage(msg)) processed++; else failed++;
+    )) as unknown;
+    const claimedEntries = Array.isArray(claimed) ? normalizeEntries(claimed[1]) : [];
+    for (const entry of claimedEntries) {
+      if (await this.dispatchEntry(entry)) processed++; else failed++;
     }
 
     // 2. Read new messages from the stream
-    // xreadgroup returns [{name: string, messages: StreamMessage[]}] | null
-    const streams = await this.redis.xreadgroup(
+    const streams = (await this.redis.xreadgroup(
       GROUP, CONSUMER, STREAM_KEY, '>', { count: batchSize },
-    ) as unknown as { name: string; messages: StreamMessage[] }[] | null;
-
-    if (streams) {
-      for (const stream of streams) {
-        for (const msg of stream.messages ?? []) {
-          if (await this.dispatchMessage(msg)) processed++; else failed++;
-        }
-      }
+    )) as unknown;
+    for (const entry of normalizeStreams(streams)) {
+      if (await this.dispatchEntry(entry)) processed++; else failed++;
     }
 
     return { processed, failed };
@@ -158,11 +218,23 @@ export class RedisStreamsEventBus implements IEventBus {
     return { processed, failed, blocked: 0 };
   }
 
-  private async dispatchMessage(msg: StreamMessage): Promise<boolean> {
+  private async dispatchEntry(entry: StreamEntry): Promise<boolean> {
+    // Poisoned message: the payload can never be recovered from the stream, so
+    // ACK it to stop the infinite reclaim loop. The outbox row is untouched —
+    // the sweep in processEvents delivers the event from there.
+    if (entry.event === null) {
+      log.error(
+        { traceId: 'system', target: 'upstash', operation: 'dispatch', outcome: 'error', streamId: entry.id, errorCode: 'POISONED_MESSAGE' },
+        'Stream message has no recoverable event — ACKing, outbox sweep will deliver',
+      );
+      await this.redis.xack(STREAM_KEY, GROUP, entry.id);
+      return false;
+    }
+
+    const event = entry.event;
     try {
-      const event = JSON.parse(msg.message.eventJson) as DomainEvent<unknown>;
       await this.dispatchOne(event);
-      await this.redis.xack(STREAM_KEY, GROUP, msg.id);
+      await this.redis.xack(STREAM_KEY, GROUP, entry.id);
       await this.supabase
         .from('outbox')
         .update({ processed: true, processed_at: new Date().toISOString() })
@@ -174,7 +246,7 @@ export class RedisStreamsEventBus implements IEventBus {
       return true;
     } catch (e) {
       log.error(
-        { traceId: 'system', target: 'upstash', operation: 'dispatch', outcome: 'error', streamId: msg.id, errorMsg: e instanceof Error ? e.message : 'unknown' },
+        { traceId: 'system', target: 'upstash', operation: 'dispatch', outcome: 'error', streamId: entry.id, errorMsg: e instanceof Error ? e.message : 'unknown' },
         'Stream message dispatch failed',
       );
       return false;
