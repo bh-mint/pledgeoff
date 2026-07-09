@@ -260,7 +260,7 @@ export class GroqLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('groq.generate-simulation', async (span) => {
       span.setAttributes({ 'adapter.name': 'groq', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callGroq(
-        buildSimulationPrompt(withFounderContext(request.ideaText, request.founderContext), request.verdict, request.signals),
+        buildSimulationPrompt(withFounderContext(request.ideaText, request.founderContext), request.verdict, request.signals, request.marketData),
         `You are a startup revenue simulation engine using prompt version ${SIMULATION_PROMPT_VERSION}. Always respond with valid JSON only.`,
         LLMSimulationResponseSchema,
         'generateSimulation',

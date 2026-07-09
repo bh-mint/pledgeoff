@@ -49,3 +49,4 @@ export { SupabaseCompetitorSnapshotRepository } from './storage/supabase-competi
 export { SupabaseLandscapeSnapshotRepository } from './storage/supabase-landscape-snapshot-repository';
 export { notifySlack, notifySlackMovement, sendSlackTestNotification } from './slack/slack-notifier';
 export type { SlackNotifyParams, SlackMovementParams } from './slack/slack-notifier';
+export { CrunchbaseAdapter } from './market-data/crunchbase-adapter';

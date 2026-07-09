@@ -278,7 +278,7 @@ export class AnthropicLLMAdapter implements ILLMClient {
     return tracer.startActiveSpan('anthropic.generate-simulation', async (span) => {
       span.setAttributes({ 'adapter.name': 'anthropic', 'trace.id': request.traceId, 'llm.model': this.model });
       const result = await this._callAnthropic(
-        buildSimulationPrompt(withFounderContext(request.ideaText, request.founderContext), request.verdict, request.signals),
+        buildSimulationPrompt(withFounderContext(request.ideaText, request.founderContext), request.verdict, request.signals, request.marketData),
         SIMULATION_SYSTEM_PROMPT,
         LLMSimulationResponseSchema,
         'generateSimulation',

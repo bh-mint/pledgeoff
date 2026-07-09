@@ -5,6 +5,7 @@ import type { SimulationScenario } from '../domain/simulation';
 import type { CustomerSegment, PainPoint, SentimentBreakdown, CustomerQuote } from '../domain/customer-analysis';
 import type { TechComponent, TechGap } from '../domain/build-analysis';
 import type { Competitor, CompetitorGap } from '../domain/competitor-analysis';
+import type { CompetitorMarketData } from './market-data-repository';
 
 export interface CalibrationExample {
   readonly ideaText: string;
@@ -34,6 +35,8 @@ export interface LLMSimulationRequest {
   readonly verdict: Verdict;
   readonly traceId: string;
   readonly founderContext?: string;
+  /** Verified competitor data (Crunchbase) — anchors TAM and pricing when present. */
+  readonly marketData?: readonly CompetitorMarketData[];
 }
 
 export interface LLMSimulationResponse {

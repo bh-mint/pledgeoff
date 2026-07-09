@@ -46,6 +46,7 @@ export * from './ports/IInterviewGuideRepository';
 export * from './ports/ITranscriptAnalysisRepository';
 export * from './ports/cache';
 export * from './ports/embedding-client';
+export * from './ports/market-data-repository';
 
 // Use cases
 export * from './use-cases/create-idea';

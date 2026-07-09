@@ -123,6 +123,11 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
         <p className="mono text-[11px] mt-2" style={{ color: "var(--t3)" }}>
           Estimated serviceable market for this category
         </p>
+        <p className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+          Market size estimated from live market signals — not verified research.
+          For verified TAM/SAM/SOM, see the{" "}
+          <a href="/pricing" style={{ textDecoration: "underline" }}>Market Data Pack</a>.
+        </p>
       </div>
 
       {/* Revenue projection chart */}

@@ -8,6 +8,9 @@ import type { ISignalRepository } from '../../ports/signal-repository';
 import type { ILLMClient, LLMSimulationResponse } from '../../ports/llm-client';
 import type { Signal } from '../../domain/signal';
 import type { Simulation } from '../../domain/simulation';
+import type { ICompetitorAnalysisRepository } from '../../ports/competitor-analysis-repository';
+import type { IMarketDataRepository, CompetitorMarketData } from '../../ports/market-data-repository';
+import { MarketDataError } from '../../ports/market-data-repository';
 
 const ideaId = crypto.randomUUID();
 const userId = crypto.randomUUID();
@@ -144,5 +147,86 @@ describe('SimulateRevenueUseCase', () => {
 
     expect(result.isErr()).toBe(true);
     if (result.isErr()) expect(result.error).toBeInstanceOf(SimulationRepositoryError);
+  });
+
+  describe('market data enrichment', () => {
+    const competitorAnalysis = {
+      id: crypto.randomUUID(),
+      ideaId,
+      userId,
+      competitors: [
+        { name: 'Notion', description: 'docs', positioning: 'all-in-one' },
+        { name: 'Linear', description: 'issues', positioning: 'fast' },
+      ],
+      gaps: [],
+      createdAt: new Date().toISOString(),
+    };
+
+    const notionData: CompetitorMarketData = {
+      name: 'Notion',
+      fundingTotalUsd: 343_000_000,
+      numEmployeesRange: '501–1000',
+      foundedYear: 2013,
+      lastFundingType: 'series_c',
+      lastFundingAt: '2021-10-08',
+    };
+
+    function makeCompetitorRepo(analysis: unknown = competitorAnalysis): ICompetitorAnalysisRepository {
+      return {
+        save: vi.fn(),
+        findByIdeaId: vi.fn().mockResolvedValue(ok(analysis)),
+      } as unknown as ICompetitorAnalysisRepository;
+    }
+
+    it('passes verified market data for matched competitors to the LLM', async () => {
+      const marketDataRepo: IMarketDataRepository = {
+        findOrganization: vi
+          .fn()
+          .mockResolvedValueOnce(ok(notionData))
+          .mockResolvedValueOnce(ok(null)),
+      };
+      const llm = makeLLMClient();
+      const useCase = new SimulateRevenueUseCase(
+        makeSimulationRepo(), makeSignalRepo(), llm, makeCompetitorRepo(), marketDataRepo,
+      );
+
+      const result = await useCase.execute(baseInput);
+
+      expect(result.isOk()).toBe(true);
+      expect(marketDataRepo.findOrganization).toHaveBeenCalledTimes(2);
+      expect(llm.generateSimulation).toHaveBeenCalledWith(
+        expect.objectContaining({ marketData: [notionData] }),
+      );
+    });
+
+    it('still generates the simulation when every market data lookup fails', async () => {
+      const marketDataRepo: IMarketDataRepository = {
+        findOrganization: vi.fn().mockResolvedValue(err(new MarketDataError('quota exhausted'))),
+      };
+      const llm = makeLLMClient();
+      const useCase = new SimulateRevenueUseCase(
+        makeSimulationRepo(), makeSignalRepo(), llm, makeCompetitorRepo(), marketDataRepo,
+      );
+
+      const result = await useCase.execute(baseInput);
+
+      expect(result.isOk()).toBe(true);
+      expect(llm.generateSimulation).toHaveBeenCalledWith(
+        expect.objectContaining({ marketData: undefined }),
+      );
+    });
+
+    it('skips lookups entirely when no competitor analysis exists', async () => {
+      const marketDataRepo: IMarketDataRepository = { findOrganization: vi.fn() };
+      const llm = makeLLMClient();
+      const useCase = new SimulateRevenueUseCase(
+        makeSimulationRepo(), makeSignalRepo(), llm, makeCompetitorRepo(null), marketDataRepo,
+      );
+
+      const result = await useCase.execute(baseInput);
+
+      expect(result.isOk()).toBe(true);
+      expect(marketDataRepo.findOrganization).not.toHaveBeenCalled();
+    });
   });
 });

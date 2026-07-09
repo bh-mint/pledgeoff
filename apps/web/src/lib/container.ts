@@ -43,11 +43,12 @@ import {
   InMemoryCacheAdapter,
   UpstashRedisCacheAdapter,
   VoyageEmbeddingAdapter,
+  CrunchbaseAdapter,
   sendVerdictEmail,
   sendMovementAlertEmail,
   notifySlackMovement,
 } from '@pledgeoff/adapters';
-import type { ICache, ISourceAdapter, ILLMClient, IEmbeddingClient } from '@pledgeoff/core';
+import type { ICache, ISourceAdapter, ILLMClient, IEmbeddingClient, IMarketDataRepository } from '@pledgeoff/core';
 import { PostgresEventBus, RedisStreamsEventBus } from '@pledgeoff/eventbus';
 import {
   CreateIdeaUseCase,
@@ -119,6 +120,7 @@ class AppContainer {
   private readonly _llmClient: ILLMClient;
   private readonly _ottoLLMClient: ILLMClient;
   private readonly _embeddingClient: IEmbeddingClient | undefined;
+  private readonly _marketDataRepo: IMarketDataRepository | undefined;
   private readonly _sourceAdapters: ISourceAdapter[];
   private readonly _usageLogger: SupabaseUsageLogAdapter;
   readonly stripeAdapter: StripeAdapter | null;
@@ -298,6 +300,8 @@ class AppContainer {
       this.simulationRepo,
       this.signalRepo,
       this._llmClient,
+      this.competitorAnalysisRepo,
+      this._marketDataRepo,
     ));
   }
 
@@ -736,6 +740,12 @@ class AppContainer {
             requireEnv('UPSTASH_REDIS_REST_TOKEN'),
           )
         : new InMemoryCacheAdapter();
+
+    // Market data (Crunchbase Basic, 200 req/day) — optional: wired only when
+    // the key exists; the Revenue Model degrades gracefully without it.
+    this._marketDataRepo = process.env.CRUNCHBASE_API_KEY
+      ? new CrunchbaseAdapter(process.env.CRUNCHBASE_API_KEY, 8_000, this._cache)
+      : undefined;
 
     // Source adapters
     this._sourceAdapters = [
