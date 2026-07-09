@@ -46,3 +46,12 @@ pnpm-debug.log*
 .vercel
 supabase/.temp/
 .env*.local
+
+# design-sync tooling (regenerated)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+apps/web/.ds-assets/compiled.css
+apps/web/.ds-assets/media/
