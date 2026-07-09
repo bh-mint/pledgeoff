@@ -8,6 +8,7 @@ import { CheckoutModal } from "@/components/CheckoutModal";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { PRICING } from "@/lib/pricing.config";
+import { PLAN_TOOL_GATES } from "@pledgeoff/core";
 import { ROICalculator } from "@/components/pricing/ROICalculator";
 
 const FOUNDER_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_FOUNDER_MONTHLY_PRICE_ID ?? "";
@@ -411,7 +412,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             <div className="plan-features">
               <div className="pf yes">20 validations / month</div>
               <div className="pf yes">All 8 signal sources</div>
-              <div className="pf yes">5 of 6 intelligence tools</div>
+              <div className="pf yes">{PLAN_TOOL_GATES.founder.length} of {PLAN_TOOL_GATES.team.length} intelligence tools</div>
               <div className="pf yes">15 Otto questions / mo</div>
               <div className="pf yes">1-year history · PDF + JSON export</div>
               <div className="pf yes">Outgoing webhooks · 24h SLA</div>
@@ -447,7 +448,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
             </div>
             <div className="plan-features">
               <div className="pf yes">60 validations / month</div>
-              <div className="pf yes">All 6 intelligence tools</div>
+              <div className="pf yes">All {PLAN_TOOL_GATES.team.length} intelligence tools</div>
               <div className="pf yes">45 Otto questions / mo</div>
               <div className="pf yes">3 team seats · add more at €{PRICING.seats.extraEurPerMonth}/seat</div>
               <div className="pf yes">Shared team library · early access</div>

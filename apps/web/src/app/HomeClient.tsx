@@ -512,7 +512,7 @@ export function HomeClient() {
               </div>
             </div>
             <div style={{ padding: "14px 20px 18px", flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-              {["20 validations / month", "All signal sources", "Forecast + ICP + Landscape"].map((f) => (
+              {["20 validations / month", "All signal sources", "Revenue Model + ICP + Landscape"].map((f) => (
                 <div
                   key={f}
                   style={{

@@ -187,7 +187,7 @@ export function Footer() {
                 marginBottom: 4,
               }}
             >
-              © 2026 S.C. PledgeOFF S.R.L. · CUI [TBD] · All rights reserved.
+              © 2026 S.C. PledgeOFF S.R.L. · All rights reserved.
             </span>
             <div
               style={{

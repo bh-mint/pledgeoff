@@ -21,6 +21,11 @@ export function CookieBanner() {
     setShown(false);
   };
 
+  const rejectNonEssential = () => {
+    savePreferences({ analytics: false });
+    setShown(false);
+  };
+
   const openModal = () => {
     setModalOpen(true);
   };
@@ -49,6 +54,9 @@ export function CookieBanner() {
           <div className="ck-acts">
             <button ref={manageRef} className="btn-g" type="button" onClick={openModal} tabIndex={shown ? 0 : -1}>
               Manage preferences
+            </button>
+            <button className="btn-g" type="button" onClick={rejectNonEssential} tabIndex={shown ? 0 : -1}>
+              Reject non-essential
             </button>
             <button className="btn-p" type="button" onClick={acceptAll} tabIndex={shown ? 0 : -1}>
               Accept all

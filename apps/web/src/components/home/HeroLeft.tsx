@@ -19,10 +19,16 @@ const mono: React.CSSProperties = {
 
 export function HeroLeft() {
   const [mounted, setMounted] = useState(false);
-  const [displayScore, setDisplayScore] = useState(0);
+  // Server HTML must show the final score (crawlers/social embeds/JS-off see
+  // the first frame); the count-up is replayed client-side only.
+  const [displayScore, setDisplayScore] = useState(82);
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return () => clearTimeout(t);
+    }
 
     let startTime: number | null = null;
     const target = 82;
@@ -127,7 +133,7 @@ export function HeroLeft() {
           display: "flex",
           gap: 20,
           ...mono,
-          fontSize: 9,
+          fontSize: 11,
           marginBottom: 8,
         }}
       >

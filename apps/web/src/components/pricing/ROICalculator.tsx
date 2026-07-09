@@ -15,7 +15,7 @@ function paybackMinutes(monthlyValue: number): number {
 function formatMinutes(min: number): string {
   if (min < 60) return `${min} minutes`;
   const h = Math.round(min / 60 * 10) / 10;
-  return h < 2 ? `${h} hour` : `${h} hours`;
+  return h === 1 ? `${h} hour` : `${h} hours`;
 }
 
 export function ROICalculator() {
