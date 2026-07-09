@@ -139,10 +139,15 @@ export class RedisStreamsEventBus implements IEventBus {
   // outbox sweep that delivers anything the stream lost, poisoned, or never
   // received. Consumers are idempotent (processed_events), so the occasional
   // double delivery is safe.
-  async processEvents(): Promise<{ processed: number; failed: number; blocked: number }> {
+  //
+  // Dispatching runs consumer handlers (emails, Slack, DB writes), so a large
+  // backlog cannot fit one serverless invocation — the wall-clock budget stops
+  // processing early and the next run continues; progress is durable per event.
+  async processEvents(budgetMs = 22_000): Promise<{ processed: number; failed: number; blocked: number }> {
+    const deadline = Date.now() + budgetMs;
     let stream = { processed: 0, failed: 0 };
     try {
-      stream = await this.processStream();
+      stream = await this.processStream(50, deadline);
     } catch (streamErr) {
       log.warn(
         { traceId: 'system', target: 'upstash', operation: 'processStream', outcome: 'error', errorMsg: streamErr instanceof Error ? streamErr.message : 'unknown' },
@@ -150,7 +155,7 @@ export class RedisStreamsEventBus implements IEventBus {
       );
     }
 
-    const outbox = await this.processOutbox();
+    const outbox = await this.processOutbox(50, deadline);
     return {
       processed: stream.processed + outbox.processed,
       failed: stream.failed + outbox.failed,
@@ -158,7 +163,7 @@ export class RedisStreamsEventBus implements IEventBus {
     };
   }
 
-  async processStream(batchSize = 50): Promise<{ processed: number; failed: number }> {
+  async processStream(batchSize = 50, deadline = Number.MAX_SAFE_INTEGER): Promise<{ processed: number; failed: number }> {
     await this.ensureGroup();
 
     let processed = 0;
@@ -170,14 +175,18 @@ export class RedisStreamsEventBus implements IEventBus {
     )) as unknown;
     const claimedEntries = Array.isArray(claimed) ? normalizeEntries(claimed[1]) : [];
     for (const entry of claimedEntries) {
+      if (Date.now() > deadline) return { processed, failed };
       if (await this.dispatchEntry(entry)) processed++; else failed++;
     }
+
+    if (Date.now() > deadline) return { processed, failed };
 
     // 2. Read new messages from the stream
     const streams = (await this.redis.xreadgroup(
       GROUP, CONSUMER, STREAM_KEY, '>', { count: batchSize },
     )) as unknown;
     for (const entry of normalizeStreams(streams)) {
+      if (Date.now() > deadline) return { processed, failed };
       if (await this.dispatchEntry(entry)) processed++; else failed++;
     }
 
@@ -185,7 +194,7 @@ export class RedisStreamsEventBus implements IEventBus {
   }
 
   // Fallback: direct outbox poll (same as PostgresEventBus)
-  async processOutbox(limit = 50): Promise<{ processed: number; failed: number; blocked: number }> {
+  async processOutbox(limit = 50, deadline = Number.MAX_SAFE_INTEGER): Promise<{ processed: number; failed: number; blocked: number }> {
     const { data, error } = await this.supabase
       .from('outbox')
       .select('event_id, event_type, payload, attempts')
@@ -199,6 +208,7 @@ export class RedisStreamsEventBus implements IEventBus {
     let failed = 0;
 
     for (const row of data as OutboxRow[]) {
+      if (Date.now() > deadline) break;
       try {
         await this.dispatchOne(row.payload);
         await this.supabase

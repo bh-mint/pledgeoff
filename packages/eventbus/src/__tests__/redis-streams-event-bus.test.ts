@@ -253,5 +253,22 @@ describe('RedisStreamsEventBus', () => {
       expect(stats.processed).toBe(1);
       expect(handler).toHaveBeenCalledWith(event);
     });
+
+    it('stops dispatching when the wall-clock budget is exhausted', async () => {
+      const event = makeEvent();
+      const supabase = makeSupabase({
+        selectData: [{ event_id: event.eventId, event_type: event.eventType, payload: event, attempts: 0 }],
+      });
+      const bus = new RedisStreamsEventBus(supabase as never, 'https://x.upstash.io', 'token');
+      const handler = vi.fn().mockResolvedValue(undefined);
+      bus.subscribe(event.eventType, handler);
+
+      // Deadline already in the past — nothing may be dispatched; the next
+      // run picks the row up
+      const stats = await bus.processEvents(-1);
+
+      expect(stats.processed).toBe(0);
+      expect(handler).not.toHaveBeenCalled();
+    });
   });
 });
