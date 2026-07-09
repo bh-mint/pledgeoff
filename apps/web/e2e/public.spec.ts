@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { PUBLIC_STATE } from './fixtures';
 
 // Public pages — no auth required
-test.use({ storageState: { cookies: [], origins: [] } });
+test.use({ storageState: PUBLIC_STATE });
 
 test.describe('Public pages', () => {
   test('homepage loads with correct title', async ({ page }) => {
@@ -13,7 +14,7 @@ test.describe('Public pages', () => {
   test('pricing page loads with plan cards', async ({ page }) => {
     await page.goto('/pricing');
     await expect(page).toHaveURL(/pricing/);
-    await expect(page.getByText(/pro/i).first()).toBeVisible();
+    await expect(page.getByText(/founder/i).first()).toBeVisible();
   });
 
   test('blog page loads with articles', async ({ page }) => {

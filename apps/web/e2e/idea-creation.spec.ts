@@ -14,15 +14,20 @@ test.describe('Idea creation — golden path', () => {
     await expect(textarea).toBeVisible();
     await textarea.fill(IDEA_TEXT);
 
+    // Category is required before the survey can run
+    await page.getByRole('button', { name: 'SaaS / B2B' }).click();
+
     // Submit
-    const submitBtn = page.getByRole('button', { name: /validate|analyze|submit/i }).first();
+    const submitBtn = page.getByRole('button', { name: /run survey|validate|analyze|submit/i }).first();
     await expect(submitBtn).toBeEnabled();
     await submitBtn.click();
 
-    // Should redirect to the idea page or dashboard after submit
-    // Verdict is async — we just verify redirect happened (not still on /new)
-    await page.waitForURL((url) => !url.pathname.endsWith('/new'), { timeout: 15_000 });
-    await expect(page).not.toHaveURL(/\/new$/);
+    // Submit stays on /ideas/new and plays the in-page analysis screen;
+    // when the verdict is ready a "View verdict →" link appears.
+    const verdictLink = page.getByRole('link', { name: /view verdict/i });
+    await expect(verdictLink).toBeVisible({ timeout: 60_000 });
+    await verdictLink.click();
+    await page.waitForURL(/\/ideas\/[0-9a-f-]{36}/, { timeout: 15_000 });
   });
 
   test('shows validation error for text shorter than 10 chars', async ({ page }) => {
@@ -31,16 +36,14 @@ test.describe('Idea creation — golden path', () => {
     const textarea = page.getByRole('textbox').first();
     await textarea.fill('short');
 
-    const submitBtn = page.getByRole('button', { name: /validate|analyze|submit/i }).first();
-    await submitBtn.click();
+    // Category selected so only the text length can be gating the button
+    await page.getByRole('button', { name: 'SaaS / B2B' }).click();
 
-    // Should show validation error, stay on /new
+    // The form disables the submit button while the text is under 10 chars —
+    // that IS the validation (no submit, no error toast needed).
+    const submitBtn = page.getByRole('button', { name: /run survey|validate|analyze|submit/i }).first();
+    await expect(submitBtn).toBeDisabled();
     await expect(page).toHaveURL(/new/);
-    // Error message appears
-    const error = page.getByRole('alert').or(page.getByText(/too short|minimum|characters/i));
-    await expect(error.first()).toBeVisible({ timeout: 5_000 }).catch(() => {
-      // Acceptable if form validation prevents submit entirely
-    });
   });
 
   test('submitted idea appears in dashboard', async ({ page }) => {
@@ -54,7 +57,8 @@ test.describe('Idea creation — golden path', () => {
     const visible = await ideaEntry.isVisible().catch(() => false);
     if (!visible) {
       // If not visible, at least the dashboard loaded without error
-      await expect(page.getByRole('main')).toBeVisible();
+      // (the empty-state dashboard has no <main> landmark — assert the nav shell)
+      await expect(page.getByRole('navigation').first()).toBeVisible();
     }
   });
 });

@@ -36,6 +36,7 @@ Thumbs.db
 
 # Playwright
 /apps/web/e2e/.auth-state.json
+/apps/web/e2e/.public-state.json
 /apps/web/playwright-report/
 /apps/web/test-results/
 

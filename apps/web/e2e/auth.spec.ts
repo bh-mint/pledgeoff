@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
-import { AUTH_FILE } from './fixtures';
+import { AUTH_FILE, PUBLIC_STATE } from './fixtures';
 
 test.describe('Auth — unauthenticated redirects', () => {
-  test.use({ storageState: { cookies: [], origins: [] } });
+  test.use({ storageState: PUBLIC_STATE });
 
   test('redirects /dashboard to /login', async ({ page }) => {
     await page.goto('/dashboard');
