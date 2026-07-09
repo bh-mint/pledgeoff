@@ -133,10 +133,10 @@ export default function AboutPage() {
             <h2 className="cta-h">Know before you build.</h2>
             <p className="cta-sub">Your next idea is a 15-second validation away. The first one is always free.</p>
             <div className="btns">
-              <Link href="/login" className="btn-inv">Create free account →</Link>
+              <Link href="/ideas/new" className="btn-inv">Validate free →</Link>
               <Link href="/pricing" className="btn-inv-g">Compare plans</Link>
             </div>
-            <p className="cta-note">No credit card · No setup · Cancel any time</p>
+            <p className="cta-note">No credit card · Free account in 30s · Cancel any time</p>
           </div>
         </div>
 

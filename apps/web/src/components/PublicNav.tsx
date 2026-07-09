@@ -202,7 +202,7 @@ export function PublicNav({ extraLink }: Props) {
                     e.currentTarget.style.borderColor = "var(--ink)";
                   }}
                 >
-                  Start free →
+                  Validate free →
                 </Link>
               </>
             )}
@@ -322,7 +322,7 @@ export function PublicNav({ extraLink }: Props) {
                       border: "1px solid var(--ink)",
                     }}
                   >
-                    Start free →
+                    Validate free →
                   </Link>
                 </>
               )}

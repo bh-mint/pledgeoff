@@ -148,7 +148,7 @@ export function HomeClient() {
                 className="btn-p"
                 style={{ justifyContent: "center" }}
               >
-                Validate your first idea free →
+                Validate free →
               </Link>
               <Link
                 href="/pricing"
@@ -166,7 +166,7 @@ export function HomeClient() {
                 color: "var(--faint)",
               }}
             >
-              First validation free. No credit card. No setup.
+              First validation free. No credit card. Free account in 30 seconds.
             </p>
           </div>
         </div>
@@ -798,7 +798,7 @@ export function HomeClient() {
                 gap: 8,
               }}
             >
-              Create free account →
+              Validate free →
             </Link>
             <Link
               href="/pricing"
@@ -829,7 +829,7 @@ export function HomeClient() {
               marginTop: 16,
             }}
           >
-            No credit card · No setup · Cancel any time
+            No credit card · Free account in 30s · Cancel any time
           </p>
         </div>
       </div>

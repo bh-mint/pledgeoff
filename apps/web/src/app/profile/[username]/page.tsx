@@ -177,7 +177,7 @@ export default async function PublicProfilePage({ params }: Props) {
           <h2 className="cta-h">Validate your own idea.</h2>
           <p className="cta-sub">Real signals, traceable sources, a verdict in ~15 seconds. First validation free, no card required.</p>
           <div className="cta-btns">
-            <Link href="/login?mode=signup" className="btn-inv">Create free account &rarr;</Link>
+            <Link href="/login?mode=signup&next=/ideas/new" className="btn-inv">Validate free &rarr;</Link>
             <Link href="/pricing" className="btn-inv-g">See what&rsquo;s included</Link>
           </div>
           <p className="cta-note">1 free validation per month &middot; No credit card &middot; No hype</p>

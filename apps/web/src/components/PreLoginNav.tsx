@@ -105,7 +105,7 @@ export function PreLoginNav({ extraLink }: PreLoginNavProps) {
                   className="inline-flex items-center h-9 px-4 rounded-md display text-[13px] font-semibold transition-opacity hover:opacity-90"
                   style={{ background: "var(--accent)", color: "var(--accent-fg)" }}
                 >
-                  Start free →
+                  Validate free →
                 </Link>
               </div>
             )}

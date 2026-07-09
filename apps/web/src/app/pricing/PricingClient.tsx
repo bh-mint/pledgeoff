@@ -673,7 +673,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
           <h2 className="cta-h">Start with one free validation.</h2>
           <p className="cta-sub">See a GO, PIVOT, or KILL verdict on your own idea before paying anything.</p>
           <div className="btns">
-            <Link href="/login" className="btn-inv">Create free account →</Link>
+            <Link href="/ideas/new" className="btn-inv">Validate free →</Link>
           </div>
           <p className="cta-note">Free forever · No card · Upgrade when ready</p>
         </div>
