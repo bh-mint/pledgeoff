@@ -54,6 +54,35 @@ const FEATURES = [
   },
 ];
 
+// Real public verdicts from the live engine (see /v/[id]) — curated snapshots,
+// not fetched at runtime. Update alongside the reports they point to.
+const FIELD_REPORTS = [
+  {
+    id: "cc1107a0-5ef2-477a-8e35-fbc8922145ed",
+    verdict: "GO",
+    title: "N+1 query detector for production",
+    desc: "A developer tool that automatically detects and fixes N+1 SQL query problems in production.",
+    signals: 3,
+    confidence: 62,
+  },
+  {
+    id: "ad1f3ab8-6ba4-424f-8768-0467e4ccc1ff",
+    verdict: "GO",
+    title: "Food-waste tracking for restaurants",
+    desc: "A platform that helps small restaurants cut food waste by automatically tracking inventory.",
+    signals: 6,
+    confidence: 67,
+  },
+  {
+    id: "72ffa176-c6e2-459d-8b95-e66fa2514d91",
+    verdict: "PIVOT",
+    title: "E-commerce refund predictor",
+    desc: "Predicts which orders are likely to result in returns — the verdict says where to aim instead.",
+    signals: 5,
+    confidence: 62,
+  },
+];
+
 const monoEyebrow: React.CSSProperties = {
   fontFamily: "var(--font-chivo-mono), monospace",
   fontSize: 8.5,
@@ -304,6 +333,57 @@ export function HomeClient() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── FROM THE FIELD — real public verdicts ── */}
+      <div className="w-bleed" style={{ paddingBottom: 60 }}>
+        <span style={{ ...monoEyebrow, marginBottom: 20 }}>From the field</span>
+        <div className="grid grid-cols-1 md:grid-cols-3" style={{ gap: 12 }}>
+          {FIELD_REPORTS.map((r) => (
+            <Link key={r.id} href={`/v/${r.id}`} className="bc" style={{ textDecoration: "none", display: "block" }}>
+              <div className="bc-hd">
+                <span style={{ color: "rgba(243,239,226,0.6)" }}>
+                  {r.signals} signals · Confidence {r.confidence}%
+                </span>
+              </div>
+              <div className="bc-bd">
+                <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+                  {r.verdict.split("").map((c, i) => (
+                    <div key={i} className={`fc fc-lg ${r.verdict === "GO" ? "fc-go" : r.verdict === "KILL" ? "fc-kill" : "fc-pivot"}`}>{c}</div>
+                  ))}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)", marginBottom: 6 }}>
+                  {r.title}
+                </div>
+                <p style={{ fontSize: 13, color: "var(--dim)", lineHeight: 1.7, marginBottom: 12 }}>
+                  {r.desc}
+                </p>
+                <span
+                  style={{
+                    fontFamily: "var(--font-chivo-mono), monospace",
+                    fontSize: 10,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--go)",
+                  }}
+                >
+                  Read the full report →
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <p
+          style={{
+            fontFamily: "var(--font-chivo-mono), monospace",
+            fontSize: 8,
+            letterSpacing: "0.08em",
+            color: "var(--faint)",
+            marginTop: 12,
+          }}
+        >
+          Real reports from the live engine — not mockups. Every signal links to its source.
+        </p>
       </div>
 
       {/* ── DECISION-CLARITY CALLOUT ── */}
