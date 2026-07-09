@@ -283,7 +283,7 @@ export function HomeClient() {
           {/* GO */}
           <div className="bc">
             <div className="bc-hd">
-              <span style={{ color: "rgba(243,239,226,0.6)" }}>Score 75+</span>
+              <span style={{ color: "rgba(243,239,226,0.6)" }}>Signal: strong</span>
             </div>
             <div className="bc-bd">
               <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
@@ -300,7 +300,7 @@ export function HomeClient() {
           {/* PIVOT */}
           <div className="bc">
             <div className="bc-hd">
-              <span style={{ color: "rgba(243,239,226,0.6)" }}>Score 40–74</span>
+              <span style={{ color: "rgba(243,239,226,0.6)" }}>Signal: mixed</span>
             </div>
             <div className="bc-bd">
               <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
@@ -318,7 +318,7 @@ export function HomeClient() {
           {/* KILL */}
           <div className="bc">
             <div className="bc-hd">
-              <span style={{ color: "rgba(243,239,226,0.6)" }}>Score &lt;40</span>
+              <span style={{ color: "rgba(243,239,226,0.6)" }}>Signal: weak</span>
             </div>
             <div className="bc-bd">
               <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
