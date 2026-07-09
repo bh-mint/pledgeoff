@@ -8,21 +8,28 @@ import { logger } from '@pledgeoff/observability';
 import { requireCronAuth } from '@/lib/cron-auth';
 
 const STALE_DAYS = 7;
+// Each idea costs ~2 sequential LLM calls (10-30s combined), so a fixed idea
+// limit cannot guarantee the 60s function cap — a wall-clock budget can. Ideas
+// left unprocessed stay stale and are picked up by the next daily run.
+const SOFT_BUDGET_MS = 45_000;
 
 export async function GET(req: Request): Promise<Response> {
   const auth = requireCronAuth(req);
   if (!auth.ok) return Response.json({ error: auth.body }, { status: auth.status });
 
+  const startedAt = Date.now();
   const traceId = crypto.randomUUID();
   const supabase = createSupabaseServiceClient();
   const staleCutoff = new Date(Date.now() - STALE_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
-  // Find ideas that have competitors but haven't been checked recently
+  // Find ideas that have competitors but haven't been checked recently —
+  // oldest first, so partial runs rotate fairly through the backlog
   const { data: staleIdeas, error } = await supabase
     .from('ideas')
     .select('id, user_id, text, context')
     .or(`last_competitor_check.is.null,last_competitor_check.lt.${staleCutoff}`)
-    .limit(20); // process max 20 per run to stay within maxDuration
+    .order('last_competitor_check', { ascending: true, nullsFirst: true })
+    .limit(20);
 
   if (error) {
     logger.error({ traceId, target: 'movement-check', outcome: 'error', errorCode: 'DB_QUERY_FAILED' }, error.message);
@@ -35,10 +42,19 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   let processed = 0;
+  let skipped = 0;
   const changed = 0;
   const errors: string[] = [];
 
   for (const idea of staleIdeas) {
+    if (Date.now() - startedAt > SOFT_BUDGET_MS) {
+      skipped = staleIdeas.length - processed - errors.length;
+      logger.info(
+        { traceId, target: 'movement-check', outcome: 'success', processed, skipped, elapsedMs: Date.now() - startedAt },
+        'Soft budget reached — remaining ideas deferred to next run',
+      );
+      break;
+    }
     try {
       // Re-run competitors with forceRerun=true (saves snapshot + diffs + emits event)
       const compResult = await container.analyzeCompetitorsUseCase.execute({
@@ -78,11 +94,11 @@ export async function GET(req: Request): Promise<Response> {
     }
   }
 
-  logger.info({ traceId, target: 'movement-check', outcome: 'success', processed, changed, errors: errors.length }, 'Movement check complete');
+  logger.info({ traceId, target: 'movement-check', outcome: 'success', processed, skipped, changed, errors: errors.length }, 'Movement check complete');
 
   if (errors.length > 0) {
     logger.error({ traceId, target: 'movement-check', errors }, 'Some ideas failed movement check');
   }
 
-  return Response.json({ processed, changed, errors });
+  return Response.json({ processed, skipped, changed, errors });
 }
