@@ -53,9 +53,12 @@ jobs:
           set -euo pipefail
           call() {
             echo "→ /api/v1/cron/$1"
+            # .vercel.app hits Vercel directly: Cloudflare (in front of
+            # pledgeoff.com) cuts requests at ~100s with a 524, so long crons
+            # could never use the full maxDuration through the custom domain.
             curl -fsS --max-time 300 --retry 2 --retry-delay 30 --retry-all-errors \
               -H "Authorization: Bearer $CRON_SECRET" \
-              "https://pledgeoff.com/api/v1/cron/$1"
+              "https://pledgeoff.vercel.app/api/v1/cron/$1"
             echo
           }
           case "$TARGET" in
