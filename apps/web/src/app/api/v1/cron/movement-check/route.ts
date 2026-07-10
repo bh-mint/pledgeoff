@@ -1,6 +1,8 @@
 // Vercel Cron: daily at 06:00 UTC — re-runs competitor analysis and market landscape
 // for ideas not checked in the last 7 days and emits competitor.changed.v1 events on diffs.
-export const maxDuration = 60;
+// One idea = 2 LLM calls (in parallel, but still 15-45s together), so even a
+// single idea can outlive a 60s cap — Fluid compute allows 300s on Hobby.
+export const maxDuration = 300;
 
 import { createSupabaseServiceClient } from '@/lib/supabase-server';
 import { container } from '@/lib/container';
@@ -8,10 +10,10 @@ import { logger } from '@pledgeoff/observability';
 import { requireCronAuth } from '@/lib/cron-auth';
 
 const STALE_DAYS = 7;
-// Each idea costs ~2 sequential LLM calls (10-30s combined), so a fixed idea
-// limit cannot guarantee the 60s function cap — a wall-clock budget can. Ideas
-// left unprocessed stay stale and are picked up by the next daily run.
-const SOFT_BUDGET_MS = 45_000;
+// Wall-clock budget under maxDuration: stop starting new ideas when the time
+// left may not fit one more (~60s worst case per idea). Ideas left unprocessed
+// stay stale and are picked up by the next daily run.
+const SOFT_BUDGET_MS = 230_000;
 
 export async function GET(req: Request): Promise<Response> {
   const auth = requireCronAuth(req);
@@ -56,25 +58,26 @@ export async function GET(req: Request): Promise<Response> {
       break;
     }
     try {
-      // Re-run competitors with forceRerun=true (saves snapshot + diffs + emits event)
-      const compResult = await container.analyzeCompetitorsUseCase.execute({
-        ideaId: idea.id,
-        ideaText: idea.text,
-        userId: idea.user_id,
-        traceId,
-        founderContext: idea.context ?? undefined,
-        forceRerun: true,
-      });
-
-      // Re-run market landscape with forceRerun=true
-      const mktResult = await container.generateMarketLandscapeUseCase.execute({
-        ideaId: idea.id,
-        userId: idea.user_id,
-        ideaText: idea.text,
-        traceId,
-        founderContext: idea.context ?? undefined,
-        forceRerun: true,
-      });
+      // Re-run competitors and market landscape in parallel (forceRerun=true
+      // saves snapshots + diffs + emits events) — halves per-idea latency
+      const [compResult, mktResult] = await Promise.all([
+        container.analyzeCompetitorsUseCase.execute({
+          ideaId: idea.id,
+          ideaText: idea.text,
+          userId: idea.user_id,
+          traceId,
+          founderContext: idea.context ?? undefined,
+          forceRerun: true,
+        }),
+        container.generateMarketLandscapeUseCase.execute({
+          ideaId: idea.id,
+          userId: idea.user_id,
+          ideaText: idea.text,
+          traceId,
+          founderContext: idea.context ?? undefined,
+          forceRerun: true,
+        }),
+      ]);
 
       if (compResult.isOk() && mktResult.isOk()) {
         // Update last_competitor_check

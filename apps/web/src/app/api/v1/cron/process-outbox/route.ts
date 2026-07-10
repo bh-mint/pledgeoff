@@ -2,7 +2,10 @@ import { logger } from '@pledgeoff/observability';
 import { container } from '@/lib/container';
 import { requireCronAuth } from '@/lib/cron-auth';
 
-export const maxDuration = 30;
+// The dispatch loop is bounded by processEvents' internal 22s budget; the
+// generous cap only absorbs cold start, Redis latency, and response overhead
+// so a slow run degrades to partial progress instead of a 504.
+export const maxDuration = 300;
 
 // Called by Vercel Cron every minute to retry unprocessed outbox events.
 // Protected by CRON_SECRET to prevent unauthorized calls.
