@@ -115,9 +115,9 @@ function dimClass(score: number): "go" | "watch" | "kill" {
 }
 
 function dimFlag(score: number): string {
-  if (score >= 75) return "Above threshold";
+  if (score >= 75) return "Above benchmark";
   if (score >= 50) return "Watch";
-  return "Below threshold";
+  return "Below benchmark";
 }
 
 function verdictClass(v: string): "go" | "pivot" | "kill" {

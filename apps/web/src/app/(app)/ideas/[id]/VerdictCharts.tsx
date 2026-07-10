@@ -60,7 +60,7 @@ export function DimensionRadarChart({
   const data = dimensions.map((d) => ({
     dim: d.name,
     score: d.score,
-    threshold: 75,
+    benchmark: 75,
   }));
 
   const strokeColor =
@@ -70,7 +70,7 @@ export function DimensionRadarChart({
     <div className="vrd-chart-wrap no-print">
       <div className="bc-hd">
         <span>Dimension Profile</span>
-        <span className="r">radar · threshold 75</span>
+        <span className="r">radar · benchmark 75</span>
       </div>
       <div className="vrd-chart-body">
         <ResponsiveContainer width="100%" height={260}>
@@ -95,8 +95,8 @@ export function DimensionRadarChart({
               tickLine={false}
             />
             <Radar
-              name="Threshold"
-              dataKey="threshold"
+              name="Benchmark"
+              dataKey="benchmark"
               stroke="var(--go-line)"
               strokeDasharray="4 3"
               strokeWidth={1.5}
@@ -129,7 +129,7 @@ export function DimensionRadarChart({
                 boxShadow: "none",
               }}
               formatter={(value, name) =>
-                name === "Threshold" ? null : [`${Number(value)} / 100`, "Score"]
+                name === "Benchmark" ? null : [`${Number(value)} / 100`, "Score"]
               }
             />
           </RadarChart>

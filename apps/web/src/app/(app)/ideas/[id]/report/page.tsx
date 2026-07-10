@@ -54,10 +54,11 @@ function parseIdeaText(text: string): { title: string; description: string } {
 }
 
 function dimFlag(score: number): { label: string; cls: "go" | "watch" | "kill" } {
-  if (score >= 75) return { label: `STRONG · +${score - 75} above threshold`, cls: "go" };
-  if (score >= 60) return { label: `OPEN · +${score - 60} above threshold`, cls: "go" };
-  if (score >= 50) return { label: `WATCH · ${score - 75} below threshold`, cls: "watch" };
-  return { label: `WEAK · ${score - 75} below threshold`, cls: "kill" };
+  if (score >= 75) return { label: `STRONG · +${score - 75} above benchmark`, cls: "go" };
+  if (score >= 60) return { label: `OPEN · +${score - 60} above benchmark`, cls: "go" };
+  // distance below the 75 benchmark as a positive number ("12 below", not "-12 below")
+  if (score >= 50) return { label: `WATCH · ${75 - score} below benchmark`, cls: "watch" };
+  return { label: `WEAK · ${75 - score} below benchmark`, cls: "kill" };
 }
 
 function dimScoreClass(score: number): "go" | "watch" | "kill" {
