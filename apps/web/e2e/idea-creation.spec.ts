@@ -46,6 +46,17 @@ test.describe('Idea creation — golden path', () => {
     await expect(page).toHaveURL(/new/);
   });
 
+  test('guest draft prefills the idea form', async ({ page }) => {
+    await page.goto('/ideas/new');
+    await page.evaluate(() => localStorage.setItem('po_guest_idea_draft', 'Guest draft: a tool for tracking equipment maintenance schedules'));
+    await page.reload();
+
+    await expect(page.getByRole('textbox').first()).toHaveValue(/Guest draft: a tool/, { timeout: 10_000 });
+    // Draft is consumed on pickup — a later visit must not resurrect it
+    const remaining = await page.evaluate(() => localStorage.getItem('po_guest_idea_draft'));
+    expect(remaining).toBeNull();
+  });
+
   test('submitted idea appears in dashboard', async ({ page }) => {
     // Navigate to dashboard — idea from previous test should be there
     await page.goto('/dashboard');

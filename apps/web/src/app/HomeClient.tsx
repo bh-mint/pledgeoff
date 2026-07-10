@@ -5,6 +5,7 @@ import { PHBanner } from "@/components/PHBanner";
 import { PRICING } from "@/lib/pricing.config";
 import { HeroLeft } from "@/components/home/HeroLeft";
 import { HomeFAQ } from "@/components/home/HomeFAQ";
+import { GuestIdeaBox } from "@/components/home/GuestIdeaBox";
 
 const FEATURES = [
   {
@@ -172,13 +173,7 @@ export function HomeClient() {
             </div>
             <div style={{ height: 1, background: "var(--line)" }} />
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <Link
-                href="/ideas/new"
-                className="btn-p"
-                style={{ justifyContent: "center" }}
-              >
-                Validate free →
-              </Link>
+              <GuestIdeaBox />
               <Link
                 href="/pricing"
                 className="btn-g"

@@ -23,6 +23,19 @@ test.describe('Public pages', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
+  test('guest idea box saves the draft and routes through login', async ({ page }) => {
+    await page.goto('/');
+    const box = page.getByPlaceholder(/describe your product idea/i);
+    await box.fill('A guest-drafted SaaS idea for tracking equipment maintenance schedules');
+    // The box renders a button (the other Validate free CTAs are links)
+    await page.getByRole('button', { name: /validate free/i }).click();
+
+    // Logged-out visitor: middleware preserves the destination
+    await page.waitForURL(/\/login\?.*next=%2Fideas%2Fnew/, { timeout: 10_000 });
+    const draft = await page.evaluate(() => localStorage.getItem('po_guest_idea_draft'));
+    expect(draft).toContain('guest-drafted SaaS idea');
+  });
+
   test('/api/health returns ok', async ({ request }) => {
     const res = await request.get('/api/health');
     expect(res.ok()).toBe(true);

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getAuthToken } from "@/lib/auth-client";
+import { takeGuestDraft } from "@/lib/guest-draft";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 
 // ─── Static data ────────────────────────────────────────
@@ -138,6 +139,17 @@ export function NewIdeaClient({
     });
     timerIds.current = [];
   }
+
+  // Pre-fill from the guest draft written on the homepage before signup
+  // (async deferral keeps the setState out of the synchronous effect body,
+  // same pattern as the fromId prefill below)
+  useEffect(() => {
+    if (fromId) return;
+    void Promise.resolve().then(() => {
+      const draft = takeGuestDraft();
+      if (draft && draft.trim().length > 0) setText(draft);
+    });
+  }, [fromId]);
 
   // Pre-fill from duplicated idea
   useEffect(() => {
