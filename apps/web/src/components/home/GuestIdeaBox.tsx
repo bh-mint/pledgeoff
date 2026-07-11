@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { saveGuestDraft } from "@/lib/guest-draft";
 
 const MIN_CHARS = 10;
+const MAX_CHARS = 2000;
 
 /**
  * Homepage idea box for visitors without an account. The draft is saved in
@@ -36,6 +37,8 @@ export function GuestIdeaBox() {
           if (showErr && e.target.value.trim().length >= MIN_CHARS) setShowErr(false);
         }}
         rows={3}
+        maxLength={MAX_CHARS}
+        aria-label="Describe your product idea"
         placeholder="Describe your product idea — what it does, who it's for…"
         style={{
           width: "100%",
@@ -51,9 +54,10 @@ export function GuestIdeaBox() {
       />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
         <span
+          aria-live="polite"
           style={{
             fontFamily: "var(--font-chivo-mono), monospace",
-            fontSize: 8,
+            fontSize: 10,
             letterSpacing: "0.08em",
             color: showErr ? "var(--kill)" : "var(--faint)",
           }}
@@ -62,9 +66,22 @@ export function GuestIdeaBox() {
             ? `At least ${MIN_CHARS} characters — one sentence is enough.`
             : "Saved in your browser — waiting for you right after the free signup."}
         </span>
-        <button type="button" className="btn-p" onClick={submit}>
-          Validate free →
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span
+            style={{
+              fontFamily: "var(--font-chivo-mono), monospace",
+              fontSize: 10,
+              letterSpacing: "0.08em",
+              fontVariantNumeric: "tabular-nums",
+              color: "var(--faint)",
+            }}
+          >
+            {text.length} / {MAX_CHARS}
+          </span>
+          <button type="button" className="btn-p" onClick={submit}>
+            Validate free →
+          </button>
+        </div>
       </div>
     </div>
   );
