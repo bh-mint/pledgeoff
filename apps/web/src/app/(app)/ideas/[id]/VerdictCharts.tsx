@@ -70,7 +70,7 @@ export function DimensionRadarChart({
     <div className="vrd-chart-wrap no-print">
       <div className="bc-hd">
         <span>Dimension Profile</span>
-        <span className="r">radar · benchmark 75</span>
+        <span className="r">radar · dashed benchmark</span>
       </div>
       <div className="vrd-chart-body">
         <ResponsiveContainer width="100%" height={260}>
