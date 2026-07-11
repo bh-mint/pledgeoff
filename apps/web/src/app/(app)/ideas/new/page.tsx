@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-server";
 import { container } from "@/lib/container";
-import { PLAN_LIMITS } from "@pledgeoff/core";
+import { PLAN_LIMITS, allowedSourcesForPlan } from "@pledgeoff/core";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { NewIdeaClient } from "./NewIdeaClient";
 
@@ -35,5 +35,14 @@ export default async function NewIdeaPage() {
   const teamId = isPaidPlan && team ? team.id : null;
   const teamName = isPaidPlan && team ? team.name : null;
 
-  return <NewIdeaClient validationsLeft={validationsLeft} teamId={teamId} teamName={teamName} />;
+  const allowed = allowedSourcesForPlan(plan);
+
+  return (
+    <NewIdeaClient
+      validationsLeft={validationsLeft}
+      teamId={teamId}
+      teamName={teamName}
+      allowedSources={allowed ? [...allowed] : null}
+    />
+  );
 }

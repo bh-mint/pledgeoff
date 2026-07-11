@@ -22,10 +22,11 @@ test.describe('Idea creation — golden path', () => {
     await expect(submitBtn).toBeEnabled();
     await submitBtn.click();
 
-    // Submit stays on /ideas/new and plays the in-page analysis screen;
-    // when the verdict is ready a "View verdict →" link appears.
-    const verdictLink = page.getByRole('link', { name: /view verdict/i });
-    await expect(verdictLink).toBeVisible({ timeout: 60_000 });
+    // Submit stays on /ideas/new and plays the in-page analysis screen.
+    // The board resolves on the REAL verdict ("View verdict →"); if the
+    // pipeline runs long the honest fallback appears ("Open case file →").
+    const verdictLink = page.getByRole('link', { name: /view verdict|open case file/i });
+    await expect(verdictLink).toBeVisible({ timeout: 150_000 });
     await verdictLink.click();
     await page.waitForURL(/\/ideas\/[0-9a-f-]{36}/, { timeout: 15_000 });
   });

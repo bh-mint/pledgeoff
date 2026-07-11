@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import type { SignalSource } from "@pledgeoff/core";
 import { getAuthToken } from "@/lib/auth-client";
 import { takeGuestDraft } from "@/lib/guest-draft";
 import { useUpgradeModal } from "@/components/UpgradeModal";
@@ -29,34 +30,38 @@ const CATEGORIES = [
 
 type CatKey = (typeof CATEGORIES)[number]["key"];
 
-const SIGNALS = [
-  { fl: "p" as const, src: "HN", txt: "Show HN: I built a changelog generator from my git commits" },
-  { fl: "p" as const, src: "HN", txt: "Ask HN: How do you keep users informed of what you ship?" },
-  { fl: "p" as const, src: "GH", txt: "googleapis/release-please · Issue #1873: narrative output requested" },
-  { fl: "u" as const, src: "GH", txt: "conventional-changelog · 14.2k stars · maintenance mode" },
-  { fl: "p" as const, src: "GH", txt: "mikepenz/release-action · community demand for prose output" },
-  { fl: "p" as const, src: "DT", txt: "Why I stopped writing changelogs by hand — mkramer_dev" },
-  { fl: "p" as const, src: "RD", txt: "r/SideProject: What do you use to announce updates to users?" },
-  { fl: "n" as const, src: "HN", txt: "Does anyone actually read changelogs? Counter-signal logged." },
-  { fl: "p" as const, src: "DT", txt: '"The gap is the translation layer to readable prose"' },
-  { fl: "p" as const, src: "GH", txt: 'changelog-generator · 847 stars · "could be so much better"' },
+// Everything shown during the analysis is real: signals, counts, dimensions
+// and the verdict come from polling the idea endpoint while the pipeline runs.
+// The only staged part is the choreography (sweep timing, flap churn).
+
+const SOURCE_GROUPS: { label: string; sources: readonly SignalSource[] }[] = [
+  { label: "Reddit · Web", sources: ["brave", "reddit", "google"] },
+  { label: "GitHub", sources: ["github"] },
+  { label: "Hacker News · Dev.to", sources: ["hn", "devto", "producthunt"] },
+  { label: "Reviews · News · Jobs", sources: ["reviews", "news", "jobs"] },
 ];
 
-const SRC_NAMES = ["Hacker News", "GitHub", "Dev.to", "Reddit · Web"];
-const SRC_COUNTS = [7, 5, 4, 2];
-const SRC_TIMING: [number, number][] = [
-  [1000, 3200],
-  [3000, 5500],
-  [5200, 8000],
-  [8200, 10500],
+const SRC_SHORT: Record<SignalSource, string> = {
+  reddit: "RD", brave: "RD", google: "WB", github: "GH", hn: "HN",
+  producthunt: "PH", devto: "DT", reviews: "RV", news: "NW", jobs: "JB",
+};
+
+const PROCESS_LINES = [
+  "Case opened — survey dispatched to live sources",
+  "Sweeping discussions, repos and posts for evidence…",
+  "Deduplicating hits · scoring relevance against your idea…",
+  "Weighing evidence across the four dimensions…",
 ];
 
-const DIMS = [
-  { name: "Market Signal", target: 91, cls: "go" as const, delay: 10400 },
-  { name: "Competitive",   target: 86, cls: "go" as const, delay: 11600 },
-  { name: "Revenue Model", target: 80, cls: "go" as const, delay: 12700 },
-  { name: "Team Capability", target: 72, cls: "watch" as const, delay: 13500 },
-];
+const DIM_NAMES = ["Market Demand", "Competition", "Feasibility", "Timing"];
+
+const POLL_MS = 3500;
+const POLL_TIMEOUT_MS = 120_000;
+const THEATER_MIN_MS = 12_000;
+
+function scoreCls(score: number): "go" | "watch" | "kill" {
+  return score >= 75 ? "go" : score >= 50 ? "watch" : "kill";
+}
 
 const CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ·▪◆";
 const TOTAL_MS = 15000;
@@ -71,6 +76,7 @@ interface SrcState {
   status: SrcStatus;
   showCount: boolean;
   dur: string;
+  count: number;
 }
 
 interface SigItem {
@@ -81,16 +87,38 @@ interface SigItem {
   faded: boolean;
 }
 
+interface LiveSignal {
+  source: SignalSource;
+  title: string;
+  sentiment: "positive" | "negative" | "neutral";
+}
+
+interface LiveDecision {
+  verdict: "GO" | "PIVOT" | "KILL";
+  score: number;
+  confidence: number;
+  dimensions: { name: string; score: number; weight: number }[];
+}
+
+interface LiveDim {
+  name: string;
+  pct: number;
+  cls: "go" | "watch" | "kill" | "";
+}
+
 // ─── Component ───────────────────────────────────────────
 
 export function NewIdeaClient({
   validationsLeft,
   teamId,
   teamName,
+  allowedSources,
 }: {
   validationsLeft: number;
   teamId?: string | null;
   teamName?: string | null;
+  /** Signal sources the user's plan actually queries; null = all sources. */
+  allowedSources?: SignalSource[] | null;
 }) {
   const router = useRouter();
   const { openQuotaModal } = useUpgradeModal();
@@ -112,20 +140,40 @@ export function NewIdeaClient({
   const [screen, setScreen] = useState<"form" | "analysis">("form");
   const [ideaId, setIdeaId] = useState<string | null>(null);
 
+  // Source groups the user's plan actually queries
+  const groups = useMemo(
+    () =>
+      SOURCE_GROUPS.filter(
+        (g) => !allowedSources || g.sources.some((s) => allowedSources.includes(s))
+      ),
+    [allowedSources]
+  );
+
   // Analysis animation state
   const [flap, setFlap] = useState(["·", "·", "·", "·"]);
-  const [flapGreen, setFlapGreen] = useState(false);
+  const [locked, setLocked] = useState<{ digits: string[]; letters: string[]; cls: "go" | "pivot" | "kill" } | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [progress, setProgress] = useState(0);
   const [srcState, setSrcState] = useState<SrcState[]>(
-    SRC_NAMES.map(() => ({ pct: 0, status: "queued" as SrcStatus, showCount: false, dur: "0s" }))
+    groups.map(() => ({ pct: 0, status: "queued" as SrcStatus, showCount: false, dur: "0s", count: 0 }))
   );
   const [sigItems, setSigItems] = useState<SigItem[]>([]);
   const [sigTotal, setSigTotal] = useState(0);
-  const [dimPct, setDimPct] = useState([0, 0, 0, 0]);
+  const [liveDims, setLiveDims] = useState<LiveDim[]>(DIM_NAMES.map((n) => ({ name: n, pct: 0, cls: "" })));
   const [showAnStatus, setShowAnStatus] = useState(false);
   const [isDone, setIsDone] = useState(false);
   const [isDoneVisible, setIsDoneVisible] = useState(false);
+
+  // Live pipeline state (real data, polled)
+  const [decision, setDecision] = useState<LiveDecision | null>(null);
+  const [realSignals, setRealSignals] = useState<LiveSignal[] | null>(null);
+  const [theaterMinPassed, setTheaterMinPassed] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+  const flapIntRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerIntRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resolvedRef = useRef(false);
+  const sigCountRef = useRef(0);
+  const streamedRef = useRef(0);
 
   // Timer cleanup
   const timerIds = useRef<(ReturnType<typeof setTimeout> | ReturnType<typeof setInterval>)[]>([]);
@@ -219,98 +267,182 @@ export function NewIdeaClient({
     }
     // Reset animation state before transitioning (event handler — no cascading re-render issue)
     setFlap(["·", "·", "·", "·"]);
-    setFlapGreen(false);
+    setLocked(null);
     setElapsed(0);
     setProgress(0);
-    setSrcState(SRC_NAMES.map(() => ({ pct: 0, status: "queued" as SrcStatus, showCount: false, dur: "0s" })));
+    setSrcState(groups.map(() => ({ pct: 0, status: "queued" as SrcStatus, showCount: false, dur: "0s", count: 0 })));
     setSigItems([]);
     setSigTotal(0);
-    setDimPct([0, 0, 0, 0]);
+    setLiveDims(DIM_NAMES.map((n) => ({ name: n, pct: 0, cls: "" })));
     setShowAnStatus(false);
     setIsDone(false);
     setIsDoneVisible(false);
+    setDecision(null);
+    setRealSignals(null);
+    setTheaterMinPassed(false);
+    setTimedOut(false);
+    resolvedRef.current = false;
+    sigCountRef.current = 0;
+    streamedRef.current = 0;
     setScreen("analysis");
     setSubmitting(false);
-  }, [text, cat, context, founderContext, teamId, submitting, validationsLeft, router]);
+  }, [text, cat, context, founderContext, teamId, submitting, validationsLeft, router, groups]);
 
-  // Analysis animation
+  // Analysis choreography — staging only; every displayed value is real
   useEffect(() => {
     if (screen !== "analysis") return;
 
     clearTimers();
+    resolvedRef.current = false;
 
-    // Flap cycling
+    // Flap cycling until the real verdict resolves the board
     const flapInt = setInterval(() => {
       setFlap([rndC(), rndC(), rndC(), rndC()]);
     }, 80);
+    flapIntRef.current = flapInt;
     addTimer(flapInt);
 
-    // Timer + progress bar
+    // Timer counts real elapsed time; the bar eases toward 90% and waits
+    // for the verdict — it never claims completion before the pipeline does
     const timerInt = setInterval(() => {
-      setElapsed((e) => Math.min(e + 200, TOTAL_MS));
-      setProgress((p) => Math.min(100, p + (200 / TOTAL_MS) * 100));
+      setElapsed((e) => e + 200);
+      setProgress((p) => Math.min(90, p + (200 / TOTAL_MS) * 90));
     }, 200);
+    timerIntRef.current = timerInt;
     addTimer(timerInt);
 
-    // Source scanning: start + done
-    SRC_TIMING.forEach(([startMs, doneMs], i) => {
-      const dur = `${((doneMs - startMs) / 1000).toFixed(1)}s`;
+    // Source sweep starts (per plan group); "done" waits for real signals
+    groups.forEach((_, i) => {
       addTimer(setTimeout(() => {
-        setSrcState((prev) => prev.map((s, j) => j === i ? { ...s, pct: 100, status: "scanning", dur } : s));
-      }, startMs));
-      addTimer(setTimeout(() => {
-        setSrcState((prev) => prev.map((s, j) => j === i ? { ...s, status: "done", showCount: true } : s));
-      }, doneMs));
+        setSrcState((prev) => prev.map((s, j) => j === i ? { ...s, pct: 100, status: "scanning", dur: "2.6s" } : s));
+      }, 900 + i * 1100));
     });
 
-    // Signal items
-    SIGNALS.forEach((sig, i) => {
+    // Process narration — describes what the pipeline is doing, claims nothing
+    PROCESS_LINES.forEach((txt, i) => {
       addTimer(setTimeout(() => {
-        setSigItems((prev) => {
-          const next = [...prev, { ...sig, id: i, faded: false }];
-          if (next.length > 7) {
-            next[0] = { ...next[0]!, faded: true };
-          }
-          return next.slice(-8);
-        });
-        setSigTotal(i + 1);
-      }, 4000 + i * 820));
+        setSigItems((prev) => [...prev, { id: 1000 + i, fl: "u" as const, src: "SYS", txt, faded: false }].slice(-8));
+      }, 800 + i * 2600));
     });
 
-    // Dimension bars
-    DIMS.forEach((d, i) => {
-      addTimer(setTimeout(() => {
-        setDimPct((prev) => prev.map((v, j) => (j === i ? d.target : v)));
-      }, d.delay));
-    });
-
-    // Board resolve at 14s — stop flap, snap 7×, lock to "82 GO"
-    addTimer(setTimeout(() => {
-      clearInterval(flapInt);
-      let snap = 0;
-      const snapInt = setInterval(() => {
-        setFlap([rndC(), rndC(), rndC(), rndC()]);
-        snap++;
-        if (snap >= 7) {
-          clearInterval(snapInt);
-          setFlap(["8", "2", "G", "O"]);
-          setFlapGreen(true);
-          addTimer(setTimeout(() => setShowAnStatus(true), 300));
-        }
-      }, 55);
-      addTimer(snapInt);
-    }, 14000));
-
-    // Done at 15s
-    addTimer(setTimeout(() => {
-      clearInterval(timerInt);
-      setProgress(100);
-      setIsDone(true);
-      addTimer(setTimeout(() => setIsDoneVisible(true), 16));
-    }, 15000));
+    // Minimum theater time before the board may resolve
+    addTimer(setTimeout(() => setTheaterMinPassed(true), THEATER_MIN_MS));
 
     return () => clearTimers();
-  }, [screen]);
+  }, [screen, groups]);
+
+  // Poll the idea endpoint for real signals + decision while the pipeline runs
+  useEffect(() => {
+    if (screen !== "analysis" || !ideaId) return;
+
+    let stopped = false;
+    let pollInt: ReturnType<typeof setInterval> | null = null;
+
+    const poll = async () => {
+      const token = await getAuthToken();
+      if (!token || stopped) return;
+      try {
+        const res = await fetch(`/api/v1/ideas/${ideaId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok || stopped) return;
+        const json = (await res.json()) as {
+          data?: { decision?: LiveDecision | null; signals?: LiveSignal[] };
+        };
+        const sigs = json.data?.signals;
+        if (Array.isArray(sigs) && sigs.length > 0 && sigs.length !== sigCountRef.current) {
+          sigCountRef.current = sigs.length;
+          setRealSignals(sigs);
+        }
+        const d = json.data?.decision;
+        if (d && typeof d.score === "number") {
+          setDecision(d);
+          stopped = true;
+          if (pollInt) clearInterval(pollInt);
+        }
+      } catch {
+        // network blip — the next tick retries
+      }
+    };
+
+    pollInt = setInterval(() => { void poll(); }, POLL_MS);
+    void poll();
+    const timeoutT = setTimeout(() => setTimedOut(true), POLL_TIMEOUT_MS);
+
+    return () => {
+      stopped = true;
+      if (pollInt) clearInterval(pollInt);
+      clearTimeout(timeoutT);
+    };
+  }, [screen, ideaId]);
+
+  // Real signals arrived (possibly incrementally) — real counts on the source
+  // cards, real titles streamed into the ticker exactly once each
+  useEffect(() => {
+    if (!realSignals || screen !== "analysis") return;
+
+    addTimer(setTimeout(() => setSigTotal(realSignals.length), 0));
+
+    groups.forEach((g, i) => {
+      const count = realSignals.filter((s) => g.sources.includes(s.source)).length;
+      addTimer(setTimeout(() => {
+        setSrcState((prev) => prev.map((s, j) => j === i ? { ...s, pct: 100, status: "done", showCount: true, count } : s));
+      }, 250 * i));
+    });
+
+    const start = streamedRef.current;
+    const batch = realSignals.slice(start, start + 12);
+    streamedRef.current = start + batch.length;
+    batch.forEach((sig, i) => {
+      addTimer(setTimeout(() => {
+        setSigItems((prev) => {
+          const next = [...prev, {
+            id: start + i,
+            fl: sig.sentiment === "positive" ? ("p" as const) : sig.sentiment === "negative" ? ("n" as const) : ("u" as const),
+            src: SRC_SHORT[sig.source] ?? "WB",
+            txt: sig.title,
+            faded: false,
+          }];
+          if (next.length > 7) next[0] = { ...next[0]!, faded: true };
+          return next.slice(-8);
+        });
+      }, 400 + i * 700));
+    });
+  }, [realSignals, screen, groups]);
+
+  // Board resolve — real verdict, real score, real dimensions
+  useEffect(() => {
+    if (!decision || !theaterMinPassed || resolvedRef.current || screen !== "analysis") return;
+    resolvedRef.current = true;
+
+    if (flapIntRef.current) clearInterval(flapIntRef.current);
+
+    const flapCls = decision.verdict === "GO" ? ("go" as const) : decision.verdict === "PIVOT" ? ("pivot" as const) : ("kill" as const);
+    const digits = String(Math.round(decision.score)).split("");
+    const letters = decision.verdict.split("");
+
+    setLiveDims(
+      decision.dimensions.map((d) => ({ name: d.name, pct: d.score, cls: scoreCls(d.score) }))
+    );
+
+    let snap = 0;
+    const snapInt = setInterval(() => {
+      setFlap([rndC(), rndC(), rndC(), rndC()]);
+      snap++;
+      if (snap >= 7) {
+        clearInterval(snapInt);
+        setLocked({ digits, letters, cls: flapCls });
+        if (timerIntRef.current) clearInterval(timerIntRef.current);
+        setProgress(100);
+        addTimer(setTimeout(() => setShowAnStatus(true), 300));
+        addTimer(setTimeout(() => {
+          setIsDone(true);
+          addTimer(setTimeout(() => setIsDoneVisible(true), 16));
+        }, 900));
+      }
+    }, 55);
+    addTimer(snapInt);
+  }, [decision, theaterMinPassed, screen]);
 
   // Derived
   const len = text.length;
@@ -318,6 +450,22 @@ export function NewIdeaClient({
   const ideaStatus = len === 0 ? "Awaiting input" : len < 10 ? "Too short" : len > 1900 ? "Near limit" : "Draft";
   const elapsedSec = Math.floor(elapsed / 1000);
   const caseRef = ideaId ? ideaId.slice(0, 4).toUpperCase() : "···";
+
+  // Derived from the real decision (render-safe: only used when decision is set)
+  const verdictToneCls = decision?.verdict === "GO" ? "go" : decision?.verdict === "PIVOT" ? "watch" : "kill";
+  const confidencePct = decision ? Math.round(decision.confidence * 100) : null;
+  const dimsSorted = decision ? [...decision.dimensions].sort((a, b) => b.score - a.score) : [];
+  const topDim = dimsSorted[0];
+  const lowDim = dimsSorted[dimsSorted.length - 1];
+  const ottoLine = decision && topDim && lowDim
+    ? `${topDim.name} at ${topDim.score} is the clearest reading — ${lowDim.name} at ${lowDim.score} is ${
+        decision.verdict === "GO"
+          ? "the one thing to watch as you build"
+          : decision.verdict === "PIVOT"
+          ? "where the pivot pressure comes from"
+          : "what pulls the case down"
+      }.`
+    : null;
 
   // ── Analysis screen
   if (screen === "analysis") {
@@ -337,26 +485,42 @@ export function NewIdeaClient({
             </div>
             <div style={{ padding: "20px 24px 18px" }}>
               <div className="an-fcs">
-                <div className={`fc fc-xl${flapGreen ? " fc-go" : ""}`}>{flap[0]}</div>
-                <div className={`fc fc-xl${flapGreen ? " fc-go" : ""}`}>{flap[1]}</div>
-                <div className="fc-gap" />
-                <div className={`fc fc-lg${flapGreen ? " fc-go" : ""}`}>{flap[2]}</div>
-                <div className={`fc fc-lg${flapGreen ? " fc-go" : ""}`}>{flap[3]}</div>
+                {locked ? (
+                  <>
+                    {locked.digits.map((c, i) => (
+                      <div key={`d${i}`} className={`fc fc-xl fc-${locked.cls}`}>{c}</div>
+                    ))}
+                    <div className="fc-gap" />
+                    {locked.letters.map((c, i) => (
+                      <div key={`l${i}`} className={`fc fc-lg fc-${locked.cls}`}>{c}</div>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    <div className="fc fc-xl">{flap[0]}</div>
+                    <div className="fc fc-xl">{flap[1]}</div>
+                    <div className="fc-gap" />
+                    <div className="fc fc-lg">{flap[2]}</div>
+                    <div className="fc fc-lg">{flap[3]}</div>
+                  </>
+                )}
               </div>
-              <div className={`an-status${showAnStatus ? " show" : ""}`}>
-                <div className="an-bsp"><span className="an-bspk">Verdict</span><span className="an-bspv go">GO</span></div>
-                <div className="an-bsp"><span className="an-bspk">Score</span><span className="an-bspv">82 / 100</span></div>
-                <div className="an-bsp"><span className="an-bspk">Confidence</span><span className="an-bspv">84%</span></div>
-                <div className="an-bsp"><span className="an-bspk">Signals</span><span className="an-bspv">{sigTotal}</span></div>
-              </div>
+              {decision && (
+                <div className={`an-status${showAnStatus ? " show" : ""}`}>
+                  <div className="an-bsp"><span className="an-bspk">Verdict</span><span className={`an-bspv ${verdictToneCls}`}>{decision.verdict}</span></div>
+                  <div className="an-bsp"><span className="an-bspk">Score</span><span className="an-bspv">{Math.round(decision.score)} / 100</span></div>
+                  <div className="an-bsp"><span className="an-bspk">Confidence</span><span className="an-bspv">{confidencePct}%</span></div>
+                  <div className="an-bsp"><span className="an-bspk">Signals</span><span className="an-bspv">{sigTotal}</span></div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Source cards */}
+          {/* Source cards — plan-real groups, counts from the live pipeline */}
           <div className="an-sources">
-            {SRC_NAMES.map((name, i) => (
-              <div className="src-card" key={name}>
-                <div className="src-nm">{name}</div>
+            {groups.map((g, i) => (
+              <div className="src-card" key={g.label}>
+                <div className="src-nm">{g.label}</div>
                 <div className="src-bw">
                   <div
                     className="src-bf"
@@ -373,10 +537,10 @@ export function NewIdeaClient({
                     ? "Queued"
                     : srcState[i]?.status === "scanning"
                     ? "Scanning…"
-                    : `${SRC_COUNTS[i]} signal${SRC_COUNTS[i] !== 1 ? "s" : ""}`}
+                    : `${srcState[i]?.count ?? 0} signal${srcState[i]?.count !== 1 ? "s" : ""}`}
                 </div>
                 <div className={`src-ct${srcState[i]?.showCount ? " show" : ""}`}>
-                  {SRC_COUNTS[i]}
+                  {srcState[i]?.count ?? 0}
                 </div>
               </div>
             ))}
@@ -387,7 +551,7 @@ export function NewIdeaClient({
             <div className="an-signals">
               <div className="sig-hd">
                 <span>Signal extraction</span>
-                <span>{sigTotal} signal{sigTotal !== 1 ? "s" : ""}</span>
+                <span>{sigTotal > 0 ? `${sigTotal} signal${sigTotal !== 1 ? "s" : ""}` : "sweep in progress"}</span>
               </div>
               <div className="sig-list">
                 {sigItems.map((sig) => (
@@ -409,16 +573,16 @@ export function NewIdeaClient({
             <div className="an-dims">
               <div className="dim-hd">Dimension synthesis</div>
               <div className="dim-list">
-                {DIMS.map((d, i) => (
+                {liveDims.map((d) => (
                   <div key={d.name}>
                     <div className="dim-nm">
                       {d.name}
-                      <span className={`dim-sc${dimPct[i]! > 0 ? ` ${d.cls}` : ""}`}>
-                        {dimPct[i]! > 0 ? dimPct[i] : "—"}
+                      <span className={`dim-sc${d.pct > 0 ? ` ${d.cls}` : ""}`}>
+                        {d.pct > 0 ? d.pct : "—"}
                       </span>
                     </div>
                     <div className="dim-bar">
-                      <div className={`dim-fill ${d.cls}`} style={{ width: `${dimPct[i]}%` }} />
+                      <div className={`dim-fill ${d.cls}`} style={{ width: `${d.pct}%` }} />
                       <div className="dim-gl" />
                     </div>
                   </div>
@@ -427,27 +591,48 @@ export function NewIdeaClient({
             </div>
           </div>
 
-          {/* Done overlay */}
-          {isDone && (
+          {/* Done overlay — real verdict, real numbers */}
+          {isDone && decision && (
             <div
               className="an-done"
               style={{ opacity: isDoneVisible ? 1 : 0 }}
             >
               <div>
                 <div className="an-done-lbl">Verdict ready</div>
-                <div className="an-done-verd">GO · 82 / 100</div>
-                <div className="an-done-sub">{sigTotal} signals · Confidence 84%</div>
+                <div className={`an-done-verd ${verdictToneCls}`}>
+                  {decision.verdict} · {Math.round(decision.score)} / 100
+                </div>
+                <div className="an-done-sub">
+                  {sigTotal} signal{sigTotal !== 1 ? "s" : ""} · Confidence {confidencePct}%
+                </div>
               </div>
-              <div className="an-done-otto">
-                <span className="do-sig">Otto</span>
-                <p className="do-txt">
-                  Market Signal at 91 is the clearest reading — demand is real and concentrated.
-                  Team Capability at 72 is the one thing to solve before you build.
-                </p>
-              </div>
+              {ottoLine && (
+                <div className="an-done-otto">
+                  <span className="do-sig">Otto</span>
+                  <p className="do-txt">{ottoLine}</p>
+                </div>
+              )}
               {ideaId && (
                 <Link href={`/ideas/${ideaId}`} className={`btn-p${isDoneVisible ? " pulse" : ""}`}>
                   View verdict →
+                </Link>
+              )}
+            </div>
+          )}
+
+          {/* Long-running pipeline — honest state, no invented verdict */}
+          {timedOut && !decision && (
+            <div className="an-done" style={{ opacity: 1 }}>
+              <div>
+                <div className="an-done-lbl">Still processing</div>
+                <div className="an-done-verd" style={{ color: "var(--ink)" }}>Survey running long</div>
+                <div className="an-done-sub">
+                  Heavy source traffic — the case file updates itself the moment the verdict lands.
+                </div>
+              </div>
+              {ideaId && (
+                <Link href={`/ideas/${ideaId}`} className="btn-p">
+                  Open case file →
                 </Link>
               )}
             </div>
