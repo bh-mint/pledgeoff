@@ -570,6 +570,35 @@ body {
   .page-enter { animation: none; }
 }
 
+/* ── Guest idea box (home) ─────────────────────────── */
+.gib-ta {
+  width: 100%;
+  padding: 12px 14px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.gib-ta:focus {
+  outline: none;
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(26,106,60,.10);
+}
+[data-theme="dark"] .gib-ta:focus { box-shadow: 0 0 0 3px rgba(58,196,122,.12); }
+@keyframes gib-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-3px); } 55% { transform: translateX(3px); } 80% { transform: translateX(-2px); } }
+.gib-ta.err { border-color: var(--kill); animation: gib-shake 280ms cubic-bezier(.36, .07, .19, .97); }
+.gib-count { transition: color .2s ease; color: var(--faint); }
+.gib-count.warn { color: var(--pivot); }
+.gib-count.over { color: var(--kill); }
+@media (prefers-reduced-motion: reduce) {
+  .gib-ta { transition: none; }
+  .gib-ta.err { animation: none; }
+}
+
 /* ═══════════════════════════════════════════════════════
    MARKETING — Bulletin page utilities
    Used across public marketing pages (pricing, about,

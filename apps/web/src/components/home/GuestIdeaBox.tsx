@@ -40,17 +40,7 @@ export function GuestIdeaBox() {
         maxLength={MAX_CHARS}
         aria-label="Describe your product idea"
         placeholder="Describe your product idea — what it does, who it's for…"
-        style={{
-          width: "100%",
-          padding: "12px 14px",
-          background: "transparent",
-          border: "1px solid var(--line)",
-          color: "var(--ink)",
-          fontFamily: "inherit",
-          fontSize: 14,
-          lineHeight: 1.6,
-          resize: "vertical",
-        }}
+        className={`gib-ta${showErr ? " err" : ""}`}
       />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
         <span
@@ -68,12 +58,12 @@ export function GuestIdeaBox() {
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span
+            className={`gib-count${text.length > 1900 ? " over" : text.length > 1700 ? " warn" : ""}`}
             style={{
               fontFamily: "var(--font-chivo-mono), monospace",
               fontSize: 10,
               letterSpacing: "0.08em",
               fontVariantNumeric: "tabular-nums",
-              color: "var(--faint)",
             }}
           >
             {text.length} / {MAX_CHARS}
