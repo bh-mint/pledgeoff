@@ -630,7 +630,7 @@ export function DashboardClient({
                 <thead>
                   <tr>
                     <th className="db-wl-th">Competitor</th>
-                    <th className="db-wl-th db-wl-num">Won against</th>
+                    <th className="db-wl-th db-wl-num">Present in wins</th>
                     <th className="db-wl-th db-wl-num">Lost to</th>
                     <th className="db-wl-th db-wl-num">Total</th>
                   </tr>
