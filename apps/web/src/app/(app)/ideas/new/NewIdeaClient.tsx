@@ -502,11 +502,11 @@ export function NewIdeaClient({
                 {locked ? (
                   <>
                     {locked.digits.map((c, i) => (
-                      <div key={`d${i}`} className={`fc fc-xl fc-${locked.cls}`}>{c}</div>
+                      <div key={`d${i}`} className={`fc fc-xl fc-${locked.cls} fc-lock`} style={{ animationDelay: `${i * 60}ms` }}>{c}</div>
                     ))}
                     <div className="fc-gap" />
                     {locked.letters.map((c, i) => (
-                      <div key={`l${i}`} className={`fc fc-lg fc-${locked.cls}`}>{c}</div>
+                      <div key={`l${i}`} className={`fc fc-lg fc-${locked.cls} fc-lock`} style={{ animationDelay: `${(locked.digits.length + i) * 60}ms` }}>{c}</div>
                     ))}
                   </>
                 ) : (
@@ -535,7 +535,7 @@ export function NewIdeaClient({
             {groups.map((g, i) => (
               <div className="src-card" key={g.label}>
                 <div className="src-nm">{g.label}</div>
-                <div className="src-bw">
+                <div className={`src-bw${srcState[i]?.status === "scanning" ? " scanning" : ""}`}>
                   <div
                     className="src-bf"
                     style={{
@@ -607,10 +607,7 @@ export function NewIdeaClient({
 
           {/* Done overlay — real verdict, real numbers */}
           {isDone && decision && (
-            <div
-              className="an-done"
-              style={{ opacity: isDoneVisible ? 1 : 0 }}
-            >
+            <div className={`an-done${isDoneVisible ? " stamped" : ""}`}>
               <div>
                 <div className="an-done-lbl">Verdict ready</div>
                 <div className={`an-done-verd ${verdictToneCls}`}>

@@ -1105,7 +1105,10 @@ select.finp { cursor: pointer; }
 /* Analysis wrapper */
 .an-wrap { max-width: 900px; margin: 0 auto; padding: 40px 60px 60px; }
 .an-eyebrow { font-family: var(--font-chivo-mono), monospace; font-size: 9px; letter-spacing: .34em; text-transform: uppercase; color: var(--faint); display: block; text-align: center; margin-bottom: 22px; }
-.an-fcs { display: flex; align-items: flex-end; gap: 4px; }
+.an-fcs { display: flex; align-items: flex-end; gap: 4px; perspective: 600px; }
+/* Split-flap lock — each cell flips down onto its final character */
+@keyframes fc-flip { 0% { transform: rotateX(88deg); opacity: .35; } 100% { transform: rotateX(0); opacity: 1; } }
+.fc-lock { animation: fc-flip 260ms cubic-bezier(.2, 0, .1, 1) both; transform-origin: center top; }
 .an-status { display: flex; flex-wrap: wrap; border-top: 1px solid var(--line); margin-top: 14px; padding-top: 12px; opacity: 0; transition: opacity .6s ease; }
 .an-status.show { opacity: 1; }
 .an-bsp { display: flex; flex-direction: column; padding-right: 14px; margin-right: 14px; border-right: 1px solid var(--line); }
@@ -1121,6 +1124,16 @@ select.finp { cursor: pointer; }
 .src-card { background: var(--surface); border: 1px solid var(--line); padding: 14px 16px; }
 .src-nm { font-family: var(--font-chivo-mono), monospace; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); margin-bottom: 8px; }
 .src-bw { height: 6px; background: var(--surface-2); border: 1px solid var(--line); position: relative; overflow: hidden; margin-bottom: 6px; }
+/* Shimmer sweep while a source is actively scanning */
+@keyframes src-shimmer { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
+.src-bw.scanning::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+  animation: src-shimmer 1.2s ease-in-out infinite;
+}
 .src-bf { position: absolute; left: 0; top: 0; bottom: 0; background: var(--go-mid); width: 100%; transform: scaleX(0); transform-origin: left; }
 .src-st { font-family: var(--font-chivo-mono), monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
 .src-st.done { color: var(--go); }
@@ -1133,7 +1146,7 @@ select.finp { cursor: pointer; }
 .sig-hd { background: var(--ink); color: var(--bg); padding: 8px 16px; font-family: var(--font-chivo-mono), monospace; font-size: 8.5px; letter-spacing: .22em; text-transform: uppercase; display: flex; justify-content: space-between; }
 [data-theme="dark"] .sig-hd { background: rgba(237,229,204,.07); color: rgba(237,229,204,.45); }
 .sig-list { padding: 6px 0; min-height: 140px; max-height: 180px; overflow: hidden; }
-.sig-item { display: grid; grid-template-columns: 16px 1fr 28px; gap: 8px; align-items: baseline; padding: 5px 16px; }
+.sig-item { display: grid; grid-template-columns: 16px 1fr 28px; gap: 8px; align-items: baseline; padding: 5px 16px; animation: fadeSlideIn .24s cubic-bezier(.2, 0, .1, 1) backwards; transition: opacity .3s; }
 .sig-fl { font-family: var(--font-chivo-mono), monospace; font-size: 9px; font-weight: 600; }
 .sig-fl.p { color: var(--go); }
 .sig-fl.n { color: var(--kill); }
@@ -1159,7 +1172,12 @@ select.finp { cursor: pointer; }
 .dim-gl { position: absolute; top: 0; bottom: 0; left: 75%; width: 1px; background: var(--go-line); }
 
 /* Done overlay */
-.an-done { background: var(--surface); border: 1px solid var(--line); padding: 20px 24px; margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; transition: opacity .6s; }
+.an-done { background: var(--surface); border: 1px solid var(--line); padding: 20px 24px; margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; opacity: 0; }
+/* Bureau stamp — the card lands, then the verdict line stamps onto it */
+@keyframes stamp-in { 0% { opacity: 0; transform: scale(1.06); } 65% { opacity: 1; transform: scale(.992); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes stamp-verd { 0% { opacity: 0; transform: scale(1.35) rotate(-4deg); } 55% { opacity: 1; transform: scale(.95) rotate(.5deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+.an-done.stamped { animation: stamp-in 320ms cubic-bezier(.2, 0, .1, 1) both; }
+.an-done.stamped .an-done-verd { display: inline-block; animation: stamp-verd 420ms cubic-bezier(.2, 0, .1, 1) 140ms both; }
 .an-done-lbl { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: .28em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
 .an-done-verd { font-family: var(--font-chivo-mono), monospace; font-size: 14px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--go); }
 .an-done-verd.watch { color: var(--pivot); }
@@ -1188,6 +1206,12 @@ select.finp { cursor: pointer; }
   .src-bf, .dim-fill, .an-progress-fill, .vrd-rt-fill, .vrd-dc-fill { transition: none !important; }
   .btn-p.pulse::after { animation: none; }
   .vrd-sc-num.settled { animation: none; }
+  .fc-lock { animation: none; }
+  .src-bw.scanning::after { animation: none; content: none; }
+  .sig-item { animation: none; }
+  .an-done { opacity: 1; }
+  .an-done.stamped,
+  .an-done.stamped .an-done-verd { animation: none; }
 }
 
 /* Fixed progress bar (analysis only) */
