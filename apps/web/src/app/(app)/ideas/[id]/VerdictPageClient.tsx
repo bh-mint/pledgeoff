@@ -15,6 +15,7 @@ import { MarketLandscapeClient } from "./market-landscape/MarketLandscapeClient"
 import { InterviewGuideClient } from "./interview-guide/InterviewGuideClient";
 import { TranscriptClient } from "./transcript/TranscriptClient";
 import { DimensionRadarChart, ScoreWaterfallChart } from "./VerdictCharts";
+import { usePrefersReducedMotion, useCountUp } from "@/lib/motion";
 import { FeedbackButtons } from "@/components/FeedbackButtons";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 import type {
@@ -167,10 +168,21 @@ function BoardCard({ verdict, score, confidence, signals, createdAt, category }:
 }) {
   const [cells, setCells] = useState<[string, string, string, string]>(["·", "·", "·", "·"]);
   const [armed, setArmed] = useState(false);
+  const reduced = usePrefersReducedMotion();
   const vc = verdictClass(verdict);
   const target = flapChars(verdict, score);
 
+  // Stat strip counts up in sync with the flap resolve
+  const scoreCt = useCountUp(score, { delay: 400, duration: 900 });
+  const confCt = useCountUp(Math.round(confidence * 100), { delay: 500, duration: 900 });
+  const sightCt = useCountUp(signals.length, { delay: 600, duration: 700 });
+
   useEffect(() => {
+    if (reduced) {
+      const t = setTimeout(() => { setCells(target); setArmed(true); }, 0);
+      return () => clearTimeout(t);
+    }
+
     let interval: ReturnType<typeof setInterval>;
     let frame = 0;
     const totalFrames = 14;
@@ -195,7 +207,7 @@ function BoardCard({ verdict, score, confidence, signals, createdAt, category }:
     }, 280);
 
     return () => { clearTimeout(startDelay); clearInterval(interval); };
-  }, [verdict, score]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [verdict, score, reduced]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const date = new Date(createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
@@ -215,10 +227,10 @@ function BoardCard({ verdict, score, confidence, signals, createdAt, category }:
         </div>
         <div className="bs">
           <div className="bsp"><span className="bspk">Verdict</span><span className={`bspv ${vc}`}>{verdict}</span></div>
-          <div className="bsp"><span className="bspk">Score</span><span className="bspv">{score} / 100</span></div>
+          <div className="bsp"><span className="bspk">Score</span><span className="bspv">{scoreCt.value} / 100</span></div>
           <div className="bsp"><span className="bspk">Gate</span><span className="bspv">{verdict === "GO" ? "Open" : "Locked"}</span></div>
-          <div className="bsp"><span className="bspk">Confidence</span><span className="bspv">{Math.round(confidence * 100)}%</span></div>
-          <div className="bsp"><span className="bspk">Sightings</span><span className="bspv">{signals.length}</span></div>
+          <div className="bsp"><span className="bspk">Confidence</span><span className="bspv">{confCt.value}%</span></div>
+          <div className="bsp"><span className="bspk">Sightings</span><span className="bspv">{sightCt.value}</span></div>
           <div className="bsp"><span className="bspk">Processed</span><span className="bspv">{date}</span></div>
         </div>
       </div>
@@ -232,37 +244,26 @@ function ScoreCard({ verdict, score, confidence }: {
   verdict: string; score: number; confidence: number;
 }) {
   const vc = verdictClass(verdict);
+  const reduced = usePrefersReducedMotion();
   const [filled, setFilled] = useState(false);
-  const [displayScore, setDisplayScore] = useState(0);
+  const { value: displayScore, done } = useCountUp(score, { duration: 1000 });
 
   useEffect(() => {
-    const t = setTimeout(() => setFilled(true), 600);
-
-    let startTime: number | null = null;
-    const duration = 1000;
-    function step(ts: number) {
-      if (!startTime) startTime = ts;
-      const progress = Math.min((ts - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayScore(Math.round(eased * score));
-      if (progress < 1) requestAnimationFrame(step);
-    }
-    const rafId = requestAnimationFrame(step);
-
-    return () => { clearTimeout(t); cancelAnimationFrame(rafId); };
-  }, [score]);
+    const t = setTimeout(() => setFilled(true), reduced ? 0 : 600);
+    return () => clearTimeout(t);
+  }, [reduced]);
 
   return (
     <div className="vrd-score-card">
       <span className="vrd-sc-lbl">Overall score</span>
-      <div className={`vrd-sc-num ${vc === "go" ? "fc-go" : vc === "pivot" ? "fc-pivot" : "fc-kill"}`} style={{ color: `var(--${vc === "pivot" ? "pivot" : vc === "kill" ? "kill" : "go"})`, fontVariantNumeric: "tabular-nums" }}>
+      <div className={`vrd-sc-num ${vc === "go" ? "fc-go" : vc === "pivot" ? "fc-pivot" : "fc-kill"}${done ? " settled" : ""}`} style={{ color: `var(--${vc === "pivot" ? "pivot" : vc === "kill" ? "kill" : "go"})`, fontVariantNumeric: "tabular-nums" }}>
         {displayScore} <span>/ 100</span>
       </div>
       <div className="vrd-sc-conf">Confidence {Math.round(confidence * 100)}%</div>
       <div className="vrd-rt">
         <div className="vrd-rt-lbls"><span>0</span><span>50</span><span>75</span><span>100</span></div>
         <div className="vrd-rt-bar">
-          <div className="vrd-rt-fill" style={{ width: filled ? `${score}%` : "0%", background: "var(--vm)" }} />
+          <div className="vrd-rt-fill" style={{ width: `${score}%`, transform: filled ? "scaleX(1)" : "scaleX(0)", transformOrigin: "left", background: "var(--vm)" }} />
           <div className="vrd-rt-thr" />
         </div>
       </div>
@@ -271,8 +272,12 @@ function ScoreCard({ verdict, score, confidence }: {
 }
 
 function DimsGrid({ dimensions }: { dimensions: Dimension[] }) {
+  const reduced = usePrefersReducedMotion();
   const [filled, setFilled] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setFilled(true), 700); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    const t = setTimeout(() => setFilled(true), reduced ? 0 : 700);
+    return () => clearTimeout(t);
+  }, [reduced]);
 
   return (
     <div className="vrd-dims">
@@ -287,7 +292,7 @@ function DimsGrid({ dimensions }: { dimensions: Dimension[] }) {
             </div>
             <div className={`vrd-dc-sc ${cls}`}>{d.score}</div>
             <div className="vrd-dc-bar">
-              <div className={`vrd-dc-fill ${cls}`} style={{ width: filled ? `${d.score}%` : "0%", transition: "width .9s cubic-bezier(.2,0,.1,1) .7s" }} />
+              <div className={`vrd-dc-fill ${cls}`} style={{ width: `${d.score}%`, transform: filled ? "scaleX(1)" : "scaleX(0)", transformOrigin: "left", transition: "transform .9s cubic-bezier(.2,0,.1,1) .7s" }} />
               <div className="vrd-dc-gl" />
             </div>
             <div className={`vrd-dc-flag ${cls}`}>{flag}</div>

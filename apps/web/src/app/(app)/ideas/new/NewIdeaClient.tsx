@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { SignalSource } from "@pledgeoff/core";
 import { getAuthToken } from "@/lib/auth-client";
 import { takeGuestDraft } from "@/lib/guest-draft";
+import { usePrefersReducedMotion } from "@/lib/motion";
 import { useUpgradeModal } from "@/components/UpgradeModal";
 
 // ─── Static data ────────────────────────────────────────
@@ -122,6 +123,7 @@ export function NewIdeaClient({
 }) {
   const router = useRouter();
   const { openQuotaModal } = useUpgradeModal();
+  const reduced = usePrefersReducedMotion();
   const searchParams = useSearchParams();
   const fromId = searchParams.get("from");
 
@@ -295,12 +297,15 @@ export function NewIdeaClient({
     clearTimers();
     resolvedRef.current = false;
 
-    // Flap cycling until the real verdict resolves the board
-    const flapInt = setInterval(() => {
-      setFlap([rndC(), rndC(), rndC(), rndC()]);
-    }, 80);
-    flapIntRef.current = flapInt;
-    addTimer(flapInt);
+    // Flap cycling until the real verdict resolves the board.
+    // Reduced motion: the cells hold steady and simply lock on the verdict.
+    if (!reduced) {
+      const flapInt = setInterval(() => {
+        setFlap([rndC(), rndC(), rndC(), rndC()]);
+      }, 80);
+      flapIntRef.current = flapInt;
+      addTimer(flapInt);
+    }
 
     // Timer counts real elapsed time; the bar eases toward 90% and waits
     // for the verdict — it never claims completion before the pipeline does
@@ -329,7 +334,7 @@ export function NewIdeaClient({
     addTimer(setTimeout(() => setTheaterMinPassed(true), THEATER_MIN_MS));
 
     return () => clearTimers();
-  }, [screen, groups]);
+  }, [screen, groups, reduced]);
 
   // Poll the idea endpoint for real signals + decision while the pipeline runs
   useEffect(() => {
@@ -425,24 +430,33 @@ export function NewIdeaClient({
       decision.dimensions.map((d) => ({ name: d.name, pct: d.score, cls: scoreCls(d.score) }))
     );
 
+    const lockBoard = () => {
+      setLocked({ digits, letters, cls: flapCls });
+      if (timerIntRef.current) clearInterval(timerIntRef.current);
+      setProgress(100);
+      addTimer(setTimeout(() => setShowAnStatus(true), 300));
+      addTimer(setTimeout(() => {
+        setIsDone(true);
+        addTimer(setTimeout(() => setIsDoneVisible(true), 16));
+      }, 900));
+    };
+
+    if (reduced) {
+      lockBoard();
+      return;
+    }
+
     let snap = 0;
     const snapInt = setInterval(() => {
       setFlap([rndC(), rndC(), rndC(), rndC()]);
       snap++;
       if (snap >= 7) {
         clearInterval(snapInt);
-        setLocked({ digits, letters, cls: flapCls });
-        if (timerIntRef.current) clearInterval(timerIntRef.current);
-        setProgress(100);
-        addTimer(setTimeout(() => setShowAnStatus(true), 300));
-        addTimer(setTimeout(() => {
-          setIsDone(true);
-          addTimer(setTimeout(() => setIsDoneVisible(true), 16));
-        }, 900));
+        lockBoard();
       }
     }, 55);
     addTimer(snapInt);
-  }, [decision, theaterMinPassed, screen]);
+  }, [decision, theaterMinPassed, screen, reduced]);
 
   // Derived
   const len = text.length;
@@ -525,8 +539,8 @@ export function NewIdeaClient({
                   <div
                     className="src-bf"
                     style={{
-                      width: `${srcState[i]?.pct ?? 0}%`,
-                      transitionProperty: "width",
+                      transform: `scaleX(${(srcState[i]?.pct ?? 0) / 100})`,
+                      transitionProperty: "transform",
                       transitionTimingFunction: "cubic-bezier(.2,0,.1,1)",
                       transitionDuration: srcState[i]?.dur ?? "0s",
                     }}
@@ -582,7 +596,7 @@ export function NewIdeaClient({
                       </span>
                     </div>
                     <div className="dim-bar">
-                      <div className={`dim-fill ${d.cls}`} style={{ width: `${d.pct}%` }} />
+                      <div className={`dim-fill ${d.cls}`} style={{ transform: `scaleX(${d.pct / 100})` }} />
                       <div className="dim-gl" />
                     </div>
                   </div>
@@ -642,7 +656,7 @@ export function NewIdeaClient({
 
         {/* Fixed progress bar */}
         <div className="an-progress">
-          <div className="an-progress-fill" style={{ width: `${progress}%` }} />
+          <div className="an-progress-fill" style={{ transform: `scaleX(${progress / 100})` }} />
         </div>
       </div>
     );

@@ -39,7 +39,14 @@ export function DimensionsBarChart({ dimensions }: { dimensions: Dimension[] }) 
             contentStyle={{ fontFamily: "var(--font-chivo-mono)", fontSize: 10, border: "1px solid var(--line)", background: "var(--surface)", borderRadius: 0, boxShadow: "none" }}
           />
           <ReferenceLine x={75} stroke="var(--faint)" strokeDasharray="3 3" label={{ value: "75", position: "insideTopRight", fontSize: 8, fill: "var(--faint)", fontFamily: "var(--font-chivo-mono)" }} />
-          <Bar dataKey="score" radius={0} maxBarSize={14}>
+          <Bar
+            dataKey="score"
+            radius={0}
+            maxBarSize={14}
+            isAnimationActive="auto"
+            animationDuration={800}
+            animationEasing="ease-out"
+          >
             {data.map((entry, i) => (
               <Cell key={i} fill={dimColor(entry.score)} />
             ))}
@@ -66,7 +73,18 @@ export function SentimentChart({ sentiment }: { sentiment: SentimentData }) {
     <div className="rpt-chart-wrap no-print" style={{ width: "100%", height: 110, display: "flex", alignItems: "center", gap: 16 }}>
       <ResponsiveContainer width={110} height="100%">
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" innerRadius={28} outerRadius={48} dataKey="value" strokeWidth={0}>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={28}
+            outerRadius={48}
+            dataKey="value"
+            strokeWidth={0}
+            isAnimationActive="auto"
+            animationDuration={800}
+            animationEasing="ease-out"
+          >
             {data.map((entry, i) => (
               <Cell key={i} fill={entry.color} />
             ))}
@@ -121,7 +139,16 @@ export function RevenueBarChart({ scenarios }: { scenarios: Scenario[] }) {
             contentStyle={{ fontFamily: "var(--font-chivo-mono)", fontSize: 10, border: "1px solid var(--line)", background: "var(--surface)", borderRadius: 0, boxShadow: "none" }}
           />
           {scenarios.map((s) => (
-            <Bar key={s.name} dataKey={s.name} fill={SCENARIO_COLORS[s.name] ?? "var(--dim)"} maxBarSize={20} radius={0} />
+            <Bar
+              key={s.name}
+              dataKey={s.name}
+              fill={SCENARIO_COLORS[s.name] ?? "var(--dim)"}
+              maxBarSize={20}
+              radius={0}
+              isAnimationActive="auto"
+              animationDuration={800}
+              animationEasing="ease-out"
+            />
           ))}
         </BarChart>
       </ResponsiveContainer>

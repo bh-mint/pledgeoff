@@ -26,6 +26,21 @@ import {
 } from "recharts";
 import type { ReactNode } from "react";
 import type { Competitor, Dimension, Simulation } from "@pledgeoff/core";
+import { useInView } from "@/lib/motion";
+
+/**
+ * Holds the chart mount until the wrapper scrolls into view, so the entrance
+ * animation plays where the user can see it instead of burning at page load.
+ * The fixed height reserves the layout slot — no shift when the chart lands.
+ */
+function ChartReveal({ height, children }: { height: number; children: ReactNode }): ReactNode {
+  const [ref, inView] = useInView<HTMLDivElement>();
+  return (
+    <div ref={ref} style={{ width: "100%", height }}>
+      {inView ? children : null}
+    </div>
+  );
+}
 
 function dotColor(score: number): string {
   if (score >= 75) return "var(--go)";
@@ -73,6 +88,7 @@ export function DimensionRadarChart({
         <span className="r">radar · dashed benchmark</span>
       </div>
       <div className="vrd-chart-body">
+        <ChartReveal height={260}>
         <ResponsiveContainer width="100%" height={260}>
           <RadarChart data={data} margin={{ top: 20, right: 48, bottom: 20, left: 48 }}>
             <PolarGrid stroke="var(--line)" strokeWidth={0.75} />
@@ -134,6 +150,7 @@ export function DimensionRadarChart({
             />
           </RadarChart>
         </ResponsiveContainer>
+        </ChartReveal>
       </div>
     </div>
   );
@@ -173,6 +190,7 @@ export function RevenueAreaChart({ simulation }: { simulation: Simulation }): Re
   };
 
   return (
+    <ChartReveal height={200}>
     <ResponsiveContainer width="100%" height={200}>
       <AreaChart data={data} margin={{ top: 12, right: 12, bottom: 0, left: 4 }}>
         <CartesianGrid stroke="var(--line)" strokeWidth={0.75} vertical={false} />
@@ -219,6 +237,7 @@ export function RevenueAreaChart({ simulation }: { simulation: Simulation }): Re
           dot={false}
           isAnimationActive="auto"
           animationDuration={900}
+          animationEasing="ease-out"
         />
         <Area
           type="monotone"
@@ -231,6 +250,7 @@ export function RevenueAreaChart({ simulation }: { simulation: Simulation }): Re
           dot={false}
           isAnimationActive="auto"
           animationDuration={1100}
+          animationEasing="ease-out"
         />
         <Area
           type="monotone"
@@ -243,6 +263,7 @@ export function RevenueAreaChart({ simulation }: { simulation: Simulation }): Re
           dot={false}
           isAnimationActive="auto"
           animationDuration={1300}
+          animationEasing="ease-out"
         />
         <Legend
           iconSize={8}
@@ -261,6 +282,7 @@ export function RevenueAreaChart({ simulation }: { simulation: Simulation }): Re
         />
       </AreaChart>
     </ResponsiveContainer>
+    </ChartReveal>
   );
 }
 
@@ -363,6 +385,7 @@ export function ScoreWaterfallChart({
         <span className="r">weighted contribution · pts</span>
       </div>
       <div className="vrd-chart-body">
+        <ChartReveal height={200}>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={data} margin={{ top: 28, right: 16, bottom: 0, left: -12 }}>
             <CartesianGrid stroke="var(--line)" strokeWidth={0.75} vertical={false} />
@@ -409,7 +432,7 @@ export function ScoreWaterfallChart({
             <Bar
               dataKey="value"
               stackId="wf"
-              isAnimationActive={true}
+              isAnimationActive="auto"
               animationDuration={800}
               animationEasing="ease-out"
               radius={[2, 2, 0, 0]}
@@ -449,6 +472,7 @@ export function ScoreWaterfallChart({
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        </ChartReveal>
       </div>
     </div>
   );
@@ -492,6 +516,7 @@ export function CompetitorPositioningMap({ competitors }: { competitors: Competi
         <span className="r">price vs. segment · {points.length} competitor{points.length !== 1 ? "s" : ""}</span>
       </div>
       <div className="vrd-chart-body">
+        <ChartReveal height={220}>
         <ResponsiveContainer width="100%" height={220}>
           <ScatterChart margin={{ top: 16, right: 40, bottom: 16, left: 8 }}>
             <CartesianGrid stroke="var(--line)" strokeWidth={0.75} />
@@ -535,7 +560,13 @@ export function CompetitorPositioningMap({ competitors }: { competitors: Competi
                 );
               }}
             />
-            <Scatter data={points} shape="circle">
+            <Scatter
+              data={points}
+              shape="circle"
+              isAnimationActive="auto"
+              animationDuration={700}
+              animationEasing="ease-out"
+            >
               {points.map((_, i) => (
                 <Cell key={i} fill={COMPETITOR_PALETTE[i % COMPETITOR_PALETTE.length]} />
               ))}
@@ -547,6 +578,7 @@ export function CompetitorPositioningMap({ competitors }: { competitors: Competi
             </Scatter>
           </ScatterChart>
         </ResponsiveContainer>
+        </ChartReveal>
       </div>
     </div>
   );
