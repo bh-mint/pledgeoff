@@ -221,7 +221,7 @@ export default async function PublicVerdictPage({ params }: Props) {
             {idea.text.split("\n\n")[0]}
           </h1>
           <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-            <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--faint)" }}>
+            <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--faint)" }}>
               Validated {validatedDate}
             </span>
             {authorHandle && (
@@ -230,12 +230,12 @@ export default async function PublicVerdictPage({ params }: Props) {
                 {authorUsername ? (
                   <Link
                     href={`/profile/${authorUsername}`}
-                    style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--dim)", textDecoration: "underline", textUnderlineOffset: 2 }}
+                    style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--dim)", textDecoration: "underline", textUnderlineOffset: 2 }}
                   >
                     {authorHandle}
                   </Link>
                 ) : (
-                  <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", color: "var(--faint)" }}>
+                  <span style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "10px", color: "var(--faint)" }}>
                     {authorHandle}
                   </span>
                 )}
@@ -249,17 +249,19 @@ export default async function PublicVerdictPage({ params }: Props) {
           <div className="sec" style={{ marginBottom: 20 }}>
             <div className="sec-hd">
               4 dimensions
-              <span className="r">Weighted verdict &middot; GO ≥ 75</span>
+              <span className="r">Weighted verdict</span>
             </div>
             <div className="sec-bd">
               {decision.dimensions!.map((d) => {
                 const isWeak = d.score < 70;
+                const isWeakest =
+                  isWeak && d.score === Math.min(...decision.dimensions!.map((x) => x.score));
                 return (
                   <div className="dim-r" key={d.name}>
                     <span className="dim-nm">
                       {d.name}
-                      {isWeak && (
-                        <span style={{ color: "var(--pivot)", fontSize: 8, marginLeft: 4 }}>↓ weakest</span>
+                      {isWeakest && (
+                        <span style={{ color: "var(--pivot)", fontSize: 10, marginLeft: 4 }}>↓ weakest</span>
                       )}
                     </span>
                     <div className="dim-bar">
@@ -333,10 +335,10 @@ export default async function PublicVerdictPage({ params }: Props) {
           </div>
         )}
 
-        {/* 6 Intelligence Tools */}
+        {/* Intelligence Tools */}
         <div style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "8.5px", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>6 Intelligence Tools</span>
+          <div style={{ fontFamily: "var(--font-chivo-mono), monospace", fontSize: "10px", letterSpacing: "0.28em", textTransform: "uppercase", color: "var(--faint)", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>{TOOLS.length} Intelligence Tools</span>
             <span style={{ color: "var(--go)" }}>Sign up to run these on your own ideas</span>
           </div>
           <div className="tools-grid">
