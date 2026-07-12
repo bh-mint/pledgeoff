@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  RadialBarChart,
-  RadialBar,
   PieChart,
   Pie,
   AreaChart,
@@ -20,9 +18,9 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Competitor, Dimension, Simulation } from "@pledgeoff/core";
-import { useInView } from "@/lib/motion";
+import { useInView, usePrefersReducedMotion } from "@/lib/motion";
 
 /**
  * Holds the chart mount until the wrapper scrolls into view, so the entrance
@@ -44,7 +42,85 @@ function dotColor(score: number): string {
   return "var(--kill)";
 }
 
-// ── Dimension Profile — activity rings (one ring per dimension) ─────────────
+// ── Dimension Profile — gauge cluster, one needle-sweep dial per dimension ──
+
+const GAUGE_CX = 65;
+const GAUGE_CY = 66;
+const GAUGE_R = 54;
+const GAUGE_STROKE = 9;
+
+/** Point on the gauge's semicircle for a 0–100 value (180°=left/0 → 0°=right/100). */
+function gaugePoint(value: number, r: number): { x: number; y: number } {
+  const theta = (Math.PI * (180 - (value / 100) * 180)) / 180;
+  return { x: GAUGE_CX + r * Math.cos(theta), y: GAUGE_CY - r * Math.sin(theta) };
+}
+
+function gaugeArcPath(fromValue: number, toValue: number, r: number): string {
+  const from = gaugePoint(fromValue, r);
+  const to = gaugePoint(toValue, r);
+  const largeArc = toValue - fromValue > 50 ? 1 : 0;
+  return `M ${from.x} ${from.y} A ${r} ${r} 0 ${largeArc} 1 ${to.x} ${to.y}`;
+}
+
+function DimensionGauge({ name, score, index }: { name: string; score: number; index: number }): ReactNode {
+  const reduced = usePrefersReducedMotion();
+  const [armed, setArmed] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setArmed(true), reduced ? 0 : 150 + index * 110);
+    return () => clearTimeout(t);
+  }, [reduced, index]);
+
+  const color = dotColor(score);
+  const needleDeg = 1.8 * (armed ? score : 0) - 90;
+  const benchmarkPoint = gaugePoint(75, GAUGE_R + 7);
+  const needleTip = GAUGE_CY - (GAUGE_R - 10);
+
+  return (
+    <div className={`vrd-gauge${armed ? " armed" : ""}`}>
+      <svg viewBox="0 0 130 76" width="100%" height="86" aria-hidden="true">
+        <path
+          d={gaugeArcPath(0, 100, GAUGE_R)}
+          fill="none"
+          stroke="var(--line)"
+          strokeWidth={GAUGE_STROKE}
+          strokeLinecap="round"
+        />
+        <path
+          d={gaugeArcPath(0, score, GAUGE_R)}
+          fill="none"
+          stroke={color}
+          strokeWidth={GAUGE_STROKE}
+          strokeLinecap="round"
+          className="vrd-gauge-fill"
+        />
+        {/* 75 benchmark tick */}
+        <line
+          x1={benchmarkPoint.x}
+          y1={benchmarkPoint.y}
+          x2={gaugePoint(75, GAUGE_R - 2).x}
+          y2={gaugePoint(75, GAUGE_R - 2).y}
+          stroke="var(--faint)"
+          strokeWidth={1.5}
+        />
+        <line
+          x1={GAUGE_CX}
+          y1={GAUGE_CY}
+          x2={GAUGE_CX}
+          y2={needleTip}
+          stroke={color}
+          strokeWidth={2.5}
+          strokeLinecap="round"
+          className="vrd-gauge-needle"
+          style={{ transform: `rotate(${needleDeg}deg)` }}
+        />
+        <circle cx={GAUGE_CX} cy={GAUGE_CY} r={4} fill={color} />
+      </svg>
+      <span className="vrd-gauge-name">{name}</span>
+      <span className="vrd-gauge-num" style={{ color }}>{score}</span>
+    </div>
+  );
+}
 
 export function DimensionRadarChart({
   dimensions,
@@ -55,12 +131,6 @@ export function DimensionRadarChart({
 }): ReactNode {
   if (dimensions.length < 3) return null;
 
-  const data = dimensions.map((d) => ({
-    name: d.name,
-    score: d.score,
-    fill: dotColor(d.score),
-  }));
-
   const verdictColor =
     verdict === "GO" ? "var(--go)" : verdict === "PIVOT" ? "var(--pivot)" : "var(--kill)";
 
@@ -68,68 +138,18 @@ export function DimensionRadarChart({
     <div className="vrd-chart-wrap no-print">
       <div className="bc-hd">
         <span>Dimension Profile</span>
-        <span className="r">radial rings · 75 clears green</span>
+        <span className="r">instrument cluster · 75 benchmark</span>
       </div>
       <div className="vrd-chart-body">
-        <ChartReveal height={240}>
-          <div style={{ position: "relative", width: "100%", height: 240 }}>
-            <ResponsiveContainer width="100%" height={240}>
-              <RadialBarChart
-                data={data}
-                innerRadius="32%"
-                outerRadius="100%"
-                startAngle={90}
-                endAngle={-270}
-                barGap={3}
-              >
-                <RadialBar
-                  dataKey="score"
-                  background={{ fill: "var(--line)" }}
-                  cornerRadius={6}
-                  isAnimationActive="auto"
-                  animationBegin={150}
-                  animationDuration={900}
-                  animationEasing="ease-out"
-                >
-                  {data.map((d, i) => (
-                    <Cell key={i} fill={d.fill} />
-                  ))}
-                </RadialBar>
-                <Tooltip
-                  contentStyle={{
-                    fontFamily: "var(--font-chivo-mono)",
-                    fontSize: 10,
-                    border: "1px solid var(--line)",
-                    background: "var(--surface)",
-                    borderRadius: 0,
-                    boxShadow: "none",
-                  }}
-                  content={(props) => {
-                    if (!props.active || !props.payload?.length) return null;
-                    const d = (props.payload[0] as { payload: { name: string; score: number } }).payload;
-                    return (
-                      <div style={{ fontFamily: "var(--font-chivo-mono)", fontSize: 10, padding: "6px 10px" }}>
-                        <div style={{ fontWeight: 700, color: "var(--ink)" }}>{d.name}</div>
-                        <div style={{ color: "var(--dim)", marginTop: 2 }}>{d.score} / 100</div>
-                      </div>
-                    );
-                  }}
-                />
-              </RadialBarChart>
-            </ResponsiveContainer>
-            <div className="vrd-ring-center" aria-hidden="true">
-              <span style={{ color: verdictColor }}>{verdict}</span>
-            </div>
+        <ChartReveal height={150}>
+          <div className="vrd-gauge-row">
+            {dimensions.map((d, i) => (
+              <DimensionGauge key={d.name} name={d.name} score={d.score} index={i} />
+            ))}
           </div>
         </ChartReveal>
-        <div className="vrd-ring-legend">
-          {data.map((d) => (
-            <div key={d.name} className="vrd-ring-leg-row">
-              <span className="vrd-ring-dot" style={{ background: d.fill }} />
-              <span className="vrd-ring-leg-name">{d.name}</span>
-              <span className="vrd-ring-leg-val" style={{ color: d.fill }}>{d.score}</span>
-            </div>
-          ))}
+        <div className="vrd-gauge-verdict">
+          Composite verdict <b style={{ color: verdictColor }}>{verdict}</b>
         </div>
       </div>
     </div>

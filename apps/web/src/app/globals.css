@@ -1383,9 +1383,63 @@ select.finp { cursor: pointer; }
 .vrd-chart-wrap { margin-top: 20px; border: 1px solid var(--line); }
 .vrd-chart-body { padding: 4px 0 8px; background: var(--surface); }
 
-/* Radial rings (Dimension Profile) + donut (Score Breakdown) — shared
-   center-overlay and legend rows, mirrors the .rpt-sent-legend pattern. */
-.vrd-ring-center, .vrd-donut-center {
+/* Dimension Profile — instrument cluster of needle-sweep gauges */
+.vrd-gauge-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 16px 18px 4px;
+}
+@media (max-width: 640px) { .vrd-gauge-row { grid-template-columns: 1fr 1fr; row-gap: 14px; } }
+.vrd-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.2, 0, 0.1, 1);
+}
+.vrd-gauge.armed { opacity: 1; transform: none; }
+.vrd-gauge-name {
+  font-family: var(--font-chivo-mono), monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+  text-align: center;
+  margin-top: 2px;
+}
+.vrd-gauge-num {
+  font-family: var(--font-bitter), Georgia, serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.vrd-gauge-needle {
+  transform-origin: 65px 66px;
+  transition: transform 1.1s cubic-bezier(0.34, 1.4, 0.4, 1);
+}
+.vrd-gauge-verdict {
+  font-family: var(--font-chivo-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  text-align: center;
+  padding: 8px 18px 14px;
+  border-top: 1px solid var(--line-soft, var(--line));
+  margin-top: 8px;
+}
+.vrd-gauge-verdict b { font-weight: 700; letter-spacing: 0.14em; }
+@media (prefers-reduced-motion: reduce) {
+  .vrd-gauge { transition: none; opacity: 1; transform: none; }
+  .vrd-gauge-needle { transition: none; }
+}
+
+/* Donut center overlay (Score Breakdown) + shared legend rows, mirrors
+   the .rpt-sent-legend pattern. Also reused by the donut's legend list. */
+.vrd-donut-center {
   position: absolute;
   inset: 0;
   display: flex;
@@ -1393,13 +1447,6 @@ select.finp { cursor: pointer; }
   align-items: center;
   justify-content: center;
   pointer-events: none;
-}
-.vrd-ring-center span {
-  font-family: var(--font-chivo-mono), monospace;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
 }
 .vrd-donut-num {
   font-family: var(--font-bitter), Georgia, serif;
