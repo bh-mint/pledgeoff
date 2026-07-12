@@ -20,7 +20,7 @@ import {
 } from "recharts";
 import { useEffect, useState, type ReactNode } from "react";
 import type { Competitor, Dimension, Simulation } from "@pledgeoff/core";
-import { useInView, usePrefersReducedMotion } from "@/lib/motion";
+import { useInView, usePrefersReducedMotion, useCountUp } from "@/lib/motion";
 
 /**
  * Holds the chart mount until the wrapper scrolls into view, so the entrance
@@ -65,16 +65,22 @@ function gaugeArcPath(fromValue: number, toValue: number, r: number): string {
 function DimensionGauge({ name, score, index }: { name: string; score: number; index: number }): ReactNode {
   const reduced = usePrefersReducedMotion();
   const [armed, setArmed] = useState(false);
+  const delay = 150 + index * 110;
+  // Needle tip is recomputed from the same gaugePoint() the arcs use, every
+  // frame of the count-up — this is what guarantees the needle always lands
+  // exactly on the arc, instead of drifting from a CSS transform pivot that
+  // doesn't line up with the SVG's own coordinate space once it's scaled.
+  const { value: needleValue } = useCountUp(score, { duration: 900, delay });
 
   useEffect(() => {
-    const t = setTimeout(() => setArmed(true), reduced ? 0 : 150 + index * 110);
+    const t = setTimeout(() => setArmed(true), reduced ? 0 : delay);
     return () => clearTimeout(t);
-  }, [reduced, index]);
+  }, [reduced, delay]);
 
   const color = dotColor(score);
-  const needleDeg = 1.8 * (armed ? score : 0) - 90;
-  const benchmarkPoint = gaugePoint(75, GAUGE_R + 7);
-  const needleTip = GAUGE_CY - (GAUGE_R - 10);
+  const tip = gaugePoint(needleValue, GAUGE_R - 10);
+  const benchmarkOuter = gaugePoint(75, GAUGE_R + 7);
+  const benchmarkInner = gaugePoint(75, GAUGE_R - 2);
 
   return (
     <div className={`vrd-gauge${armed ? " armed" : ""}`}>
@@ -92,27 +98,24 @@ function DimensionGauge({ name, score, index }: { name: string; score: number; i
           stroke={color}
           strokeWidth={GAUGE_STROKE}
           strokeLinecap="round"
-          className="vrd-gauge-fill"
         />
         {/* 75 benchmark tick */}
         <line
-          x1={benchmarkPoint.x}
-          y1={benchmarkPoint.y}
-          x2={gaugePoint(75, GAUGE_R - 2).x}
-          y2={gaugePoint(75, GAUGE_R - 2).y}
+          x1={benchmarkOuter.x}
+          y1={benchmarkOuter.y}
+          x2={benchmarkInner.x}
+          y2={benchmarkInner.y}
           stroke="var(--faint)"
           strokeWidth={1.5}
         />
         <line
           x1={GAUGE_CX}
           y1={GAUGE_CY}
-          x2={GAUGE_CX}
-          y2={needleTip}
+          x2={tip.x}
+          y2={tip.y}
           stroke={color}
           strokeWidth={2.5}
           strokeLinecap="round"
-          className="vrd-gauge-needle"
-          style={{ transform: `rotate(${needleDeg}deg)` }}
         />
         <circle cx={GAUGE_CX} cy={GAUGE_CY} r={4} fill={color} />
       </svg>
