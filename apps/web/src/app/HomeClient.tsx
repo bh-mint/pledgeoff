@@ -25,8 +25,8 @@ const FEATURES = [
   },
   {
     n: "04",
-    title: "Eleven intelligence tools",
-    desc: "From ICP analysis and battlecards to interview guides and transcript analysis. Each tool reads the verdict and goes deeper on one angle.",
+    title: "Your context, injected",
+    desc: "Add what you already know — customer conversations, lost deals, pricing signals. Every intelligence tool reads your context alongside the public signals.",
   },
   {
     n: "05",
