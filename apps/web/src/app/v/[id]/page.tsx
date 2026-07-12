@@ -4,6 +4,7 @@ import Link from "next/link";
 import { container } from "@/lib/container";
 import { createSupabaseServiceClient } from "@/lib/supabase-server";
 import { PublicNav } from "@/components/PublicNav";
+import { DimensionRadarChart, ScoreWaterfallChart } from "@/app/(app)/ideas/[id]/VerdictCharts";
 import type { Decision, Signal } from "@pledgeoff/core";
 
 interface Props {
@@ -244,41 +245,14 @@ export default async function PublicVerdictPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Dimensions */}
+        {/* Dimensions — same gauge cluster + contribution donut as the
+            private verdict page, so public reports read at the same
+            quality bar instead of a plain bar list with unexplained
+            weight arithmetic. */}
         {hasDimensions && (
-          <div className="sec" style={{ marginBottom: 20 }}>
-            <div className="sec-hd">
-              4 dimensions
-              <span className="r">Weighted verdict</span>
-            </div>
-            <div className="sec-bd">
-              {decision.dimensions!.map((d) => {
-                const isWeak = d.score < 70;
-                const isWeakest =
-                  isWeak && d.score === Math.min(...decision.dimensions!.map((x) => x.score));
-                return (
-                  <div className="dim-r" key={d.name}>
-                    <span className="dim-nm">
-                      {d.name}
-                      {isWeakest && (
-                        <span style={{ color: "var(--pivot)", fontSize: 10, marginLeft: 4 }}>↓ weakest</span>
-                      )}
-                    </span>
-                    <div className="dim-bar">
-                      <div
-                        className="dim-fill"
-                        style={{
-                          width: `${d.score}%`,
-                          background: isWeak ? "var(--pivot)" : "var(--go)",
-                        }}
-                      />
-                    </div>
-                    <span className="dim-sc">{d.score}</span>
-                    <span className="dim-wt">&times;{d.weight.toFixed(2)} = {(d.weight * d.score).toFixed(1)}</span>
-                  </div>
-                );
-              })}
-            </div>
+          <div style={{ marginBottom: 32 }}>
+            <DimensionRadarChart dimensions={decision.dimensions!} verdict={decision.verdict} />
+            <ScoreWaterfallChart dimensions={decision.dimensions!} score={score} />
           </div>
         )}
 

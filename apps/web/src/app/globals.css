@@ -1828,11 +1828,6 @@ select.finp { cursor: pointer; }
 .bs-v { font-family: var(--font-chivo-mono), monospace; font-size: 12px; font-weight: 600; color: var(--ink); }
 .bs-v.go { color: var(--go); }
 
-/* Dimension row (public verdict — different from .dim-row used in dashboard) */
-.dim-r { display: grid; grid-template-columns: 170px 1fr 46px 72px; align-items: center; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
-.dim-r:last-child { border-bottom: none; }
-.dim-wt { font-family: var(--font-chivo-mono), monospace; font-size: 9px; color: var(--faint); text-align: right; }
-
 /* Evidence signals */
 .sig-g { margin-bottom: 22px; }
 .sig-g:last-child { margin-bottom: 0; }
@@ -1940,8 +1935,6 @@ select.finp { cursor: pointer; }
   .pub-pw { padding: 0 24px; }
   .tools-grid { grid-template-columns: 1fr 1fr; }
   .ig { grid-template-columns: 1fr 1fr; }
-  .dim-r { grid-template-columns: 140px 1fr 36px; }
-  .dim-wt { display: none; }
 }
 @media (max-width: 600px) {
   .fcl { width: 60px; height: 72px; font-size: 42px; }
