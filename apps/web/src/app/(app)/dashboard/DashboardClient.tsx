@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuthToken } from "@/lib/auth-client";
+import { useCountUp } from "@/lib/motion";
 import { TeamAnalytics } from "@/components/TeamAnalytics";
 import { TeamActivityFeed } from "@/components/TeamActivityFeed";
 import { SignalFeed } from "@/components/SignalFeed";
@@ -82,6 +83,13 @@ function getNextMonthReset(): string {
   const now = new Date();
   const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
   return next.toLocaleDateString("en-GB", { month: "short", day: "numeric" });
+}
+
+// Ledger + quota figures count up on mount, same pattern as the verdict page.
+// prefers-reduced-motion (baked into useCountUp) lands them instantly.
+function AnimatedNum({ value, duration = 700 }: { value: number; duration?: number }) {
+  const { value: v } = useCountUp(value, { duration });
+  return <>{v}</>;
 }
 
 function getCurrentDate(): string {
@@ -556,7 +564,7 @@ export function DashboardClient({
                 </div>
                 <div className="db-quota-bd">
                   <div className="db-quota-main">
-                    <span className="db-quota-num">{usedThisMonth}</span>
+                    <span className="db-quota-num"><AnimatedNum value={usedThisMonth} /></span>
                     <span className="db-quota-den">/ {monthLimit}</span>
                     <span className="db-quota-unit">used</span>
                   </div>
@@ -572,12 +580,12 @@ export function DashboardClient({
                   </div>
                   {otto && (
                     <div className="db-quota-otto">
-                      <span className="db-quota-otto-k">Otto</span>
+                      <span className="db-quota-otto-k">Otto questions</span>
                       <span className="db-quota-otto-v">
                         {otto.includedLimit === null ? (
                           <>Unlimited</>
                         ) : (
-                          <><b>{otto.includedUsed}</b> / {otto.includedLimit} used</>
+                          <><b><AnimatedNum value={otto.includedUsed} duration={500} /></b> / {otto.includedLimit} used</>
                         )}
                         {otto.purchased > 0 && <em> · +{otto.purchased} pack</em>}
                       </span>
@@ -591,32 +599,48 @@ export function DashboardClient({
             )}
           </div>
 
+          {/* Attention module — the single most actionable thing on the
+              page, promoted right under the masthead instead of being the
+              6th module down */}
+          {attnItems.length > 0 && (
+            <div className="db-attn-wrap">
+              <div className="db-sec-head">
+                <span className="db-sec-title">Requires a decision</span>
+                <span className="db-sec-count alert">{attnItems.length}</span>
+                <span className="db-sec-rule" />
+              </div>
+              <div className="db-attn-grid">
+                {attnItems.map((item, i) => attnCard(item, i))}
+              </div>
+            </div>
+          )}
+
           {/* Ledger strip */}
           <div className="db-ledger db-ledger-5">
             <div className="db-led-cell">
               <span className="db-led-k">Ideas validated</span>
-              <div className="db-led-v">{ownCount}</div>
+              <div className="db-led-v"><AnimatedNum value={ownCount} /></div>
               <div className="db-led-sub">All time</div>
             </div>
-            <div className="db-led-cell">
+            <div className={`db-led-cell${ownWithVerdict.length > 0 && ownGoRate >= 50 ? " accent go" : ""}`}>
               <span className="db-led-k">GO rate</span>
-              <div className="db-led-v go">{ownGoRate}<em>%</em></div>
+              <div className="db-led-v go"><AnimatedNum value={ownGoRate} /><em>%</em></div>
               <div className="db-led-sub">{ownGoCount} of {ownWithVerdict.length} cleared</div>
             </div>
             <div className="db-led-cell">
               <span className="db-led-k">Avg score</span>
-              <div className="db-led-v">{ownAvgScore ?? "—"}</div>
+              <div className="db-led-v">{ownAvgScore !== null ? <AnimatedNum value={ownAvgScore} /> : "—"}</div>
               <div className="db-led-sub">Across verdicts</div>
             </div>
             <div className="db-led-cell">
               <span className="db-led-k">Built & shipped</span>
-              <div className="db-led-v">{builtCount}</div>
+              <div className="db-led-v"><AnimatedNum value={builtCount} /></div>
               <div className="db-led-sub">Outcome reported</div>
             </div>
-            <div className="db-led-cell">
+            <div className={`db-led-cell${winRate !== null && winRate >= 50 ? " accent go" : ""}`}>
               <span className="db-led-k">Win rate</span>
               <div className={`db-led-v${winRate !== null && winRate >= 50 ? " go" : ""}`}>
-                {winRate !== null ? <>{winRate}<em>%</em></> : "—"}
+                {winRate !== null ? <><AnimatedNum value={winRate} /><em>%</em></> : "—"}
               </div>
               <div className="db-led-sub">{winRate !== null ? "Built & worked" : "Min 3 outcomes"}</div>
             </div>
@@ -706,20 +730,6 @@ export function DashboardClient({
           {/* Main grid */}
           <div className="db-brief-grid">
             <main className="db-brief-col">
-
-              {/* Attention module */}
-              {attnItems.length > 0 && (
-                <div className="db-attn-wrap">
-                  <div className="db-sec-head">
-                    <span className="db-sec-title">Requires a decision</span>
-                    <span className="db-sec-count alert">{attnItems.length}</span>
-                    <span className="db-sec-rule" />
-                  </div>
-                  <div className="db-attn-grid">
-                    {attnItems.map((item, i) => attnCard(item, i))}
-                  </div>
-                </div>
-              )}
 
               {/* Filters */}
               <div className="db-brief-filters">

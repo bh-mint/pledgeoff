@@ -3290,6 +3290,10 @@ select.adm-search-inp { cursor: pointer; }
 .db-ledger-5 { grid-template-columns: repeat(5,1fr); }
 .db-led-cell { padding: 14px 18px; border-right: 1px solid var(--line); }
 .db-led-cell:last-child { border-right: none; }
+/* Whisper of hierarchy on the two derived, judgment-carrying metrics
+   (GO rate, Win rate) when they clear a healthy threshold — same
+   tinted-cell convention as .vrd-dc, not a new pattern. */
+.db-led-cell.accent.go { background: color-mix(in srgb, var(--go) 5%, var(--surface)); }
 .db-led-k { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: .26em; text-transform: uppercase; color: var(--faint); display: block; margin-bottom: 6px; }
 .db-led-v { font-family: var(--font-bitter), Georgia, serif; font-size: 26px; font-weight: 700; line-height: 1; color: var(--ink); }
 .db-led-v.go { color: var(--go); }
