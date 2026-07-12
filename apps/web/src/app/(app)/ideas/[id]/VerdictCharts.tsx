@@ -1,15 +1,12 @@
 "use client";
 
 import {
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
+  RadialBarChart,
+  RadialBar,
+  PieChart,
+  Pie,
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   ScatterChart,
   Scatter,
   ZAxis,
@@ -22,7 +19,6 @@ import {
   Legend,
   ResponsiveContainer,
   Tooltip,
-  type DotItemDotProps,
 } from "recharts";
 import type { ReactNode } from "react";
 import type { Competitor, Dimension, Simulation } from "@pledgeoff/core";
@@ -48,20 +44,7 @@ function dotColor(score: number): string {
   return "var(--kill)";
 }
 
-function renderScoreDot(props: DotItemDotProps): ReactNode {
-  const score: number = props.payload?.score ?? 0;
-  return (
-    <circle
-      key={props.index}
-      cx={props.cx ?? 0}
-      cy={props.cy ?? 0}
-      r={4}
-      fill={dotColor(score)}
-      stroke="var(--surface)"
-      strokeWidth={1.5}
-    />
-  );
-}
+// ── Dimension Profile — activity rings (one ring per dimension) ─────────────
 
 export function DimensionRadarChart({
   dimensions,
@@ -73,84 +56,81 @@ export function DimensionRadarChart({
   if (dimensions.length < 3) return null;
 
   const data = dimensions.map((d) => ({
-    dim: d.name,
+    name: d.name,
     score: d.score,
-    benchmark: 75,
+    fill: dotColor(d.score),
   }));
 
-  const strokeColor =
+  const verdictColor =
     verdict === "GO" ? "var(--go)" : verdict === "PIVOT" ? "var(--pivot)" : "var(--kill)";
 
   return (
     <div className="vrd-chart-wrap no-print">
       <div className="bc-hd">
         <span>Dimension Profile</span>
-        <span className="r">radar · dashed benchmark</span>
+        <span className="r">radial rings · 75 clears green</span>
       </div>
       <div className="vrd-chart-body">
-        <ChartReveal height={260}>
-        <ResponsiveContainer width="100%" height={260}>
-          <RadarChart data={data} margin={{ top: 20, right: 48, bottom: 20, left: 48 }}>
-            <PolarGrid stroke="var(--line)" strokeWidth={0.75} />
-            <PolarAngleAxis
-              dataKey="dim"
-              tick={{
-                fontSize: 9.5,
-                fontFamily: "var(--font-chivo-mono)",
-                fill: "var(--dim)",
-                fontWeight: 600,
-                letterSpacing: 1,
-              }}
-            />
-            <PolarRadiusAxis
-              angle={90}
-              domain={[0, 100]}
-              tickCount={5}
-              tick={{ fontSize: 7.5, fontFamily: "var(--font-chivo-mono)", fill: "var(--faint)" }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Radar
-              name="Benchmark"
-              dataKey="benchmark"
-              stroke="var(--go-line)"
-              strokeDasharray="4 3"
-              strokeWidth={1.5}
-              fill="transparent"
-              isAnimationActive={false}
-              dot={false}
-              legendType="none"
-            />
-            <Radar
-              name="Score"
-              dataKey="score"
-              stroke={strokeColor}
-              strokeWidth={2}
-              fill={strokeColor}
-              fillOpacity={0.15}
-              dot={renderScoreDot}
-              isAnimationActive="auto"
-              animationBegin={200}
-              animationDuration={900}
-              animationEasing="ease-out"
-              legendType="none"
-            />
-            <Tooltip
-              contentStyle={{
-                fontFamily: "var(--font-chivo-mono)",
-                fontSize: 10,
-                border: "1px solid var(--line)",
-                background: "var(--surface)",
-                borderRadius: 0,
-                boxShadow: "none",
-              }}
-              formatter={(value, name) =>
-                name === "Benchmark" ? null : [`${Number(value)} / 100`, "Score"]
-              }
-            />
-          </RadarChart>
-        </ResponsiveContainer>
+        <ChartReveal height={240}>
+          <div style={{ position: "relative", width: "100%", height: 240 }}>
+            <ResponsiveContainer width="100%" height={240}>
+              <RadialBarChart
+                data={data}
+                innerRadius="32%"
+                outerRadius="100%"
+                startAngle={90}
+                endAngle={-270}
+                barGap={3}
+              >
+                <RadialBar
+                  dataKey="score"
+                  background={{ fill: "var(--line)" }}
+                  cornerRadius={6}
+                  isAnimationActive="auto"
+                  animationBegin={150}
+                  animationDuration={900}
+                  animationEasing="ease-out"
+                >
+                  {data.map((d, i) => (
+                    <Cell key={i} fill={d.fill} />
+                  ))}
+                </RadialBar>
+                <Tooltip
+                  contentStyle={{
+                    fontFamily: "var(--font-chivo-mono)",
+                    fontSize: 10,
+                    border: "1px solid var(--line)",
+                    background: "var(--surface)",
+                    borderRadius: 0,
+                    boxShadow: "none",
+                  }}
+                  content={(props) => {
+                    if (!props.active || !props.payload?.length) return null;
+                    const d = (props.payload[0] as { payload: { name: string; score: number } }).payload;
+                    return (
+                      <div style={{ fontFamily: "var(--font-chivo-mono)", fontSize: 10, padding: "6px 10px" }}>
+                        <div style={{ fontWeight: 700, color: "var(--ink)" }}>{d.name}</div>
+                        <div style={{ color: "var(--dim)", marginTop: 2 }}>{d.score} / 100</div>
+                      </div>
+                    );
+                  }}
+                />
+              </RadialBarChart>
+            </ResponsiveContainer>
+            <div className="vrd-ring-center" aria-hidden="true">
+              <span style={{ color: verdictColor }}>{verdict}</span>
+            </div>
+          </div>
         </ChartReveal>
+        <div className="vrd-ring-legend">
+          {data.map((d) => (
+            <div key={d.name} className="vrd-ring-leg-row">
+              <span className="vrd-ring-dot" style={{ background: d.fill }} />
+              <span className="vrd-ring-leg-name">{d.name}</span>
+              <span className="vrd-ring-leg-val" style={{ color: d.fill }}>{d.score}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -323,23 +303,11 @@ type CompetitorPoint = {
   positioning: string;
 };
 
-// ── Score Waterfall Chart ─────────────────────────────────────────────────────
+// ── Score Breakdown — radial contribution donut ─────────────────────────────
 
-type WfEntry = {
-  name: string;
-  base: number;
-  value: number;
-  weight: number;
-  contrib: number;
-  isTotal: boolean;
-};
+type WfEntry = { name: string; contrib: number; weight: number; fill: string };
 
-function wfBarColor(contrib: number, weight: number, isTotal: boolean, score: number): string {
-  if (isTotal) {
-    if (score >= 75) return "var(--go)";
-    if (score >= 50) return "var(--pivot)";
-    return "var(--kill)";
-  }
+function contribColor(contrib: number, weight: number): string {
   if (contrib >= weight * 75) return "var(--go)";
   if (contrib >= weight * 50) return "var(--pivot)";
   return "var(--kill)";
@@ -354,18 +322,17 @@ export function ScoreWaterfallChart({
 }): ReactNode {
   if (dimensions.length === 0) return null;
 
-  const contributions = dimensions.map((d) => Math.round(d.weight * d.score));
-  const dimEntries: WfEntry[] = dimensions.map((d, i) => ({
-    name: d.name,
-    base: contributions.slice(0, i).reduce((s, c) => s + c, 0),
-    value: contributions[i] ?? 0,
-    weight: d.weight,
-    contrib: contributions[i] ?? 0,
-    isTotal: false,
-  }));
-  const data: WfEntry[] = [
-    ...dimEntries,
-    { name: "Total", base: 0, value: score, weight: 1, contrib: score, isTotal: true },
+  const verdictColor = score >= 75 ? "var(--go)" : score >= 50 ? "var(--pivot)" : "var(--kill)";
+
+  const contributions: WfEntry[] = dimensions.map((d) => {
+    const contrib = Math.round(d.weight * d.score);
+    return { name: d.name, contrib, weight: d.weight, fill: contribColor(contrib, d.weight) };
+  });
+
+  const remainder = Math.max(0, 100 - score);
+  const pieData = [
+    ...contributions.map((c) => ({ name: c.name, value: c.contrib, fill: c.fill })),
+    ...(remainder > 0 ? [{ name: "Remaining", value: remainder, fill: "var(--line)" }] : []),
   ];
 
   const tooltipStyle = {
@@ -382,97 +349,66 @@ export function ScoreWaterfallChart({
     <div className="vrd-chart-wrap no-print">
       <div className="bc-hd">
         <span>Score Breakdown</span>
-        <span className="r">weighted contribution · pts</span>
+        <span className="r">radial · weighted contribution</span>
       </div>
       <div className="vrd-chart-body">
         <ChartReveal height={200}>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={data} margin={{ top: 28, right: 16, bottom: 0, left: -12 }}>
-            <CartesianGrid stroke="var(--line)" strokeWidth={0.75} vertical={false} />
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 9, fontFamily: "var(--font-chivo-mono)", fill: "var(--dim)", fontWeight: 600 }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              domain={[0, 100]}
-              ticks={[0, 25, 50, 75, 100]}
-              tick={{ fontSize: 8, fontFamily: "var(--font-chivo-mono)", fill: "var(--faint)" }}
-              tickLine={false}
-              axisLine={false}
-              width={24}
-            />
-            <Tooltip
-              cursor={{ fill: "var(--line)", fillOpacity: 0.3 }}
-              contentStyle={tooltipStyle}
-              content={(props) => {
-                if (!props.active || !props.payload?.length) return null;
-                const d = (props.payload[0] as { payload: WfEntry }).payload;
-                if (d.isTotal) {
-                  return (
-                    <div style={tooltipStyle}>
-                      <div style={{ fontWeight: 700, color: "var(--ink)" }}>Total Score</div>
-                      <div style={{ color: "var(--dim)", marginTop: 2 }}>{score} / 100</div>
-                    </div>
-                  );
-                }
-                return (
-                  <div style={tooltipStyle}>
-                    <div style={{ fontWeight: 700, color: "var(--ink)" }}>{d.name}</div>
-                    <div style={{ color: "var(--dim)", marginTop: 2 }}>+{d.contrib} pts · weight {Math.round(d.weight * 100)}%</div>
-                    <div style={{ color: "var(--faint)", marginTop: 2 }}>dim score {Math.round(d.contrib / d.weight)} / 100</div>
-                  </div>
-                );
-              }}
-            />
-            {/* Transparent base bar — pushes visible bar up for waterfall effect */}
-            <Bar dataKey="base" stackId="wf" fill="transparent" isAnimationActive={false} legendType="none" />
-            {/* Visible contribution bar */}
-            <Bar
-              dataKey="value"
-              stackId="wf"
-              isAnimationActive="auto"
-              animationDuration={800}
-              animationEasing="ease-out"
-              radius={[2, 2, 0, 0]}
-            >
-              {data.map((d, i) => (
-                <Cell
-                  key={i}
-                  fill={wfBarColor(d.contrib, d.weight, d.isTotal, score)}
-                  fillOpacity={d.isTotal ? 1 : 0.82}
+          <div style={{ position: "relative", width: "100%", height: 200 }}>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="64%"
+                  outerRadius="94%"
+                  startAngle={90}
+                  endAngle={-270}
+                  strokeWidth={0}
+                  isAnimationActive="auto"
+                  animationDuration={900}
+                  animationEasing="ease-out"
+                >
+                  {pieData.map((d, i) => (
+                    <Cell key={i} fill={d.fill} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  content={(props) => {
+                    if (!props.active || !props.payload?.length) return null;
+                    const p = (props.payload[0] as { payload: { name: string } }).payload;
+                    if (p.name === "Remaining") return null;
+                    const dim = contributions.find((c) => c.name === p.name);
+                    if (!dim) return null;
+                    return (
+                      <div style={tooltipStyle}>
+                        <div style={{ fontWeight: 700, color: "var(--ink)" }}>{dim.name}</div>
+                        <div style={{ color: "var(--dim)", marginTop: 2 }}>+{dim.contrib} pts · weight {Math.round(dim.weight * 100)}%</div>
+                        <div style={{ color: "var(--faint)", marginTop: 2 }}>dim score {Math.round(dim.contrib / dim.weight)} / 100</div>
+                      </div>
+                    );
+                  }}
                 />
-              ))}
-              <LabelList
-                content={(props) => {
-                  const { x, y, width, index } = props as {
-                    x?: number; y?: number; width?: number; index?: number;
-                  };
-                  if (index === undefined) return null;
-                  const d = data[index];
-                  if (!d) return null;
-                  const label = d.isTotal ? `Total: ${score}` : `+${d.contrib} pts`;
-                  const color = wfBarColor(d.contrib, d.weight, d.isTotal, score);
-                  return (
-                    <text
-                      x={(x ?? 0) + (width ?? 0) / 2}
-                      y={(y ?? 28) - 5}
-                      textAnchor="middle"
-                      fontSize={8.5}
-                      fontFamily="var(--font-chivo-mono)"
-                      fill={color}
-                      fontWeight={d.isTotal ? 700 : 500}
-                    >
-                      {label}
-                    </text>
-                  );
-                }}
-              />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="vrd-donut-center" aria-hidden="true">
+              <span className="vrd-donut-num" style={{ color: verdictColor }}>{score}</span>
+              <span className="vrd-donut-lbl">/ 100 total</span>
+            </div>
+          </div>
         </ChartReveal>
+        <div className="vrd-ring-legend">
+          {contributions.map((c) => (
+            <div key={c.name} className="vrd-ring-leg-row">
+              <span className="vrd-ring-dot" style={{ background: c.fill }} />
+              <span className="vrd-ring-leg-name">{c.name}</span>
+              <span className="vrd-ring-leg-val" style={{ color: c.fill }}>+{c.contrib}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
