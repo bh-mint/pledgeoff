@@ -12,6 +12,7 @@ import { ArticleCTAButton } from "@/components/blog/ArticleCTAButton";
 import { ArticleFeedback } from "@/components/blog/ArticleFeedback";
 import { MidArticleCTA } from "@/components/blog/MidArticleCTA";
 import { HighlightToTweet } from "@/components/blog/HighlightToTweet";
+import { CopyLinkButton } from "@/components/blog/CopyLinkButton";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
@@ -127,7 +128,7 @@ export default async function ArticlePage({ params }: Props) {
         <PublicNav extraLink={{ href: "/blog", label: "← All articles" }} />
 
         {/* Article */}
-        <article className="w-bleed" style={{ paddingTop: 64, paddingBottom: 96 }}>
+        <article className="w-page-sm" style={{ paddingTop: 64, paddingBottom: 96 }}>
 
           {/* Category */}
           <div className="mono text-[10px] uppercase tracking-wider" style={{ color: "var(--faint)" }}>
@@ -283,6 +284,7 @@ export default async function ArticlePage({ params }: Props) {
             >
               LinkedIn
             </a>
+            <CopyLinkButton url={`https://pledgeoff.com/blog/${slug}`} />
           </div>
 
           {/* Feedback */}

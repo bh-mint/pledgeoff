@@ -902,6 +902,24 @@ select.finp { cursor: pointer; }
 }
 .prose-pledgeoff pre code { background: none; border: none; padding: 0; }
 .prose-pledgeoff hr { border-color: var(--line); margin: 2rem 0; }
+.prose-pledgeoff table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+}
+.prose-pledgeoff th,
+.prose-pledgeoff td {
+  border: 1px solid var(--line);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-pledgeoff th {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 700;
+}
+.prose-pledgeoff tr:nth-child(even) td { background: color-mix(in srgb, var(--surface) 50%, transparent); }
 
 .callout {
   border-left: 2px solid var(--go);

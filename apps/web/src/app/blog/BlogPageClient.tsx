@@ -79,7 +79,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
           <div className="flex items-center gap-2 mb-6">
             <span className="w-1.5 h-1.5 pulse-dot" style={{ background: "var(--go)" }} />
             <span className="mono text-[10px] tracking-wider uppercase" style={{ color: "var(--faint)" }}>
-              INSIGHTS · UPDATED WEEKLY
+              INSIGHTS · REGULARLY UPDATED
             </span>
           </div>
           <h1
@@ -100,7 +100,7 @@ export function BlogPageClient({ articles }: BlogPageClientProps) {
           >
             {[
               { value: String(articles.length), label: "ARTICLES" },
-              { value: "Weekly", label: "NEW CONTENT" },
+              { value: "Regular", label: "NEW CONTENT" },
               { value: "7m", label: "AVG READ" },
             ].map(({ value, label }) => (
               <div key={label} className="p-4" style={{ background: "var(--bg)" }}>
