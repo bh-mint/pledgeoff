@@ -8,6 +8,7 @@ import { useCountUp } from "@/lib/motion";
 import { TeamAnalytics } from "@/components/TeamAnalytics";
 import { TeamActivityFeed } from "@/components/TeamActivityFeed";
 import { SignalFeed } from "@/components/SignalFeed";
+import { DecisionQueueView } from "./DecisionQueueView";
 import type { Plan } from "@pledgeoff/core";
 import type { TeamActivityEvent } from "@/server/team/getTeamActivity";
 import type { SignalFeedNiche } from "@/app/api/v1/signal-feed/route";
@@ -423,7 +424,7 @@ export function DashboardClient({
           )}
         </div>
         <div className="db-c-tools">
-          <div className="db-c-tools-lbl"><span>Tools</span><b>{runCount}/6</b></div>
+          <div className="db-c-tools-lbl"><span>Tools</span><b>{runCount}/{toolKeys.length}</b></div>
           <div className="db-c-meter">
             {toolKeys.map((k) => <div key={k} className={`db-c-seg${row.tools[k] ? " run" : ""}`} />)}
           </div>
@@ -778,7 +779,7 @@ export function DashboardClient({
                     What are you building?
                   </h2>
                   <p style={{ fontSize: 14, color: "var(--dim)", marginBottom: 20, lineHeight: 1.65 }}>
-                    One sentence. Get a GO / KILL / PIVOT verdict in under 60 seconds.
+                    One sentence. Get a GO / KILL / PIVOT verdict in about 15 seconds.
                   </p>
                   <form onSubmit={handleQuickValidate} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                     <textarea
@@ -820,6 +821,13 @@ export function DashboardClient({
                 </div>
                 <SignalFeed niches={signalFeedData.data} locked={signalFeedData.locked} />
               </div>
+
+              {rows.length > 0 && (
+                <div className="db-rail-card">
+                  <div className="db-rail-hd">Priority Queue</div>
+                  <DecisionQueueView variant="sidebar" />
+                </div>
+              )}
 
               {teamActivityEvents.length > 0 && (
                 <div className="db-rail-card">
