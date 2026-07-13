@@ -1873,7 +1873,11 @@ select.finp { cursor: pointer; }
 .tc-nm { font-family: var(--font-bitter), Georgia, serif; font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
 .tc-desc { font-family: var(--font-chivo-mono), monospace; font-size: 8px; letter-spacing: 0.06em; color: var(--faint); line-height: 1.6; }
 .tc-skel { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
-.sk { height: 6px; background: var(--surface-3); border: 1px solid var(--line); }
+.sk {
+  height: 6px;
+  border: 1px solid var(--line);
+  background-image: repeating-linear-gradient(-45deg, var(--surface-3) 0 3px, transparent 3px 6px);
+}
 .tc-foot { border-top: 1px solid var(--line); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-shrink: 0; }
 .tc-lock { font-family: var(--font-chivo-mono), monospace; font-size: 8px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--go); border: 1px solid rgba(26,106,60,0.3); padding: 3px 8px; background: rgba(26,106,60,0.07); flex-shrink: 0; }
 [data-theme="dark"] .tc-lock { background: rgba(58,196,122,0.09); border-color: rgba(58,196,122,0.3); }

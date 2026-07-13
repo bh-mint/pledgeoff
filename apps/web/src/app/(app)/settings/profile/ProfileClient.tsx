@@ -146,6 +146,9 @@ export function ProfileClient({
               />
             </div>
             <p className="fine" style={{ marginTop: 4 }}>3–30 chars · letters, numbers, _ or -</p>
+            <p className="fine" style={{ marginTop: 2, color: "var(--caution)" }}>
+              Setting a username makes your idea history — including verdicts — visible to anyone at pledgeoff.com/@{uname || "your-handle"}.
+            </p>
           </div>
 
           {/* Company */}
