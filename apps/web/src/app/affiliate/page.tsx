@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
+import { Reveal } from "@/components/motion/Reveal";
 import { PRICING } from "@/lib/pricing.config";
 
 const COMMISSION_RATE = 0.3;
@@ -62,58 +63,64 @@ export default function AffiliatePage() {
           </p>
 
           {/* Commission cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", marginBottom: "32px" }}>
-            {PLANS.map(({ plan, monthly }) => (
-              <div key={plan} className="bc">
-                <div className="bc-hd">{plan} <span className="r">€{monthly}/mo</span></div>
-                <div className="bc-bd">
-                  <div className="display" style={{ fontSize: "22px", fontWeight: 700, color: "var(--go)", lineHeight: 1 }}>
-                    €{(monthly * COMMISSION_RATE).toFixed(2)}
-                  </div>
-                  <div className="mono" style={{ fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--faint)", marginTop: "4px" }}>
-                    per user · per month
+          <Reveal>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "12px", marginBottom: "32px" }}>
+              {PLANS.map(({ plan, monthly }) => (
+                <div key={plan} className="bc">
+                  <div className="bc-hd">{plan} <span className="r">€{monthly}/mo</span></div>
+                  <div className="bc-bd">
+                    <div className="display" style={{ fontSize: "22px", fontWeight: 700, color: "var(--go)", lineHeight: 1 }}>
+                      €{(monthly * COMMISSION_RATE).toFixed(2)}
+                    </div>
+                    <div className="mono" style={{ fontSize: "8px", letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--faint)", marginTop: "4px" }}>
+                      per user · per month
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </Reveal>
 
           {/* How it works */}
-          <div className="sec" style={{ marginBottom: "28px" }}>
-            <div className="sec-hd">How it works</div>
-            <div className="sec-bd" style={{ padding: 0 }}>
-              {STEPS.map(({ step, label, desc }) => (
-                <div key={step} className="aff-step" style={{ padding: "16px 22px" }}>
-                  <div className="aff-no">{step}</div>
-                  <div>
-                    <div className="aff-nm">{label}</div>
-                    <div className="aff-desc">{desc}</div>
+          <Reveal delayMs={80}>
+            <div className="sec" style={{ marginBottom: "28px" }}>
+              <div className="sec-hd">How it works</div>
+              <div className="sec-bd" style={{ padding: 0 }}>
+                {STEPS.map(({ step, label, desc }) => (
+                  <div key={step} className="aff-step" style={{ padding: "16px 22px" }}>
+                    <div className="aff-no">{step}</div>
+                    <div>
+                      <div className="aff-nm">{label}</div>
+                      <div className="aff-desc">{desc}</div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* Who it's for */}
-          <div className="sec" style={{ marginBottom: "28px" }}>
-            <div className="sec-hd">Who it&apos;s for</div>
-            <div className="sec-bd" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {[
-                { label: "Founder newsletters",   desc: "IndieHackers, Substack, Beehiiv writers with an audience of builders." },
-                { label: "Product blogs & YouTube", desc: "Content about product strategy, validation, building SaaS, or founder life." },
-                { label: "Developer communities",  desc: "Discord servers, Slack groups, forums where PMs and founders hang out." },
-                { label: "Accelerators",            desc: "Introduce us to your cohort. Every founder they refer earns both of you." },
-                { label: "Consultants & coaches",  desc: "If you advise founders on product decisions, PledgeOFF is a natural recommendation." },
-              ].map(({ label, desc }) => (
-                <div key={label} style={{ display: "flex", gap: "12px" }}>
-                  <span className="mono" style={{ fontSize: "11px", color: "var(--faint)", flexShrink: 0, paddingTop: "2px" }}>—</span>
-                  <span style={{ fontSize: "13.5px", color: "var(--dim)" }}>
-                    <strong style={{ color: "var(--ink)" }}>{label}</strong>{" "}{desc}
-                  </span>
-                </div>
-              ))}
+          <Reveal delayMs={160}>
+            <div className="sec" style={{ marginBottom: "28px" }}>
+              <div className="sec-hd">Who it&apos;s for</div>
+              <div className="sec-bd" style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {[
+                  { label: "Founder newsletters",   desc: "IndieHackers, Substack, Beehiiv writers with an audience of builders." },
+                  { label: "Product blogs & YouTube", desc: "Content about product strategy, validation, building SaaS, or founder life." },
+                  { label: "Developer communities",  desc: "Discord servers, Slack groups, forums where PMs and founders hang out." },
+                  { label: "Accelerators",            desc: "Introduce us to your cohort. Every founder they refer earns both of you." },
+                  { label: "Consultants & coaches",  desc: "If you advise founders on product decisions, PledgeOFF is a natural recommendation." },
+                ].map(({ label, desc }) => (
+                  <div key={label} style={{ display: "flex", gap: "12px" }}>
+                    <span className="mono" style={{ fontSize: "11px", color: "var(--faint)", flexShrink: 0, paddingTop: "2px" }}>—</span>
+                    <span style={{ fontSize: "13.5px", color: "var(--dim)" }}>
+                      <strong style={{ color: "var(--ink)" }}>{label}</strong>{" "}{desc}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          </Reveal>
 
           {/* FAQ */}
           <div className="sec" style={{ marginBottom: "32px" }}>

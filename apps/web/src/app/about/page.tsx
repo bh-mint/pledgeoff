@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
+import { Reveal } from "@/components/motion/Reveal";
 
 export const metadata: Metadata = {
   title: { absolute: "About — PledgeOFF" },
@@ -72,9 +73,11 @@ export default function AboutPage() {
             <p>
               PledgeOFF automates that synthesis. You get a structured verdict — not a chatbot&apos;s guess, not an AI hallucination, but a scoring system grounded in real public signals with every source cited. GO, PIVOT, or KILL. In fifteen seconds.
             </p>
-            <blockquote>
-              &ldquo;The goal is never to tell founders what to do. It&apos;s to remove the excuse for not knowing what the evidence says.&rdquo;
-            </blockquote>
+            <Reveal>
+              <blockquote>
+                &ldquo;The goal is never to tell founders what to do. It&apos;s to remove the excuse for not knowing what the evidence says.&rdquo;
+              </blockquote>
+            </Reveal>
             <p>
               We charge for it because the infrastructure to scrape, parse, weight, and summarise signals at this quality has real costs. The free tier exists because we want the verdict to be available to everyone before they decide to commit. If you never upgrade, that&apos;s fine — one honest verdict per month is still more than most people get.
             </p>
@@ -110,9 +113,8 @@ export default function AboutPage() {
           {/* Contact */}
           <div style={{ marginTop: "32px", display: "flex", gap: "24px", flexWrap: "wrap" }}>
             {[
-              { label: "General", email: "hello@pledgeoff.com" },
+              { label: "General / Press", email: "hello@pledgeoff.com" },
               { label: "Billing", email: "billing@pledgeoff.com" },
-              { label: "Press", email: "hello@pledgeoff.com" },
             ].map(({ label, email }) => (
               <div key={email}>
                 <div className="mono" style={{ fontSize: "8px", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--faint)", marginBottom: "4px" }}>

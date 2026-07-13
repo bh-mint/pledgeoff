@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
+import { Reveal } from "@/components/motion/Reveal";
 
 export const metadata: Metadata = {
   title: { absolute: "Roadmap — PledgeOFF" },
@@ -78,30 +79,32 @@ export default function RoadmapPage() {
             </Link>
           </p>
 
-          {STATUS_ORDER.map((status) => {
+          {STATUS_ORDER.map((status, i) => {
             const items = grouped[status];
             if (items.length === 0) return null;
             const cfg = STATUS_CONFIG[status];
             return (
-              <div key={status} className="sec" style={{ marginBottom: "20px" }}>
-                <div className="sec-hd">
-                  {cfg.label}
-                  <span className="r">{items.length} items</span>
-                </div>
-                <div className="sec-bd" style={{ padding: 0 }}>
-                  {items.map(({ label, desc, tag }) => (
-                    <div key={label} className="rm-item" style={{ padding: "16px 22px" }}>
-                      <div>
-                        {tag && <span className={`rm-tag${status === "next" || status === "in-progress" ? " soon" : ""}`}>{tag}</span>}
+              <Reveal key={status} delayMs={i * 80}>
+                <div className="sec" style={{ marginBottom: "20px" }}>
+                  <div className="sec-hd">
+                    {cfg.label}
+                    <span className="r">{items.length} items</span>
+                  </div>
+                  <div className="sec-bd" style={{ padding: 0 }}>
+                    {items.map(({ label, desc, tag }) => (
+                      <div key={label} className="rm-item" style={{ padding: "16px 22px" }}>
+                        <div>
+                          {tag && <span className={`rm-tag${status === "next" || status === "in-progress" ? " soon" : ""}`}>{tag}</span>}
+                        </div>
+                        <div>
+                          <div className="rm-nm">{label}</div>
+                          <div className="rm-desc">{desc}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="rm-nm">{label}</div>
-                        <div className="rm-desc">{desc}</div>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              </Reveal>
             );
           })}
 

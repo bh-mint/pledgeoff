@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 
@@ -383,11 +384,20 @@ export default function ChangelogPage() {
         </p>
 
         <div>
-          {RELEASES.map((r) => (
-            <div key={r.version} className="cl-entry">
+          {RELEASES.map((r, i) => (
+            <div
+              key={r.version}
+              className="cl-entry"
+              style={i === 0 ? { borderLeft: "2px solid var(--go)", paddingLeft: "16px" } : undefined}
+            >
               <div className="cl-meta">{r.date}</div>
               <div className="cl-v">
                 v{r.version}
+                {i === 0 && (
+                  <span className="cl-tag" style={{ color: "var(--go)", borderColor: "color-mix(in srgb, var(--go) 30%, transparent)", background: "var(--go-light)" }}>
+                    LATEST
+                  </span>
+                )}
                 <span
                   className="cl-tag"
                   style={{
@@ -406,6 +416,18 @@ export default function ChangelogPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-16 border p-6" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
+          <div className="display font-semibold leading-tight" style={{ fontSize: "20px", color: "var(--ink)" }}>
+            See it in action.
+          </div>
+          <p className="text-[13px] mt-2 leading-relaxed" style={{ color: "var(--dim)" }}>
+            Every release ships to validate your next idea faster. Try the latest version free.
+          </p>
+          <div className="mt-4">
+            <Link href="/ideas/new" className="btn-p">Validate your idea →</Link>
+          </div>
         </div>
       </div>
       <Footer />
