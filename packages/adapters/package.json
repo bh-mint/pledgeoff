@@ -15,7 +15,7 @@
     "@anthropic-ai/sdk": "^0.105.0",
     "@pledgeoff/core": "workspace:*",
     "@pledgeoff/observability": "workspace:*",
-    "@supabase/supabase-js": "2.108.2",
+    "@supabase/supabase-js": "2.110.2",
     "@upstash/redis": "^1.38.0",
     "groq-sdk": "^0.37.0",
     "neverthrow": "^8.2.0",
