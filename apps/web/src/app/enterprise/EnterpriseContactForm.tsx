@@ -19,7 +19,7 @@ export function EnterpriseContactForm() {
       const res = await fetch("/api/v1/enterprise/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, companySize }),
+        body: JSON.stringify({ name, company, email, companySize, message }),
       });
       setStatus(res.ok ? "success" : "error");
     } catch {

@@ -28,7 +28,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/roadmap`, lastModified: "2026-05-30" },
     { url: `${SITE_URL}/changelog`, lastModified: "2026-05-18" },
     { url: `${SITE_URL}/tools/decision-clarity`, lastModified: "2026-05-18" },
-    { url: `${SITE_URL}/launch`, lastModified: "2026-05-18" },
     { url: `${SITE_URL}/terms`, lastModified: "2026-05-16" },
     { url: `${SITE_URL}/privacy`, lastModified: "2026-05-16" },
   ];
