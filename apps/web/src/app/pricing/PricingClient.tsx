@@ -8,7 +8,7 @@ import { CheckoutModal } from "@/components/CheckoutModal";
 import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { PRICING } from "@/lib/pricing.config";
-import { PLAN_TOOL_GATES } from "@pledgeoff/core";
+import { PLAN_LIMITS, PLAN_TOOL_GATES } from "@pledgeoff/core";
 import { ROICalculator } from "@/components/pricing/ROICalculator";
 
 const FOUNDER_MONTHLY_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_FOUNDER_MONTHLY_PRICE_ID ?? "";
@@ -24,7 +24,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Validation",
     rows: [
-      { k: "Validations / month",       f: "1",               fo: "20",             t: "60",               s: "100" },
+      { k: "Validations / month",       f: String(PLAN_LIMITS.free.verificationsPerMonth), fo: String(PLAN_LIMITS.founder.verificationsPerMonth), t: String(PLAN_LIMITS.team.verificationsPerMonth), s: String(PLAN_LIMITS.studio.verificationsPerMonth) },
       { k: "Signal sources",            f: "Reddit · GitHub", fo: "All 8 sources",  t: "All 8 sources",    s: "All 8 sources" },
       { k: "PDF / JSON export",         f: "—",               fo: "✓",              t: "✓",                s: "✓ · white-label" },
     ],
@@ -54,7 +54,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Team",
     rows: [
-      { k: "Seats included",            f: "1",               fo: "1",              t: "3",                s: "8" },
+      { k: "Seats included",            f: String(PLAN_LIMITS.free.seatsIncluded), fo: String(PLAN_LIMITS.founder.seatsIncluded), t: String(PLAN_LIMITS.team.seatsIncluded), s: String(PLAN_LIMITS.studio.seatsIncluded) },
       { k: "Extra seats",               f: "—",               fo: "—",              t: `€${PRICING.seats.extraEurPerMonth}/seat/mo`,      s: `€${PRICING.seats.extraEurPerMonth}/seat/mo` },
       { k: "Early access to features",  f: "—",               fo: "—",              t: "✓",                s: "✓" },
     ],
@@ -62,7 +62,7 @@ const FEATURES: { group: string; rows: FeatureRow[] }[] = [
   {
     group: "Otto AI",
     rows: [
-      { k: "Otto questions / month",    f: "—",               fo: "15",             t: "45",               s: "120" },
+      { k: "Otto questions / month",    f: "—",               fo: String(PLAN_LIMITS.founder.ottoQuestionsPerMonth), t: String(PLAN_LIMITS.team.ottoQuestionsPerMonth), s: String(PLAN_LIMITS.studio.ottoQuestionsPerMonth) },
     ],
   },
   {
@@ -203,7 +203,7 @@ function MarketDataPackSection() {
               You&apos;re on the list. We&apos;ll be in touch.
             </p>
           ) : (
-            <form onSubmit={join} style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <form onSubmit={join} className="finp-row" style={{ flexWrap: "wrap" }}>
               <input
                 type="email"
                 required
@@ -211,13 +211,14 @@ function MarketDataPackSection() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 aria-label="Email for Market Data Pack waitlist"
-                style={{ flex: "1 1 200px", padding: "9px 12px", fontSize: "13px", background: "var(--bg)", border: "1px solid var(--line)", color: "var(--ink)", borderRadius: 3 }}
+                className="finp"
+                style={{ flex: "1 1 200px" }}
               />
               <button
                 type="submit"
                 disabled={status === "saving"}
-                className="mono"
-                style={{ fontSize: "11px", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", padding: "9px 18px", background: "var(--ink)", color: "var(--bg)", border: "none", cursor: "pointer", opacity: status === "saving" ? 0.6 : 1, borderRadius: 3 }}
+                className="btn-p"
+                style={{ opacity: status === "saving" ? 0.6 : 1 }}
               >
                 {status === "saving" ? "Joining…" : "Join waitlist"}
               </button>
@@ -374,7 +375,7 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               <div className="plan-annual-note">&nbsp;</div>
             </div>
             <div className="plan-features">
-              <div className="pf yes">1 validation per month</div>
+              <div className="pf yes">{PLAN_LIMITS.free.verificationsPerMonth} validation per month</div>
               <div className="pf yes">Full verdict — GO / PIVOT / KILL</div>
               <div className="pf yes">4 scored dimensions</div>
               <div className="pf yes">Reddit · GitHub signals</div>
@@ -410,10 +411,10 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               </div>
             </div>
             <div className="plan-features">
-              <div className="pf yes">20 validations / month</div>
+              <div className="pf yes">{PLAN_LIMITS.founder.verificationsPerMonth} validations / month</div>
               <div className="pf yes">All 8 signal sources</div>
               <div className="pf yes">{PLAN_TOOL_GATES.founder.length} of {PLAN_TOOL_GATES.team.length} intelligence tools</div>
-              <div className="pf yes">15 Otto questions / mo</div>
+              <div className="pf yes">{PLAN_LIMITS.founder.ottoQuestionsPerMonth} Otto questions / mo</div>
               <div className="pf yes">1-year history · PDF + JSON export</div>
               <div className="pf yes">Outgoing webhooks · 24h SLA</div>
               <div className="pf no">GTM Brief <span className="mono" style={{ fontSize: "8px" }}>Team+</span></div>
@@ -447,10 +448,10 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               </div>
             </div>
             <div className="plan-features">
-              <div className="pf yes">60 validations / month</div>
+              <div className="pf yes">{PLAN_LIMITS.team.verificationsPerMonth} validations / month</div>
               <div className="pf yes">All {PLAN_TOOL_GATES.team.length} intelligence tools</div>
-              <div className="pf yes">45 Otto questions / mo</div>
-              <div className="pf yes">3 team seats · add more at €{PRICING.seats.extraEurPerMonth}/seat</div>
+              <div className="pf yes">{PLAN_LIMITS.team.ottoQuestionsPerMonth} Otto questions / mo</div>
+              <div className="pf yes">{PLAN_LIMITS.team.seatsIncluded} team seats · add more at €{PRICING.seats.extraEurPerMonth}/seat</div>
               <div className="pf yes">Shared team library · early access</div>
               <div className="pf yes">API access · Signal Feed</div>
               <div className="pf yes">Validation + Otto Packs</div>
@@ -481,9 +482,9 @@ export function PricingClient({ popularPlan }: { popularPlan?: "founder" | "team
               </div>
             </div>
             <div className="plan-features" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-              <div className="pf yes">100 validations / month</div>
-              <div className="pf yes">All tools · 120 Otto questions</div>
-              <div className="pf yes">8 team seats</div>
+              <div className="pf yes">{PLAN_LIMITS.studio.verificationsPerMonth} validations / month</div>
+              <div className="pf yes">All tools · {PLAN_LIMITS.studio.ottoQuestionsPerMonth} Otto questions</div>
+              <div className="pf yes">{PLAN_LIMITS.studio.seatsIncluded} team seats</div>
               <div className="pf yes">All 8 signal sources</div>
               <div className="pf yes">Audit log · NET30 invoicing</div>
               <div className="pf yes">4h dedicated SLA</div>

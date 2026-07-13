@@ -3,57 +3,11 @@ import { PublicNav } from "@/components/PublicNav";
 import { Footer } from "@/components/Footer";
 import { PHBanner } from "@/components/PHBanner";
 import { PRICING } from "@/lib/pricing.config";
+import { PLAN_LIMITS } from "@pledgeoff/core";
 import { HeroLeft } from "@/components/home/HeroLeft";
 import { HomeFAQ } from "@/components/home/HomeFAQ";
 import { GuestIdeaBox } from "@/components/home/GuestIdeaBox";
-
-const FEATURES = [
-  {
-    n: "01",
-    title: "Cited sources",
-    desc: "Every signal links to its origin. Reddit threads, Hacker News, GitHub issues, G2 reviews, news, job postings. Nothing invented.",
-  },
-  {
-    n: "02",
-    title: "Four scored dimensions",
-    desc: "Market demand, competition, feasibility, and timing — each weighted and scored independently before the composite verdict.",
-  },
-  {
-    n: "03",
-    title: "Otto, your co-pilot",
-    desc: "Ask follow-up questions in plain English. Otto reads your verdict and signals before answering — not a generic chatbot.",
-  },
-  {
-    n: "04",
-    title: "Your context, injected",
-    desc: "Add what you already know — customer conversations, lost deals, pricing signals. Every intelligence tool reads your context alongside the public signals.",
-  },
-  {
-    n: "05",
-    title: "Movement tracking",
-    desc: "Competitors change pricing, positioning, and features. PledgeOFF re-checks the market on schedule and flags what moved.",
-  },
-  {
-    n: "06",
-    title: "Win/Loss intelligence",
-    desc: "Report what happened after the verdict — built, failed, lost to whom. Every outcome calibrates your future verdicts.",
-  },
-  {
-    n: "07",
-    title: "Team collaboration",
-    desc: "Share verdicts with teammates. React, run tools together, get Slack alerts and a weekly digest of what changed.",
-  },
-  {
-    n: "08",
-    title: "Public profiles",
-    desc: "Make ideas public. Share verdicts via link. Build a credible validation track record others can see.",
-  },
-  {
-    n: "09",
-    title: "API & reports",
-    desc: "REST API with keys and usage stats. Export any verdict as a PDF intelligence report — white-label on Studio.",
-  },
-];
+import { FeatureGrid } from "@/components/home/FeatureGrid";
 
 const monoEyebrow: React.CSSProperties = {
   fontFamily: "var(--font-chivo-mono), monospace",
@@ -228,15 +182,7 @@ export function HomeClient() {
       {/* ── FEATURE GRID ── */}
       <div className="w-bleed" style={{ paddingBottom: 60 }}>
         <span style={{ ...monoEyebrow, marginBottom: 20 }}>What you get</span>
-        <div className="feat-grid" style={{ border: "1px solid var(--line)" }}>
-          {FEATURES.map((f) => (
-            <div key={f.n} className="feat-item">
-              <div className="feat-no">{f.n}</div>
-              <div className="feat-title">{f.title}</div>
-              <div className="feat-desc">{f.desc}</div>
-            </div>
-          ))}
-        </div>
+        <FeatureGrid />
       </div>
 
       {/* ── THREE VERDICTS ── */}
@@ -426,7 +372,7 @@ export function HomeClient() {
               </div>
             </div>
             <div style={{ padding: "14px 20px 18px", flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-              {["1 validation / month", "Reddit + GitHub signals", "GO / KILL / PIVOT verdict"].map((f) => (
+              {[`${PLAN_LIMITS.free.verificationsPerMonth} validation / month`, "Reddit + GitHub signals", "GO / KILL / PIVOT verdict"].map((f) => (
                 <div
                   key={f}
                   style={{
@@ -507,7 +453,7 @@ export function HomeClient() {
               </div>
             </div>
             <div style={{ padding: "14px 20px 18px", flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-              {["20 validations / month", "All signal sources", "Revenue Model + ICP + Landscape"].map((f) => (
+              {[`${PLAN_LIMITS.founder.verificationsPerMonth} validations / month`, "All signal sources", "Revenue Model + ICP + Landscape"].map((f) => (
                 <div
                   key={f}
                   style={{
@@ -606,7 +552,7 @@ export function HomeClient() {
               </div>
             </div>
             <div style={{ padding: "14px 20px 18px", flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-              {["60 validations / month", "3 seats included", "Otto AI co-pilot (45q/mo)"].map((f) => (
+              {[`${PLAN_LIMITS.team.verificationsPerMonth} validations / month`, `${PLAN_LIMITS.team.seatsIncluded} seats included`, `Otto AI co-pilot (${PLAN_LIMITS.team.ottoQuestionsPerMonth}q/mo)`].map((f) => (
                 <div
                   key={f}
                   style={{
@@ -687,7 +633,7 @@ export function HomeClient() {
               </div>
             </div>
             <div style={{ padding: "14px 20px 18px", flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-              {["100 validations / month", "8 seats + white-label PDF", "Audit trail + API access"].map((f) => (
+              {[`${PLAN_LIMITS.studio.verificationsPerMonth} validations / month`, `${PLAN_LIMITS.studio.seatsIncluded} seats + white-label PDF`, "Audit trail + API access"].map((f) => (
                 <div
                   key={f}
                   style={{
