@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useCountUp } from "@/lib/motion";
 
 const QUESTIONS = [
   {
@@ -97,6 +98,13 @@ export function DecisionClarityClient() {
   }
 
   const level = LEVELS.find((l) => pct >= l.min) ?? LEVELS[LEVELS.length - 1];
+  const { value: displayScore } = useCountUp(pct, { duration: 900 });
+  const [barPct, setBarPct] = useState(0);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setBarPct(screen === "result" ? pct : 0));
+    return () => cancelAnimationFrame(id);
+  }, [screen, pct]);
 
   if (screen === "result") {
     return (
@@ -107,13 +115,13 @@ export function DecisionClarityClient() {
           ))}
         </div>
 
-        <div className="result-score" style={{ color: level.color }}>{pct}</div>
+        <div className="result-score" style={{ color: level.color }}>{displayScore}</div>
         <div className="mono" style={{ fontSize: "8.5px", letterSpacing: ".22em", textTransform: "uppercase", color: "var(--faint)", marginBottom: "16px" }}>
           Decision-Clarity Score
         </div>
 
         <div className="result-bar">
-          <div className="result-fill" style={{ width: `${pct}%` }} />
+          <div className="result-fill" style={{ width: `${barPct}%` }} />
         </div>
 
         <div className="result-verdict">{level.label}</div>
