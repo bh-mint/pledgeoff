@@ -153,6 +153,10 @@ export function LoginClient() {
             ← Back to sign in
           </button>
         </p>
+        <p className="auth-fine" style={{ marginTop: "8px" }}>
+          Lost access to your authenticator? Email{" "}
+          <a href="mailto:hello@pledgeoff.com" className="auth-sl">hello@pledgeoff.com</a> from the address on your account.
+        </p>
       </div>
     );
   }
