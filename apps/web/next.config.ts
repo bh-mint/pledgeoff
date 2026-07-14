@@ -6,7 +6,10 @@ const nextConfig: NextConfig = {
     return [{ source: '/@:username', destination: '/profile/:username' }];
   },
   async redirects() {
-    return [{ source: '/launch', destination: '/', permanent: true }];
+    return [
+      { source: '/launch', destination: '/', permanent: true },
+      { source: '/settings/api', destination: '/settings/developer', permanent: true },
+    ];
   },
   transpilePackages: [
     '@pledgeoff/core',

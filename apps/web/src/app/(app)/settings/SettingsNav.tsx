@@ -8,7 +8,10 @@ const TABS = [
   { href: "/settings/billing", label: "Billing" },
   { href: "/settings/team", label: "Team" },
   { href: "/settings/security", label: "Security" },
+  { href: "/settings/notifications", label: "Notifications" },
+  { href: "/settings/integrations", label: "Integrations" },
   { href: "/settings/developer", label: "Developer" },
+  { href: "/settings/audit-log", label: "Activity Log" },
   { href: "/settings/data", label: "Data & Account" },
 ];
 
