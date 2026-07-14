@@ -21,21 +21,31 @@ const SITUATION_META: Record<
 export function MarketLandscapeClient({ ideaId, initialLandscape }: Props) {
   const [landscape, setLandscape] = useState<MarketLandscape | null>(initialLandscape);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function generate() {
     setLoading(true);
-    const token = await getAuthToken();
-    if (!token) { setLoading(false); return; }
+    setError(null);
+    try {
+      const token = await getAuthToken();
+      if (!token) { setError("Not authenticated."); setLoading(false); return; }
 
-    const res = await fetch(`/api/v1/ideas/${ideaId}/market-landscape`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
+      const res = await fetch(`/api/v1/ideas/${ideaId}/market-landscape`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError((body as { error?: { message?: string } }).error?.message ?? "Analysis failed. Try again.");
+        return;
+      }
       const json = await res.json() as { data: MarketLandscape };
       setLandscape(json.data);
+    } catch {
+      setError("Network error. Check connection and try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   if (!landscape) {
@@ -50,6 +60,9 @@ export function MarketLandscapeClient({ ideaId, initialLandscape }: Props) {
         <p className="mono text-[10px] mb-5" style={{ color: "var(--t3)" }}>
           Segments · trends · uncovered opportunities
         </p>
+        {error && (
+          <p className="text-[12px] mb-4" style={{ color: "var(--caution)" }}>{error}</p>
+        )}
         <button
           onClick={generate}
           disabled={loading}
@@ -120,7 +133,10 @@ export function MarketLandscapeClient({ ideaId, initialLandscape }: Props) {
         </ul>
       </section>
 
-      <div className="flex justify-end mt-2">
+      <div className="flex items-center justify-end gap-3 mt-2">
+        {error && (
+          <p className="text-[12px]" style={{ color: "var(--caution)" }}>{error}</p>
+        )}
         <button
           onClick={generate}
           disabled={loading}

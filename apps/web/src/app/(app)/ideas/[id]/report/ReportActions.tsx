@@ -8,6 +8,7 @@ export function ReportActions({ canExport }: { canExport: boolean }) {
         if (canExport) window.print();
       }}
       disabled={!canExport}
+      title={!canExport ? "PDF export requires the Studio plan" : undefined}
       style={!canExport ? { opacity: 0.38, cursor: "not-allowed" } : undefined}
     >
       {canExport ? "Export PDF →" : "Export PDF"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getAuthToken } from "@/lib/auth-client";
 import { diffCompetitors } from "@pledgeoff/core";
 import type { CompetitorAnalysis, SnapshotDiff } from "@pledgeoff/core";
@@ -18,6 +18,15 @@ export function CompetitorsClient({ ideaId, initialAnalysis }: CompetitorsClient
   const [error, setError] = useState<string | null>(null);
   const [changes, setChanges] = useState<SnapshotDiff[] | null>(null);
   const [changesOpen, setChangesOpen] = useState(false);
+
+  useEffect(() => {
+    if (!changesOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setChangesOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [changesOpen]);
 
   async function run(force = false) {
     if (loading) return;

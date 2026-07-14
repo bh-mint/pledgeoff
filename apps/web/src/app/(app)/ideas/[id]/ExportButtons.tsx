@@ -12,17 +12,19 @@ interface Props {
 export function ExportButtons({ ideaId, plan }: Props) {
   const [jsonLoading, setJsonLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function downloadJson() {
     setJsonLoading(true);
+    setError(null);
     try {
       const token = await getAuthToken();
-      if (!token) return;
+      if (!token) { setError("Not authenticated."); return; }
 
       const res = await fetch(`/api/v1/ideas/${ideaId}/export`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) return;
+      if (!res.ok) { setError("Export failed. Try again."); return; }
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -31,6 +33,8 @@ export function ExportButtons({ ideaId, plan }: Props) {
       a.download = `pledgeoff-idea-${ideaId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
+    } catch {
+      setError("Export failed. Try again.");
     } finally {
       setJsonLoading(false);
     }
@@ -38,14 +42,15 @@ export function ExportButtons({ ideaId, plan }: Props) {
 
   async function downloadPdf() {
     setPdfLoading(true);
+    setError(null);
     try {
       const token = await getAuthToken();
-      if (!token) return;
+      if (!token) { setError("Not authenticated."); return; }
 
       const res = await fetch(`/api/v1/ideas/${ideaId}/pdf`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) return;
+      if (!res.ok) { setError("Export failed. Try again."); return; }
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -54,6 +59,8 @@ export function ExportButtons({ ideaId, plan }: Props) {
       a.download = `report-${ideaId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+    } catch {
+      setError("Export failed. Try again.");
     } finally {
       setPdfLoading(false);
     }
@@ -89,6 +96,9 @@ export function ExportButtons({ ideaId, plan }: Props) {
       >
         {jsonLoading ? "Exporting…" : "Export JSON"}
       </button>
+      {error && (
+        <span className="mono text-[10px]" style={{ color: "var(--caution)" }}>{error}</span>
+      )}
     </div>
   );
 }

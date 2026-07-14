@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getAuthToken } from "@/lib/auth-client";
+import { friendlyToolError } from "@/lib/tool-error-messages";
 import type { FeatureAnalysis } from "@pledgeoff/core";
 
 interface Props {
@@ -32,12 +33,12 @@ export function FeaturesClient({ ideaId, initialFeatures, isLocked }: Props) {
       });
       const json = await res.json() as { data?: FeatureAnalysis; error?: { code: string } };
       if (!res.ok || json.error) {
-        setError(json.error?.code ?? "INTERNAL");
+        setError(friendlyToolError(json.error?.code));
       } else if (json.data) {
         setData(json.data);
       }
     } catch {
-      setError("INTERNAL");
+      setError(friendlyToolError(undefined));
     } finally {
       setLoading(false);
     }
@@ -52,7 +53,7 @@ export function FeaturesClient({ ideaId, initialFeatures, isLocked }: Props) {
         <button className="btn-p" onClick={run} disabled={loading}>
           {loading ? "Analyzing…" : "Run Feature Analysis"}
         </button>
-        {error && <p className="feat-err">Error: {error}</p>}
+        {error && <p className="feat-err">{error}</p>}
       </div>
     );
   }
@@ -105,7 +106,7 @@ export function FeaturesClient({ ideaId, initialFeatures, isLocked }: Props) {
       >
         {loading ? "Re-analyzing…" : "Re-run"}
       </button>
-      {error && <p className="feat-err">Error: {error}</p>}
+      {error && <p className="feat-err">{error}</p>}
     </div>
   );
 }
