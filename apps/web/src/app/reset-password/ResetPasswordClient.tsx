@@ -118,7 +118,7 @@ export function ResetPasswordClient() {
             className="finp"
           />
           <span className="mono" style={{ fontSize: "8px", letterSpacing: "0.08em", color: "var(--faint)", marginTop: "5px", display: "block" }}>
-            8+ chars · 1 number · 1 symbol
+            At least 8 characters
           </span>
         </div>
 

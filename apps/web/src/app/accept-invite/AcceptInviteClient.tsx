@@ -97,9 +97,18 @@ export function AcceptInviteClient({ token }: { token: string }) {
         )}
 
         {status === "error" && (
-          <p className="text-[14px]" style={{ color: "var(--kill)" }}>
-            {errorMsg}
-          </p>
+          <>
+            <p className="text-[14px] mb-6" style={{ color: "var(--kill)" }}>
+              {errorMsg}
+            </p>
+            <a
+              href="/dashboard"
+              className="inline-flex items-center h-9 px-5 display text-[13px] font-semibold"
+              style={{ background: "var(--go)", color: "var(--accent-fg)" }}
+            >
+              Go to dashboard →
+            </a>
+          </>
         )}
 
         {(status === "checking" || status === "accepting") && (

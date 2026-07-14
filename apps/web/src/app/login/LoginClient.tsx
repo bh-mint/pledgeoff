@@ -175,7 +175,7 @@ export function LoginClient() {
           <span className="stat-txt">Email sent — check your spam folder if you don&apos;t see it</span>
         </div>
         <div className="auth-foot">
-          <button className="auth-sl" onClick={() => setUiState("idle")}>Resend link</button>
+          <button className="auth-sl" onClick={() => void handleForgotPassword()}>Resend link</button>
           <button className="auth-sl" onClick={() => switchMode("signin")}>Back to sign in</button>
         </div>
       </div>
