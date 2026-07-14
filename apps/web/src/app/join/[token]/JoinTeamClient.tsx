@@ -47,7 +47,7 @@ export function JoinTeamClient({ token, teamName, isLoggedIn }: Props) {
         <div className="mono text-[13px] mb-1" style={{ color: "var(--validated)" }}>
           Joined successfully ✓
         </div>
-        <div className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[11px]" style={{ color: "var(--faint)" }}>
           Redirecting to team settings…
         </div>
       </div>
@@ -67,7 +67,7 @@ export function JoinTeamClient({ token, teamName, isLoggedIn }: Props) {
         <Link
           href={`/login?next=/join/${token}`}
           className="mono text-[11px] transition-opacity hover:opacity-70"
-          style={{ color: "var(--t3)" }}
+          style={{ color: "var(--faint)" }}
         >
           Already have an account? Sign in
         </Link>
