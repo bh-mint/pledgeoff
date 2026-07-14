@@ -59,6 +59,27 @@ export function NotificationsClient({
     string | null
   >(marketingEmailsConsentedAt);
   const [marketingSaving, setMarketingSaving] = useState(false);
+  const [notifError, setNotifError] = useState<string | null>(null);
+
+  async function toggleNotification(key: string) {
+    const next = !notifState[key];
+    setNotifState((prev) => ({ ...prev, [key]: next }));
+    setNotifError(null);
+    try {
+      const res = await fetch("/api/v1/notification-preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ [key]: next }),
+      });
+      if (!res.ok) {
+        setNotifState((prev) => ({ ...prev, [key]: !next }));
+        setNotifError("Couldn't save that change. Try again.");
+      }
+    } catch {
+      setNotifState((prev) => ({ ...prev, [key]: !next }));
+      setNotifError("Couldn't save that change. Try again.");
+    }
+  }
 
   useEffect(() => {
     void (async () => {
@@ -130,15 +151,7 @@ export function NotificationsClient({
           </div>
           <button
             className="tog"
-            onClick={() => {
-              const next = !notifState[item.key];
-              setNotifState((prev) => ({ ...prev, [item.key]: next }));
-              void fetch("/api/v1/notification-preferences", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ [item.key]: next }),
-              });
-            }}
+            onClick={() => void toggleNotification(item.key)}
             role="switch"
             aria-checked={notifState[item.key] ?? false}
             aria-label={item.label}
@@ -150,6 +163,9 @@ export function NotificationsClient({
         </div>
       ))}
 
+      {notifError && (
+        <p className="fine" style={{ marginTop: 12, color: "var(--caution)" }}>{notifError}</p>
+      )}
       <p className="fine" style={{ marginTop: 12 }}>
         GDPR Art. 6(1)(a) for marketing · 6(1)(f) for product notifications.
         Preferences saved instantly.

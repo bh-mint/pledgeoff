@@ -1,6 +1,6 @@
 export default function SettingsLoading() {
   return (
-    <div className="min-h-screen" style={{ background: "var(--canvas)" }}>
+    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
       <div className="max-w-360 mx-auto px-4 sm:px-8 py-8">
         <div className="animate-pulse">
           <div className="grid grid-cols-12 gap-10 mt-6">

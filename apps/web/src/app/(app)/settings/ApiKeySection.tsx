@@ -86,6 +86,7 @@ export function ApiKeySection() {
   }
 
   async function handleRevoke(id: string) {
+    if (!confirm("Revoke this API key? Anything using it will stop working immediately.")) return;
     setRevoking(id);
     const res = await fetch(`/api/v1/api-keys/${id}`, {
       method: "DELETE",

@@ -66,32 +66,32 @@ function SlackSection({ plan }: { plan: string }) {
 
   if (!isTeamPlus) {
     return (
-      <div className="rounded-lg border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)", opacity: 0.65 }}>
+      <div className="rounded-lg border p-6" style={{ background: "var(--surface)", borderColor: "var(--line)", opacity: 0.65 }}>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-sm font-medium" style={{ color: "var(--t1)" }}>Slack Integration</h3>
-            <p className="mt-1 text-sm" style={{ color: "var(--t2)" }}>
+            <h3 className="text-sm font-medium" style={{ color: "var(--ink)" }}>Slack Integration</h3>
+            <p className="mt-1 text-sm" style={{ color: "var(--dim)" }}>
               Get notified in Slack when analysis tools complete.
             </p>
           </div>
-          <span className="mono text-[10px] px-2 py-1 rounded" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid var(--border)", color: "var(--t3)" }}>
+          <span className="mono text-[10px] px-2 py-1 rounded" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid var(--line)", color: "var(--faint)" }}>
             Team+
           </span>
         </div>
-        <p className="mt-3 text-xs" style={{ color: "var(--t3)" }}>Upgrade to Team or higher to connect Slack.</p>
+        <p className="mt-3 text-xs" style={{ color: "var(--faint)" }}>Upgrade to Team or higher to connect Slack.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg border p-6" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+    <div className="rounded-lg border p-6" style={{ background: "var(--surface)", borderColor: "var(--line)" }}>
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="text-sm font-medium" style={{ color: "var(--t1)" }}>
+          <h3 className="text-sm font-medium" style={{ color: "var(--ink)" }}>
             Slack Integration
             {saved && <span className="ml-2 text-[10px] mono" style={{ color: "var(--validated)" }}>● Connected</span>}
           </h3>
-          <p className="mt-1 text-sm" style={{ color: "var(--t2)" }}>
+          <p className="mt-1 text-sm" style={{ color: "var(--dim)" }}>
             Receive a message when Competitor Analysis, Market Landscape, or Battlecard is ready.
           </p>
         </div>
@@ -132,7 +132,7 @@ function SlackSection({ plan }: { plan: string }) {
 
       {saved && (
         <button
-          onClick={() => { setWebhookUrl(""); void handleSave(false); }}
+          onClick={() => { if (confirm("Remove the Slack connection? You'll stop getting alerts until you reconnect.")) { setWebhookUrl(""); void handleSave(false); } }}
           className="mt-3 text-xs"
           style={{ color: "var(--kill)", background: "none", border: "none", padding: 0, cursor: "pointer" }}
         >
@@ -170,11 +170,11 @@ export function IntegrationsClient({ githubParam, loginProvider, plan = "free" }
     <div>
       <h1
         className="display text-[28px] font-semibold tracking-tight mb-1"
-        style={{ color: "var(--t1)" }}
+        style={{ color: "var(--ink)" }}
       >
         Integrations
       </h1>
-      <p className="text-[13px] mb-8" style={{ color: "var(--t2)" }}>
+      <p className="text-[13px] mb-8" style={{ color: "var(--dim)" }}>
         Connect your existing tools so PledgeOFF can give you context-aware decisions — not just generic advice.
       </p>
 

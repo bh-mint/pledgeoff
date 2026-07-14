@@ -60,8 +60,8 @@ export function AuditLogSection({ entries }: { entries: AuditRow[] }) {
     <div>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <div className="display text-[18px] font-semibold" style={{ color: 'var(--t1)' }}>Activity Log</div>
-          <div className="text-[12px] mt-0.5" style={{ color: 'var(--t3)' }}>Last 50 events · your account only</div>
+          <div className="display text-[18px] font-semibold" style={{ color: 'var(--ink)' }}>Activity Log</div>
+          <div className="text-[12px] mt-0.5" style={{ color: 'var(--faint)' }}>Last 50 events · your account only</div>
         </div>
         <span
           className="mono text-[10px] px-2 py-1 rounded"
@@ -74,16 +74,16 @@ export function AuditLogSection({ entries }: { entries: AuditRow[] }) {
       {entries.length === 0 ? (
         <div
           className="rounded-md border p-8 text-center"
-          style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+          style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}
         >
-          <div className="mono text-[11px]" style={{ color: 'var(--t3)' }}>No activity recorded yet.</div>
+          <div className="mono text-[11px]" style={{ color: 'var(--faint)' }}>No activity recorded yet.</div>
         </div>
       ) : (
-        <div className="rounded-md border overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+        <div className="rounded-md border overflow-hidden" style={{ borderColor: 'var(--line)' }}>
           {/* Header */}
           <div
             className="grid grid-cols-12 gap-3 px-4 py-2.5 mono text-[10px] uppercase tracking-[0.12em] border-b"
-            style={{ borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--t3)' }}
+            style={{ borderColor: 'var(--line)', background: 'var(--surface)', color: 'var(--faint)' }}
           >
             <div className="col-span-2">Time</div>
             <div className="col-span-4">Action</div>
@@ -92,30 +92,30 @@ export function AuditLogSection({ entries }: { entries: AuditRow[] }) {
           </div>
 
           {entries.map((entry) => {
-            const color = ACTION_COLORS[entry.action] ?? 'var(--t2)';
+            const color = ACTION_COLORS[entry.action] ?? 'var(--dim)';
             const summary = metaSummary(entry.action, entry.metadata);
             return (
               <div
                 key={entry.id}
                 className="grid grid-cols-12 gap-3 px-4 py-3 border-b items-center"
-                style={{ borderColor: 'var(--border)' }}
+                style={{ borderColor: 'var(--line)' }}
               >
-                <div className="col-span-2 mono text-[10px]" style={{ color: 'var(--t3)' }}>
+                <div className="col-span-2 mono text-[10px]" style={{ color: 'var(--faint)' }}>
                   {formatRelative(entry.created_at)}
                 </div>
                 <div className="col-span-4 flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
-                  <span className="text-[12px]" style={{ color: 'var(--t1)' }}>
+                  <span className="text-[12px]" style={{ color: 'var(--ink)' }}>
                     {ACTION_LABELS[entry.action] ?? entry.action}
                   </span>
                 </div>
-                <div className="col-span-3 mono text-[10px]" style={{ color: 'var(--t2)' }}>
+                <div className="col-span-3 mono text-[10px]" style={{ color: 'var(--dim)' }}>
                   {entry.resource_type}
                   {entry.resource_id && (
-                    <span style={{ color: 'var(--t3)' }}> #{entry.resource_id.slice(0, 8)}</span>
+                    <span style={{ color: 'var(--faint)' }}> #{entry.resource_id.slice(0, 8)}</span>
                   )}
                 </div>
-                <div className="col-span-3 mono text-[10px]" style={{ color: 'var(--t3)' }}>
+                <div className="col-span-3 mono text-[10px]" style={{ color: 'var(--faint)' }}>
                   {summary ?? '—'}
                 </div>
               </div>

@@ -294,7 +294,8 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
     setTimeout(() => setTeamNameState("idle"), 2000);
   };
 
-  const handleRemove = async (membershipId: string) => {
+  const handleRemove = async (membershipId: string, email: string) => {
+    if (!confirm(`Remove ${email} from this team? They'll lose access immediately.`)) return;
     setRemovingId(membershipId);
     const token = await getAuthToken();
     if (!token) { setRemovingId(null); return; }
@@ -429,7 +430,7 @@ export function TeamSection({ plan, subscriptionStatus }: Props) {
                     {(data.callerRole === "owner" || (data.callerRole === "admin" && m.role === "member")) && (
                       <button
                         className="btn-xs d"
-                        onClick={() => handleRemove(m.id)}
+                        onClick={() => handleRemove(m.id, m.invitedEmail)}
                         disabled={removingId === m.id}
                       >
                         {removingId === m.id ? "…" : "Remove"}
