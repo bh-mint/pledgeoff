@@ -91,12 +91,12 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
       return (
         <div
           className="rounded-md border p-8 text-center"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          style={{ borderColor: "var(--line)", background: "var(--surface)" }}
         >
-          <p className="mono text-[11px] animate-pulse mb-2" style={{ color: "var(--t3)" }}>
+          <p className="mono text-[11px] animate-pulse mb-2" style={{ color: "var(--faint)" }}>
             Writing landing page copy…
           </p>
-          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+          <p className="mono text-[10px]" style={{ color: "var(--faint)" }}>
             This may take 15–30 seconds
           </p>
         </div>
@@ -106,12 +106,12 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
     return (
       <div
         className="rounded-md border p-8 text-center"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
       >
-        <div className="mono text-[11px] mb-3" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[11px] mb-3" style={{ color: "var(--faint)" }}>
           Landing page copy not yet generated
         </div>
-        <p className="text-[14px] mb-6" style={{ color: "var(--t2)" }}>
+        <p className="text-[14px] mb-6" style={{ color: "var(--dim)" }}>
           PledgeOFF will write headline, subheadline, 3 features, CTA, and waitlist copy — ready to publish.
         </p>
         {error && (
@@ -152,11 +152,11 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
       {/* Visual preview — always visible */}
       <div
           className="rounded-md border overflow-hidden"
-          style={{ borderColor: "var(--border)" }}
+          style={{ borderColor: "var(--line)" }}
         >
           <div
             className="mono text-[10px] uppercase tracking-[0.12em] px-4 py-2"
-            style={{ color: "var(--t3)", borderBottom: "1px solid var(--border)", background: "var(--surface)" }}
+            style={{ color: "var(--faint)", borderBottom: "1px solid var(--line)", background: "var(--surface)" }}
           >
             Page preview
           </div>
@@ -197,26 +197,26 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
         </div>
 
       {/* Copy breakdown (collapsible) */}
-      <div className="rounded-md border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+      <div className="rounded-md border overflow-hidden" style={{ borderColor: "var(--line)" }}>
         <button
           onClick={() => setShowBreakdown((v) => !v)}
           className="w-full flex items-center justify-between px-5 py-3 transition-colors hover:bg-white/5"
           style={{ background: "var(--surface)" }}
         >
-          <span className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+          <span className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--faint)" }}>
             Copy breakdown
           </span>
-          <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+          <span className="mono text-[10px]" style={{ color: "var(--faint)" }}>
             {showBreakdown ? "↑ hide" : "↓ show"}
           </span>
         </button>
 
         {showBreakdown && (
-          <div className="divide-y" style={{ borderColor: "var(--border)" }}>
+          <div className="divide-y" style={{ borderColor: "var(--line)" }}>
             {sections.map(({ key, label, value }) => (
-              <div key={key} className="px-5 py-4" style={{ background: "var(--canvas)" }}>
+              <div key={key} className="px-5 py-4" style={{ background: "var(--bg)" }}>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+                  <div className="mono text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--faint)" }}>
                     {label}
                   </div>
                   <button
@@ -226,8 +226,8 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
                     }}
                     className="mono text-[10px] px-2 py-1 rounded transition-colors"
                     style={{
-                      color: copied === key ? "var(--validated)" : "var(--t3)",
-                      border: "1px solid var(--border)",
+                      color: copied === key ? "var(--validated)" : "var(--faint)",
+                      border: "1px solid var(--line)",
                     }}
                   >
                     {copied === key ? "Copied!" : "Copy"}
@@ -239,7 +239,7 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
                     {value.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="mono text-[10px] mt-1 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
-                        <span className="text-[14px] leading-snug" style={{ color: "var(--t1)" }}>{feature}</span>
+                        <span className="text-[14px] leading-snug" style={{ color: "var(--ink)" }}>{feature}</span>
                       </li>
                     ))}
                   </ul>
@@ -247,7 +247,7 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
                   <p
                     className={key === "headline" ? "display font-bold leading-tight" : "text-[14px] leading-relaxed"}
                     style={{
-                      color: "var(--t1)",
+                      color: "var(--ink)",
                       fontSize: key === "headline" ? "20px" : undefined,
                       letterSpacing: key === "headline" ? "-0.02em" : undefined,
                     }}
@@ -266,14 +266,14 @@ export function LandingClient({ ideaId, initialLanding }: Props) {
           <p className="mono text-[11px] text-right" style={{ color: "var(--caution)" }}>{error}</p>
         )}
         <div className="flex items-center justify-between">
-          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+          <p className="mono text-[10px]" style={{ color: "var(--faint)" }}>
             Generated {new Date(landing.createdAt).toLocaleDateString()} · AI-written, human-reviewed
           </p>
           <button
             onClick={generate}
             disabled={loading}
             className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
-            style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
+            style={{ border: "1px solid var(--line)", color: "var(--dim)" }}
           >
             {loading ? "Regenerating…" : "Regenerate"}
           </button>

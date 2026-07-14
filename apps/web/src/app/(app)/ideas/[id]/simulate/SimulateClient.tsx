@@ -25,7 +25,7 @@ const SCENARIO_LABELS: Record<string, string> = {
 };
 
 const SCENARIO_COLORS: Record<string, string> = {
-  conservative: "var(--t3)",
+  conservative: "var(--faint)",
   moderate: "var(--accent)",
   optimistic: "var(--validated)",
 };
@@ -64,12 +64,12 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
       return (
         <div
           className="rounded-md border p-8 text-center"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          style={{ borderColor: "var(--line)", background: "var(--surface)" }}
         >
-          <p className="mono text-[11px] animate-pulse mb-2" style={{ color: "var(--t3)" }}>
+          <p className="mono text-[11px] animate-pulse mb-2" style={{ color: "var(--faint)" }}>
             Running revenue simulation…
           </p>
-          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+          <p className="mono text-[10px]" style={{ color: "var(--faint)" }}>
             This may take 15–30 seconds
           </p>
         </div>
@@ -79,12 +79,12 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
     return (
       <div
         className="rounded-md border p-8 text-center"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
       >
-        <div className="mono text-[11px] mb-3" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[11px] mb-3" style={{ color: "var(--faint)" }}>
           Revenue simulation not yet generated
         </div>
-        <p className="text-[14px] mb-6" style={{ color: "var(--t2)" }}>
+        <p className="text-[14px] mb-6" style={{ color: "var(--dim)" }}>
           PledgeOFF will estimate your TAM, model 3 revenue scenarios, and calculate break-even.
         </p>
         {error && (
@@ -106,24 +106,24 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
       {/* TAM */}
       <div
         className="rounded-md border p-6"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
       >
-        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--faint)" }}>
           Total Addressable Market
         </div>
         <div className="flex items-end gap-3">
-          <span className="display text-4xl font-bold" style={{ color: "var(--t1)", letterSpacing: "-0.03em" }}>
+          <span className="display text-4xl font-bold" style={{ color: "var(--ink)", letterSpacing: "-0.03em" }}>
             {formatCurrency(simulation.tamLow)}
           </span>
-          <span className="mono text-[14px] pb-2" style={{ color: "var(--t3)" }}>–</span>
+          <span className="mono text-[14px] pb-2" style={{ color: "var(--faint)" }}>–</span>
           <span className="display text-4xl font-bold" style={{ color: "var(--accent)", letterSpacing: "-0.03em" }}>
             {formatCurrency(simulation.tamHigh)}
           </span>
         </div>
-        <p className="mono text-[11px] mt-2" style={{ color: "var(--t3)" }}>
+        <p className="mono text-[11px] mt-2" style={{ color: "var(--faint)" }}>
           Estimated serviceable market for this category
         </p>
-        <p className="mono text-[10px] mt-1" style={{ color: "var(--t3)" }}>
+        <p className="mono text-[10px] mt-1" style={{ color: "var(--faint)" }}>
           Market size estimated from live market signals — not verified research.
           For verified TAM/SAM/SOM, see the{" "}
           <a href="/pricing" style={{ textDecoration: "underline" }}>Market Data Pack</a>.
@@ -133,9 +133,9 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
       {/* Revenue projection chart */}
       <div
         className="rounded-md border p-5 no-print"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
       >
-        <div className="mono text-[10px] mb-3 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-3 uppercase tracking-[0.12em]" style={{ color: "var(--faint)" }}>
           Revenue Projection · 3 scenarios · 24 months
         </div>
         <RevenueAreaChart simulation={simulation} />
@@ -143,7 +143,7 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
 
       {/* Scenarios */}
       <div>
-        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+        <div className="mono text-[10px] mb-4 uppercase tracking-[0.12em]" style={{ color: "var(--faint)" }}>
           Revenue Scenarios{" "}
           <span className="sm:hidden">(Monthly Recurring Revenue)</span>
           <InfoTooltip content="Monthly Recurring Revenue — total subscription income earned per month" align="center">
@@ -155,16 +155,16 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
             <div
               key={scenario.name}
               className="rounded-md border p-5"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              style={{ borderColor: "var(--line)", background: "var(--surface)" }}
             >
               <div
                 className="mono text-[10px] uppercase tracking-widest mb-4 font-semibold"
-                style={{ color: SCENARIO_COLORS[scenario.name] ?? "var(--t3)" }}
+                style={{ color: SCENARIO_COLORS[scenario.name] ?? "var(--faint)" }}
               >
                 {SCENARIO_LABELS[scenario.name] ?? scenario.name}
               </div>
-              <div className="mono text-[11px] mb-1" style={{ color: "var(--t3)" }}>Price / user</div>
-              <div className="display text-[18px] font-semibold mb-4" style={{ color: "var(--t1)" }}>
+              <div className="mono text-[11px] mb-1" style={{ color: "var(--faint)" }}>Price / user</div>
+              <div className="display text-[18px] font-semibold mb-4" style={{ color: "var(--ink)" }}>
                 ${scenario.pricePerUser}/mo
               </div>
               <div className="space-y-2">
@@ -174,8 +174,8 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
                   { label: "24 months", value: scenario.mrr24 },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex items-center justify-between">
-                    <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>{label}</span>
-                    <span className="mono text-[12px] font-semibold" style={{ color: "var(--t1)" }}>
+                    <span className="mono text-[10px]" style={{ color: "var(--faint)" }}>{label}</span>
+                    <span className="mono text-[12px] font-semibold" style={{ color: "var(--ink)" }}>
                       {formatCurrency(value)}/mo
                     </span>
                   </div>
@@ -189,33 +189,33 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
       {/* Break-even */}
       <div
         className="rounded-md border p-5 flex items-center justify-between"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
       >
         <div>
-          <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[10px] uppercase tracking-[0.12em] mb-1" style={{ color: "var(--faint)" }}>
             Break-even estimate
           </div>
-          <p className="text-[13px]" style={{ color: "var(--t2)" }}>
+          <p className="text-[13px]" style={{ color: "var(--dim)" }}>
             Months until MRR covers base operating costs (~$2-5K/mo)
           </p>
         </div>
-        <div className="display font-bold text-right ml-6 shrink-0" style={{ fontSize: "32px", color: "var(--t1)", letterSpacing: "-0.03em" }}>
+        <div className="display font-bold text-right ml-6 shrink-0" style={{ fontSize: "32px", color: "var(--ink)", letterSpacing: "-0.03em" }}>
           {simulation.breakEvenMonths}
-          <span className="mono text-[12px] font-normal ml-1" style={{ color: "var(--t3)" }}>mo</span>
+          <span className="mono text-[12px] font-normal ml-1" style={{ color: "var(--faint)" }}>mo</span>
         </div>
       </div>
 
       {/* Assumptions */}
       {simulation.assumptions.length > 0 && (
         <div>
-          <div className="mono text-[10px] mb-3 uppercase tracking-[0.12em]" style={{ color: "var(--t3)" }}>
+          <div className="mono text-[10px] mb-3 uppercase tracking-[0.12em]" style={{ color: "var(--faint)" }}>
             Key assumptions
           </div>
           <ul className="space-y-1.5">
             {simulation.assumptions.map((a, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="mono text-[10px] mt-0.5" style={{ color: "var(--t3)" }}>—</span>
-                <span className="text-[13px]" style={{ color: "var(--t2)" }}>{a}</span>
+                <span className="mono text-[10px] mt-0.5" style={{ color: "var(--faint)" }}>—</span>
+                <span className="text-[13px]" style={{ color: "var(--dim)" }}>{a}</span>
               </li>
             ))}
           </ul>
@@ -227,14 +227,14 @@ export function SimulateClient({ ideaId, initialSimulation }: Props) {
           <p className="mono text-[11px] text-right" style={{ color: "var(--caution)" }}>{error}</p>
         )}
         <div className="flex items-center justify-between">
-          <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+          <p className="mono text-[10px]" style={{ color: "var(--faint)" }}>
             Simulation generated {new Date(simulation.createdAt).toLocaleDateString()} · Not financial advice
           </p>
           <button
             onClick={runSimulation}
             disabled={loading}
             className="mono text-[10px] px-3 py-1.5 rounded transition-opacity hover:opacity-80 disabled:opacity-50"
-            style={{ border: "1px solid var(--border)", color: "var(--t2)" }}
+            style={{ border: "1px solid var(--line)", color: "var(--dim)" }}
           >
             {loading ? "Simulating…" : "Re-run"}
           </button>

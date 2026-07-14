@@ -18,7 +18,7 @@ const RELEASES = [
     items: [
       "Dashboard: animated score count-up, today's highlight, keyboard shortcuts (N → new idea, / → search), weekly digest opt-in banner",
       "Ideas page: re-validate button with score diff display (Score: 79 → 82 +3), tool group filter pills (All / Analysis / Execution / Intelligence), share verdict clipboard button",
-      "Ideas new: 3 clickable example ideas, upgrade CTA when validations exhausted, dynamic loading overlay with 6 rotating messages",
+      "Ideas new: upgrade CTA when validations exhausted, live analysis screen streaming real pipeline progress",
       "Blog: search, article count on filter pills, mid-article CTA at 60% scroll, TOC accordion on mobile, highlight-to-tweet, per-article OG image",
       "Settings: usage stats strip, notification preferences (5 email toggles), GDPR data export as JSON attachment",
       "Homepage: ROI calculator on pricing page, 'Who this is for' profiles, 'Last validated X ago' live badge, animated floating signal cards",

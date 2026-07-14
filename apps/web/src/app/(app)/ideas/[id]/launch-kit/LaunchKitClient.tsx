@@ -24,7 +24,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
     <button
       onClick={handleCopy}
       className="mono text-[10px] px-2 py-1 rounded border transition-colors hover:border-(--t2)"
-      style={{ borderColor: "var(--border)", color: copied ? "var(--validated)" : "var(--t3)" }}
+      style={{ borderColor: "var(--line)", color: copied ? "var(--validated)" : "var(--faint)" }}
     >
       {copied ? "Copied ✓" : label}
     </button>
@@ -66,19 +66,19 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
     return (
       <div
         className="rounded border px-4 py-8 text-center"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
       >
-        <p className="text-[13px] mb-1" style={{ color: "var(--t1)" }}>
+        <p className="text-[13px] mb-1" style={{ color: "var(--ink)" }}>
           Generate your launch kit
         </p>
-        <p className="mono text-[10px] mb-5" style={{ color: "var(--t3)" }}>
+        <p className="mono text-[10px] mb-5" style={{ color: "var(--faint)" }}>
           3 headline A/B variants · 3-email waitlist sequence · pricing recommendation
         </p>
         <button
           onClick={generate}
           disabled={loading}
           className="mono text-[11px] px-4 py-2 rounded border transition-colors hover:border-(--t2) disabled:opacity-50"
-          style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+          style={{ borderColor: "var(--line)", color: "var(--dim)" }}
         >
           {loading ? "Generating…" : "Generate GTM Brief →"}
         </button>
@@ -96,7 +96,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
   return (
     <div>
       {/* Tab bar */}
-      <div className="flex items-center gap-0 mb-5 border-b" style={{ borderColor: "var(--border)" }}>
+      <div className="flex items-center gap-0 mb-5 border-b" style={{ borderColor: "var(--line)" }}>
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -104,7 +104,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
             className="mono text-[10px] uppercase tracking-[0.08em] px-4 py-2.5 border-b-2 transition-colors"
             style={{
               borderBottomColor: tab === t.key ? "var(--accent)" : "transparent",
-              color: tab === t.key ? "var(--t1)" : "var(--t3)",
+              color: tab === t.key ? "var(--ink)" : "var(--faint)",
             }}
           >
             {t.label}
@@ -119,7 +119,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
             <div
               key={h.variant}
               className="rounded border p-4"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              style={{ borderColor: "var(--line)", background: "var(--surface)" }}
             >
               <div className="flex items-start justify-between gap-3 mb-2">
                 <span
@@ -130,10 +130,10 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
                 </span>
                 <CopyButton text={h.headline} label="Copy" />
               </div>
-              <p className="text-[15px] font-semibold leading-snug mb-2" style={{ color: "var(--t1)" }}>
+              <p className="text-[15px] font-semibold leading-snug mb-2" style={{ color: "var(--ink)" }}>
                 {h.headline}
               </p>
-              <p className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+              <p className="mono text-[10px]" style={{ color: "var(--faint)" }}>
                 Angle: {h.angle}
               </p>
             </div>
@@ -146,7 +146,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
                 "text/csv",
               )}
               className="mono text-[10px] px-3 py-1.5 rounded border transition-colors hover:border-(--t2)"
-              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+              style={{ borderColor: "var(--line)", color: "var(--faint)" }}
             >
               Download CSV →
             </button>
@@ -163,7 +163,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
               <div
                 key={email.sequence}
                 className="rounded border p-4"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                style={{ borderColor: "var(--line)", background: "var(--surface)" }}
               >
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2">
@@ -173,16 +173,16 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
                     >
                       #{email.sequence} {LABELS[email.sequence] ?? ""}
                     </span>
-                    <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+                    <span className="mono text-[10px]" style={{ color: "var(--faint)" }}>
                       Send: {email.sendAt}
                     </span>
                   </div>
                   <CopyButton text={`Subject: ${email.subject}\n\n${email.body}`} label="Copy email" />
                 </div>
-                <p className="text-[12px] font-semibold mb-2" style={{ color: "var(--t2)" }}>
+                <p className="text-[12px] font-semibold mb-2" style={{ color: "var(--dim)" }}>
                   Subject: {email.subject}
                 </p>
-                <p className="text-[13px] leading-relaxed whitespace-pre-wrap" style={{ color: "var(--t2)" }}>
+                <p className="text-[13px] leading-relaxed whitespace-pre-wrap" style={{ color: "var(--dim)" }}>
                   {email.body}
                 </p>
               </div>
@@ -196,7 +196,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
                 "text/plain",
               )}
               className="mono text-[10px] px-3 py-1.5 rounded border transition-colors hover:border-(--t2)"
-              style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+              style={{ borderColor: "var(--line)", color: "var(--faint)" }}
             >
               Download TXT →
             </button>
@@ -208,22 +208,22 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
       {tab === "pricing" && (
         <div
           className="rounded border p-5"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          style={{ borderColor: "var(--line)", background: "var(--surface)" }}
         >
           <div className="flex items-baseline gap-3 mb-4">
-            <span className="text-[32px] font-bold" style={{ color: "var(--t1)" }}>
+            <span className="text-[32px] font-bold" style={{ color: "var(--ink)" }}>
               ${kit.pricingRecommendation.priceMonthly}
             </span>
-            <span className="mono text-[11px]" style={{ color: "var(--t3)" }}>
+            <span className="mono text-[11px]" style={{ color: "var(--faint)" }}>
               {kit.pricingRecommendation.currency}/mo · {kit.pricingRecommendation.tier}
             </span>
           </div>
 
           <div className="mb-4">
-            <p className="mono text-[10px] uppercase tracking-[0.08em] mb-1.5" style={{ color: "var(--t3)" }}>
+            <p className="mono text-[10px] uppercase tracking-[0.08em] mb-1.5" style={{ color: "var(--faint)" }}>
               Rationale
             </p>
-            <p className="text-[13px] leading-relaxed" style={{ color: "var(--t2)" }}>
+            <p className="text-[13px] leading-relaxed" style={{ color: "var(--dim)" }}>
               {kit.pricingRecommendation.rationale}
             </p>
           </div>
@@ -235,7 +235,7 @@ export function LaunchKitClient({ ideaId, initialKit }: Props) {
             <p className="mono text-[10px] uppercase tracking-[0.08em] mb-1" style={{ color: "var(--accent)" }}>
               Anchoring
             </p>
-            <p className="text-[13px] leading-relaxed" style={{ color: "var(--t2)" }}>
+            <p className="text-[13px] leading-relaxed" style={{ color: "var(--dim)" }}>
               {kit.pricingRecommendation.anchoring}
             </p>
           </div>

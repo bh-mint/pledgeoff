@@ -25,7 +25,7 @@ function DeltaBadge({ entry }: { entry: DecisionTimelineEntry }) {
     return (
       <span
         className="mono text-[9px] px-1.5 py-0.5 rounded border"
-        style={{ borderColor: "var(--border)", color: "var(--t3)" }}
+        style={{ borderColor: "var(--line)", color: "var(--faint)" }}
       >
         {delta.previousVerdict} → {entry.decision.verdict}
       </span>
@@ -48,7 +48,7 @@ function DeltaBadge({ entry }: { entry: DecisionTimelineEntry }) {
   }
 
   return (
-    <span className="mono text-[9px]" style={{ color: "var(--t3)" }}>
+    <span className="mono text-[9px]" style={{ color: "var(--faint)" }}>
       no change
     </span>
   );
@@ -102,9 +102,9 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
     return (
       <div className="space-y-3">
         {[1, 2].map((i) => (
-          <div key={i} className="rounded border p-4 animate-pulse" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-            <div className="h-3 w-16 rounded mb-2" style={{ background: "var(--border)" }} />
-            <div className="h-2 w-full rounded" style={{ background: "var(--border)" }} />
+          <div key={i} className="rounded border p-4 animate-pulse" style={{ borderColor: "var(--line)", background: "var(--surface)" }}>
+            <div className="h-3 w-16 rounded mb-2" style={{ background: "var(--line)" }} />
+            <div className="h-2 w-full rounded" style={{ background: "var(--line)" }} />
           </div>
         ))}
       </div>
@@ -115,12 +115,12 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
     return (
       <div
         className="rounded border px-4 py-6 text-center"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        style={{ borderColor: "var(--line)", background: "var(--surface)" }}
       >
-        <p className="mono text-[10px] uppercase tracking-[0.1em] mb-1" style={{ color: "var(--t3)" }}>
+        <p className="mono text-[10px] uppercase tracking-[0.1em] mb-1" style={{ color: "var(--faint)" }}>
           No history yet
         </p>
-        <p className="text-[13px]" style={{ color: "var(--t2)" }}>
+        <p className="text-[13px]" style={{ color: "var(--dim)" }}>
           Each time you validate this idea, a new decision entry appears here.
         </p>
       </div>
@@ -133,7 +133,7 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
     <div>
       {/* Header row */}
       <div className="flex items-center justify-between mb-5">
-        <p className="mono text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--t3)" }}>
+        <p className="mono text-[10px] uppercase tracking-[0.1em]" style={{ color: "var(--faint)" }}>
           {timeline.entries.length} decision{timeline.entries.length !== 1 ? "s" : ""} recorded
         </p>
         {canExportPdf ? (
@@ -141,12 +141,12 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
             onClick={handleExportPdf}
             disabled={exportLoading}
             className="mono text-[10px] px-3 py-1.5 rounded border transition-colors hover:border-(--t2) disabled:opacity-50"
-            style={{ borderColor: "var(--border)", color: "var(--t2)" }}
+            style={{ borderColor: "var(--line)", color: "var(--dim)" }}
           >
             {exportLoading ? "Generating…" : "Export PDF →"}
           </button>
         ) : (
-          <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+          <span className="mono text-[10px]" style={{ color: "var(--faint)" }}>
             PDF export · Studio plan
           </span>
         )}
@@ -163,7 +163,7 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
               key={entry.decision.id}
               className="rounded border p-4"
               style={{
-                borderColor: isLatest ? "color-mix(in srgb, var(--accent) 30%, transparent)" : "var(--border)",
+                borderColor: isLatest ? "color-mix(in srgb, var(--accent) 30%, transparent)" : "var(--line)",
                 background: "var(--surface)",
               }}
             >
@@ -176,11 +176,11 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
                   {entry.decision.verdict}
                 </span>
                 {entry.decision.score != null && (
-                  <span className="mono text-[10px] font-bold" style={{ color: "var(--t1)" }}>
+                  <span className="mono text-[10px] font-bold" style={{ color: "var(--ink)" }}>
                     {entry.decision.score}/100
                   </span>
                 )}
-                <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+                <span className="mono text-[10px]" style={{ color: "var(--faint)" }}>
                   {Math.round(entry.decision.confidence * 100)}% confidence
                 </span>
                 <DeltaBadge entry={entry} />
@@ -195,7 +195,7 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
               </div>
 
               {/* Date */}
-              <p className="mono text-[9px] mb-3" style={{ color: "var(--t3)" }}>
+              <p className="mono text-[9px] mb-3" style={{ color: "var(--faint)" }}>
                 {new Date(entry.decision.createdAt).toLocaleDateString("en-GB", {
                   day: "2-digit", month: "short", year: "numeric",
                   hour: "2-digit", minute: "2-digit",
@@ -204,7 +204,7 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
               </p>
 
               {/* Reasoning */}
-              <p className="text-[13px] leading-relaxed" style={{ color: "var(--t2)" }}>
+              <p className="text-[13px] leading-relaxed" style={{ color: "var(--dim)" }}>
                 {entry.decision.reasoning.length > 280
                   ? entry.decision.reasoning.slice(0, 280) + "…"
                   : entry.decision.reasoning}
@@ -212,8 +212,8 @@ export function AuditTrailClient({ ideaId, plan }: Props) {
 
               {/* Feedback */}
               {(entry.feedbackCounts.thumbsUp > 0 || entry.feedbackCounts.thumbsDown > 0) && (
-                <div className="flex items-center gap-3 mt-3 pt-3 border-t" style={{ borderColor: "var(--border)" }}>
-                  <span className="mono text-[10px]" style={{ color: "var(--t3)" }}>
+                <div className="flex items-center gap-3 mt-3 pt-3 border-t" style={{ borderColor: "var(--line)" }}>
+                  <span className="mono text-[10px]" style={{ color: "var(--faint)" }}>
                     Feedback:
                   </span>
                   {entry.feedbackCounts.thumbsUp > 0 && (
