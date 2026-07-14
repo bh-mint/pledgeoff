@@ -203,6 +203,11 @@ export function BillingClient({
   };
 
   const handleUpdateSeats = async () => {
+    if (seatExtra > initialExtraSeats) {
+      const added = seatExtra - initialExtraSeats;
+      const cost = added * PRICING.seats.extraEurPerMonth;
+      if (!confirm(`Add ${added} seat${added === 1 ? "" : "s"} for €${cost}/month, pro-rated on your next invoice?`)) return;
+    }
     setSeatState("loading");
     const token = await getAuthToken();
     const res = await fetch("/api/v1/billing/seats", {
@@ -708,7 +713,7 @@ export function BillingClient({
                     value={seatExtra}
                     onChange={(e) => setSeatExtra(Math.max(0, Math.min(97, parseInt(e.target.value) || 0)))}
                     min={0}
-                    max={50}
+                    max={97}
                   />
                 </div>
                 <button

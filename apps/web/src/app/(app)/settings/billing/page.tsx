@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth-server";
 import { getUserPlan } from "@/server/billing/getUserPlan";
 import { container } from "@/lib/container";
 import { effectivePlan } from "@pledgeoff/core";
+import { PRICING } from "@/lib/pricing.config";
 import { BillingClient } from "./BillingClient";
 
 export const dynamic = "force-dynamic";
@@ -47,28 +48,28 @@ export default async function BillingPage() {
   const availablePlans = [
     {
       id: "founder" as const,
-      label: "Founder",
-      monthlyEur: 49,
-      annualEquivalentEur: 39,
-      annualTotalEur: 468,
+      label: PRICING.founder.label,
+      monthlyEur: PRICING.founder.monthly.eur,
+      annualEquivalentEur: PRICING.founder.monthly.annual_equivalent,
+      annualTotalEur: PRICING.founder.monthly.annual_total,
       monthlyPriceId: process.env.STRIPE_FOUNDER_MONTHLY_PRICE_ID ?? "",
       annualPriceId: process.env.STRIPE_FOUNDER_ANNUAL_PRICE_ID ?? "",
     },
     {
       id: "team" as const,
-      label: "Team",
-      monthlyEur: 99,
-      annualEquivalentEur: 79,
-      annualTotalEur: 948,
+      label: PRICING.team.label,
+      monthlyEur: PRICING.team.monthly.eur,
+      annualEquivalentEur: PRICING.team.monthly.annual_equivalent,
+      annualTotalEur: PRICING.team.monthly.annual_total,
       monthlyPriceId: process.env.STRIPE_TEAM_MONTHLY_PRICE_ID ?? "",
       annualPriceId: process.env.STRIPE_TEAM_ANNUAL_PRICE_ID ?? "",
     },
     {
       id: "studio" as const,
-      label: "Studio",
-      monthlyEur: 349,
-      annualEquivalentEur: 279,
-      annualTotalEur: 3348,
+      label: PRICING.studio.label,
+      monthlyEur: PRICING.studio.monthly.eur,
+      annualEquivalentEur: PRICING.studio.monthly.annual_equivalent,
+      annualTotalEur: PRICING.studio.monthly.annual_total,
       monthlyPriceId: process.env.STRIPE_STUDIO_MONTHLY_PRICE_ID ?? "",
       annualPriceId: process.env.STRIPE_STUDIO_ANNUAL_PRICE_ID ?? "",
     },
