@@ -58,8 +58,11 @@ function gaugePoint(value: number, r: number): { x: number; y: number } {
 function gaugeArcPath(fromValue: number, toValue: number, r: number): string {
   const from = gaugePoint(fromValue, r);
   const to = gaugePoint(toValue, r);
-  const largeArc = toValue - fromValue > 50 ? 1 : 0;
-  return `M ${from.x} ${from.y} A ${r} ${r} 0 ${largeArc} 1 ${to.x} ${to.y}`;
+  // Both points sit on the same upper semicircle (theta in [0,180]), so the
+  // sweep between them never exceeds 180° — the large-arc flag must stay 0,
+  // otherwise SVG draws the arc through the lower half-circle, which falls
+  // outside the viewBox and renders as a disconnected, clipped stub.
+  return `M ${from.x} ${from.y} A ${r} ${r} 0 0 1 ${to.x} ${to.y}`;
 }
 
 function DimensionGauge({ name, score, index }: { name: string; score: number; index: number }): ReactNode {
