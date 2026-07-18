@@ -17,7 +17,7 @@ export default async function ProfilePage() {
   const [profileResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("first_name, last_name, username, company_name, avatar_url, marketing_emails_consent, marketing_emails_consented_at")
+      .select("first_name, last_name, username, company_name, avatar_url, marketing_emails_consent, marketing_emails_consented_at, is_profile_public")
       .eq("id", user.id)
       .single(),
   ]);
@@ -30,6 +30,7 @@ export default async function ProfilePage() {
     avatar_url?: string | null;
     marketing_emails_consent?: boolean | null;
     marketing_emails_consented_at?: string | null;
+    is_profile_public?: boolean | null;
   } | null;
 
   return (
@@ -46,6 +47,7 @@ export default async function ProfilePage() {
       avatarUrl={profile?.avatar_url ?? null}
       marketingEmailsConsent={profile?.marketing_emails_consent ?? false}
       marketingEmailsConsentedAt={profile?.marketing_emails_consented_at ?? null}
+      isProfilePublic={profile?.is_profile_public ?? true}
     />
   );
 }

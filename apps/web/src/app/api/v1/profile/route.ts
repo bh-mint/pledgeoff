@@ -15,6 +15,7 @@ export async function PATCH(req: NextRequest) {
   const companyName = typeof body.company_name === "string" ? body.company_name.trim() : undefined;
   const role = typeof body.role === "string" ? body.role : undefined;
   const marketingEmailsConsent = typeof body.marketing_emails_consent === "boolean" ? body.marketing_emails_consent : undefined;
+  const isProfilePublic = typeof body.is_profile_public === "boolean" ? body.is_profile_public : undefined;
 
   if (hasFirstName && !firstName) {
     return NextResponse.json({ error: "first_name is required" }, { status: 400 });
@@ -44,6 +45,7 @@ export async function PATCH(req: NextRequest) {
     updatePayload.marketing_emails_consent = marketingEmailsConsent;
     updatePayload.marketing_emails_consented_at = marketingEmailsConsent ? now : null;
   }
+  if (isProfilePublic !== undefined) updatePayload.is_profile_public = isProfilePublic;
 
   if (Object.keys(updatePayload).length === 1) {
     return NextResponse.json({ ok: true });

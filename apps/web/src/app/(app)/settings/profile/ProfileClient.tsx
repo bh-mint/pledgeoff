@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { NotificationsClient } from "../notifications/NotificationsClient";
+import { getAuthToken } from "@/lib/auth-client";
 
 type Props = {
   email: string;
@@ -14,6 +15,7 @@ type Props = {
   avatarUrl: string | null;
   marketingEmailsConsent: boolean;
   marketingEmailsConsentedAt: string | null;
+  isProfilePublic: boolean;
 };
 
 export function ProfileClient({
@@ -26,6 +28,7 @@ export function ProfileClient({
   avatarUrl,
   marketingEmailsConsent,
   marketingEmailsConsentedAt,
+  isProfilePublic,
 }: Props) {
   const [first, setFirst] = useState(firstName ?? "");
   const [last, setLast] = useState(lastName ?? "");
@@ -34,6 +37,27 @@ export function ProfileClient({
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(avatarUrl);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [profilePublic, setProfilePublic] = useState(isProfilePublic);
+  const [profilePublicSaving, setProfilePublicSaving] = useState(false);
+
+  const handleProfilePublicToggle = async () => {
+    const next = !profilePublic;
+    setProfilePublic(next);
+    setProfilePublicSaving(true);
+    try {
+      const token = await getAuthToken();
+      await fetch("/api/v1/profile", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ is_profile_public: next }),
+      });
+    } finally {
+      setProfilePublicSaving(false);
+    }
+  };
 
   const fullName = [first, last].filter(Boolean).join(" ") || null;
   const initials = (fullName ?? email)
@@ -147,8 +171,30 @@ export function ProfileClient({
             </div>
             <p className="fine" style={{ marginTop: 4 }}>3–30 chars · letters, numbers, _ or -</p>
             <p className="fine" style={{ marginTop: 2, color: "var(--caution)" }}>
-              Setting a username makes your idea history — including verdicts — visible to anyone at pledgeoff.com/@{uname || "your-handle"}.
+              A username creates a public page at pledgeoff.com/@{uname || "your-handle"} showing your idea history, including verdicts — control it below.
             </p>
+          </div>
+
+          {/* Public profile visibility */}
+          <div className="nrow" style={{ marginTop: 4 }}>
+            <div>
+              <div className="nrow-ttl">Public profile</div>
+              <div className="nrow-desc">
+                When on, anyone with your link can see your idea history and verdicts at pledgeoff.com/@{uname || "your-handle"}. When off, that page returns not-found.
+              </div>
+            </div>
+            <button
+              className="tog"
+              onClick={() => { void handleProfilePublicToggle(); }}
+              disabled={profilePublicSaving}
+              role="switch"
+              aria-checked={profilePublic}
+              aria-label="Public profile"
+            >
+              <div className={`tog-t${profilePublic ? " on" : ""}`}>
+                <div className="tog-th" />
+              </div>
+            </button>
           </div>
 
           {/* Company */}

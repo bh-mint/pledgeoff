@@ -27,11 +27,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createSupabaseServiceClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, first_name, last_name")
+    .select("username, first_name, last_name, is_profile_public")
     .eq("username", username.toLowerCase())
     .single();
 
-  if (!profile) return { title: "Profile — PledgeOFF", robots: { index: false } };
+  if (!profile || !profile.is_profile_public) {
+    return { title: "Profile — PledgeOFF", robots: { index: false } };
+  }
 
   const displayName = [profile.first_name, profile.last_name].filter(Boolean).join(" ") || `@${username}`;
   const title = `${displayName} (@${username}) — PledgeOFF`;
@@ -56,11 +58,11 @@ export default async function PublicProfilePage({ params }: Props) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, username, first_name, last_name, avatar_url, created_at")
+    .select("id, username, first_name, last_name, avatar_url, created_at, is_profile_public")
     .eq("username", username.toLowerCase())
     .single();
 
-  if (!profile) notFound();
+  if (!profile || !profile.is_profile_public) notFound();
 
   const { data: rows } = await supabase
     .from("ideas")
