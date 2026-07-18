@@ -24,7 +24,7 @@ const STEPS = [
   {
     num: "02",
     title: "We fetch real signals",
-    desc: "Reddit threads, Hacker News, GitHub repos, and Dev.to discussions — scraped in real time for your idea.",
+    desc: "Reddit threads and GitHub repos — scraped in real time for your idea. Paid plans add Hacker News, Dev.to, reviews, news, and job postings.",
     tag: "scraping",
   },
   {

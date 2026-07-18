@@ -241,7 +241,7 @@ export default async function DashboardPage() {
           </h1>
           <p className="db-empty-sub">
             Write your idea. Wait 15 seconds. Receive a GO / KILL / PIVOT verdict
-            backed by real signals from Hacker News, GitHub, and the wider web —
+            backed by real signals from {isPaidPlan ? "Reddit, GitHub, Hacker News, Dev.to, and the wider web" : "Reddit and GitHub"} —
             with the reasoning to trust it.
           </p>
           <Link className="db-empty-cta" href="/ideas/new">
@@ -282,7 +282,9 @@ export default async function DashboardPage() {
             {
               n: "Step 02 · Wait 15 s",
               title: "Real signals are fetched",
-              desc: "The system scans Hacker News, GitHub, Dev.to, and the web for evidence. You watch it happen.",
+              desc: isPaidPlan
+                ? "The system scans Reddit, GitHub, Hacker News, Dev.to, and the web for evidence. You watch it happen."
+                : "The system scans Reddit and GitHub for evidence. Upgrade for six more sources.",
             },
             {
               n: "Step 03 · Read",

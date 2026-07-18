@@ -65,24 +65,6 @@ export function DataClient({ email }: Props) {
         </div>
       </div>
 
-      {/* Audit log gate */}
-      <div className="sec">
-        <div className="sec-hd">
-          Audit log
-          <span className="r">Studio+</span>
-        </div>
-        <div className="sec-bd">
-          <div className="plan-gate">
-            <span className="pg-tag">Studio+</span>
-            <div>
-              <div className="pg-ttl">Requires Studio or Enterprise</div>
-              <p className="pg-desc">A tamper-evident log of every action on your account — who ran what, when, and from which IP. Exportable as a signed PDF.</p>
-              <a href="/pricing" className="btn-xs p">Upgrade to Studio</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Delete account */}
       <div className="sec danger-sec">
         <div className="sec-hd">Delete account</div>
