@@ -12,6 +12,64 @@ export const metadata: Metadata = {
 
 const RELEASES = [
   {
+    version: "3.7",
+    date: "July 2026",
+    tag: "IMPROVEMENT",
+    items: [
+      "Homepage social proof is now 3 real verdicts pulled from live reports — no invented testimonials, no popularity counters",
+      "Verdict copy no longer claims a fixed numeric cutoff (\"Score 75+ = GO\") — the model weighs evidence rather than a hard threshold, so copy now reads \"Signal: strong / mixed / weak\"",
+      "Fixed: Market Landscape could get stuck on \"Analyzing…\" forever if generation failed, with no error shown",
+      "Fixed: 4 real Settings pages (Notifications, Integrations, Activity Log) were only reachable by typing the URL directly — now linked from Settings navigation",
+      "Fixed: revoking an API key, disconnecting Slack, and removing a team member had no confirmation step",
+      "Fixed: the password reset screen's \"Resend link\" button silently reset the UI instead of sending a new email",
+      "Fixed: new signups with no subscription row yet could get a 500 on their first validation — now correctly treated as Free plan",
+    ],
+  },
+  {
+    version: "3.6",
+    date: "July 2026",
+    tag: "FIX",
+    items: [
+      "Signal sources are now actually gated by plan (Free = Reddit + GitHub; Founder+ = all 8 sources) — closes a gap where Free accounts were quietly getting more than advertised",
+      "11 intelligence tools now correctly represented site-wide — some pages hadn't been updated since the newest tools shipped and still said 6",
+      "Market Data Pack: waitlist open on Pricing for verified TAM/SAM/SOM data (Statista/PitchBook) as a paid add-on",
+      "Dashboard: Market Movements panel and Otto question balance added to the pipeline view",
+    ],
+  },
+  {
+    version: "3.5",
+    date: "July 2026",
+    tag: "SIGNALS",
+    items: [
+      "3 new signal sources: G2 & Capterra reviews, news & funding announcements, and job postings — broader evidence beyond Reddit and GitHub",
+      "Win/Loss tracking: record which competitor you lost to when an idea doesn't work out, see the pattern in your dashboard's Win/Loss table, and let it inform future verdicts",
+      "Verdict page: 4 new interactive charts — dimension radar, revenue scenario area chart, competitor positioning map, and score breakdown waterfall",
+    ],
+  },
+  {
+    version: "3.4",
+    date: "June 2026",
+    tag: "FEATURE",
+    items: [
+      "Movement Tracking: competitors and market landscape are now re-checked automatically — a changes view shows exactly what moved (price, positioning, messaging) since your last check",
+      "Slack integration: connect a webhook to get competitor moves and analysis results posted directly to your team channel",
+      "Weekly email digest (Team+): a Monday summary of what your team validated, killed, and shipped",
+    ],
+  },
+  {
+    version: "3.3",
+    date: "June 2026",
+    tag: "FEATURE",
+    items: [
+      "SWOT breakdown, Executive Summary, and an enhanced Competitor Map (pricing, target segment, strengths/weaknesses) added to every verdict",
+      "Interview Guide Generator (tool #10, Founder+): AI-drafted interview questions with hypotheses and red flags for your target segment",
+      "Transcript Analyzer (tool #11, Team+): paste a customer call transcript, get confirmed/rejected hypotheses and sentiment-tagged quotes",
+      "Idea context field: add your own customer conversations or research notes — injected into every tool's analysis",
+      "Tool stages reordered (Understand → Intel → Validate → Plan → Launch) for a clearer path from verdict to launch",
+      "Intelligence Report (PDF) enriched with charts: dimension bars, sentiment pie, revenue scenarios",
+    ],
+  },
+  {
     version: "3.2",
     date: "May 2026",
     tag: "IMPROVED",
