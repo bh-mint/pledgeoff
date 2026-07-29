@@ -18,9 +18,13 @@ jobs:
     steps:
       - name: Ping Supabase dev REST API
         env:
-          SUPABASE_DEV_ANON_KEY: ${{ secrets.SUPABASE_DEV_ANON_KEY }}
+          SUPABASE_DEV_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_DEV_SERVICE_ROLE_KEY }}
         run: |
           set -euo pipefail
+          # anon key has no GRANTs on any table (by design — public access
+          # goes through auth), and the REST root path requires a secret
+          # key, so a real read needs service_role.
           curl -fsS --max-time 30 \
-            -H "apikey: $SUPABASE_DEV_ANON_KEY" \
-            "https://vayqlprmwtvwqfxdfygl.supabase.co/rest/v1/"
+            -H "apikey: $SUPABASE_DEV_SERVICE_ROLE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_DEV_SERVICE_ROLE_KEY" \
+            "https://vayqlprmwtvwqfxdfygl.supabase.co/rest/v1/feature_flags?select=id&limit=1"
