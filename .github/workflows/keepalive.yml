@@ -1,0 +1,26 @@
+# Prevents Supabase free-tier auto-pause (7 days no API activity) on the
+# dev project, which backs both local dev and staging.pledgeoff.com. No
+# other scheduled job hits this project — everything in cron.yml targets
+# prod. This is a pure infra ping, not business logic.
+name: Keepalive Supabase Dev
+
+on:
+  schedule:
+    - cron: '0 4 */3 * *' # every 3 days at 04:00 UTC
+  workflow_dispatch: {}
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping Supabase dev REST API
+        env:
+          SUPABASE_DEV_ANON_KEY: ${{ secrets.SUPABASE_DEV_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 30 \
+            -H "apikey: $SUPABASE_DEV_ANON_KEY" \
+            "https://vayqlprmwtvwqfxdfygl.supabase.co/rest/v1/"
