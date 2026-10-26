@@ -1032,5 +1032,13 @@ class AppContainer {
   }
 }
 
-// Singleton per process (Next.js module caching handles this in dev + prod)
-export const container = new AppContainer();
+// Archived routes are still compiled, but must not start integrations at module
+// evaluation time. The private terminal never accesses this legacy container.
+let legacyInstance: AppContainer | undefined;
+export const container = new Proxy({} as AppContainer, {
+  get(_target, key) {
+    const instance = legacyInstance ??= new AppContainer();
+    const value = Reflect.get(instance, key, instance);
+    return typeof value === 'function' ? value.bind(instance) : value;
+  },
+});
