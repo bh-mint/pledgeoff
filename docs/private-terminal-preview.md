@@ -2,6 +2,14 @@
 
 Status: remote configuration in progress, 2026-10-27. User authorized use of existing local credentials to continue Preview/Development setup. No deployments performed.
 
+## Google-only account onboarding correction — 2026-10-27
+
+The login attempt report revealed that the existing Development user has only a Google identity, confirmed through the admin API. Prior wording about an "existing password" was incorrect: Google sign-in did not establish a terminal password. The alias remains bashui. Login guidance now pre-fills this alias and explicitly requests the terminal password.
+
+A separate, temporary capability-protected local password form was opened for the user on localhost 3110. It expires after 20 minutes, uses HttpOnly/SameSite=Strict and exact-Origin checks, updates only the verified Development account after the user's form submission, verifies password sign-in and revokes only its verification session. Passwords are not stored or logged. Its implementation and capability URL stay outside Git in private /tmp files. Completion must be confirmed from `/tmp/pledgeoff-password-setup-result.json`; at preparation time it was still pending user submission.
+
+Keep the 3-attempt / 10-minute limit. A fresh Preview deployment plus a one-time reset of only its terminal limiter keys resolves the temporary lock without changing Production or disabling protection. Never reset the Google password, email credentials or MFA, and never ask for the password in chat.
+
 ## Published Preview — 2026-10-27
 
 Implementation commit `db6bb73e4ece9a9398b1566a55d26822b898eca6` was pushed to `feature/private-terminal`. Vercel deployment `dpl_GECwbCVMYJQ7TcHYfYk3RaaVEyGm` is **READY**, running the updated Next.js 16.4.1 dependency set.

@@ -2,6 +2,18 @@
 
 Updated: 2026-10-27. Branch: `feature/private-terminal`.
 
+## Remediere onboarding Google-only — 2026-10-27
+
+Utilizatorul a raportat „Too many attempts” după încercări cu emailul și cu bashui, folosind autentificarea cunoscută de pe site-ul vechi. Readback Development a confirmat providers=[google] și identities=[google], email confirmat și fără MFA. Afirmația anterioară că poate folosi „parola existentă” a fost incorectă: autentificarea Google nu stabilește o parolă Supabase pentru terminal.
+
+- Loginul terminalului acceptă numai aliasul bashui. Cele 3 încercări / 10 minute, global și per IP, rămân active; nu s-a relaxat protecția.
+- Ecranul de login a fost corectat local: bashui este completat implicit și textul cere parola configurată pentru terminal. Niciun UUID/email/secret nu a fost introdus în client.
+- Formular privat de configurare parolă: `/tmp/pledgeoff-development-password-setup.py`, localhost 3110, sesiune exec 41678, valabil 20 de minute de la pornire. Browserul utilizatorului a fost deschis cu succes la URL-ul din fișierul privat `/tmp/pledgeoff-development-password-setup-url.txt` (0600). Nu copia URL-ul cu capabilitatea în Git/chat.
+- Formularul necesită capabilitatea locală, cookie HttpOnly/SameSite=Strict și Origin exact. Testul cookie/CSRF a trecut, fără mutare de parolă în test. Parola este aleasă numai de utilizator și nu se scrie în fișiere/loguri; după submit se actualizează strict contul Development verificat, se validează signinWithPassword real și se revocă numai sesiunea de verificare.
+- Nu modifica parola Google, identitatea OAuth, Production sau utilizatori diferiți. Nu trimite emailuri și nu cere parola în chat. Helper-ul nu este o rută publică și nu face parte din aplicație/commit.
+- Starea trimiterii formularului se verifică numai prin `/tmp/pledgeoff-password-setup-result.json` (fără parolă) și logul procesului. La momentul pregătirii acestei note, formularul încă așteaptă utilizatorul; nu declara parola configurată fără rezultatul confirmat.
+- După publicarea ghidajului, resetează o singură dată cheile `rl:resend:terminal:*` doar din Redis-ul Preview dedicat, păstrând limiterul activ. Noul deployment elimină și cache-ul efemer al workerelor vechi. Nu șterge alte prefixe, nu folosi FLUSHDB și nu modifica Redis Production.
+
 ## Preview publicat și verificat — 2026-10-27
 
 Stare curentă: implementarea este publicată în **Preview**, fără promovare Production.

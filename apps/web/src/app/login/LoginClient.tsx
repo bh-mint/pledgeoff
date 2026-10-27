@@ -40,10 +40,10 @@ export function LoginClient() {
           <div className="pt-lock" aria-hidden="true">⌑</div>
           <span className="pt-eyebrow">AUTHORIZED ACCESS ONLY</span>
           <h2 id="access-heading">Welcome back.</h2>
-          <p>Sign in to your private terminal.</p>
+          <p>Use bashui and the password configured for this terminal.</p>
           <form onSubmit={submit}>
             <label htmlFor="username">Username</label>
-            <input id="username" name="username" autoComplete="username" autoCapitalize="none" spellCheck={false} required maxLength={64} placeholder="Your username" />
+            <input id="username" name="username" autoComplete="username" autoCapitalize="none" spellCheck={false} required maxLength={64} defaultValue="bashui" placeholder="bashui" />
             <label htmlFor="password">Password</label>
             <input id="password" name="password" type="password" autoComplete="current-password" required maxLength={256} placeholder="Enter your password" />
             <div className="pt-form-error" role="alert">{error}</div>
