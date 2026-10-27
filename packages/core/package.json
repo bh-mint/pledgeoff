@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "neverthrow": "^8.2.0",
-    "zod": "^3.24.2"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@vitest/coverage-v8": "^4.1.9",
+    "@vitest/coverage-v8": "4.1.12",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.9"
+    "vitest": "4.1.12"
   }
 }

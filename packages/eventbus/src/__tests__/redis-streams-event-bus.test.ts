@@ -17,7 +17,9 @@ vi.mock('@upstash/redis', () => {
   const xautoclaim = vi.fn().mockResolvedValue(['0-0', []]);
   const xack = vi.fn().mockResolvedValue(1);
   return {
-    Redis: vi.fn().mockImplementation(() => ({ xadd, xgroup, xreadgroup, xautoclaim, xack })),
+    Redis: vi.fn().mockImplementation(function () {
+      return { xadd, xgroup, xreadgroup, xautoclaim, xack };
+    }),
     _mocks: { xadd, xgroup, xreadgroup, xautoclaim, xack },
   };
 });

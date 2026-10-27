@@ -26,8 +26,16 @@ minimumReleaseAgeExclude:
   - stripe@22.2.2
 
 overrides:
-  postcss: ">=8.5.10"
-  "brace-expansion@<1.1.13": "1.1.13"
+  postcss: "8.5.23"
+  "brace-expansion@<1.1.21": "1.1.21"
+  "brace-expansion@>=5.0.0 <5.0.12": "5.0.12"
   "@supabase/supabase-js": "2.108.2"
   esbuild: ">=0.28.1"
-  "js-yaml@3": "^3.15.0"
+  "js-yaml@3": "3.15.2"
+  "js-yaml@>=4.0.0 <4.3.2": "4.3.2"
+  "fast-uri@>=3.0.0 <3.1.9": "3.1.9"
+  "fast-copy@>=4.0.0 <4.1.0": "4.1.0"
+  "source-map-js@>=1.0.0 <1.2.2": "1.2.2"
+  "browserslist@>=4.0.0 <4.28.7": "4.28.7"
+  "baseline-browser-mapping@>=2.0.0 <2.11.0": "2.11.0"
+  "vite@>=7.0.0 <7.3.7": "7.3.7"
