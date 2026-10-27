@@ -2,6 +2,18 @@
 
 Status: remote configuration in progress, 2026-10-27. User authorized use of existing local credentials to continue Preview/Development setup. No deployments performed.
 
+## Published Preview — 2026-10-27
+
+Implementation commit `db6bb73e4ece9a9398b1566a55d26822b898eca6` was pushed to `feature/private-terminal`. Vercel deployment `dpl_GECwbCVMYJQ7TcHYfYk3RaaVEyGm` is **READY**, running the updated Next.js 16.4.1 dependency set.
+
+Use **https://pledgeoff-git-feature-private-terminal-pledgeoff.vercel.app/login**, matching PRIVATE_TERMINAL_ORIGIN. The immutable deployment hostname is different and is not the configured login/logout origin.
+
+HTTPS checks against the deployed app passed Vercel protection, anonymous route/API denial, CSRF, real Supabase server-side refresh, actual server-issued Secure/HttpOnly/SameSite cookies, all seven sections, JWT 900 seconds, retired API 410, logout/cookie clearing and revoked refresh. QA used an unmailed admin-generated session for the existing confirmed user, without changing its password or giving the application the admin key. Only cached expiry metadata was shortened to trigger refresh; natural JWT expiration was not awaited.
+
+Password sign-in and a second real identity remain unverified. The user should test the existing password directly in the browser; never collect it in chat or reset it as part of QA. Temporary Vercel access used by the browser harness was revoked. Evidence: `/tmp/pledgeoff-published-preview-results.json`, `/tmp/pledgeoff-published-preview-auth-results.log`.
+
+This report is a documentation-only follow-up to the validated implementation. No Production promotion, merge, DNS change, paid resource or Production configuration write occurred. Older sections below retain historical states; this published state supersedes them.
+
 ## Publication authorization — 2026-10-27
 
 The user explicitly approved committing and publishing a new Preview. Publish only `feature/private-terminal`; no merge, production promotion or Production configuration change. The implementation and credential scan passed final review. Await deployment readiness and remote route/Auth checks before reporting publication complete.

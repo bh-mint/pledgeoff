@@ -2,6 +2,24 @@
 
 Updated: 2026-10-27. Branch: `feature/private-terminal`.
 
+## Preview publicat și verificat — 2026-10-27
+
+Stare curentă: implementarea este publicată în **Preview**, fără promovare Production.
+
+- Commit implementare: `db6bb73e4ece9a9398b1566a55d26822b898eca6`, push pe `feature/private-terminal` reușit. Au fost incluse exact cele 14 fișiere validate, fără credențiale. Auditul local anterior: 0 vulnerabilități, 537 teste unitare și 2 E2E trecute.
+- Deployment implementare: `dpl_GECwbCVMYJQ7TcHYfYk3RaaVEyGm`, **READY**, URL `https://pledgeoff-l4l8ci5cb-pledgeoff.vercel.app`.
+- Adresa de utilizat pentru autentificare, potrivită originului CSRF: **https://pledgeoff-git-feature-private-terminal-pledgeoff.vercel.app/login**. URL-ul imuabil al deployment-ului are alt origin și nu este adresa configurată pentru login/logout.
+- Build remote a folosit Next.js 16.4.1 și pnpm 11.8.0. Compilarea, TypeScript și deployment-ul au trecut. Mesajul GitHub de la push despre 64 vulnerabilități se referă la default branch, rămas neschimbat, nu la auditul lockfile-ului din acest branch.
+- Teste pe HTTPS cu Supabase Development real: **PASS** pentru protecția Vercel fără acces, refuzul anonim pentru toate cele 7 secțiuni și API, CSRF login/logout, refresh server-side, cookie-uri **emise efectiv de server** cu Secure/HttpOnly/SameSite=Lax, toate cele 7 secțiuni autentificate, JWT 900 secunde, inaccesibilitatea cookie-urilor din JavaScript, API legacy 410, logout, ștergerea cookie-urilor și revocarea refresh-ului.
+- Pentru a testa refresh-ul server-side, harness-ul a expirat numai metadata locală expires_at din cookie; JWT-ul semnat a rămas valid și Supabase a validat refresh token-ul real. Nu s-a așteptat expirarea naturală de 15 minute.
+- Sesiunea QA a fost emisă administrativ prin magic link neexpediat pentru identitatea existentă, fără modificarea parolei și fără transmiterea service-role către aplicație. Loginul prin parola existentă și refuzul unei a doua identități reale rămân nevalidate. Testele locale cu simulatorul și verificările de sesiune nu sunt prezentate ca dovadă a acestor două cazuri.
+- Accesul temporar Vercel folosit la testare a fost revocat. Prima încercare de parsare a accesului de 15 minute nu a recunoscut formatul răspunsului; acel link era limitat în timp. Fluxul oficial al conectorului a furnizat apoi linkul de alias necesar, revocat explicit la final, iar o verificare separată a accesului URL-ului imuabil a fost închisă prin conector. Protecția proiectului nu a fost dezactivată.
+- Dovezi fără credențiale: `/tmp/pledgeoff-published-preview-results.json` și `/tmp/pledgeoff-published-preview-auth-results.log`. Tokenurile de sesiune au rămas în memorie; linkurile temporare au fost păstrate în fișiere private /tmp, nu în Git sau în răspunsuri publice.
+- Acest raport este un follow-up numai de documentație la commitul de implementare. Dacă push-ul raportului declanșează alt build, verificați și starea lui; aplicația este identică cu deployment-ul verificat mai sus.
+- Niciun merge/promote, deployment Production, schimbare DNS sau plan plătit. Originalul păstrează node_modules vechi; DEMO-ul rămâne pe copia separată de pe 3100.
+
+Pentru următoarea sesiune: Preview este publicat; nu relua migrarea, restaurarea Supabase sau provisionarea Redis. Folosește adresa stabilă de mai sus. Utilizatorul poate verifica loginul cu `bashui` și parola sa existentă, direct în browser; nu solicita parola în chat și nu o reseta automat.
+
 ## Publicare Preview aprobată — 2026-10-27
 
 Utilizatorul a răspuns „da” la aprobarea commitului și publicării unui Preview nou. Autorizația acoperă checkpoint-ul local, push pe `feature/private-terminal` și deployment/validare Preview; nu acoperă merge/promovare sau modificări Production. Cele 14 fișiere au fost reverificate cu manifestul SHA-256, scanarea credențialelor și `git diff --check`, toate PASS. Branch-ul remote este încă la checkpoint-ul `5bdd1cd3ba1902dcb15e35848e1e27b240f57d98`, fără modificări concurente. Publicarea începe din această stare; rezultatul deployment-ului trebuie confirmat înainte de a declara Preview actualizat.
